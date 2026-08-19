@@ -9,6 +9,7 @@ import { resumenCorto, resumenDeEquipaje } from '@/dominio/equipaje';
 import { tarifaDeServicio } from '@/dominio/tarifas';
 import type { EstadoDeSolicitud, Payment, ReservaFila } from '@/tipos';
 
+import { nuevoId } from './_id';
 import { fuente } from './_fuente';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
@@ -201,8 +202,4 @@ function textoRestante(ms: number): string {
   return h > 0 ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min`;
 }
 
-let contador = 0;
-function nuevoId(): string {
-  contador += 1;
-  return `bbbbbbbb-bbbb-4bbb-8bbb-${String(contador).padStart(12, '0')}`;
-}
+

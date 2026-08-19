@@ -16,6 +16,7 @@ import {
 } from '@/dominio/aporte';
 import type { AvailableTrip, Corridor, TripStop, Vehicle, ViajeFila } from '@/tipos';
 
+import { nuevoId } from './_id';
 import { fuente } from './_fuente';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
@@ -504,10 +505,4 @@ function comoResultado(v: ViajeFila): ViajeEnResultados {
     destination_label: v.destination_label,
     driver_rating: fuente.reputacion[v.driver_id]?.calificacion ?? null,
   };
-}
-
-let contador = 0;
-function nuevoId(): string {
-  contador += 1;
-  return `88888888-8888-4888-8888-${String(contador).padStart(12, '0')}`;
 }

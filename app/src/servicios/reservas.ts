@@ -9,6 +9,7 @@ import type { Equipaje } from '@/dominio/equipaje';
 import { type CanalDePago, tarifaDeServicio } from '@/dominio/tarifas';
 import type { ReservaFila } from '@/tipos';
 
+import { nuevoId } from './_id';
 import { fuente } from './_fuente';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
@@ -78,18 +79,35 @@ export async function pedirPuesto(
   }
 
   const canal = opciones.canal ?? 'yappy_app';
-  const aporte = viaje.price_cents;
-  const tarifa = tarifaDeServicio(aporte, canal);
+  const puestos = 1;
+  /**
+   * `total_cents` ES EL APORTE, NO LO QUE PAGA EL PASAJERO.
+   *
+   * Aquí se escribía `aporte + tarifa`, y la base lo rechazaba: la
+   * restricción `fee_is_fixed_pct` (migración 0018) exige
+   * `service_fee_cents = round(total_cents * 0,05)`, así que meter la tarifa
+   * dentro del total la volvía un 5 % de sí misma. Con 6,00 $ de aporte la
+   * base pedía 32 centavos y la app escribía 30: **ninguna reserva entraba**,
+   * ni la primera.
+   *
+   * La 0018 dice quién manda: «esta restricción es la autoridad». Y el sitio,
+   * que es la implementación de referencia, hace `totalCents = unitCents *
+   * seats` y calcula la tarifa sobre eso (`BookingPanel.tsx`). Lo que el
+   * pasajero paga —aporte más tarifa— es un número de pantalla; no se guarda.
+   * Así el conductor recibe su aporte completo, que es el invariante de R2.
+   */
+  const total = viaje.price_cents * puestos;
+  const tarifa = tarifaDeServicio(total, canal);
   const ahora = new Date();
 
   const reserva: ReservaFila = {
     id: nuevoId(),
     trip_id: viajeId,
     passenger_id: opciones.pasajeroId,
-    seats: 1,
-    unit_price_cents: aporte,
+    seats: puestos,
+    unit_price_cents: viaje.price_cents,
     service_fee_cents: tarifa,
-    total_cents: aporte + tarifa,
+    total_cents: total,
     trip_stop_id: 'paradaId' in punto ? punto.paradaId : null,
     proposed_point: 'direccionPropia' in punto ? punto.direccionPropia : null,
     proposal_accepted: null,
@@ -137,10 +155,4 @@ export async function marcarNoShow(reservaId: string): Promise<ReservaFila> {
 /** Cuatro dígitos. En producción los emite el servidor y se verifican ahí. */
 function nuevoCodigo(): string {
   return String(Math.floor(1000 + Math.random() * 9000));
-}
-
-let contador = 0;
-function nuevoId(): string {
-  contador += 1;
-  return `aaaaaaaa-aaaa-4aaa-8aaa-${String(contador).padStart(12, '0')}`;
 }

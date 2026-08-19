@@ -103,11 +103,13 @@ export function desglosar(
 export async function elegirMetodo(reservaId: string, canal: CanalDePago): Promise<void> {
   const reserva = fuente.reservas.find((r) => r.id === reservaId);
   if (!reserva) throw new Error(`No existe la reserva ${reservaId}`);
-  const aporte = reserva.unit_price_cents * reserva.seats;
+  // El mismo reparto que al pedir el puesto: `total_cents` es el aporte, y la
+  // tarifa se calcula sobre él. Ver la nota larga en `reservas.ts`.
+  const total = reserva.unit_price_cents * reserva.seats;
   await fuente.actualizarReserva(reservaId, {
     payment_channel: canal,
-    service_fee_cents: tarifaDeServicio(aporte, canal),
-    total_cents: totalQuePagaElPasajero(aporte, canal),
+    service_fee_cents: tarifaDeServicio(total, canal),
+    total_cents: total,
   });
   await demora(null);
 }

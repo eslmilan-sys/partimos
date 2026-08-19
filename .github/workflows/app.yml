@@ -74,6 +74,18 @@ jobs:
       # empieza por guion bajo — que es donde Expo deja el paquete.
       - run: touch ../publicar/.nojekyll
 
+      # La red de seguridad del enrutado. Pages resuelve `/app/resultados`
+      # contra `resultados.html`, pero cuando NO lo consigue —un camino que el
+      # export no escribió, una ruta con parámetro que alguien pega tal cual—
+      # sirve su propio 404, no el nuestro, y `app/+not-found.tsx` nunca llega a
+      # ejecutarse porque el paquete no se ha cargado todavía. Con un 404.html
+      # que es la propia app, ese caso entra por la puerta y el enrutador
+      # resuelve el camino del lado del navegador.
+      - name: El 404 tambien es la app
+        run: |
+          cp dist/index.html ../publicar/app/404.html
+          cp dist/index.html ../publicar/404.html
+
       # Pages tiene que estar encendido a mano una vez: Settings -> Pages ->
       # Source: «GitHub Actions». La accion no puede encenderlo ella misma
       # —«Create Pages site failed: Resource not accessible by integration»,

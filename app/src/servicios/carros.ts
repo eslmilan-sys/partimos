@@ -12,6 +12,7 @@
 
 import type { Vehicle } from '@/tipos';
 
+import { nuevoId } from './_id';
 import { fuente } from './_fuente';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
@@ -97,9 +98,8 @@ export function sePuedeGuardar(b: BorradorDeCarro): boolean {
 export async function guardarCarro(duenoId: string, b: BorradorDeCarro): Promise<Vehicle> {
   if (!b.foto) throw new Error('Falta la foto del carro por detrás');
 
-  const sufijo = String(fuente.vehiculos.length + 2).padStart(12, '0');
   const carro: Vehicle = {
-    id: `44444444-4444-4444-8444-${sufijo}`,
+    id: nuevoId(),
     owner_id: duenoId,
     category_code: fuente.categoriaDe(b.modelo),
     make: b.marca,

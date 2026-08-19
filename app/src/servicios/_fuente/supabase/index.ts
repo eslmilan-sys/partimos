@@ -100,6 +100,24 @@ const traer = async <T,>(nombre: string, destino: T[], columnas = '*') => {
   destino.push(...((data ?? []) as T[]));
 };
 
+/**
+ * Igual, pero un fallo no tumba la app.
+ *
+ * `traer` lanza, y `app/_layout.tsx` convierte cualquier excepción de `cargar`
+ * en la pantalla «No se pudo cargar». Para las tablas sin las que la app no
+ * existe —ciudades, viajes— eso es correcto. Para las que solo llenan una
+ * pantalla lateral, no: perder los pagos no es motivo para no dejar buscar un
+ * viaje. Aquí un fallo deja el arreglo vacío, que es lo que ya pasaba antes de
+ * pedirlos siquiera.
+ */
+const traerSiSePuede = async <T,>(nombre: string, destino: T[]) => {
+  try {
+    await traer<T>(nombre, destino);
+  } catch {
+    destino.length = 0;
+  }
+};
+
 let enCurso: Promise<void> | null = null;
 
 /** Trae el almacén. Llamarla dos veces no lo trae dos veces. */
@@ -117,6 +135,10 @@ export function cargar(): Promise<void> {
       traer<IdentityVerification>('identity_verifications', verificaciones),
       traer<RutinaFila>('routines', rutinas),
       traer<CancellationPolicy>('cancellation_policies', politicas),
+      // Los pagos son de sus dos partes (migración 0024): quien no tenga
+      // sesión recibe una lista vacía, no un error. Va por la vía tolerante
+      // porque una pantalla de dinero vacía no justifica tumbar la app.
+      traerSiSePuede<Payment>('payments', pagos),
       // Los perfiles vienen de la vista: nombre, inicial, foto y poco más. El
       // teléfono y el apellido entero se quedan donde deben.
       traer<Profile>('perfiles_publicos', perfiles),

@@ -16,6 +16,7 @@
 
 import type { Review } from '@/tipos';
 
+import { nuevoId } from './_id';
 import { fuente } from './_fuente';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
@@ -153,7 +154,4 @@ function duracion(salida: string, llegada: string | null): string {
   return m === 0 ? `${h} h` : `${h} h ${m}`;
 }
 
-function nuevoId(): string {
-  const n = (fuente.resenas.length + 1).toString().padStart(12, '0');
-  return `bbbbbbb2-0000-4000-8000-${n}`;
-}
+

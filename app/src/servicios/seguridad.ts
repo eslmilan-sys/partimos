@@ -16,6 +16,7 @@
 
 import type { Incident, IdentityVerification } from '@/tipos';
 
+import { nuevoId } from './_id';
 import { fuente } from './_fuente';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
@@ -69,10 +70,10 @@ export async function pedirVerificacion(perfilId: string): Promise<IdentityVerif
   if (ya) return demora(ya);
 
   const v: IdentityVerification = {
-    id: `id000000-0000-4000-8000-${String(fuente.verificaciones.length + 2).padStart(12, '0')}`,
+    id: nuevoId(),
     profile_id: perfilId,
     provider: 'didit',
-    provider_ref: `ver_${String(fuente.verificaciones.length + 2).padStart(4, '0')}`,
+    provider_ref: `ver_${nuevoId().slice(0, 8)}`,
     document_country: 'PA',
     document_type: 'cedula',
     status: 'pending',
@@ -140,7 +141,7 @@ export async function reportar(
   const elegido = MOTIVOS_DE_REPORTE.find((m) => m.clave === motivo);
 
   const incidencia: Incident = {
-    id: `in000000-0000-4000-8000-${String(fuente.incidencias.length + 1).padStart(12, '0')}`,
+    id: nuevoId(),
     booking_id: reservaId,
     category: bloquear ? `${motivo}+bloqueo` : motivo,
     severity: elegido?.severidad ?? 1,

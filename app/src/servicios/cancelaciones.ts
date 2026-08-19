@@ -16,6 +16,7 @@ import { calcularReembolso, type MotivoDeReembolso } from '@/dominio/reembolsos'
 import { tarifaDeServicio } from '@/dominio/tarifas';
 import type { Cancellation, CancelParty, Refund } from '@/tipos';
 
+import { nuevoId } from './_id';
 import { fuente } from './_fuente';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
@@ -113,10 +114,8 @@ export async function cancelar(
   const politica = fuente.politicas[0];
   const aporte = reserva.unit_price_cents * reserva.seats;
   const tarifa = tarifaDeServicio(aporte, reserva.payment_channel);
-  const sufijo = String(fuente.cancelaciones.length + 2).padStart(12, '0');
-
   const cancelacion: Cancellation = {
-    id: `cc000000-0000-4000-8000-${sufijo}`,
+    id: nuevoId(),
     booking_id: reservaId,
     trip_id: reserva.trip_id,
     actor_id: quienCancela,
@@ -136,7 +135,7 @@ export async function cancelar(
   };
 
   const reembolso: Refund = {
-    id: `ff000000-0000-4000-8000-${sufijo}`,
+    id: nuevoId(),
     cancellation_id: cancelacion.id,
     payment_id: fuente.pagos.find((p) => p.booking_id === reservaId)?.id ?? null,
     amount_cents: previa.montoCentavos,
