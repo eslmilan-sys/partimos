@@ -27,11 +27,15 @@ import { obtenerViaje, paradasDelViaje, slugDestinoDe } from '@/servicios/viajes
 import type { TripStop, ViajeFila } from '@/tipos';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Bandera, motivoDe } from '@/ui/CampoRojo';
-import { Avatar, Boton, Epigrafe, Insignia, Pastilla } from '@/ui/controles';
+import { Avatar, Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaLargo, hora } from '@/ui/fechas';
-import { Atras, Carro, Compartir, Escudo, Estrella } from '@/ui/iconos';
+import { Asiento, Atras, Avanza, Ayuda, Carro, Chat, Compartir, Escudo, Estrella, Maleta } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
+
+/** El verde de «verificado» es `--green-100/700` del traspaso; no está en tokens. */
+const VERDE_FONDO = '#DFF1E8';
+const VERDE_TINTA = '#0E5A3F';
 
 const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 /** Sin sesión que preguntar —solo en simulado—. En producción la pide `1c`. */
@@ -137,38 +141,39 @@ export default function DetalleDelViaje() {
         </Bandera>
 
         <View style={estilos.hoja}>
-          <Epigrafe>Por dónde pasa</Epigrafe>
-
           <View style={estilos.tarjeta}>
+            <Epigrafe>Ruta del viaje</Epigrafe>
             <View style={estilos.recorrido}>
               <View style={estilos.linea} />
-              {paradas.map((p, i) => (
-                <View
-                  key={p.id}
-                  style={[estilos.parada, i === paradas.length - 1 && { paddingBottom: 0 }]}
-                >
-                  <View
-                    style={
-                      i === 0
-                        ? estilos.puntoLleno
-                        : i === paradas.length - 1
-                          ? estilos.puntoFinal
-                          : estilos.puntoMedio
-                    }
-                  />
-                  <Text
-                    style={[
-                      estilos.paradaNombre,
-                      i > 0 && i < paradas.length - 1 && { fontWeight: '400' },
-                    ]}
-                  >
-                    {p.custom_label}
-                  </Text>
-                  <Text style={estilos.paradaHora}>
-                    {p.scheduled_at ? hora(p.scheduled_at) : ''}
-                  </Text>
-                </View>
-              ))}
+              {paradas.map((p, i) => {
+                const ultima = i === paradas.length - 1;
+                return (
+                  <View key={p.id} style={[estilos.parada, ultima && { paddingBottom: 0 }]}>
+                    <View
+                      style={i === 0 ? estilos.puntoLleno : ultima ? estilos.puntoFinal : estilos.puntoMedio}
+                    />
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      {/* «Salida» y «Llegada» con nombre: dos filas con un punto
+                          cada una no dicen cuál es cuál si no las lees enteras. */}
+                      <Text
+                        style={[
+                          estilos.paradaQue,
+                          i === 0 && { color: color.rojo600 },
+                        ]}
+                      >
+                        {i === 0 ? 'Salida' : ultima ? 'Llegada' : 'Parada'}
+                      </Text>
+                      <Text style={[estilos.paradaNombre, !ultima && i > 0 && { fontWeight: '400' }]}>
+                        {p.custom_label}
+                      </Text>
+                    </View>
+                    <Text style={estilos.paradaHora}>
+                      {p.scheduled_at ? hora(p.scheduled_at) : ''}
+                      {ultima && p.scheduled_at ? <Text style={estilos.aprox}> aprox.</Text> : null}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
           </View>
 
@@ -178,50 +183,92 @@ export default function DetalleDelViaje() {
             onPress={() =>
               router.push({ pathname: '/(pasajero)/perfil', params: { perfil: viaje.driver_id } })
             }
-            style={({ pressed }) => [
-              estilos.tarjeta,
-              pressed && { backgroundColor: color.sand100 },
-            ]}
+            style={({ pressed }) => [estilos.tarjeta, pressed && { backgroundColor: color.sand100 }]}
           >
             <View style={estilos.filaConductor}>
-              <Avatar nombre={nombre || '·'} tono="rojo" />
+              <Avatar nombre={nombre || '·'} tono="rojo" tamano={56} />
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.nombre}>{nombre}</Text>
                 <View style={estilos.filaCalificacion}>
-                  {conductor?.calificacion != null ? <Estrella /> : null}
+                  {conductor?.calificacion != null ? <Estrella tamano={13} /> : null}
                   <Text style={estilos.calificacion}>
                     {conductor?.calificacion != null
-                      ? `${conductor.calificacion.toFixed(1)} · ${conductor.viajes} ${conductor.viajes === 1 ? 'viaje' : 'viajes'}`
+                      ? `${conductor.calificacion.toFixed(1)} (${conductor.viajes} ${conductor.viajes === 1 ? 'viaje' : 'viajes'})`
                       : 'Todavía sin calificaciones'}
                   </Text>
                 </View>
+                {/* Las dos etiquetas en su propia fila y no a la derecha del
+                    nombre: a 390 px la pastilla del equipaje dejaba ochenta
+                    píxeles para la nota, y «4.9 (34 viajes)» partía en dos. */}
+                <View style={estilos.filaChips}>
+                  {conductor?.distintivos.some((d) => d.tono === 'verde') ? (
+                    <View style={estilos.verificado}>
+                      <Escudo tamano={13} tinta={VERDE_TINTA} />
+                      <Text style={estilos.verificadoTexto}>Verificado</Text>
+                    </View>
+                  ) : null}
+                  <View style={estilos.pastillaEquipaje}>
+                    <Maleta tamano={13} tinta={color.azul700} />
+                    <Text style={estilos.pastillaEquipajeTexto}>
+                      {etiquetaDeMaletero(viaje.accepts_luggage)}
+                    </Text>
+                  </View>
+                </View>
               </View>
-              {conductor?.distintivos.some((d) => d.tono === 'verde') ? (
-                <Insignia punto fondo="#DFF1E8" tinta="#0E5A3F">
-                  Verificado
-                </Insignia>
-              ) : null}
             </View>
 
             <View style={estilos.separador} />
 
             <View style={estilos.filaCarro}>
-              <Carro />
-              <Text style={estilos.textoCarro} numberOfLines={1}>
-                {carro
-                  ? `${carro.modelo}${carro.color ? ` ${carro.color}` : ''}${carro.placa ? ` · ${carro.placa}` : ''}`
-                  : 'Carro sin registrar'}
-              </Text>
-              <Pastilla>{etiquetaDeMaletero(viaje.accepts_luggage)}</Pastilla>
-            </View>
-
-            <View style={estilos.filaPromesa}>
-              <Escudo />
-              <Text style={estilos.promesa}>
-                {`Pedir puesto no cuesta nada · no se cobra hasta que ${deNombre} acepte`}
-              </Text>
+              <View style={estilos.cuadroCarro}>
+                <Carro tamano={26} tinta={color.ink500} />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.textoCarro} numberOfLines={1}>
+                  {carro ? `${carro.modelo}${carro.color ? ` ${carro.color}` : ''}` : 'Carro sin registrar'}
+                </Text>
+                {/* La placa entera no se guarda: solo los tres últimos. Enseñar
+                    la de alguien a quien no has conocido es lo que el diseño
+                    evita, así que se dice lo que hay y no se inventa. */}
+                <Text style={estilos.detalleCarro}>
+                  {carro?.placa ? `Placa ${carro.placa}` : 'Lo reconoces por el modelo y el color'}
+                </Text>
+              </View>
+              <Avanza />
             </View>
           </Pressable>
+
+          {/* Azul, no rojo: informa, no es algo que tocar. */}
+          <View style={estilos.aviso}>
+            <Escudo tamano={19} tinta={color.azul500} />
+            <Text style={estilos.avisoTexto}>
+              <Text style={estilos.avisoFuerte}>Pedir puesto no cuesta nada</Text>
+              {` · no se cobra hasta que ${deNombre} acepte`}
+            </Text>
+          </View>
+
+          {/* Tres cosas ciertas, y ninguna promete lo que no hay: no hay
+              soporte 24/7 ni la plataforma custodia el dinero de nadie.
+              Va en el desplazamiento y no en la barra fija: pegada abajo, la
+              barra se comía un tercio de la pantalla en un teléfono. */}
+          <View style={estilos.tira}>
+            <View style={estilos.tiraItem}>
+              <Escudo tamano={17} tinta={color.ink500} />
+              <Text style={estilos.tiraTexto}>Sin cargo al pedir</Text>
+            </View>
+            <View style={estilos.tiraItem}>
+              <Chat tamano={17} tinta={color.ink500} />
+              <Text style={estilos.tiraTexto}>Chat al aceptar</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/(ayuda)')}
+              style={estilos.tiraItem}
+            >
+              <Ayuda tamano={17} tinta={color.ink500} />
+              <Text style={estilos.tiraTexto}>Ayuda si algo pasa</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
 
@@ -229,19 +276,36 @@ export default function DetalleDelViaje() {
         <View style={estilos.filaPrecioBarra}>
           <Text style={estilos.precioBarra}>{formatearDineroRedondo(viaje.price_cents)}</Text>
           <Pastilla estilo={{ marginTop: 3 }}>1 puesto</Pastilla>
+          {/* «Aporte directo» y no «pago seguro»: la plataforma no guarda la
+              plata de nadie, y decir lo contrario sería la única mentira que
+              este producto no se puede permitir. */}
+          <View style={estilos.filaDirecto}>
+            <Escudo tamano={15} tinta={color.ink600} />
+            <Text style={estilos.directo}>Aporte directo</Text>
+          </View>
         </View>
-        <Boton
-          desactivado={preguntando}
-          alPulsar={() =>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Pedir mi puesto"
+          disabled={preguntando}
+          onPress={() =>
             router.push(
               yo
                 ? { pathname: '/(pasajero)/reservar', params: { viaje: viajeId } }
                 : { pathname: '/(cuenta)/puerta', params: { viaje: viajeId } },
             )
           }
+          style={({ pressed }) => [
+            estilos.cta,
+            { backgroundColor: pressed ? color.rojo600 : color.rojo500, opacity: preguntando ? 0.5 : 1 },
+          ]}
         >
-          Pedir mi puesto
-        </Boton>
+          <Asiento tamano={21} />
+          <Text style={estilos.ctaTexto}>Pedir mi puesto</Text>
+          <Avanza tamano={19} tinta="#fff" />
+        </Pressable>
+
       </View>
     </View>
   );
@@ -255,7 +319,7 @@ const estilos = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
   },
-  contenido: { paddingBottom: 170 },
+  contenido: { paddingBottom: 190 },
 
   chrome: {
     paddingHorizontal: 22,
@@ -347,21 +411,29 @@ const estilos = StyleSheet.create({
     marginTop: 14,
   },
 
-  recorrido: { position: 'relative' },
+  recorrido: { position: 'relative', marginTop: 14 },
   linea: {
     position: 'absolute',
     left: 4.25,
-    top: 8,
-    bottom: 8,
+    top: 10,
+    bottom: 22,
     width: 1.5,
     backgroundColor: color.rojo300,
   },
-  parada: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingBottom: 9 },
+  parada: { flexDirection: 'row', alignItems: 'flex-start', gap: 13, paddingBottom: 16 },
+  paradaQue: {
+    fontSize: 12.5,
+    lineHeight: 18.12,
+    color: color.ink500,
+    fontFamily: familia,
+  },
+  aprox: { fontSize: 11.5, color: color.ink400 },
   puntoLleno: {
     width: 10,
     height: 10,
     borderRadius: radio.pastilla,
     backgroundColor: color.rojo500,
+    marginTop: 6,
   },
   puntoMedio: {
     width: 10,
@@ -370,6 +442,7 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
     borderWidth: 2,
     borderColor: color.azul500,
+    marginTop: 6,
   },
   puntoFinal: {
     width: 10,
@@ -378,10 +451,10 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
     borderWidth: 2,
     borderColor: color.ink200,
+    marginTop: 6,
   },
   paradaNombre: {
-    flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     lineHeight: 21.75,
     fontWeight: '500',
     letterSpacing: -0.27,
@@ -389,14 +462,55 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   paradaHora: {
-    fontSize: 13,
-    lineHeight: 18.85,
-    color: color.ink400,
+    fontSize: 14,
+    lineHeight: 23,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },
 
-  filaConductor: { flexDirection: 'row', alignItems: 'center', gap: 13 },
+  filaConductor: { flexDirection: 'row', alignItems: 'flex-start', gap: 13 },
+  filaChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 9 },
+  verificado: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radio.pastilla,
+    backgroundColor: VERDE_FONDO,
+  },
+  verificadoTexto: {
+    fontSize: 12.5,
+    lineHeight: 16,
+    fontWeight: '600',
+    color: VERDE_TINTA,
+    fontFamily: familia,
+  },
+  pastillaEquipaje: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.azul100,
+  },
+  pastillaEquipajeTexto: {
+    fontSize: 12.5,
+    lineHeight: 16,
+    fontWeight: '600',
+    color: color.azul700,
+    fontFamily: familia,
+  },
+  cuadroCarro: {
+    width: 52,
+    height: 40,
+    borderRadius: radio.control,
+    backgroundColor: color.sand200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   nombre: {
     fontSize: 16.5,
     lineHeight: 23.93,
@@ -414,26 +528,33 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   separador: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 16 },
-  filaCarro: { flexDirection: 'row', alignItems: 'center', gap: 11 },
+  filaCarro: { flexDirection: 'row', alignItems: 'center', gap: 13 },
   textoCarro: {
-    flex: 1,
-    fontSize: 14.5,
-    lineHeight: 21.02,
+    fontSize: 15.5,
+    lineHeight: 22.5,
     fontWeight: '500',
-    letterSpacing: -0.22,
+    letterSpacing: -0.24,
     color: color.ink900,
     fontFamily: familia,
   },
-  filaPromesa: {
+  detalleCarro: {
+    fontSize: 13,
+    lineHeight: 18.85,
+    color: color.ink500,
+    fontFamily: familia,
+    ...tabular,
+  },
+  aviso: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: color.bordeSutil,
+    gap: 11,
+    marginTop: 14,
+    padding: 15,
+    borderRadius: radio.l,
+    backgroundColor: color.azul50,
   },
-  promesa: { flex: 1, fontSize: 13, lineHeight: 18.85, color: color.ink700, fontFamily: familia },
+  avisoTexto: { flex: 1, fontSize: 13.5, lineHeight: 20, color: color.azul700, fontFamily: familia },
+  avisoFuerte: { fontWeight: '600' },
 
   barraVidrio: {
     position: 'absolute',
@@ -453,6 +574,42 @@ const estilos = StyleSheet.create({
     elevation: 10,
   },
   filaPrecioBarra: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 12 },
+  filaDirecto: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto', marginTop: 4 },
+  directo: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia },
+
+  cta: {
+    height: 60,
+    borderRadius: radio.pastilla,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingHorizontal: 26,
+  },
+  ctaTexto: {
+    fontSize: 17.5,
+    lineHeight: 25,
+    fontWeight: '600',
+    letterSpacing: -0.175,
+    color: '#fff',
+    fontFamily: familia,
+  },
+
+  tira: {
+    flexDirection: 'row',
+    marginTop: 22,
+    paddingTop: 18,
+    borderTopWidth: 1,
+    borderTopColor: color.bordeSutil,
+  },
+  tiraItem: { flex: 1, alignItems: 'center', gap: 6 },
+  tiraTexto: {
+    fontSize: 11.5,
+    lineHeight: 16,
+    color: color.ink600,
+    textAlign: 'center',
+    fontFamily: familia,
+  },
   precioBarra: {
     fontSize: 26,
     fontWeight: '700',

@@ -30,9 +30,12 @@ export type ViajeEnTarjeta = {
 
 export function TarjetaDeViaje({
   viaje,
+  marca,
   alPulsar,
 }: {
   viaje: ViajeEnTarjeta;
+  /** «Más temprano», y solo en una tarjeta: dos marcas no marcan nada. */
+  marca?: string;
   alPulsar?: () => void;
 }) {
   // Un solo puesto libre se marca en rojo: es lo que queda por decidir rápido.
@@ -45,6 +48,12 @@ export function TarjetaDeViaje({
       onPress={alPulsar}
       style={estilos.tarjeta}
     >
+      {marca ? (
+        <View style={estilos.marca}>
+          <Text style={estilos.marcaTexto}>{marca}</Text>
+        </View>
+      ) : null}
+
       <View style={estilos.filaSuperior}>
         <Text style={estilos.cuando}>{`${viaje.salida} · ${viaje.duracion}`}</Text>
         <View style={estilos.filaPrecio}>
@@ -107,6 +116,24 @@ const estilos = StyleSheet.create({
     borderColor: color.bordeSutil,
     borderRadius: radio.l,
     padding: 15,
+  },
+  /** En rojo y en versalitas, como un sello: es la única de la lista. */
+  marca: {
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.rojo50,
+  },
+  marcaTexto: {
+    fontSize: 10.5,
+    lineHeight: 14,
+    fontWeight: '700',
+    letterSpacing: 1.05,
+    textTransform: 'uppercase',
+    color: color.rojo700,
+    fontFamily: familia,
   },
   filaSuperior: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 },
   cuando: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },

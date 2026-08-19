@@ -20,8 +20,10 @@ import { aDondeSeVaDesde, ciudadesDeSalida, CIUDAD_POR_DEFECTO } from '@/servici
 import {
   type GanchoDeConductor,
   type RutaPopular,
+  type SalidaCercana,
   diaEnPanama,
   ganchoDeConductor,
+  proximasSalidas,
   rutasPopulares,
 } from '@/servicios/viajes';
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
@@ -29,10 +31,10 @@ import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Pestanas } from '@/ui/Pestanas';
 import { Amanecer, Bandera, DibujoDelSitio } from '@/ui/CampoRojo';
-import { Boton, Epigrafe } from '@/ui/controles';
+import { Avatar, Boton, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { diaCorto, diaLargo } from '@/ui/fechas';
-import { Campana, Marca } from '@/ui/iconos';
+import { diaCorto, diaLargo, hora } from '@/ui/fechas';
+import { Avanza, Campana, Escudo, Estrella, Marca } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -101,6 +103,7 @@ export default function Inicio() {
   const [nombre, setNombre] = useState<string | null>(null);
   const [sinLeer, setSinLeer] = useState(0);
   const [rutas, setRutas] = useState<RutaPopular[]>([]);
+  const [salen, setSalen] = useState<SalidaCercana[]>([]);
   const [gancho, setGancho] = useState<GanchoDeConductor | null>(null);
   const [desde, setDesde] = useState<Lugar>(DESDE_POR_DEFECTO);
   const [hacia, setHacia] = useState<Lugar | null>(null);
@@ -114,6 +117,9 @@ export default function Inicio() {
   useEffect(() => {
     rutasPopulares().then(setRutas);
     ganchoDeConductor().then(setGancho);
+    /* Lo que sale ya. Si no hay nada en la próxima hora la sección no
+       aparece: una fila vacía diciendo «salen ahora» sería mentira. */
+    proximasSalidas(6).then(setSalen);
   }, []);
 
   useEffect(() => {
@@ -164,13 +170,17 @@ export default function Inicio() {
         {/* El campo y lo que va encima se desplazan juntos: fuera del
             ScrollView el campo se quedaba clavado y «RUTAS POPULARES»
             terminaba escrito sobre el rojo. */}
-        <Bandera altura={326} motivo="skyline">
+        {/* La silueta con la torre Tornillo, la que trajo el cliente: a plena
+            opacidad y al pie del campo, que es donde una línea de horizonte va.
+            El «skyline» plano al 26 % no se veía. */}
+        <Bandera altura={326} motivo="ciudadDetras">
           <BarraDeEstado />
           <View style={estilos.cabecera}>
           <View style={estilos.filaSaludo}>
-            <Text style={estilos.saludo}>
-              {nombre ? 'Hola, ' : 'Hola'}
-              {nombre ? <Text style={estilos.saludoFuerte}>{nombre}</Text> : null}
+            {/* El epígrafe dice a quién y cuándo: es el sitio donde el saludo
+                no compite con el titular, que es la pregunta de la pantalla. */}
+            <Text style={estilos.epigrafeCampo} numberOfLines={1}>
+              {`${nombre ? `Hola, ${nombre}` : 'Panamá'} · ${diaCorto(new Date().toISOString())}`}
             </Text>
             <View style={estilos.filaDerecha}>
               {/* La bandeja de avisos no tenía puerta: existía la pantalla y
@@ -184,7 +194,11 @@ export default function Inicio() {
                 style={estilos.campana}
               >
                 <Campana />
-                {sinLeer > 0 ? <View style={estilos.puntoAviso} /> : null}
+                {sinLeer > 0 ? (
+                  <View style={estilos.cuentaAviso}>
+                    <Text style={estilos.cuentaAvisoTexto}>{sinLeer > 9 ? '9+' : String(sinLeer)}</Text>
+                  </View>
+                ) : null}
               </Pressable>
               <Marca />
             </View>
@@ -194,6 +208,14 @@ export default function Inicio() {
             {'\n'}
             <Text style={estilos.titularFuerte}>vas hoy?</Text>
           </Text>
+          {/* Qué es esto, dicho una vez, a quien todavía no tiene cuenta. A
+              quien vuelve cada semana no hay que explicárselo otra vez. */}
+          {!yo ? (
+            <Text style={estilos.explicacion}>
+              Carro compartido entre la ciudad y el interior. Te recogen cerca y le aportas
+              directo al conductor.
+            </Text>
+          ) : null}
         </View>
 
         <View style={estilos.hoja}>
@@ -228,6 +250,7 @@ export default function Inicio() {
                 {hacia?.nombre ?? 'Chitré, David, Santiago…'}
               </Text>
             </View>
+            <Avanza />
           </Pressable>
 
           <View style={estilos.filaCajas}>
@@ -260,6 +283,76 @@ export default function Inicio() {
           </View>
         </View>
         </Bandera>
+
+        {/* Lo que hace que subirse con un desconocido sea razonable, dicho sin
+            adornos: la cédula es obligatoria para publicar y las notas son de
+            viajes que pasaron. Nada de «soporte 24/7», que no existe. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Cómo cuidamos el viaje"
+          onPress={() => router.push('/(ayuda)')}
+          style={({ pressed }) => [estilos.seguro, pressed && { backgroundColor: color.sand200 }]}
+        >
+          <Escudo tamano={20} tinta={color.azul500} />
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text style={estilos.seguroTitulo}>Viaja tranquilo</Text>
+            <Text style={estilos.seguroTexto}>
+              Todos los conductores pasan por cédula, y las notas son de viajes que ocurrieron.
+            </Text>
+          </View>
+          <Avanza />
+        </Pressable>
+
+        {salen.length > 0 ? (
+          <View style={estilos.seccionSalen}>
+            <View style={estilos.filaSeccion}>
+              <Epigrafe>Salen en la próxima hora</Epigrafe>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={estilos.tiraSalen}
+            >
+              {salen.map((v) => (
+                <Pressable
+                  key={v.viajeId}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${v.destino} a las ${hora(v.hora)} con ${v.conductor}`}
+                  onPress={() =>
+                    router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.viajeId } })
+                  }
+                  style={({ pressed }) => [estilos.tarjetaSale, pressed && { opacity: 0.9 }]}
+                >
+                  <View style={estilos.fotoSale}>
+                    {FOTOS[v.foto] ? (
+                      <Image source={FOTOS[v.foto]} style={estilos.foto} resizeMode="cover" />
+                    ) : (
+                      <DibujoDelSitio slug={v.foto} tamano={54} />
+                    )}
+                  </View>
+                  <View style={estilos.cuerpoSale}>
+                    <Text style={estilos.horaSale}>{hora(v.hora)}</Text>
+                    <Text style={estilos.destinoSale} numberOfLines={1}>
+                      {`${v.destino} · ${formatearDineroRedondo(v.aporteCentavos)}`}
+                    </Text>
+                    <View style={estilos.filaQuienSale}>
+                      <Avatar nombre={v.conductor || '·'} tamano={22} />
+                      <Text style={estilos.quienSale} numberOfLines={1}>
+                        {v.conductor}
+                      </Text>
+                      {v.calificacion != null ? (
+                        <>
+                          <Estrella tamano={10} />
+                          <Text style={estilos.notaSale}>{v.calificacion.toFixed(1)}</Text>
+                        </>
+                      ) : null}
+                    </View>
+                  </View>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
 
         <View style={estilos.seccionRutas}>
           <View style={estilos.filaSeccion}>
@@ -382,20 +475,100 @@ const estilos = StyleSheet.create({
   filaDerecha: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   campana: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
   /** El punto rojo dice que hay algo sin leer sin tener que abrir nada. */
-  puntoAviso: {
+  /** La cuenta, no un punto: saber que hay tres avisos evita abrir por nada. */
+  cuentaAviso: {
     position: 'absolute',
-    top: 4,
-    right: 5,
-    width: 9,
-    height: 9,
-    borderRadius: 5,
+    top: 1,
+    right: 0,
+    minWidth: 17,
+    height: 17,
+    paddingHorizontal: 4,
+    borderRadius: radio.pastilla,
     backgroundColor: color.rojo500,
     borderWidth: 1.5,
     borderColor: '#C50E2F',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  cuentaAvisoTexto: {
+    fontSize: 10.5,
+    lineHeight: 14,
+    fontWeight: '700',
+    color: '#fff',
+    fontFamily: familia,
+    ...tabular,
+  },
+  seguro: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 13,
+    marginHorizontal: 22,
+    marginTop: 18,
+    padding: 15,
+    borderRadius: radio.l,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+  },
+  seguroTitulo: {
+    fontSize: 15,
+    lineHeight: 21.75,
+    fontWeight: '600',
+    letterSpacing: -0.23,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  seguroTexto: { fontSize: 13, lineHeight: 19, color: color.ink600, marginTop: 2, fontFamily: familia },
+
+  seccionSalen: { marginTop: 24 },
+  tiraSalen: { flexDirection: 'row', gap: 10, paddingHorizontal: 22, paddingTop: 12 },
+  tarjetaSale: {
+    width: 208,
+    borderRadius: radio.l,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    overflow: 'hidden',
+  },
+  fotoSale: {
+    height: 92,
+    backgroundColor: color.sand200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cuerpoSale: { padding: 13, gap: 3 },
+  horaSale: {
+    fontSize: 21,
+    lineHeight: 26,
+    fontWeight: '600',
+    letterSpacing: -0.63,
+    color: color.ink900,
+    fontFamily: familia,
+    ...tabular,
+  },
+  destinoSale: { fontSize: 13.5, lineHeight: 19.5, color: color.ink600, fontFamily: familia },
+  filaQuienSale: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
+  quienSale: { flex: 1, fontSize: 12.5, lineHeight: 18, color: color.ink700, fontFamily: familia },
+  notaSale: { fontSize: 12, lineHeight: 18, color: color.ink600, fontFamily: familia, ...tabular },
+
   filaSaludo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
-  saludo: { fontSize: 15.5, lineHeight: 22.47, fontWeight: '500', letterSpacing: -0.19, color: '#fff', fontFamily: familia },
-  saludoFuerte: { fontWeight: '600' },
+  epigrafeCampo: {
+    flex: 1,
+    fontSize: 11,
+    lineHeight: 15.95,
+    fontWeight: '600',
+    letterSpacing: 11 * TRACK_MICRO,
+    textTransform: 'uppercase',
+    color: color.campoTexto,
+    fontFamily: familia,
+  },
+  explicacion: {
+    fontSize: 14.5,
+    lineHeight: 21,
+    color: color.campoTexto,
+    marginTop: 12,
+    fontFamily: familia,
+  },
   titular: {
     fontSize: 36,
     lineHeight: 36.72,

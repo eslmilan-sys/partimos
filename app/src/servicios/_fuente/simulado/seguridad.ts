@@ -88,6 +88,16 @@ export async function guardarIncidencia(i: Incident): Promise<Incident> {
   return i;
 }
 
+/** Guardar una ruta. En memoria, como todo el simulado. */
+export async function guardarRuta(r: RutinaFila): Promise<RutinaFila> {
+  const ya = rutinas.find(
+    (x) => x.profile_id === r.profile_id && x.from_city_id === r.from_city_id && x.to_city_id === r.to_city_id,
+  );
+  if (ya) return ya;
+  rutinas.unshift(r);
+  return r;
+}
+
 export async function cambiarAvisoDeRutina(
   id: string,
   avisar: boolean,

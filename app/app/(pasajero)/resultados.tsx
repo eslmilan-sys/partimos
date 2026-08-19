@@ -23,6 +23,9 @@ import {
   proximoDiaConViajes,
 } from '@/servicios/viajes';
 import { hayCorredor, nombreDeCiudad, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
+import { guardarRutaBuscada } from '@/servicios/rutas';
+import { useMiId } from '@/servicios/sesion';
+import { NOMBRE_DE_FRANJA, type Franja, franjaDe } from '@/dominio/rutinas';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo, motivoDe } from '@/ui/CampoRojo';
@@ -84,6 +87,9 @@ export default function Resultados() {
   // Un sitio de Mapbox no es una ciudad que servimos: se busca, no se encuentra,
   // y la pantalla tiene que decir eso y no «nadie sale con esos filtros».
   const servimosLaRuta = hayCorredor(origen, destino);
+  /** Sin sesión que preguntar —solo en simulado—: la persona del recorrido. */
+  const yo = useMiId('22222222-2222-4222-8222-222222222222');
+  const [guardada, setGuardada] = useState(false);
   const [filtros, setFiltros] = useState<Filtros>({});
   const [hojaAbierta, setHojaAbierta] = useState(false);
   const [viajes, setViajes] = useState<ViajeEnTarjeta[]>([]);
@@ -186,15 +192,6 @@ export default function Resultados() {
         contentContainerStyle={estilos.lista}
         showsVerticalScrollIndicator={false}
       >
-        {/* El orden ya está puesto y a la vista en la barra: repetirlo aquí
-            era decir dos veces lo mismo con palabras distintas. */}
-        <View style={estilos.filaSeccion}>
-          <Epigrafe>{`Salidas de ${cuandoTexto(dia).toLowerCase()}`}</Epigrafe>
-          <Text style={estilos.orden}>
-            {viajes.length === 1 ? '1 viaje' : `${viajes.length} viajes`}
-          </Text>
-        </View>
-
         {viajes.length === 0 ? (
           <View style={estilos.vacio}>
             {servimosLaRuta ? (
@@ -223,16 +220,71 @@ export default function Resultados() {
             )}
           </View>
         ) : (
-          <View style={{ gap: 8 }}>
-            {viajes.map((v) => (
-              <TarjetaDeViaje
-                key={v.id}
-                viaje={v}
-                alPulsar={() => router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })}
-              />
-            ))}
-          </View>
+          /* Partido por franjas: siete horas seguidas en una lista se leen
+             peor que «las de la mañana» y «las de la tarde», que es como se
+             piensa un viaje. Cuando todas caen en la misma franja, sale una
+             sección y ya. */
+          porFranjas(viajes).map(([franja, deLaFranja], seccion) => (
+            <View key={franja} style={seccion > 0 ? { marginTop: 22 } : undefined}>
+              <View style={estilos.filaSeccion}>
+                <Epigrafe>{`Salidas de ${NOMBRE_DE_FRANJA[franja]}`}</Epigrafe>
+                <Text style={estilos.orden}>
+                  {deLaFranja.length === 1 ? '1 viaje' : `${deLaFranja.length} viajes`}
+                </Text>
+              </View>
+              <View style={{ gap: 8 }}>
+                {deLaFranja.map((v, i) => (
+                  <TarjetaDeViaje
+                    key={v.id}
+                    viaje={v}
+                    /* La más temprana del día, marcada una sola vez. */
+                    marca={seccion === 0 && i === 0 && (filtros.orden ?? 'temprano') === 'temprano'
+                      ? 'Más temprano'
+                      : undefined}
+                    alPulsar={() =>
+                      router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })
+                    }
+                  />
+                ))}
+              </View>
+            </View>
+          ))
         )}
+
+        {/* Una búsqueda que no llena el día no es un fallo: es lo que un
+            conductor necesita saber. `PRODUCT.md` lo dice, y guardar la ruta
+            es la única forma que hay de decírselo. */}
+        {servimosLaRuta && viajes.length > 0 && viajes.length < 4 ? (
+          <View style={estilos.avisarme}>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={estilos.avisarmeTexto}>
+                {guardada
+                  ? 'Guardada. Te avisamos en cuanto alguien publique.'
+                  : '¿Nada a tu hora? Te avisamos cuando alguien publique esta ruta.'}
+              </Text>
+            </View>
+            {!guardada ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Avisarme de esta ruta"
+                onPress={async () => {
+                  if (!yo) {
+                    router.push('/(cuenta)/entrar');
+                    return;
+                  }
+                  await guardarRutaBuscada(yo, origen, destino, dia ?? diaEnPanama(new Date()));
+                  setGuardada(true);
+                }}
+                style={({ pressed }) => [
+                  estilos.botonAvisarme,
+                  pressed && { backgroundColor: color.rojo600 },
+                ]}
+              >
+                <Text style={estilos.botonAvisarmeTexto}>Avisarme</Text>
+              </Pressable>
+            ) : null}
+          </View>
+        ) : null}
       </ScrollView>
     <HojaDeFiltros
         abierta={hojaAbierta}
@@ -456,6 +508,22 @@ function HojaDeFiltros({
   );
 }
 
+/**
+ * Los viajes agrupados por franja, en el orden en que empiezan. No reordena
+ * nada: recorre la lista ya ordenada y corta cuando cambia la franja, así el
+ * orden elegido —hora o aporte— se respeta dentro de cada sección.
+ */
+function porFranjas(viajes: ViajeEnTarjeta[]): [Franja, ViajeEnTarjeta[]][] {
+  const grupos = new Map<Franja, ViajeEnTarjeta[]>();
+  for (const v of viajes) {
+    const f = franjaDe(Number(v.salida.slice(0, 2)));
+    const ya = grupos.get(f);
+    if (ya) ya.push(v);
+    else grupos.set(f, [v]);
+  }
+  return [...grupos.entries()];
+}
+
 /** «Hoy», «Mañana» o el día, según cuándo salgan los viajes que hay. */
 function cuandoTexto(dia: string | null): string {
   if (!dia) return 'Hoy';
@@ -636,6 +704,31 @@ const estilos = StyleSheet.create({
   },
 
   lista: { paddingHorizontal: espacio.gutter, paddingTop: 18, paddingBottom: 26 },
+  avisarme: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 18,
+    padding: 15,
+    borderRadius: radio.l,
+    backgroundColor: color.rojo50,
+  },
+  avisarmeTexto: { fontSize: 13.5, lineHeight: 20, color: color.rojo700, fontFamily: familia },
+  botonAvisarme: {
+    height: 38,
+    paddingHorizontal: 17,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.rojo500,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  botonAvisarmeTexto: {
+    fontSize: 13.5,
+    lineHeight: 19.5,
+    fontWeight: '600',
+    color: '#fff',
+    fontFamily: familia,
+  },
   filaSeccion: {
     flexDirection: 'row',
     justifyContent: 'space-between',

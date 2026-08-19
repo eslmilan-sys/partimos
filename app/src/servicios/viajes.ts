@@ -192,6 +192,10 @@ export type SalidaCercana = {
   aporteCentavos: number;
   /** El slug de la ciudad, que es como se encuentra su fotografía. */
   foto: string;
+  /** Quién maneja: una salida sin nombre no invita a nadie a subirse. */
+  conductor: string;
+  calificacion: number | null;
+  puestosLibres: number;
 };
 
 /**
@@ -215,12 +219,16 @@ export async function proximasSalidas(limite = 3, ventanaMin = 60): Promise<Sali
     .map((v) => {
       const destino = (v.destination_label ?? '').split(' · ')[0];
       const ciudad = fuente.ciudades.find((c) => c.name === destino);
+      const p = fuente.perfiles.find((x) => x.id === v.driver_id);
       return {
         viajeId: v.id,
         hora: v.departure_at,
         destino,
         aporteCentavos: v.price_cents,
         foto: ciudad?.slug ?? '',
+        conductor: p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : '',
+        calificacion: fuente.reputacion[v.driver_id]?.calificacion ?? null,
+        puestosLibres: v.seats_offered - contarVendidos(v.id),
       };
     });
   return demora(salidas);

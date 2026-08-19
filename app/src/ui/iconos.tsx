@@ -290,6 +290,53 @@ export function Bateria({ tinta = '#fff' }: Props) {
  * se pulsa. Va en `rojo-700` —más oscuro que cualquier botón— y **con este
  * icono al lado**, que es lo que lo separa de una etiqueta cualquiera.
  */
+/** La punta que dice que una fila lleva a otro sitio. */
+export function Avanza({ tamano = 17, tinta = color.ink300 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path
+        d="M9 6l6 6-6 6"
+        stroke={tinta}
+        strokeWidth={1.7}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/**
+ * El puesto: una butaca de perfil, el respaldo y el asiento. Dos rectángulos
+ * redondeados y nada más — cualquier cosa con más curvas a 20 px se lee como
+ * un garabato, que es lo que pasaba con la primera versión.
+ */
+export function Asiento({ tamano = 20, tinta = '#fff' }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Rect x={6.4} y={3.6} width={4} height={11} rx={2} stroke={tinta} strokeWidth={1.8} />
+      <Rect x={6.4} y={13.4} width={11.2} height={4} rx={2} stroke={tinta} strokeWidth={1.8} />
+      <Path d="M17.6 17.4v2.8" stroke={tinta} strokeWidth={1.8} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** El bocadillo con la interrogación: la ayuda. */
+export function Ayuda({ tamano = 18, tinta = color.ink600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Circle cx={12} cy={12} r={8.6} stroke={tinta} strokeWidth={1.7} />
+      <Path
+        d="M9.7 9.4a2.4 2.4 0 1 1 3.1 2.6c-.6.2-.9.8-.9 1.4v.4"
+        stroke={tinta}
+        strokeWidth={1.7}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path d="M11.9 16.6h.01" stroke={tinta} strokeWidth={2.1} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
 /** La campana de los avisos. Solo la lleva el inicio, arriba a la derecha. */
 export function Campana({ tamano = 21, tinta = '#fff' }: Props) {
   return (

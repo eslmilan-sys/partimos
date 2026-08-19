@@ -20,6 +20,8 @@ import type {
   AvisoPendiente,
 } from '@/tipos';
 
+import { A_CUALQUIER_HORA, etiquetaDeRutina } from '@/dominio/rutinas';
+
 import { supabase } from './cliente';
 
 /* El catálogo de carros no es un dato: es una lista cerrada del producto. */
@@ -143,7 +145,7 @@ export function cargar(): Promise<void> {
       traer<Message>('messages', mensajes),
       traer<Review>('reviews', resenas),
       traer<IdentityVerification>('identity_verifications', verificaciones),
-      traer<RutinaFila>('routines', rutinas),
+      traerRutinas(),
       traer<CancellationPolicy>('cancellation_policies', politicas),
       // Los pagos son de sus dos partes (migración 0024): quien no tenga
       // sesión recibe una lista vacía, no un error. Va por la vía tolerante
@@ -263,6 +265,25 @@ function derivarAvisos() {
   }
 }
 
+/**
+ * `routines` guarda los días y la hora; «Viernes por la tarde» y el
+ * interruptor de avisar son campos pendientes que solo existían en el
+ * simulado. Sin derivarlos aquí, `15a` enseñaba la ruta y un hueco donde va
+ * el cuándo.
+ */
+async function traerRutinas() {
+  const crudas: RutinaFila[] = [];
+  await traerSiSePuede<RutinaFila>('routines', crudas);
+  rutinas.length = 0;
+  for (const r of crudas) {
+    rutinas.push({
+      ...r,
+      avisar: r.avisar ?? true,
+      etiqueta: etiquetaDeRutina(r.days ?? [], String(r.departure_time ?? A_CUALQUIER_HORA)),
+    });
+  }
+}
+
 async function cargarCategorias() {
   const { data } = await supabase.from('vehicle_categories').select('*');
   categorias.length = 0;
@@ -331,6 +352,24 @@ export const guardarIncidencia = (i: Incident) => insertar('incidents', i, incid
  * que calificar no calificaba.
  */
 export const guardarResena = (r: Review) => insertar('reviews', r, resenas);
+
+/**
+ * Guardar una ruta para que te avisen. `avisar` y `etiqueta` no son columnas,
+ * así que se derivan igual que al cargar. La base tiene `UNIQUE (profile_id,
+ * from_city_id, to_city_id)`: pedir dos veces la misma ruta no la duplica, y
+ * quien lo intenta ya la tenía guardada.
+ */
+export async function guardarRuta(r: RutinaFila): Promise<RutinaFila> {
+  const { avisar: _a, etiqueta: _e, ...fila } = r;
+  const { data, error } = await tabla('routines').insert(fila).select().single();
+  if (error) {
+    if (error.message.includes('duplicate key')) return r;
+    throw new Error(`routines: ${error.message}`);
+  }
+  const guardada = { ...(data as RutinaFila), avisar: true, etiqueta: r.etiqueta };
+  rutinas.push(guardada);
+  return guardada;
+}
 export const guardarVehiculo = (v: Vehicle) => insertar('vehicles', v, vehiculos);
 
 /**

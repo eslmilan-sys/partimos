@@ -29,7 +29,7 @@ export { avisos, marcarAvisoLeido, marcarTodosLeidos } from './avisos';
 
 export {
   verificaciones, incidencias, reportesDeNoShow, rutinas,
-  guardarIncidencia, cambiarAvisoDeRutina,
+  guardarIncidencia, cambiarAvisoDeRutina, guardarRuta,
 } from './seguridad';
 
 /** El catálogo de carros no es un dato: es una lista cerrada del producto. */

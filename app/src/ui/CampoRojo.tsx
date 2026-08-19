@@ -40,7 +40,17 @@ const MOTIVOS = {
    * a plena opacidad, con sus tres capas de profundidad ya dentro del propio
    * archivo.
    */
-  tornillo: { svg: SkylineTornillo, ancho: espacio.marco, alto: 120, sitio: { left: 0, right: 0, bottom: 0 }, opacidad: 1 },
+  tornillo: { svg: SkylineTornillo, ancho: espacio.marco, alto: 135, sitio: { left: 0, right: 0, bottom: 0 }, opacidad: 1 },
+  /**
+   * La misma ciudad, levantada del suelo.
+   *
+   * En el inicio la hoja de búsqueda monta sobre el borde del campo, así que
+   * una línea de horizonte pegada abajo queda tapada entera y solo asoman dos
+   * franjas de veintidós píxeles a los lados. Subida treinta, las torres caen
+   * en la banda vacía que hay entre el titular y la hoja, y la hoja se apoya
+   * en la ciudad en vez de taparla.
+   */
+  ciudadDetras: { svg: SkylineTornillo, ancho: espacio.marco, alto: 135, sitio: { left: 0, right: 0, bottom: 30 }, opacidad: 1 },
 } as const;
 
 export type Motivo = keyof typeof MOTIVOS;
