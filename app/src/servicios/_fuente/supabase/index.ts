@@ -206,6 +206,30 @@ export const guardarReembolso = (r: Refund) => insertar('refunds', r, reembolsos
 export const guardarIncidencia = (i: Incident) => insertar('incidents', i, incidencias);
 
 /**
+ * Las tres que se escribian solo en memoria y se perdian al recargar: la nota
+ * que le pones a alguien, lo que escribes en el chat y el carro que registras.
+ * `calificaciones.ts`, `mensajes.ts` y `carros.ts` hacian `array.push` y ya.
+ * En simulado no se notaba —todo es memoria— pero contra la base significaba
+ * que calificar no calificaba.
+ */
+export const guardarResena = (r: Review) => insertar('reviews', r, resenas);
+export const guardarVehiculo = (v: Vehicle) => insertar('vehicles', v, vehiculos);
+
+/**
+ * `messages.id` es un `bigserial` con valor por defecto, asi que el
+ * identificador NO se manda: lo pone la base. Mandarlo desde el cliente es
+ * como choca la secuencia en cuanto escriben dos personas.
+ */
+export async function guardarMensaje(m: Message): Promise<Message> {
+  const { id: _sinUsar, ...sinId } = m;
+  const { data, error } = await tabla('messages').insert(sinId).select().single();
+  if (error) throw new Error(`messages: ${error.message}`);
+  const guardado = data as Message;
+  mensajes.push(guardado);
+  return guardado;
+}
+
+/**
  * Cambia una fila de `profiles`. La política RLS solo deja tocar la propia, que
  * es exactamente lo que la app pide: nadie cambia por dónde le cobran a otro.
  *

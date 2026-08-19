@@ -117,9 +117,12 @@ export async function guardarCarro(duenoId: string, b: BorradorDeCarro): Promise
     photo_path: b.foto,
   };
 
-  fuente.vehiculos.push(carro);
-  fuente.placasCompletas[carro.id] = b.placa;
-  return demora(carro);
+  const guardado = await fuente.guardarVehiculo(carro);
+  /* La placa entera NO tiene columna —`vehicles` solo guarda `plate_last3`—,
+     asi que vive en memoria a proposito: enseñar la placa completa de alguien
+     a quien todavia no has conocido es lo que el diseño evita. */
+  fuente.placasCompletas[guardado.id] = b.placa;
+  return demora(guardado);
 }
 
 export async function carrosDe(duenoId: string): Promise<Vehicle[]> {

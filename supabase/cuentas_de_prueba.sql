@@ -14,6 +14,17 @@
 --                            que es lo que `prepararPublicacion` y
 --                            `puedePublicar` exigen para dejar publicar
 --
+-- EL DETALLE QUE HACE QUE ESTO FUNCIONE: las columnas de token van a CADENA
+-- VACIA, nunca a NULL. GoTrue las lee en un `string` de Go, no en un puntero,
+-- asi que un NULL revienta la busqueda del usuario antes siquiera de mirar la
+-- contrasena. Medido en los registros del proyecto, cinco intentos seguidos:
+--
+--   error finding user: sql: Scan error on column index 3,
+--   name "confirmation_token": converting NULL to string is unsupported
+--   -> 500 en /token
+--
+-- Se ve como «no se pudo entrar» y parece cosa de la contrasena. No lo es.
+--
 -- LA CONTRASEÑA NO SE ESCRIBE AQUÍ. Este repositorio es público y la base es
 -- la de verdad; una contraseña en claro aquí es una puerta abierta indexada
 -- por Google. Se pasa al ejecutar:
@@ -43,10 +54,14 @@ begin
   /* ── La pasajera ─────────────────────────────────────────────────────── */
   insert into auth.users (
     instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+    -- Las ocho de token: vacias, jamas NULL. Ver la nota de arriba.
+    confirmation_token, recovery_token, email_change, email_change_token_new,
+    email_change_token_current, phone_change, phone_change_token, reauthentication_token,
     raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
   values (
     '00000000-0000-0000-0000-000000000000', v_pas, 'authenticated', 'authenticated',
     'test@partimos.app', crypt(v_clave, gen_salt('bf')), now(),
+    '', '', '', '', '', '', '', '',
     '{"provider":"email","providers":["email"]}'::jsonb,
     /* El disparador `handle_new_user` (0017) lee estas dos claves para
        escribir el perfil, así que el nombre llega solo. */
@@ -64,10 +79,14 @@ begin
   /* ── El conductor ────────────────────────────────────────────────────── */
   insert into auth.users (
     instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+    -- Las ocho de token: vacias, jamas NULL. Ver la nota de arriba.
+    confirmation_token, recovery_token, email_change, email_change_token_new,
+    email_change_token_current, phone_change, phone_change_token, reauthentication_token,
     raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
   values (
     '00000000-0000-0000-0000-000000000000', v_con, 'authenticated', 'authenticated',
     'conductor@partimos.app', crypt(v_clave, gen_salt('bf')), now(),
+    '', '', '', '', '', '', '', '',
     '{"provider":"email","providers":["email"]}'::jsonb,
     jsonb_build_object('first_name','Test','last_name','Conductor',
                        'email','conductor@partimos.app','email_verified',true),

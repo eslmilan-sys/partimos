@@ -10,14 +10,14 @@
 
 export {
   viajes, paradas, reservas, mensajes, pagos,
-  guardarViaje, guardarReserva, guardarPago, actualizarReserva,
+  guardarViaje, guardarReserva, guardarPago, guardarMensaje, actualizarReserva,
 } from './almacen';
 
 export { ciudades, corredores, paradasDeLaRuta } from './geografia';
 
 export {
   categorias, perfiles, vehiculos, reputacion, resenas, placasCompletas,
-  actualizarPerfil,
+  actualizarPerfil, guardarVehiculo, guardarResena,
 } from './personas';
 
 export {

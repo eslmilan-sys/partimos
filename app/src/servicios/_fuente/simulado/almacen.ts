@@ -469,6 +469,11 @@ export async function guardarPago(pago: Payment): Promise<Payment> {
   return pago;
 }
 
+export async function guardarMensaje(mensaje: Message): Promise<Message> {
+  mensajes.push(mensaje);
+  return mensaje;
+}
+
 export async function actualizarReserva(
   id: string,
   cambios: Partial<ReservaFila>,

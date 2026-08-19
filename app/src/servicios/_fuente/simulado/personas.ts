@@ -41,6 +41,16 @@ export async function actualizarPerfil(id: string, cambios: Partial<Profile>): P
   return perfiles[i];
 }
 
+export async function guardarVehiculo(carro: Vehicle): Promise<Vehicle> {
+  vehiculos.push(carro);
+  return carro;
+}
+
+export async function guardarResena(resena: Review): Promise<Review> {
+  resenas.push(resena);
+  return resena;
+}
+
 export const perfiles: Profile[] = [
   {
     id: ANDRES_ID,

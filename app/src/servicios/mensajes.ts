@@ -82,8 +82,7 @@ export async function enviarMensaje(
     read_at: null,
     created_at: new Date().toISOString(),
   };
-  fuente.mensajes.push(mensaje);
-  return demora(mensaje);
+  return demora(await fuente.guardarMensaje(mensaje));
 }
 
 /* ------------------------------------------------------------------ */

@@ -140,8 +140,9 @@ export async function calificar(
     created_at: new Date().toISOString(),
   };
 
-  fuente.resenas.push(resena);
-  return demora(resena);
+  // Guardar, no apilar: `push` dejaba la nota en memoria y se perdia al
+  // recargar, asi que calificar no calificaba nada.
+  return demora(await fuente.guardarResena(resena));
 }
 
 /* ------------------------------------------------------------------ */
