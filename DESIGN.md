@@ -1,4 +1,9 @@
-# Design — « La lámina »
+> **REMPLACÉ.** L'utilisateur a choisi le langage de `diseno/design_system/`
+> pour le site comme pour l'app. Ce document décrit le système encore en place
+> dans `web/`, et sert à savoir ce qu'on remplace — il ne guide plus aucune
+> décision. Voir `CLAUDE.md`, « Un seul langage visuel ».
+
+# Design — « La lámina » *(ancien système du site)*
 
 <!-- Écrit APRÈS la construction, depuis le monde réellement bâti. Un
      règlement écrit avant le build se fait défendre contre la réalité au lieu

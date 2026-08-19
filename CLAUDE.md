@@ -80,18 +80,39 @@ Deux contraintes qui s'oublient facilement : un détour ne se facture jamais en
 supplément — il change la distance, donc le coût, donc le plafond, par la même
 formule ; et **maximum 4 points de prise en charge par trajet**.
 
-## Deux langages visuels, et c'est voulu
+## Un seul langage visuel : celui de `diseno/`
 
-`DESIGN.md` décrit le système du **site** : les planches d'ingénieur du Canal,
-vert `plate-900 #0a2b25`, clé ocre, et un refus explicite des coins arrondis.
+**Décidé par l'utilisateur.** Le traspaso de `diseno/` est le langage de
+**l'app ET du site**. Son système est dans `diseno/design_system/` — c'est la
+référence, pas une inspiration.
 
-`diseno/` est le traspaso de l'**app** : rouge du Panama `#D21034`, sable
-`#FAF7F3`, coins arrondis partout, feuilles blanches.
+Ce qu'il pose, et qui n'est pas négociable dans une surface :
 
-Ce ne sont pas les mêmes. `PRODUCT.md` déclare le langage visuel ouvert — seuls
-le nom et le pin sont fixes — donc l'app a le droit d'avoir le sien. **Mais le
-site et l'app ne se ressemblent pas**, et c'est une décision à prendre, pas un
-bug à corriger en douce.
+- **Azul `#005293` possède les surfaces** : en-têtes, champs héros, barres,
+  chrome sombre. **Rojo `#D21034` possède l'interaction** : boutons, liens,
+  états actifs. **Le blanc les sépare — ils ne se touchent jamais.** Ce sont
+  les deux couleurs du drapeau, réparties par métier.
+- **Les neutres sont chauds**, jamais gris-bleu : `ink-*` tire sur le violet,
+  les fonds sont `sand-*`.
+- **L'erreur ne peut pas être « rouge »**, puisque le rouge est la marque :
+  elle est `rojo-700` **avec une icône et un libellé**, et un bouton destructif
+  est en contour, jamais plein.
+- **Une seule famille typographique** pour tout — `"Helvetica Neue", Helvetica,
+  "Inter Tight", Arial`. Pas de monospace : les heures, les prix et les plaques
+  utilisent la police d'interface avec des chiffres tabulaires.
+- Une échelle de tailles fixe, avec son interlignage et son crénage par
+  palier : `--lh-body:1.45`, `--track-micro:0.1em`.
+
+**La spécification complète est dans `diseno/SISTEMA.md`** : l'archétype
+d'écran « Bandera », les neuf mécaniques signature, les règles du verre, la
+typographie, l'espace, et les règles de langue — tutoiement, casse de phrase,
+boutons verbe-en-tête de deux ou trois mots, pas d'emoji, **aucun point
+d'exclamation dans le produit**. Lis-le avant de toucher à une surface.
+
+**`DESIGN.md` décrit l'ancien système du site** — les planches d'ingénieur du
+Canal, vert `#0a2b25`, refus des coins arrondis. Il est **remplacé**. On le
+garde parce qu'il documente ce qui est encore en ligne dans `web/`, mais il ne
+guide plus rien. Le site est à reprendre dans le langage de `diseno/`.
 
 ## Conflits ouverts, à trancher — ne pas « corriger » seul
 
