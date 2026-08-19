@@ -197,3 +197,40 @@ para que la migración sea mecánica:
   diga que no sin cancelar una reserva confirmada.
 
 No se ha tocado la base de producción.
+
+---
+
+## Ce qui manque pour envoyer un lien de test
+
+L'objectif : que des collègues éprouvent chaque bouton, chaque texte, chaque
+filtre, chaque calcul, l'inscription et la connexion. Dans l'ordre.
+
+**1 · Les écrans ne savent pas encore qui elles montrent.** 37 écrans ont
+l'identifiant du parcours de démonstration écrit en dur (`const CONDUCTOR =
+'11111111-…'`). Trois motifs seulement : « qui je suis » doit venir de la
+session (`servicios/cuenta.ts` → `miId()`), « quel trajet » et « quelle
+réservation » du paramètre de route. Tant que ce n'est pas fait, la source
+`supabase` montre des écrans vides parce que ces identifiants n'existent pas
+dans la vraie base.
+
+**2 · La recherche de lieux n'est branchée nulle part.**
+`servicios/lugares.ts` est porté et fonctionne (Mapbox Search Box, sessions
+partagées entre `sugerir` et `concretar` pour ne payer qu'une fois). Mais
+l'écran d'accueil n'a aucun champ de recherche — seulement des routes
+préréglées. Le site, lui, fusionne LocationIQ **et** Mapbox dans
+`web/src/lib/geosearch.ts` : lire ce fichier avant de faire autrement.
+
+**3 · Trois contrôles ne font rien.** Mesuré en cliquant sur tout :
+35 contrôles sur 38 répondent. Les trois qui ne répondent pas sont
+« Confirmar y pagar » (7b) et deux boutons de l'écran Publier.
+
+**4 · L'hébergement.** Ni Supabase ni claude.ai ne peuvent servir cette app :
+Supabase réécrit le `content-type` du HTML en `text/plain` (mesuré, sur les
+Edge Functions comme sur le stockage public) et claude.ai bloque les appels
+sortants. Il faut GitHub Pages ou équivalent, déployé par CI — jamais en
+commitant le build.
+
+**5 · Supabase doit autoriser l'adresse de retour.** Le lien de confirmation
+du courriel ne revient à l'app que si son URL figure dans les « Redirect URLs »
+du projet. Sinon Supabase renvoie vers la « Site URL », qui pointe sur le site,
+et la personne atterrit sur une page d'erreur. C'était le symptôme constaté.
