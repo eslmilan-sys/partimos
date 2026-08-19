@@ -112,6 +112,23 @@ export async function elegirMetodo(reservaId: string, canal: CanalDePago): Promi
   await demora(null);
 }
 
+/**
+ * Guarda por dónde te cobran, en tu perfil. Es lo que `14c` deja al aceptar y
+ * lo que `9a` lee como predeterminado la próxima vez.
+ *
+ * **El número de Yappy y el de la tarjeta no se guardan**, y no es un olvido:
+ * no hay columna donde ponerlos, y guardar un número de tarjeta sería además
+ * exactamente lo que no queremos custodiar. Se guarda el canal, que es lo que
+ * la pantalla necesita recordar.
+ */
+export async function guardarMetodoPreferido(
+  perfilId: string,
+  canal: CanalDePago,
+): Promise<void> {
+  await fuente.actualizarPerfil(perfilId, { preferred_pay_channel: canal });
+  await demora(null);
+}
+
 /** El aporte retenido pasa al conductor. Solo ocurre con la llegada confirmada. */
 export async function liberarAporte(reservaId: string): Promise<Payment | null> {
   const pago = fuente.pagos.find((p) => p.booking_id === reservaId);

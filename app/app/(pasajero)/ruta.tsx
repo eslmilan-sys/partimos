@@ -16,11 +16,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
 import { type PuestoMio, misViajes } from '@/servicios/panel';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Mapa } from '@/ui/Mapa';
 import { Vidrio } from '@/ui/Vidrio';
@@ -29,17 +30,20 @@ import { hora } from '@/ui/fechas';
 import { Escudo } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-const PASAJERA = 'aaaaaaa1-0000-4000-8000-000000000001';
+/** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
+const DEL_RECORRIDO = 'aaaaaaa1-0000-4000-8000-000000000001';
 
 type Parada = { nombre: string; cuando: string; estado: 'pasada' | 'ahora' | 'falta' };
 
 export default function EnRuta() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [puesto, setPuesto] = useState<PuestoMio | null>(null);
 
   useEffect(() => {
-    misViajes(PASAJERA).then((m) => setPuesto(m.hoy ?? m.proximos[0] ?? null));
-  }, []);
+    if (!yo) return;
+    misViajes(yo).then((m) => setPuesto(m.hoy ?? m.proximos[0] ?? null));
+  }, [yo]);
 
   if (!puesto) return <View style={estilos.pantalla} />;
 
@@ -69,7 +73,16 @@ export default function EnRuta() {
       <View style={estilos.hoja}>
         <View style={estilos.filaEpigrafe}>
           <Text style={estilos.epigrafeVivo}>Vas en camino</Text>
-          <Pressable accessibilityRole="button">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Compartir mi llegada"
+            onPress={() =>
+              Share.share({
+                title: 'Partimos',
+                message: `Voy en camino a ${puesto.destino} con ${puesto.conductor}. Llego sobre las ${hora(llegada)}.`,
+              })
+            }
+          >
             <Text style={estilos.compartir}>Compartir mi llegada</Text>
           </Pressable>
         </View>

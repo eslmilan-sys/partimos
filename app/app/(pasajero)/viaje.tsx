@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -25,12 +25,12 @@ import { diaLargo, hora } from '@/ui/fechas';
 import { Atras, Carro, Compartir, Escudo, Estrella } from '@/ui/iconos';
 import { familia, color, espacio, radio } from '@/ui/tokens';
 
-const POR_DEFECTO = '55555555-5555-4555-8555-555555555555';
+const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 export default function DetalleDelViaje() {
   const router = useRouter();
   const { viaje: viajeParam } = useLocalSearchParams<{ viaje?: string }>();
-  const viajeId = viajeParam ?? POR_DEFECTO;
+  const viajeId = viajeParam ?? DEL_RECORRIDO;
 
   const [viaje, setViaje] = useState<ViajeFila | null>(null);
   const [paradas, setParadas] = useState<TripStop[]>([]);
@@ -56,12 +56,27 @@ export default function DetalleDelViaje() {
       <BarraDeEstado tono="oscuro" />
 
       <View style={estilos.chrome}>
-        <View style={estilos.vidrioBoton}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Atrás"
+          onPress={() => router.back()}
+          style={estilos.vidrioBoton}
+        >
           <Atras tinta={color.ink900} />
-        </View>
-        <View style={estilos.vidrioBoton}>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Compartir el viaje"
+          onPress={() =>
+            Share.share({
+              title: 'Partimos',
+              message: `${viaje.origin_label ?? ''} → ${viaje.destination_label ?? ''} · ${diaLargo(viaje.departure_at)} ${hora(viaje.departure_at)} · ${formatearDineroRedondo(viaje.price_cents)} por puesto`,
+            })
+          }
+          style={estilos.vidrioBoton}
+        >
           <Compartir />
-        </View>
+        </Pressable>
       </View>
 
       <ScrollView

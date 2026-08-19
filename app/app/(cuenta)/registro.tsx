@@ -21,6 +21,7 @@ import {
   inicialDelApellido,
   registrarse,
 } from '@/servicios/cuenta';
+import { Aviso } from '@/ui/Aviso';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -168,7 +169,7 @@ function PasoCorreo({
         mal={!!error}
         alTerminar={alSeguir}
       />
-      {error ? <Text style={estilos.malo}>{error}</Text> : null}
+      {error ? <Aviso>{error}</Aviso> : null}
       <Text style={estilos.ayuda}>Aquí te llega la confirmación y nada más.</Text>
       <View style={{ marginTop: 18 }}>
         <Boton tono="azul" desactivado={!correoValido(correo)} alPulsar={alSeguir}>
@@ -201,7 +202,7 @@ function PasoContrasena({
         mal={!!error}
         alTerminar={alSeguir}
       />
-      {error ? <Text style={estilos.malo}>{error}</Text> : null}
+      {error ? <Aviso>{error}</Aviso> : null}
       <Text style={estilos.ayuda}>Seis caracteres o más. No hace falta que sea rara.</Text>
       <View style={{ marginTop: 18 }}>
         <Boton tono="azul" desactivado={!contrasenaValida(clave)} alPulsar={alSeguir}>
@@ -261,7 +262,7 @@ function PasoNombre({
           : 'En público solo se ve tu nombre y la inicial del apellido — nunca el apellido completo.'}
       </Text>
 
-      {error ? <Text style={estilos.malo}>{error}</Text> : null}
+      {error ? <Aviso>{error}</Aviso> : null}
 
       <View style={{ marginTop: 18 }}>
         <Boton
@@ -300,13 +301,6 @@ const estilos = StyleSheet.create({
     ...(Platform.OS === 'web' ? { height: 844, maxHeight: 844 } : null),
   },
 
-  malo: {
-    fontFamily: familia,
-    fontSize: 13,
-    lineHeight: 18.85,
-    color: color.rojo500,
-    marginTop: 10,
-  },
 
   cabecera: { paddingHorizontal: espacio.gutter },
   circulo: {

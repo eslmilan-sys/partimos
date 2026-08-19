@@ -24,7 +24,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type Comprobante, comprobante } from '@/servicios/ayuda';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -36,7 +36,7 @@ import { Atras } from '@/ui/iconos';
 import { color, espacio, familia, radio, sombra, texto } from '@/ui/tokens';
 
 /** Mientras no haya sesión, la reserva pagada de Daniela en el Albrook → Chitré. */
-const RESERVA = '77777777-7777-4777-8777-777777777700';
+const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777700';
 
 /** El ancho de la hoja del total, para que el brillo sepa dónde nace. */
 const ANCHO_HOJA = 346;
@@ -44,11 +44,13 @@ const ALTO_HOJA = 104;
 
 export default function ComprobantePasajero() {
   const router = useRouter();
+  const { reserva } = useLocalSearchParams<{ reserva?: string }>();
+  const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Comprobante | null>(null);
 
   useEffect(() => {
-    comprobante(RESERVA).then(setDatos);
-  }, []);
+    comprobante(reservaId).then(setDatos);
+  }, [reservaId]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 

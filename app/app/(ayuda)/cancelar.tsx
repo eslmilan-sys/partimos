@@ -23,11 +23,12 @@
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { HORAS_PARA_CANCELAR_ENTERO, type MotivoDeReembolso } from '@/dominio/reembolsos';
 import { type Previsualizacion, cancelar, previsualizar } from '@/servicios/cancelaciones';
 import { type PuestoMio, misViajes } from '@/servicios/panel';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
@@ -38,8 +39,10 @@ import { color, espacio, familia, interlinea, radio, sombra, texto } from '@/ui/
 
 // Mientras no haya sesión, la pasajera del recorrido del diseño y el puesto
 // que tiene comprado en el Albrook → Chitré.
-const PASAJERA = '99999999-9999-4999-8999-999999999999';
-const RESERVA = '77777777-7777-4777-8777-777777777700';
+/** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
+const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
+const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777700';
 
 /**
  * Las tres razones que se le pueden dar al conductor. No son los `MOTIVOS` de
@@ -56,20 +59,24 @@ const RAZONES: { etiqueta: string; motivo: MotivoDeReembolso }[] = [
 
 export default function Cancelar() {
   const router = useRouter();
+  const { reserva } = useLocalSearchParams<{ reserva?: string }>();
+  const reservaId = reserva ?? DEL_RECORRIDO;
+  const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
   const [puesto, setPuesto] = useState<PuestoMio | null>(null);
   const [previa, setPrevia] = useState<Previsualizacion | null>(null);
   const [elegida, setElegida] = useState(0);
   const [cancelando, setCancelando] = useState(false);
 
   useEffect(() => {
-    misViajes(PASAJERA).then(({ proximos, pasados }) =>
-      setPuesto([...proximos, ...pasados].find((p) => p.reservaId === RESERVA) ?? null),
+    if (!yo) return;
+    misViajes(yo).then(({ proximos, pasados }) =>
+      setPuesto([...proximos, ...pasados].find((p) => p.reservaId === reservaId) ?? null),
     );
-  }, []);
+  }, [yo, reservaId]);
 
   useEffect(() => {
-    previsualizar(RESERVA, RAZONES[elegida].motivo).then(setPrevia);
-  }, [elegida]);
+    previsualizar(reservaId, RAZONES[elegida].motivo).then(setPrevia);
+  }, [reservaId, elegida]);
 
   if (!puesto || !previa) return <View style={estilos.pantalla} />;
 
@@ -80,7 +87,8 @@ export default function Cancelar() {
 
   const confirmar = async () => {
     setCancelando(true);
-    await cancelar(RESERVA, RAZONES[elegida].motivo, PASAJERA, RAZONES[elegida].etiqueta);
+    if (!yo) return;
+    await cancelar(reservaId, RAZONES[elegida].motivo, yo, RAZONES[elegida].etiqueta);
     router.replace('/(pasajero)');
   };
 

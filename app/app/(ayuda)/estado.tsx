@@ -14,7 +14,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View, type TextStyle } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import {
   estadoDelReembolso,
@@ -30,7 +30,7 @@ import { Atras, Visto } from '@/ui/iconos';
 import { familia, color, espacio, radio, sombra } from '@/ui/tokens';
 
 /** El reembolso de la cancelación de Andrés. Mientras no haya sesión. */
-const REEMBOLSO = 'ff000000-0000-4000-8000-000000000001';
+const DEL_RECORRIDO = 'ff000000-0000-4000-8000-000000000001';
 
 /**
  * React Native Web deja `white-space: pre-wrap` en todo `Text`, y eso conserva
@@ -49,11 +49,13 @@ const PUNTO = {
 
 export default function Estado() {
   const router = useRouter();
+  const { reembolso } = useLocalSearchParams<{ reembolso?: string }>();
+  const reembolsoId = reembolso ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<EstadoDelReembolso | null>(null);
 
   useEffect(() => {
-    estadoDelReembolso(REEMBOLSO).then(setDatos);
-  }, []);
+    estadoDelReembolso(reembolsoId).then(setDatos);
+  }, [reembolsoId]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 

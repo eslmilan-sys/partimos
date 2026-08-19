@@ -8,7 +8,9 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import {
   type ResumenDeSolicitudes,
@@ -24,19 +26,23 @@ import { Atras, Maleta, Pin, Visto } from '@/ui/iconos';
 import { cuando } from '@/ui/fechas';
 import { familia, color, espacio, radio, texto } from '@/ui/tokens';
 
-const VIAJE = '55555555-5555-4555-8555-555555555555';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, el del traspaso. */
+const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 /** Lo que la pantalla recuerda de lo que acabas de aceptar, para el recibo. */
 type Recibo = { nombre: string; aporteCentavos: number };
 
 export default function Solicitudes() {
+  const router = useRouter();
+  const { viaje } = useLocalSearchParams<{ viaje?: string }>();
+  const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<ResumenDeSolicitudes | null>(null);
   const [recibos, setRecibos] = useState<Record<string, Recibo>>({});
   const [ocupado, setOcupado] = useState<string | null>(null);
 
   const recargar = useCallback(async () => {
-    setDatos(await listarSolicitudes(VIAJE));
-  }, []);
+    setDatos(await listarSolicitudes(viajeId));
+  }, [viajeId]);
 
   useEffect(() => {
     recargar();
@@ -78,9 +84,14 @@ export default function Solicitudes() {
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaEpigrafe}>
-          <View style={estilos.circulo}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => router.back()}
+            style={estilos.circulo}
+          >
             <Atras />
-          </View>
+          </Pressable>
           <Text style={estilos.epigrafeCampo}>
             {`${cuando(datos.viaje.salida)} · ${datos.viaje.origen} → ${datos.viaje.destino}`}
           </Text>

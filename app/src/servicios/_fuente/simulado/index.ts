@@ -15,7 +15,10 @@ export {
 
 export { ciudades, corredores, paradasDeLaRuta } from './geografia';
 
-export { categorias, perfiles, vehiculos, reputacion, resenas, placasCompletas } from './personas';
+export {
+  categorias, perfiles, vehiculos, reputacion, resenas, placasCompletas,
+  actualizarPerfil,
+} from './personas';
 
 export {
   politicas, cancelaciones, reembolsos, creditos, lotes, pagosAlConductor, libro,

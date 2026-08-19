@@ -12,31 +12,37 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
 
 import { type ViajePublicado, viajesPublicados } from '@/servicios/panel';
+import { perfilResumido } from '@/servicios/perfiles';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
-import { BarraDePestanas } from '@/ui/BarraDePestanas';
+import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { cuando, diaAbrev, hora } from '@/ui/fechas';
-import { Carro, Chat, Lupa, Mas, Persona } from '@/ui/iconos';
+import { Mas } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-/** Mientras no haya sesión, el conductor del recorrido del diseño. */
-const CONDUCTOR = '11111111-1111-4111-8111-111111111111';
+/** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 export default function Panel() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [viajes, setViajes] = useState<ViajePublicado[]>([]);
+  const [nombre, setNombre] = useState<string | null>(null);
 
   useEffect(() => {
-    viajesPublicados(CONDUCTOR).then(setViajes);
-  }, []);
+    if (!yo) return;
+    viajesPublicados(yo).then(setViajes);
+    perfilResumido(yo).then((p) => setNombre(p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : null));
+  }, [yo]);
 
   const [hoy, ...resto] = viajes;
 
@@ -46,7 +52,7 @@ export default function Panel() {
       <BarraDeEstado />
 
       <View style={estilos.cabecera}>
-        <Text style={estilos.epigrafeCampo}>Conductor · Andrés C.</Text>
+        <Text style={estilos.epigrafeCampo}>{nombre ? `Conductor · ${nombre}` : 'Conductor'}</Text>
         <Text style={estilos.titular}>
           {'Tus viajes '}
           <Text style={estilos.titularFuerte}>publicados</Text>
@@ -77,15 +83,7 @@ export default function Panel() {
       </Pressable>
 
       <View style={estilos.pie}>
-        <BarraDePestanas
-          valor="Mis viajes"
-          pestanas={[
-            { valor: 'Buscar', etiqueta: 'Buscar', icono: (a) => <Lupa tinta={tinta(a)} /> },
-            { valor: 'Mis viajes', etiqueta: 'Mis viajes', icono: (a) => <Carro tamano={21} tinta={tinta(a)} /> },
-            { valor: 'Mensajes', etiqueta: 'Mensajes', icono: (a) => <Chat tinta={tinta(a)} /> },
-            { valor: 'Perfil', etiqueta: 'Perfil', icono: (a) => <Persona tinta={tinta(a)} /> },
-          ]}
-        />
+        <Pestanas valor="Mis viajes" />
       </View>
     </View>
   );
@@ -104,7 +102,9 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         <View style={estilos.puntoVivo} />
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.push('/(conductor)/editar')}
+          onPress={() =>
+            router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
+          }
           style={{ marginLeft: 'auto' }}
         >
           <Text style={estilos.enlace}>Editar</Text>
@@ -124,7 +124,9 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${viaje.solicitudes} solicitudes nuevas`}
-          onPress={() => router.push('/(conductor)/solicitudes')}
+          onPress={() =>
+            router.push({ pathname: '/(conductor)/solicitudes', params: { viaje: viaje.id } })
+          }
           style={estilos.solicitudes}
         >
           <View style={estilos.contador}>
@@ -151,7 +153,9 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         </Text>
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.push('/(conductor)/editar')}
+          onPress={() =>
+            router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
+          }
           style={{ marginLeft: 'auto' }}
         >
           <Text style={estilos.enlace}>Editar</Text>
@@ -170,7 +174,17 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
             ? 'Nadie todavía'
             : `${viaje.puestosVendidos} de ${viaje.puestosOfrecidos} puestos vendidos`}
         </Text>
-        <Pressable accessibilityRole="button" style={{ marginLeft: 'auto' }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Compartir el viaje"
+          onPress={() =>
+            Share.share({
+              title: 'Partimos',
+              message: `${viaje.origen} → ${viaje.destino} · ${diaAbrev(viaje.cuando)} ${hora(viaje.cuando)} · ${formatearDineroRedondo(viaje.aporteCentavos)} por puesto · quedan ${viaje.puestosOfrecidos - viaje.puestosVendidos}`,
+            })
+          }
+          style={{ marginLeft: 'auto' }}
+        >
           <Text style={estilos.enlace}>Compartir el viaje</Text>
         </Pressable>
       </View>

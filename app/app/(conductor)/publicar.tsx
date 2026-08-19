@@ -10,6 +10,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useRouter } from 'expo-router';
+
 import { aporteCalculado, origenDelAporte } from '@/dominio/aporte';
 import {
   type PublicacionPreparada,
@@ -17,6 +19,7 @@ import {
   publicarViaje,
   repartoDelCosto,
 } from '@/servicios/viajes';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe, Interruptor, Pastilla, Stepper } from '@/ui/controles';
@@ -25,8 +28,8 @@ import { diaCorto, hora, mas } from '@/ui/fechas';
 import { Atras, Carro, Cerrar, Mas } from '@/ui/iconos';
 import { familia, color, espacio, radio, texto } from '@/ui/tokens';
 
-/** Mientras no exista sesión, el conductor del recorrido del diseño. */
-const CONDUCTOR = '11111111-1111-4111-8111-111111111111';
+/** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 const RUTA = 'panama-chitre';
 const SALIDA = '2026-11-14T14:50:00-05:00';
 
@@ -34,6 +37,8 @@ const SALIDA = '2026-11-14T14:50:00-05:00';
 const MINUTOS_POR_PARADA = 5;
 
 export default function Publicar() {
+  const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
   const [paradas, setParadas] = useState(2);
   const [puestos, setPuestos] = useState(3);
@@ -43,8 +48,9 @@ export default function Publicar() {
   const [publicando, setPublicando] = useState(false);
 
   useEffect(() => {
-    prepararPublicacion(CONDUCTOR, RUTA, SALIDA).then(setDatos);
-  }, []);
+    if (!yo) return;
+    prepararPublicacion(yo, RUTA, SALIDA).then(setDatos);
+  }, [yo]);
 
   const calculado = useMemo(
     () => (datos ? aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos) : 0),
@@ -71,7 +77,12 @@ export default function Publicar() {
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaEpigrafe}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Atrás" style={estilos.circulo}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => router.back()}
+            style={estilos.circulo}
+          >
             <Atras />
           </Pressable>
           <Text style={estilos.epigrafeCampo}>
@@ -217,10 +228,11 @@ export default function Publicar() {
           tono="azul"
           desactivado={publicando}
           alPulsar={async () => {
+            if (!yo) return;
             setPublicando(true);
             try {
               await publicarViaje({
-                conductorId: CONDUCTOR,
+                conductorId: yo,
                 carroId: datos.carro.id,
                 corredorSlug: RUTA,
                 salida: datos.salida,

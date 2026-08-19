@@ -183,6 +183,22 @@ export const guardarCancelacion = (c: Cancellation) => insertar('cancellations',
 export const guardarReembolso = (r: Refund) => insertar('refunds', r, reembolsos);
 export const guardarIncidencia = (i: Incident) => insertar('incidents', i, incidencias);
 
+/**
+ * Cambia una fila de `profiles`. La política RLS solo deja tocar la propia, que
+ * es exactamente lo que la app pide: nadie cambia por dónde le cobran a otro.
+ *
+ * El arreglo local viene de la vista `perfiles_publicos`, que no trae todas las
+ * columnas; por eso se mezcla el cambio sobre la fila que ya había en vez de
+ * reemplazarla por lo que devuelve la base.
+ */
+export async function actualizarPerfil(id: string, cambios: Partial<Profile>): Promise<Profile> {
+  const { error } = await tabla('profiles').update(cambios).eq('id', id).select().single();
+  if (error) throw new Error(`profiles: ${error.message}`);
+  const i = perfiles.findIndex((p) => p.id === id);
+  if (i >= 0) perfiles[i] = { ...perfiles[i], ...cambios };
+  return perfiles[i] ?? ({ id, ...cambios } as Profile);
+}
+
 export async function actualizarReserva(id: string, cambios: Partial<ReservaFila>): Promise<ReservaFila> {
   const { data, error } = await tabla('bookings').update(cambios).eq('id', id).select().single();
   if (error) throw new Error(`bookings: ${error.message}`);

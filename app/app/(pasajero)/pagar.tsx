@@ -10,11 +10,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CanalDePago } from '@/dominio/tarifas';
-import { type MetodoDePago, desglosar, metodosDePago } from '@/servicios/pagos';
+import { type MetodoDePago, desglosar, elegirMetodo, metodosDePago } from '@/servicios/pagos';
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
@@ -24,14 +24,19 @@ import { hora } from '@/ui/fechas';
 import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
-const VIAJE = '55555555-5555-4555-8555-555555555555';
+const VIAJE_DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
+const RESERVA_DEL_RECORRIDO = '77777777-7777-4777-8777-777777777700';
 
 export default function Pagar() {
-  const { viaje } = useLocalSearchParams<{ viaje?: string }>();
-  const viajeId = viaje ?? VIAJE;
+  const router = useRouter();
+  const { viaje, reserva } = useLocalSearchParams<{ viaje?: string; reserva?: string }>();
+  const viajeId = viaje ?? VIAJE_DEL_RECORRIDO;
+  const reservaId = reserva ?? RESERVA_DEL_RECORRIDO;
   const [datos, setDatos] = useState<ReservaPreparada | null>(null);
   const [metodos, setMetodos] = useState<MetodoDePago[]>([]);
   const [canal, setCanal] = useState<CanalDePago>('yappy_app');
+  const [confirmando, setConfirmando] = useState(false);
 
   useEffect(() => {
     prepararReserva(viajeId).then(setDatos);
@@ -53,9 +58,14 @@ export default function Pagar() {
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaEpigrafe}>
-          <View style={estilos.circulo}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => router.back()}
+            style={estilos.circulo}
+          >
             <Atras />
-          </View>
+          </Pressable>
           <Text style={estilos.epigrafeCampo}>
             {`${datos.destino} · ${hora(datos.salida)} · 1 puesto`}
           </Text>
@@ -139,7 +149,27 @@ export default function Pagar() {
       </ScrollView>
 
       <View style={estilos.pie}>
-        <Boton tono="azul">{desglose.textoBoton}</Boton>
+        <Boton
+          tono="azul"
+          desactivado={confirmando}
+          alPulsar={async () => {
+            setConfirmando(true);
+            try {
+              // Elegir el método no cobra nada: deja la reserva con el canal
+              // escrito. El cargo ocurre cuando el conductor acepta, que es lo
+              // que dice el reloj de `16b`.
+              await elegirMetodo(reservaId, canal);
+              router.replace({
+                pathname: '/(pasajero)/comprobante',
+                params: { reserva: reservaId },
+              });
+            } finally {
+              setConfirmando(false);
+            }
+          }}
+        >
+          {desglose.textoBoton}
+        </Boton>
         <Text style={estilos.notaPie}>{desglose.nota}</Text>
       </View>
     </View>

@@ -7,9 +7,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -19,7 +19,7 @@ import { tabular } from '@/ui/dinero';
 import { Atras, Estrella } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-const ANDRES = '11111111-1111-4111-8111-111111111111';
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 const TONOS = {
   verde: { fondo: '#DFF1E8', tinta: '#0E5A3F', punto: true },
@@ -28,11 +28,12 @@ const TONOS = {
 } as const;
 
 export default function Perfil() {
+  const router = useRouter();
   const { perfil: perfilParam } = useLocalSearchParams<{ perfil?: string }>();
   const [datos, setDatos] = useState<PerfilPublico | null>(null);
 
   useEffect(() => {
-    perfilPublico(perfilParam ?? ANDRES).then(setDatos);
+    perfilPublico(perfilParam ?? DEL_RECORRIDO).then(setDatos);
   }, [perfilParam]);
 
   if (!datos) return <View style={estilos.pantalla} />;
@@ -44,9 +45,14 @@ export default function Perfil() {
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaSuperior}>
-          <View style={estilos.circulo}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => router.back()}
+            style={estilos.circulo}
+          >
             <Atras />
-          </View>
+          </Pressable>
           <Text style={estilos.epigrafeCampo}>Perfil público</Text>
         </View>
 

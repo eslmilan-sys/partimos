@@ -28,7 +28,7 @@ import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { type Href, useRouter } from 'expo-router';
+import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 
 import {
   HORARIO,
@@ -48,7 +48,8 @@ import { color, espacio, familia, interlinea, radio, sombra, texto } from '@/ui/
 
 // Mientras no haya sesión, el puesto que la pasajera del recorrido tiene
 // comprado en el Albrook → Chitré: el viaje del que se viene hablando.
-const RESERVA = '77777777-7777-4777-8777-777777777700';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
+const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777700';
 
 /** La única fila que no va de dinero: la que hay que atender ya. */
 const URGENTE = 'incidente';
@@ -70,11 +71,13 @@ function Adelante() {
 
 export default function Ayuda() {
   const router = useRouter();
+  const { reserva } = useLocalSearchParams<{ reserva?: string }>();
+  const reservaId = reserva ?? DEL_RECORRIDO;
   const [viaje, setViaje] = useState<ViajeDeAyuda | null>(null);
 
   useEffect(() => {
-    viajeDeAyuda(RESERVA).then(setViaje);
-  }, []);
+    viajeDeAyuda(reservaId).then(setViaje);
+  }, [reservaId]);
 
   if (!viaje) return <View style={estilos.pantalla} />;
 
@@ -133,7 +136,12 @@ export default function Ayuda() {
                   key={cosa.clave}
                   accessibilityRole="button"
                   accessibilityLabel={`${cosa.titulo}. ${cosa.respuesta}`}
-                  onPress={() => router.push(cosa.ruta as Href)}
+                  onPress={() =>
+                    router.push({
+                      pathname: cosa.ruta,
+                      params: { reserva: viaje.reservaId },
+                    } as Href)
+                  }
                   style={({ pressed }) => [estilos.fila, pressed && estilos.filaPulsada]}
                 >
                   <View style={estilos.filaTituloCaja}>
@@ -160,7 +168,12 @@ export default function Ayuda() {
               key={pregunta.titulo}
               accessibilityRole="button"
               accessibilityLabel={pregunta.titulo}
-              onPress={() => router.push(pregunta.ruta as Href)}
+              onPress={() =>
+                router.push({
+                  pathname: pregunta.ruta,
+                  params: { reserva: viaje.reservaId, viaje: viaje.viajeId },
+                } as Href)
+              }
               // La última no lleva relleno abajo: el padding de la tarjeta ya
               // la separa del borde, y con los dos la fila queda descentrada.
               style={[estilos.filaPregunta, i === PREGUNTAS.length - 1 && { paddingBottom: 0 }]}
@@ -175,7 +188,12 @@ export default function Ayuda() {
       <View style={estilos.pie}>
         {/* Azul, no rojo: el pie es blanco y esto no es «sigue adelante», es la
             salida de quien no se reconoce en ninguna fila. */}
-        <Boton tono="azul" alPulsar={() => router.push('/(pasajero)/chat')}>
+        <Boton
+          tono="azul"
+          alPulsar={() =>
+            router.push({ pathname: '/(pasajero)/chat', params: { reserva: viaje.reservaId } })
+          }
+        >
           Escribirle a una persona
         </Boton>
         <Text style={estilos.promesa}>{PROMESA}</Text>

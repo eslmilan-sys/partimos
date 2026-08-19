@@ -9,6 +9,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useMiIdOEntrar } from '@/servicios/sesion';
+
 import { type HiloDelViaje, enviarMensaje, hiloDelViaje } from '@/servicios/mensajes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -18,17 +22,24 @@ import { cuando } from '@/ui/fechas';
 import { Atras, Avion, Mas } from '@/ui/iconos';
 import { familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-const RESERVA = '77777777-7777-4777-8777-777777777700';
-const YO = '99999999-9999-4999-8999-999999999999'; // Daniela, mientras no haya sesión
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
+const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777700';
+/** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
+const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 export default function Chat() {
+  const router = useRouter();
+  const { reserva } = useLocalSearchParams<{ reserva?: string }>();
+  const reservaId = reserva ?? DEL_RECORRIDO;
+  const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
   const [hilo, setHilo] = useState<HiloDelViaje | null>(null);
   const [texto, setTexto] = useState('');
   const lista = useRef<ScrollView>(null);
 
   const recargar = useCallback(async () => {
-    setHilo(await hiloDelViaje(RESERVA, YO));
-  }, []);
+    if (!yo) return;
+    setHilo(await hiloDelViaje(reservaId, yo));
+  }, [reservaId, yo]);
 
   useEffect(() => {
     recargar();
@@ -38,7 +49,8 @@ export default function Chat() {
 
   const mandar = async () => {
     if (!texto.trim()) return;
-    await enviarMensaje(RESERVA, YO, texto);
+    if (!yo) return;
+    await enviarMensaje(reservaId, yo, texto);
     setTexto('');
     await recargar();
     lista.current?.scrollToEnd({ animated: true });
@@ -50,9 +62,14 @@ export default function Chat() {
       <BarraDeEstado />
 
       <View style={estilos.cabecera}>
-        <View style={estilos.circulo}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Atrás"
+          onPress={() => router.back()}
+          style={estilos.circulo}
+        >
           <Atras />
-        </View>
+        </Pressable>
         <View style={estilos.retrato}>
           <Text style={estilos.retratoTexto}>{hilo.otro.iniciales}</Text>
         </View>
@@ -101,7 +118,16 @@ export default function Chat() {
         </ScrollView>
 
         <View style={estilos.barraEscribir}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Adjuntar" style={estilos.adjuntar}>
+          {/* El punto de recogida es de lo que más se habla aquí, así que el
+              «más» abre el mapa en vez de un adjunto: no hay módulo de archivos
+              en el proyecto, y un botón que no hace nada es peor que uno que
+              hace lo útil. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ver el punto de recogida"
+            onPress={() => router.push('/(pasajero)/ya-mapa')}
+            style={estilos.adjuntar}
+          >
             <Mas tamano={19} tinta={color.ink700} />
           </Pressable>
           <View style={estilos.campoMensaje}>

@@ -30,6 +30,7 @@ import {
   resumen,
   sePuedeGuardar,
 } from '@/servicios/carros';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe, Stepper } from '@/ui/controles';
@@ -37,8 +38,8 @@ import { tabular } from '@/ui/dinero';
 import { Atras, Carro } from '@/ui/iconos';
 import { color, espacio, familia, interlinea, radio, sombra, texto } from '@/ui/tokens';
 
-/** Mientras no haya sesión, el conductor del recorrido del diseño. */
-const CONDUCTOR = '11111111-1111-4111-8111-111111111111';
+/** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 /**
  * El proyecto no trae módulo de cámara. Aquí volvería el archivo que deja la
@@ -52,6 +53,7 @@ const siguiente = <T,>(lista: readonly T[], actual: T): T =>
 
 export default function RegistrarCarro() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [borrador, setBorrador] = useState<BorradorDeCarro>(borradorInicial);
   const [faltaLaFoto, setFaltaLaFoto] = useState(false);
   const [guardando, setGuardando] = useState(false);
@@ -62,13 +64,13 @@ export default function RegistrarCarro() {
 
   const guardar = async () => {
     // El botón nunca se apaga: lo que falta se señala donde falta.
-    if (!sePuedeGuardar(borrador)) {
+    if (!sePuedeGuardar(borrador) || !yo) {
       setFaltaLaFoto(true);
       return;
     }
     setGuardando(true);
     try {
-      await guardarCarro(CONDUCTOR, borrador);
+      await guardarCarro(yo, borrador);
       router.back();
     } finally {
       setGuardando(false);

@@ -16,7 +16,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ATAJOS, type Atajo, calificar, prepararCalificacion, type Calificacion } from '@/servicios/calificaciones';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -28,20 +28,23 @@ import { EstrellaGrande } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
 // Una reserva que ya abordó: sin viaje que pasó no hay nada que calificar.
-const RESERVA = '77777777-7777-4777-8777-777777777711';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
+const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777711';
 
 const EN_LETRA = ['', 'Una estrella', 'Dos estrellas', 'Tres estrellas', 'Cuatro estrellas', 'Cinco estrellas'];
 
 export default function Calificar() {
   const router = useRouter();
+  const { reserva } = useLocalSearchParams<{ reserva?: string }>();
+  const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Calificacion | null>(null);
   const [estrellas, setEstrellas] = useState(4);
   const [elegidos, setElegidos] = useState<Atajo[]>(['puntual', 'manejo']);
   const [comentario, setComentario] = useState('');
 
   useEffect(() => {
-    prepararCalificacion(RESERVA).then(setDatos);
-  }, []);
+    prepararCalificacion(reservaId).then(setDatos);
+  }, [reservaId]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 
@@ -138,7 +141,7 @@ export default function Calificar() {
       <View style={estilos.pie}>
         <Boton
           alPulsar={async () => {
-            await calificar(RESERVA, estrellas, elegidos, comentario);
+            await calificar(reservaId, estrellas, elegidos, comentario);
             router.replace('/(pasajero)');
           }}
         >

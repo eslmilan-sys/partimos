@@ -22,6 +22,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { cambiarAviso, cuantasAvisando, rutasGuardadas, type RutaGuardada } from '@/servicios/rutas';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe } from '@/ui/controles';
@@ -30,17 +31,20 @@ import { Atras, Mas } from '@/ui/iconos';
 import { color, espacio, familia, radio, sombra, texto } from '@/ui/tokens';
 
 /** Mientras no haya sesión, la pasajera del recorrido del diseño. */
-const PERFIL = '99999999-9999-4999-8999-999999999999';
+/** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
+const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 export default function Rutas() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [rutas, setRutas] = useState<RutaGuardada[] | null>(null);
   const [avisando, setAvisando] = useState(0);
 
   useEffect(() => {
-    rutasGuardadas(PERFIL).then(setRutas);
-    cuantasAvisando(PERFIL).then(setAvisando);
-  }, []);
+    if (!yo) return;
+    rutasGuardadas(yo).then(setRutas);
+    cuantasAvisando(yo).then(setAvisando);
+  }, [yo]);
 
   const alternar = useCallback(async (id: string, avisar: boolean) => {
     const cambiada = await cambiarAviso(id, avisar);
@@ -48,7 +52,7 @@ export default function Rutas() {
     // El estado de la fila lo reescribe el servicio: apagar el aviso no sólo
     // mueve el pulgar, también borra lo que había esta semana.
     setRutas((antes) => antes?.map((r) => (r.id === cambiada.id ? cambiada : r)) ?? antes);
-    setAvisando(await cuantasAvisando(PERFIL));
+    if (yo) setAvisando(await cuantasAvisando(yo));
   }, []);
 
   if (!rutas) return <View style={estilos.pantalla} />;

@@ -9,12 +9,13 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { etiquetaDeMaletero, notaDeEquipaje } from '@/dominio/equipaje';
 import { type ReservaPreparada, pedirPuesto, prepararReserva } from '@/servicios/reservas';
+import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Campo, Epigrafe, Pastilla, Stepper } from '@/ui/controles';
@@ -23,15 +24,18 @@ import { diaCorto, hora } from '@/ui/fechas';
 import { Atras, Maleta } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
-const VIAJE = '55555555-5555-4555-8555-555555555555';
-/** Mientras no exista sesión. La cuenta se pide en `1c`, al pulsar Pedir puesto. */
-const PASAJERO = '22222222-2222-4222-8222-222222222222';
+const VIAJE_DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
+/** Sin sesión que preguntar —solo en simulado—. En producción la pide `1c`. */
+const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 
 export default function Reservar() {
   const router = useRouter();
   // `/viaje/[id]` en cuanto exista el descubrimiento; hoy, el del simulado.
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
-  const viajeId = viaje ?? VIAJE;
+  const viajeId = viaje ?? VIAJE_DEL_RECORRIDO;
+  // Aquí no se manda a entrar: pedir puesto es justo donde el traspaso pide
+  // la cuenta, y esa puerta es `1c`, que vuelve a esta pantalla con el viaje.
+  const yo = useMiId(YO_DEL_RECORRIDO);
   const [datos, setDatos] = useState<ReservaPreparada | null>(null);
   const [direccion, setDireccion] = useState('Vía Argentina, Riba Smith');
   const [mochilas, setMochilas] = useState(1);
@@ -55,9 +59,14 @@ export default function Reservar() {
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaEpigrafe}>
-          <View style={estilos.circulo}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => router.back()}
+            style={estilos.circulo}
+          >
             <Atras />
-          </View>
+          </Pressable>
           <Text style={estilos.epigrafeCampo}>
             {`${datos.destino} · ${diaCorto(datos.salida)}, ${hora(datos.salida)}`}
           </Text>
@@ -171,15 +180,24 @@ export default function Reservar() {
           tono="azul"
           desactivado={pidiendo}
           alPulsar={async () => {
+            if (!yo) {
+              router.push({ pathname: '/(cuenta)/puerta', params: { viaje: viajeId } });
+              return;
+            }
             setPidiendo(true);
             try {
-              await pedirPuesto(
+              const puesto = await pedirPuesto(
                 viajeId,
                 { direccionPropia: direccion },
                 { mochilas, maletas: maletasReales },
-                { pasajeroId: PASAJERO },
+                { pasajeroId: yo },
               );
-              router.push({ pathname: '/(pasajero)/pagar', params: { viaje: viajeId } });
+              // `7b` cobra sobre una reserva concreta: sin este identificador el
+              // botón «Confirmar y pagar» no tenía nada que confirmar.
+              router.push({
+                pathname: '/(pasajero)/pagar',
+                params: { viaje: viajeId, reserva: puesto.id },
+              });
             } finally {
               setPidiendo(false);
             }

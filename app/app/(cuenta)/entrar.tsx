@@ -14,7 +14,15 @@ import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 
 import { useRouter } from 'expo-router';
 
-import { QUE_PASO, contrasenaValida, correoValido, entrar as entrarConCuenta } from '@/servicios/cuenta';
+import {
+  QUE_PASO,
+  SIN_PROVEEDOR,
+  contrasenaValida,
+  correoValido,
+  entrar as entrarConCuenta,
+  entrarCon,
+} from '@/servicios/cuenta';
+import { Aviso } from '@/ui/Aviso';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -22,6 +30,12 @@ import { Boton } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
+
+/** Los dos que dibuja el traspaso. El nombre se escribe una vez, no dos. */
+const OTROS = [
+  { quien: 'google', nombre: 'Google' },
+  { quien: 'apple', nombre: 'Apple' },
+] as const;
 
 export default function Entrar() {
   const router = useRouter();
@@ -89,7 +103,7 @@ export default function Entrar() {
             />
           </View>
 
-          {quePaso ? <Text style={estilos.quePaso}>{quePaso}</Text> : null}
+          {quePaso ? <Aviso>{quePaso}</Aviso> : null}
 
           <View style={{ marginTop: 16 }}>
             {/* Dentro de la hoja blanca la acción es azul: rojo sobre rojo no se lee. */}
@@ -107,12 +121,18 @@ export default function Entrar() {
           </View>
 
           <View style={estilos.otros}>
-            <Pressable accessibilityRole="button" style={estilos.otro}>
-              <Text style={estilos.otroTexto}>Continuar con Google</Text>
-            </Pressable>
-            <Pressable accessibilityRole="button" style={estilos.otro}>
-              <Text style={estilos.otroTexto}>Continuar con Apple</Text>
-            </Pressable>
+            {OTROS.map(({ quien, nombre }) => (
+              <Pressable
+                key={quien}
+                accessibilityRole="button"
+                onPress={async () => {
+                  if (!(await entrarCon(quien))) setQuePaso(SIN_PROVEEDOR(nombre));
+                }}
+                style={estilos.otro}
+              >
+                <Text style={estilos.otroTexto}>{`Continuar con ${nombre}`}</Text>
+              </Pressable>
+            ))}
           </View>
 
           <Pressable accessibilityRole="button" onPress={() => router.push('/(cuenta)/registro')}>
@@ -137,13 +157,6 @@ const estilos = StyleSheet.create({
     ...(Platform.OS === 'web' ? { height: 844, maxHeight: 844 } : null),
   },
 
-  quePaso: {
-    fontFamily: familia,
-    fontSize: 13,
-    lineHeight: interlinea(13),
-    color: color.rojo500,
-    marginTop: 12,
-  },
 
   cabecera: { paddingHorizontal: espacio.gutter },
   filaSuperior: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

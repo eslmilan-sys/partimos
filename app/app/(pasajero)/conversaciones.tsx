@@ -17,33 +17,37 @@ import { useRouter } from 'expo-router';
 
 import { type HiloDelViaje, hiloDelViaje } from '@/servicios/mensajes';
 import { type PuestoMio, misViajes } from '@/servicios/panel';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
-import { BarraDePestanas } from '@/ui/BarraDePestanas';
+import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { diaAbrev, esHoy, hora } from '@/ui/fechas';
-import { Atras, Carro, Chat, Lupa, Persona } from '@/ui/iconos';
+import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea } from '@/ui/tokens';
 
-const YO = '99999999-9999-4999-8999-999999999999';
+/** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
+const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 type Fila = { puesto: PuestoMio; hilo: HiloDelViaje };
 
 export default function Conversaciones() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
   const [filas, setFilas] = useState<Fila[]>([]);
 
   useEffect(() => {
+    if (!yo) return;
     (async () => {
-      const mios = await misViajes(YO);
+      const mios = await misViajes(yo);
       const todos = [...mios.proximos, ...mios.pasados];
       const hilos = await Promise.all(
-        todos.map(async (puesto) => ({ puesto, hilo: await hiloDelViaje(puesto.reservaId, YO) })),
+        todos.map(async (puesto) => ({ puesto, hilo: await hiloDelViaje(puesto.reservaId, yo) })),
       );
       setFilas(hilos.filter((f) => f.hilo.mensajes.length > 0));
     })();
-  }, []);
+  }, [yo]);
 
   const sinLeer = filas.filter((f) => !f.hilo.mensajes[f.hilo.mensajes.length - 1]?.mio).length;
 
@@ -82,7 +86,12 @@ export default function Conversaciones() {
                 key={puesto.reservaId}
                 accessibilityRole="button"
                 accessibilityLabel={`Conversación con ${hilo.otro.nombre}`}
-                onPress={() => router.push('/(pasajero)/chat')}
+                onPress={() =>
+                  router.push({
+                    pathname: '/(pasajero)/chat',
+                    params: { reserva: puesto.reservaId },
+                  })
+                }
                 style={[estilos.fila, i < filas.length - 1 && estilos.filaConRaya]}
               >
                 <Avatar nombre={hilo.otro.nombre} tono="rojo" />
@@ -121,21 +130,12 @@ export default function Conversaciones() {
       </ScrollView>
 
       <View style={estilos.pie}>
-        <BarraDePestanas
-          valor="Mensajes"
-          pestanas={[
-            { valor: 'Buscar', etiqueta: 'Buscar', icono: (a) => <Lupa tinta={tinta(a)} /> },
-            { valor: 'Mis viajes', etiqueta: 'Mis viajes', icono: (a) => <Carro tamano={21} tinta={tinta(a)} /> },
-            { valor: 'Mensajes', etiqueta: 'Mensajes', icono: (a) => <Chat tinta={tinta(a)} /> },
-            { valor: 'Perfil', etiqueta: 'Perfil', icono: (a) => <Persona tinta={tinta(a)} /> },
-          ]}
-        />
+        <Pestanas valor="Mensajes" />
       </View>
     </View>
   );
 }
 
-const tinta = (activo: boolean) => (activo ? color.rojo600 : color.ink700);
 
 /** La hora si es de hoy, el día si no: en una lista nadie quiere la fecha entera. */
 function cuandoCorto(cuandoISO: string): string {

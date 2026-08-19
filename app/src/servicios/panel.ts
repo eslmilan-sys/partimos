@@ -83,6 +83,8 @@ function comoPublicado(v: ViajeFila): ViajePublicado {
 
 export type PuestoMio = {
   reservaId: string;
+  /** De qué viaje es el puesto: lo que `5b` necesita para abrir `5a`. */
+  viajeId: string;
   destino: string;
   cuando: string;
   conductor: string;
@@ -127,6 +129,7 @@ function comoPuesto(r: (typeof fuente.reservas)[number]): PuestoMio | null {
 
   return {
     reservaId: r.id,
+    viajeId: r.trip_id,
     destino: (viaje.destination_label ?? '').split(' · ')[0],
     cuando: viaje.departure_at,
     conductor: nombre,

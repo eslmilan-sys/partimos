@@ -16,13 +16,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { type CanalDePago, seCobraEnLaApp } from '@/dominio/tarifas';
 import { cuenta } from '@/servicios/ajustes';
 import { type MetodoDePago, desglosar, metodosDePago } from '@/servicios/pagos';
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe, Pastilla } from '@/ui/controles';
@@ -31,22 +32,26 @@ import { Atras, Mas } from '@/ui/iconos';
 import { familia, color, espacio, radio, sombra } from '@/ui/tokens';
 
 /** Daniela, la pasajera del recorrido. Mientras no haya sesión, va aquí. */
-const PASAJERA = '99999999-9999-4999-8999-999999999999';
+const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 /** Albrook → Chitré: el aporte de 6 $ sobre el que se calculan las tarifas. */
-const VIAJE = '55555555-5555-4555-8555-555555555555';
+const VIAJE_DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 export default function Metodos() {
   const router = useRouter();
+  const { viaje: viajeParam } = useLocalSearchParams<{ viaje?: string }>();
+  const viajeId = viajeParam ?? VIAJE_DEL_RECORRIDO;
+  const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
   const [metodos, setMetodos] = useState<MetodoDePago[]>([]);
   const [viaje, setViaje] = useState<ReservaPreparada | null>(null);
   const [canal, setCanal] = useState<CanalDePago | null>(null);
 
   useEffect(() => {
+    if (!yo) return;
     (async () => {
       const [lista, preparado, quien] = await Promise.all([
-        metodosDePago(VIAJE),
-        prepararReserva(VIAJE),
-        cuenta(PASAJERA),
+        metodosDePago(viajeId),
+        prepararReserva(viajeId),
+        cuenta(yo),
       ]);
       setMetodos(lista);
       setViaje(preparado);
@@ -54,7 +59,7 @@ export default function Metodos() {
       // que devuelva la lista.
       setCanal(lista.find((m) => m.nombre === quien.metodo)?.canal ?? lista[0]?.canal ?? null);
     })();
-  }, []);
+  }, [yo, viajeId]);
 
   const desglose = useMemo(
     () => (viaje && canal ? desglosar(viaje.aporteCentavos, canal, viaje.conductor) : null),
@@ -133,6 +138,9 @@ export default function Metodos() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Añadir método de pago"
+          onPress={() =>
+            router.push({ pathname: '/(pasajero)/metodo-nuevo', params: { viaje: viajeId } })
+          }
           style={estilos.anadir}
         >
           <Mas tamano={18} tinta={color.ink900} />

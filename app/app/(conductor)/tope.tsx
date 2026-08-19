@@ -25,6 +25,7 @@ import {
   prepararPublicacion,
   repartoDelCosto,
 } from '@/servicios/viajes';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Amanecer, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
@@ -32,8 +33,8 @@ import { formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
 import { color, espacio, familia, radio, sombra } from '@/ui/tokens';
 
-/** Mientras no haya sesión, el conductor del recorrido del diseño. */
-const CONDUCTOR = '11111111-1111-4111-8111-111111111111';
+/** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 const RUTA = 'panama-chitre';
 const SALIDA = '2026-11-14T14:50:00-05:00';
 
@@ -49,11 +50,13 @@ export default function Tope() {
   // `5c` llega con los puestos que el conductor haya movido. Sin ellos, la
   // ocupación de referencia con la que el dominio calcula el tope de la ruta.
   const { puestos: puestosPedidos } = useLocalSearchParams<{ puestos?: string }>();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
 
   useEffect(() => {
-    prepararPublicacion(CONDUCTOR, RUTA, SALIDA).then(setDatos);
-  }, []);
+    if (!yo) return;
+    prepararPublicacion(yo, RUTA, SALIDA).then(setDatos);
+  }, [yo]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 

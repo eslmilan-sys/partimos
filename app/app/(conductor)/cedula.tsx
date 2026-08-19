@@ -27,6 +27,7 @@ import {
   estadoDeCedula,
   pedirVerificacion,
 } from '@/servicios/seguridad';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
@@ -36,10 +37,10 @@ import { familia, color, espacio, radio, sombra } from '@/ui/tokens';
 
 /**
  * Quien se está haciendo conductor. Andrés la tiene verificada desde hace
- * meses; esta pantalla es la de quien acaba de mandarla. Mientras no haya
- * sesión, ésta es la convención.
+ * meses; esta pantalla es la de quien acaba de mandarla. Sin sesión que
+ * preguntar —solo en simulado—, ésta es la convención.
  */
-const PERFIL = '22222222-2222-4222-8222-222222222222';
+const DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 
 /** `--arena-700` del traspaso: el ámbar de lo que está en curso. `@/ui/tokens`
  *  trae la arena clara pero no su tinta, y no se tocan los tokens desde aquí. */
@@ -63,16 +64,20 @@ const TINTA_DEL_ESTADO: Record<EstadoDeCedula['estado'], { fondo: string; tinta:
 
 export default function Cedula() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<EstadoDeCedula | null>(null);
 
-  const mirar = useCallback(() => estadoDeCedula(PERFIL).then(setDatos), []);
+  const mirar = useCallback(() => {
+    if (yo) estadoDeCedula(yo).then(setDatos);
+  }, [yo]);
 
   useEffect(() => {
+    if (!yo) return;
     // Llegar aquí es haber mandado la cédula al proveedor: se abre la
     // verificación —si ya existe, devuelve la que hay— y de ahí en adelante
     // esta pantalla sólo lee.
-    pedirVerificacion(PERFIL).then(mirar);
-  }, [mirar]);
+    pedirVerificacion(yo).then(mirar);
+  }, [yo, mirar]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 

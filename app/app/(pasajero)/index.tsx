@@ -12,18 +12,20 @@ import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from '
 
 import { useRouter } from 'expo-router';
 
+import { type Destino, aDondeSeVaDesde, ciudadesDeSalida } from '@/servicios/lugares';
 import {
   type GanchoDeConductor,
   type RutaPopular,
   ganchoDeConductor,
   rutasPopulares,
 } from '@/servicios/viajes';
+import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
-import { BarraDePestanas } from '@/ui/BarraDePestanas';
+import { Pestanas } from '@/ui/Pestanas';
 import { Amanecer, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { Carro, Chat, Lupa, Marca, Mas, Persona } from '@/ui/iconos';
+import { Marca } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -37,15 +39,47 @@ const FOTOS: Record<string, number> = {
 const LETRAS = ['cero', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis'];
 const enLetra = (n: number) => LETRAS[n] ?? String(n);
 
+/** Las ciudades que abren corredor. Es lo que enseña «Desde» en blanco. */
+const DESDE_QUE_SE_SALE = ciudadesDeSalida();
+
+/** De dónde se sale por defecto: es de donde sale casi todo el mundo. */
+const DESDE_POR_DEFECTO: Destino = {
+  nombre: 'Ciudad de Panamá',
+  contexto: 'Panamá',
+  ciudad: 'panama',
+  lat: 8.9824,
+  lng: -79.5199,
+};
+
 export default function Inicio() {
   const router = useRouter();
   const [rutas, setRutas] = useState<RutaPopular[]>([]);
   const [gancho, setGancho] = useState<GanchoDeConductor | null>(null);
+  const [desde, setDesde] = useState<Destino>(DESDE_POR_DEFECTO);
+  const [hacia, setHacia] = useState<Destino | null>(null);
+  /** Cuál de los dos campos tiene la hoja abierta, o ninguno. */
+  const [buscando, setBuscando] = useState<'desde' | 'hacia' | null>(null);
 
   useEffect(() => {
     rutasPopulares().then(setRutas);
     ganchoDeConductor().then(setGancho);
   }, []);
+
+  // Con el campo en blanco, la hoja de «Hacia» enseña a dónde hay corredor
+  // desde donde estás: una lista vacía no dice a dónde llevamos.
+  const sugerencias =
+    buscando === 'hacia' ? aDondeSeVaDesde(desde.ciudad ?? 'panama') : DESDE_QUE_SE_SALE;
+
+  const buscar = () => {
+    router.push({
+      pathname: '/(pasajero)/resultados',
+      params: {
+        origen: desde.ciudad ?? 'panama',
+        destino: hacia?.ciudad ?? '',
+        etiquetaDestino: hacia?.nombre ?? '',
+      },
+    });
+  };
 
   return (
     <View style={estilos.pantalla}>
@@ -74,23 +108,38 @@ export default function Inicio() {
         </View>
 
         <View style={estilos.hoja}>
-          <View style={estilos.filaLugar}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Desde ${desde.nombre}. Cambiar`}
+            onPress={() => setBuscando('desde')}
+            style={estilos.filaLugar}
+          >
             <View style={estilos.puntoLleno} />
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={estilos.etiquetaLugar}>Desde</Text>
-              <Text style={estilos.valorLugar}>Ciudad de Panamá</Text>
+              <Text style={estilos.valorLugar} numberOfLines={1}>
+                {desde.nombre}
+              </Text>
             </View>
-          </View>
+          </Pressable>
 
-          <View style={[estilos.filaLugar, estilos.filaConLinea]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={hacia ? `Hacia ${hacia.nombre}. Cambiar` : 'Elegir a dónde vas'}
+            onPress={() => setBuscando('hacia')}
+            style={[estilos.filaLugar, estilos.filaConLinea]}
+          >
             <View style={estilos.puntoVacio} />
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={estilos.etiquetaLugar}>Hacia</Text>
-              <Text style={[estilos.valorLugar, { color: color.ink400 }]}>
-                Chitré, David, Santiago…
+              <Text
+                style={[estilos.valorLugar, !hacia && { color: color.ink400 }]}
+                numberOfLines={1}
+              >
+                {hacia?.nombre ?? 'Chitré, David, Santiago…'}
               </Text>
             </View>
-          </View>
+          </Pressable>
 
           <View style={estilos.filaCajas}>
             <View style={estilos.caja}>
@@ -104,7 +153,7 @@ export default function Inicio() {
           </View>
 
           <View style={{ marginTop: 14 }}>
-            <Boton tono="azul" alPulsar={() => router.push('/(pasajero)/resultados')}>
+            <Boton tono="azul" alPulsar={buscar}>
               Buscar viajes
             </Boton>
           </View>
@@ -121,7 +170,12 @@ export default function Inicio() {
               key={r.slug}
               accessibilityRole="button"
               accessibilityLabel={`Panamá a ${r.destino}`}
-              onPress={() => router.push('/(pasajero)/resultados')}
+              onPress={() =>
+                router.push({
+                  pathname: '/(pasajero)/resultados',
+                  params: { origen: 'panama', destino: r.slug, etiquetaDestino: r.destino },
+                })
+              }
               style={[estilos.filaRuta, i > 0 && estilos.filaRutaConLinea]}
             >
               <View style={estilos.miniatura}>
@@ -168,26 +222,24 @@ export default function Inicio() {
       </ScrollView>
 
       <View style={estilos.pie}>
-        <BarraDePestanas
-          valor="Buscar"
-          pestanas={[
-            { valor: 'Buscar', etiqueta: 'Buscar', icono: (a) => <Lupa tinta={tinta(a)} /> },
-            { valor: 'Mis viajes', etiqueta: 'Mis viajes', icono: (a) => <Carro tamano={21} tinta={tinta(a)} /> },
-            { valor: 'Mensajes', etiqueta: 'Mensajes', icono: (a) => <Chat tinta={tinta(a)} /> },
-            { valor: 'Perfil', etiqueta: 'Perfil', icono: (a) => <Persona tinta={tinta(a)} /> },
-          ]}
-          fab={{
-            etiqueta: 'Publicar un viaje',
-            icono: <Mas tamano={20} tinta="#fff" />,
-            alPulsar: () => router.push('/(conductor)/publicar'),
-          }}
-        />
+        <Pestanas valor="Buscar" conPublicar />
       </View>
+
+      <BuscadorDeLugar
+        abierto={buscando !== null}
+        titulo={buscando === 'desde' ? 'Desde dónde sales' : 'A dónde vas'}
+        sugerencias={sugerencias}
+        alElegir={(d) => {
+          if (buscando === 'desde') setDesde(d);
+          else setHacia(d);
+          setBuscando(null);
+        }}
+        alCerrar={() => setBuscando(null)}
+      />
     </View>
   );
 }
 
-const tinta = (activo: boolean) => (activo ? color.rojo600 : color.ink700);
 
 const estilos = StyleSheet.create({
   pantalla: {

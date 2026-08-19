@@ -15,6 +15,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { useRouter } from 'expo-router';
 
 import { type Aportes, type Tramo, aportes } from '@/servicios/aportes';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo, Brillo } from '@/ui/CampoRojo';
 import { Epigrafe, Pastilla } from '@/ui/controles';
@@ -22,16 +23,19 @@ import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-const CONDUCTOR = '11111111-1111-4111-8111-111111111111';
+/** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 export default function AportesPantalla() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [tramo, setTramo] = useState<Tramo>('mes');
   const [datos, setDatos] = useState<Aportes | null>(null);
 
   useEffect(() => {
-    aportes(CONDUCTOR, tramo).then(setDatos);
-  }, [tramo]);
+    if (!yo) return;
+    aportes(yo, tramo).then(setDatos);
+  }, [yo, tramo]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 
@@ -113,7 +117,11 @@ export default function AportesPantalla() {
             <Text style={estilos.donde}>{datos.donde}</Text>
             <Text style={estilos.cadaCuando}>{datos.cadaCuando}</Text>
           </View>
-          <Pressable accessibilityRole="button">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Cambiar por dónde te llega"
+            onPress={() => router.push('/(pasajero)/metodos')}
+          >
             <Text style={estilos.cambiar}>Cambiar</Text>
           </Pressable>
         </View>

@@ -282,3 +282,25 @@ export function Bateria({ tinta = '#fff' }: Props) {
     </Svg>
   );
 }
+
+/**
+ * El aviso de que algo salió mal. Un triángulo con su admiración dentro.
+ *
+ * `SISTEMA.md`: el error **no puede ser solo color**, porque el rojo es lo que
+ * se pulsa. Va en `rojo-700` —más oscuro que cualquier botón— y **con este
+ * icono al lado**, que es lo que lo separa de una etiqueta cualquiera.
+ */
+export function Alerta({ tamano = 15, tinta = color.rojo700 }: Props) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 16 16" fill="none">
+      <Path
+        d="M8 2.2 14.5 13.4H1.5L8 2.2Z"
+        stroke={tinta}
+        strokeWidth={1.4}
+        strokeLinejoin="round"
+      />
+      <Path d="M8 6.4v3.1" stroke={tinta} strokeWidth={1.4} strokeLinecap="round" />
+      <Path d="M8 11.5h.01" stroke={tinta} strokeWidth={1.6} strokeLinecap="round" />
+    </Svg>
+  );
+}

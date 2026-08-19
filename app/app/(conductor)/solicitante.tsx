@@ -13,7 +13,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { type Solicitud, aceptarSolicitud, listarSolicitudes, rechazarSolicitud } from '@/servicios/solicitudes';
@@ -25,25 +25,36 @@ import { cuando } from '@/ui/fechas';
 import { Atras, Maleta, Pin } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-const VIAJE = '55555555-5555-4555-8555-555555555555';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, el del traspaso. */
+const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 const VERDE = { fondo: '#DFF1E8', tinta: '#0E5A3F' };
 
 export default function Solicitante() {
   const router = useRouter();
+  // `11a` manda el viaje y, si venías de una fila concreta, cuál. Sin la
+  // segunda, la que espera respuesta: es la que abre quien llega desde el aviso.
+  const { viaje, solicitud: solicitudParam } = useLocalSearchParams<{
+    viaje?: string;
+    solicitud?: string;
+  }>();
+  const viajeId = viaje ?? DEL_RECORRIDO;
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
   const [perfil, setPerfil] = useState<PerfilPublico | null>(null);
   const [salida, setSalida] = useState('');
 
   useEffect(() => {
-    listarSolicitudes(VIAJE).then(async (r) => {
-      const primera = r.solicitudes.find((s) => s.estado === 'pendiente') ?? r.solicitudes[0];
-      if (!primera) return;
-      setSolicitud(primera);
+    listarSolicitudes(viajeId).then(async (r) => {
+      const cual =
+        r.solicitudes.find((s) => s.id === solicitudParam) ??
+        r.solicitudes.find((s) => s.estado === 'pendiente') ??
+        r.solicitudes[0];
+      if (!cual) return;
+      setSolicitud(cual);
       setSalida(r.viaje.salida);
-      setPerfil(await perfilPublico(primera.pasajero.id));
+      setPerfil(await perfilPublico(cual.pasajero.id));
     });
-  }, []);
+  }, [viajeId, solicitudParam]);
 
   if (!solicitud || !perfil) return <View style={estilos.pantalla} />;
 

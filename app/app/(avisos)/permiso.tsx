@@ -20,7 +20,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
@@ -31,7 +31,7 @@ import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio, sombra, texto } from '@/ui/tokens';
 
 /** Mientras no haya sesión, el viaje del recorrido del diseño: Albrook → Chitré. */
-const VIAJE = '55555555-5555-4555-8555-555555555555';
+const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 /** `--radius-sheet` son 28 px en el traspaso. `radio.hoja` de los tokens quedó
  *  en 26 y los tokens no se tocan desde una pantalla. */
@@ -97,17 +97,19 @@ function Aspa() {
 
 export default function PermisoDeAvisos() {
   const router = useRouter();
+  const { viaje } = useLocalSearchParams<{ viaje?: string }>();
+  const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<ReservaPreparada | null>(null);
 
   useEffect(() => {
-    prepararReserva(VIAJE).then(setDatos);
-  }, []);
+    prepararReserva(viajeId).then(setDatos);
+  }, [viajeId]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 
   // Se conteste que sí o que no, de aquí se sigue a pedir el puesto: el
   // permiso no bloquea nada.
-  const seguir = () => router.replace('/(pasajero)/reservar');
+  const seguir = () => router.replace({ pathname: '/(pasajero)/reservar', params: { viaje: viajeId } });
 
   const razones = [
     {

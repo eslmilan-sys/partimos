@@ -24,7 +24,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import { type ComoSePaga, comoSePaga } from '@/servicios/ayuda';
@@ -36,7 +36,7 @@ import { color, espacio, familia, radio, sombra, texto } from '@/ui/tokens';
 
 // El Albrook → Chitré, el viaje de referencia del traspaso: de él salen el
 // aporte y el tope que ilustran la explicación mientras no haya sesión.
-const VIAJE = '55555555-5555-4555-8555-555555555555';
+const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 /**
  * Un rótulo de dos líneas fijas. El salto va en su propio `Text`, igual que el
@@ -61,11 +61,13 @@ const DURO = ' ';
 
 export default function Pagos() {
   const router = useRouter();
+  const { viaje } = useLocalSearchParams<{ viaje?: string }>();
+  const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<ComoSePaga | null>(null);
 
   useEffect(() => {
-    comoSePaga(VIAJE).then(setDatos);
-  }, []);
+    comoSePaga(viajeId).then(setDatos);
+  }, [viajeId]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 

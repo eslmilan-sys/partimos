@@ -25,11 +25,11 @@ import {
   resumenDeRuta,
 } from '@/servicios/viajes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
-import { BarraDePestanas } from '@/ui/BarraDePestanas';
+import { Pestanas } from '@/ui/Pestanas';
 import { Insignia, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaAbrev, diaCorto, hora } from '@/ui/fechas';
-import { Atras, Carro, Chat, Estrella, Lupa, Maleta, Persona } from '@/ui/iconos';
+import { Atras, Estrella, Maleta } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -108,13 +108,13 @@ export default function Destino() {
         </View>
 
         <View style={estilos.lista}>
-          {primero ? <Detallada viaje={primero} alPulsar={() => router.push('/(pasajero)/viaje')} /> : null}
+          {primero ? <Detallada viaje={primero} alPulsar={() => router.push({ pathname: '/(pasajero)/viaje', params: { viaje: primero.id } })} /> : null}
 
           {resto.map((v) => (
             <Pressable
               key={v.id}
               accessibilityRole="button"
-              onPress={() => router.push('/(pasajero)/viaje')}
+              onPress={() => router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })}
               style={estilos.compacta}
             >
               <Text style={estilos.compactaCuando}>
@@ -135,15 +135,7 @@ export default function Destino() {
       </ScrollView>
 
       <View style={estilos.pie}>
-        <BarraDePestanas
-          valor="Buscar"
-          pestanas={[
-            { valor: 'Buscar', etiqueta: 'Buscar', icono: (a) => <Lupa tinta={tinta(a)} /> },
-            { valor: 'Mis viajes', etiqueta: 'Mis viajes', icono: (a) => <Carro tamano={21} tinta={tinta(a)} /> },
-            { valor: 'Mensajes', etiqueta: 'Mensajes', icono: (a) => <Chat tinta={tinta(a)} /> },
-            { valor: 'Perfil', etiqueta: 'Perfil', icono: (a) => <Persona tinta={tinta(a)} /> },
-          ]}
-        />
+        <Pestanas valor="Buscar" />
       </View>
     </View>
   );
