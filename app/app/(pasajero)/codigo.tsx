@@ -8,6 +8,8 @@
 import { useEffect, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useLocalSearchParams } from 'expo-router';
+
 import { type CodigoDeAbordaje, codigoDeAbordaje } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -17,14 +19,17 @@ import { hora, mas } from '@/ui/fechas';
 import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
-const RESERVA = '77777777-7777-4777-8777-777777777710';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
+const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777710';
 
 export default function Codigo() {
+  const { reserva } = useLocalSearchParams<{ reserva?: string }>();
+  const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<CodigoDeAbordaje | null>(null);
 
   useEffect(() => {
-    codigoDeAbordaje(RESERVA).then(setDatos);
-  }, []);
+    codigoDeAbordaje(reservaId).then(setDatos);
+  }, [reservaId]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 

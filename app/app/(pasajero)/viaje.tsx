@@ -25,12 +25,12 @@ import { diaLargo, hora } from '@/ui/fechas';
 import { Atras, Carro, Compartir, Escudo, Estrella } from '@/ui/iconos';
 import { familia, color, espacio, radio } from '@/ui/tokens';
 
-const POR_DEFECTO = '55555555-5555-4555-8555-555555555555';
+const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 export default function DetalleDelViaje() {
   const router = useRouter();
   const { viaje: viajeParam } = useLocalSearchParams<{ viaje?: string }>();
-  const viajeId = viajeParam ?? POR_DEFECTO;
+  const viajeId = viajeParam ?? DEL_RECORRIDO;
 
   const [viaje, setViaje] = useState<ViajeFila | null>(null);
   const [paradas, setParadas] = useState<TripStop[]>([]);

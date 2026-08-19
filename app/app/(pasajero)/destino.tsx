@@ -108,13 +108,13 @@ export default function Destino() {
         </View>
 
         <View style={estilos.lista}>
-          {primero ? <Detallada viaje={primero} alPulsar={() => router.push('/(pasajero)/viaje')} /> : null}
+          {primero ? <Detallada viaje={primero} alPulsar={() => router.push({ pathname: '/(pasajero)/viaje', params: { viaje: primero.id } })} /> : null}
 
           {resto.map((v) => (
             <Pressable
               key={v.id}
               accessibilityRole="button"
-              onPress={() => router.push('/(pasajero)/viaje')}
+              onPress={() => router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })}
               style={estilos.compacta}
             >
               <Text style={estilos.compactaCuando}>

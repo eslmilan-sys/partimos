@@ -17,7 +17,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
 
@@ -35,7 +35,7 @@ import { TRACK_MICRO, familia, color, espacio, radio, sombra } from '@/ui/tokens
  * El viaje de referencia del traspaso, Albrook → Chitré. La tarifa no se
  * enseña en abstracto: se enseña sobre lo que cuesta un viaje real.
  */
-const VIAJE_DE_REFERENCIA = '55555555-5555-4555-8555-555555555555';
+const VIAJE_DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 /** El efectivo no se guarda: no pasa por la app, se paga en la mano al subir. */
 type Guardable = Exclude<CanalDePago, 'external'>;
@@ -64,15 +64,17 @@ const FORMULARIO: Record<
 
 export default function MetodoNuevo() {
   const router = useRouter();
+  const { viaje } = useLocalSearchParams<{ viaje?: string }>();
+  const viajeId = viaje ?? VIAJE_DEL_RECORRIDO;
   const [metodos, setMetodos] = useState<MetodoDePago[]>([]);
   const [datos, setDatos] = useState<ReservaPreparada | null>(null);
   const [canal, setCanal] = useState<Guardable>('yappy_app');
   const [numero, setNumero] = useState('');
 
   useEffect(() => {
-    metodosDePago(VIAJE_DE_REFERENCIA).then(setMetodos);
-    prepararReserva(VIAJE_DE_REFERENCIA).then(setDatos);
-  }, []);
+    metodosDePago(viajeId).then(setMetodos);
+    prepararReserva(viajeId).then(setDatos);
+  }, [viajeId]);
 
   const pestanas = useMemo(
     () => metodos.flatMap((m) => (esGuardable(m.canal) ? [{ canal: m.canal, nombre: m.nombre }] : [])),

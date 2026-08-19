@@ -29,7 +29,7 @@ import {
   View,
 } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
 
 import {
@@ -40,6 +40,7 @@ import {
   datosParaLlamar,
   reportar,
 } from '@/servicios/seguridad';
+import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
@@ -49,8 +50,10 @@ import { color, espacio, familia, interlinea, radio, sombra, texto } from '@/ui/
 
 // Mientras no haya sesión: la pasajera del recorrido del diseño y el puesto que
 // tiene en el Albrook → Chitré. De ese puesto sale a quién se reporta.
-const PASAJERA = '99999999-9999-4999-8999-999999999999';
-const RESERVA = '77777777-7777-4777-8777-777777777700';
+/** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
+const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
+const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777700';
 
 /**
  * React Native Web deja `white-space: pre-wrap` en todo `Text`, y eso conserva
@@ -76,14 +79,17 @@ function Telefono({ tamano = 20, tinta = color.blanco }: { tamano?: number; tint
 
 export default function Reportar() {
   const router = useRouter();
+  const { reserva } = useLocalSearchParams<{ reserva?: string }>();
+  const reservaId = reserva ?? DEL_RECORRIDO;
+  const yo = useMiId(YO_DEL_RECORRIDO);
   const [datos, setDatos] = useState<DatosParaLlamar | null>(null);
   const [motivo, setMotivo] = useState(MOTIVOS_DE_REPORTE[0].clave);
   const [bloquear, setBloquear] = useState(true);
   const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
-    datosParaLlamar(RESERVA).then(setDatos);
-  }, []);
+    datosParaLlamar(reservaId).then(setDatos);
+  }, [reservaId]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 
@@ -96,7 +102,8 @@ export default function Reportar() {
 
   const enviar = async () => {
     setEnviando(true);
-    await reportar(RESERVA, motivo, PASAJERA, bloquear);
+    if (!yo) return;
+    await reportar(reservaId, motivo, yo, bloquear);
     router.replace('/(pasajero)');
   };
 

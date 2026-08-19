@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import { type MisViajes, type PuestoMio, misViajes } from '@/servicios/panel';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Epigrafe } from '@/ui/controles';
@@ -23,19 +24,21 @@ import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaAbrev, hora } from '@/ui/fechas';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-/** Mientras no haya sesión, la pasajera del recorrido del diseño. */
-const PASAJERA = '99999999-9999-4999-8999-999999999999';
+/** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
+const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 type Pestana = 'proximos' | 'pasados';
 
 export default function MisViajesPantalla() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<MisViajes | null>(null);
   const [pestana, setPestana] = useState<Pestana>('proximos');
 
   useEffect(() => {
-    misViajes(PASAJERA).then(setDatos);
-  }, []);
+    if (!yo) return;
+    misViajes(yo).then(setDatos);
+  }, [yo]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 
@@ -65,7 +68,12 @@ export default function MisViajesPantalla() {
         contentContainerStyle={estilos.cuerpo}
         showsVerticalScrollIndicator={false}
       >
-        {hoy ? <Hoy puesto={hoy} alVerPunto={() => router.push('/(pasajero)/codigo')} /> : null}
+        {hoy ? <Hoy
+            puesto={hoy}
+            alVerPunto={() =>
+              router.push({ pathname: '/(pasajero)/codigo', params: { reserva: hoy.reservaId } })
+            }
+          /> : null}
 
         <View style={estilos.selector}>
           {(['proximos', 'pasados'] as const).map((p) => (
@@ -89,7 +97,9 @@ export default function MisViajesPantalla() {
               key={p.reservaId}
               accessibilityRole="button"
               accessibilityLabel={`${p.destino}, ${diaAbrev(p.cuando)} ${hora(p.cuando)}`}
-              onPress={() => router.push('/(pasajero)/viaje')}
+              onPress={() =>
+                router.push({ pathname: '/(pasajero)/viaje', params: { viaje: p.viajeId } })
+              }
               style={[estilos.fila, i < lista.length - 1 && estilos.filaConRaya]}
             >
               <Avatar nombre={p.conductor} tamano={36} />

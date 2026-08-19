@@ -19,6 +19,7 @@ import { useRouter } from 'expo-router';
 import { aporteCalculado } from '@/dominio/aporte';
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { type PublicacionPreparada, prepararPublicacion } from '@/servicios/viajes';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Interruptor, Pastilla, Stepper } from '@/ui/controles';
@@ -27,10 +28,12 @@ import { hora } from '@/ui/fechas';
 import { Maleta } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-const CONDUCTOR = '11111111-1111-4111-8111-111111111111';
+/** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 export default function Puestos() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
   const [puestos, setPuestos] = useState(3);
   const [maletas, setMaletas] = useState(true);
@@ -38,11 +41,12 @@ export default function Puestos() {
   const [aporteElegido, setAporte] = useState<number | null>(null);
 
   useEffect(() => {
-    prepararPublicacion(CONDUCTOR, 'panama-chitre', new Date().toISOString()).then((p) => {
+    if (!yo) return;
+    prepararPublicacion(yo, 'panama-chitre', new Date().toISOString()).then((p) => {
       setDatos(p);
       setPuestos(Math.min(3, p.puestosMaximos));
     });
-  }, []);
+  }, [yo]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 

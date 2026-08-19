@@ -81,7 +81,7 @@ export default function YaMapa() {
             key={v.id}
             accessibilityRole="button"
             accessibilityLabel={`${faltan(v.departure_at!)}, ${formatearDineroRedondo(Number(v.price_cents ?? 0))}`}
-            onPress={() => router.push('/(pasajero)/viaje')}
+            onPress={() => router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })}
             style={[estilos.chincheta, SITIOS[i], i === 0 && estilos.chinchetaViva]}
           >
             <Text style={[estilos.chinchetaTexto, i === 0 && estilos.chinchetaTextoVivo]}>
@@ -141,7 +141,7 @@ export default function YaMapa() {
             </View>
 
             <View style={{ marginTop: 18 }}>
-              <Boton alPulsar={() => router.push('/(pasajero)/reservar')}>
+              <Boton alPulsar={() => router.push({ pathname: '/(pasajero)/reservar', params: { viaje: primero.id } })}>
                 {`Pedir puesto · ${formatearDineroRedondo(Number(primero.price_cents ?? 0))}`}
               </Boton>
             </View>
@@ -151,7 +151,7 @@ export default function YaMapa() {
                 <Pressable
                   key={v.id}
                   accessibilityRole="button"
-                  onPress={() => router.push('/(pasajero)/viaje')}
+                  onPress={() => router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })}
                   style={estilos.otro}
                 >
                   <Text style={estilos.otroCuando}>{faltan(v.departure_at!)}</Text>

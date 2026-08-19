@@ -26,6 +26,7 @@ import {
   previsualizarTodos,
   type Previsualizacion,
 } from '@/servicios/cancelaciones';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
@@ -35,8 +36,10 @@ import { Atras } from '@/ui/iconos';
 import { familia, color, espacio, interlinea, radio, sombra, texto } from '@/ui/tokens';
 
 /** La reserva de Daniela, la pasajera, y ella misma. Mientras no haya sesión. */
-const RESERVA = '77777777-7777-4777-8777-777777777700';
-const PASAJERA = '99999999-9999-4999-8999-999999999999';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
+const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777700';
+/** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
+const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 /**
  * El traspaso pregunta en pasado. `14a` dice «Ya no puedo ir» porque ahí todavía
@@ -55,7 +58,9 @@ const POR_DEFECTO: MotivoDeReembolso = 'conductor';
 
 export default function Reembolso() {
   const router = useRouter();
-  const parametros = useLocalSearchParams<{ motivo?: string }>();
+  const parametros = useLocalSearchParams<{ motivo?: string; reserva?: string }>();
+  const reservaId = parametros.reserva ?? DEL_RECORRIDO;
+  const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
 
   const [viaje, setViaje] = useState<ViajeDeAyuda | null>(null);
   const [referencia, setReferencia] = useState('');
@@ -67,12 +72,13 @@ export default function Reembolso() {
   );
 
   useEffect(() => {
-    viajeDeAyuda(RESERVA).then(setViaje);
-    comprobante(RESERVA).then((c) => setReferencia(c.referencia));
-    previsualizarTodos(RESERVA).then(setPrevias);
+    viajeDeAyuda(reservaId).then(setViaje);
+    comprobante(reservaId).then((c) => setReferencia(c.referencia));
+    previsualizarTodos(reservaId).then(setPrevias);
     // Dónde cae el dinero es el método de pago de la cuenta: la fila que lleva a
     // cambiarlo es la misma que enseña cuál es.
-    ajustes(PASAJERA).then((grupos) => {
+    if (!yo) return;
+    ajustes(yo).then((grupos) => {
       const fila = grupos.flatMap((g) => g.filas).find((f) => f.ruta === '/(pasajero)/metodos');
       setADonde(fila?.valor ?? '');
     });
@@ -83,7 +89,8 @@ export default function Reembolso() {
 
   const pedir = async () => {
     setPidiendo(true);
-    await cancelar(RESERVA, motivo, PASAJERA);
+    if (!yo) return;
+    await cancelar(reservaId, motivo, yo);
     // `15c` — por dónde va el reembolso — todavía no está en el árbol de rutas.
     // Mientras no exista, el reembolso queda pedido y se vuelve por donde se vino.
     router.back();
@@ -181,7 +188,9 @@ export default function Reembolso() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Cambiar a dónde vuelve el dinero"
-              onPress={() => router.push('/(pasajero)/pagar')}
+              onPress={() =>
+                router.push({ pathname: '/(pasajero)/pagar', params: { viaje: viaje.viajeId } })
+              }
             >
               <Text style={estilos.cambiar}>Cambiar</Text>
             </Pressable>

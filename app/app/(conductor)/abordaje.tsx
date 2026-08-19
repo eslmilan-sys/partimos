@@ -9,6 +9,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useLocalSearchParams } from 'expo-router';
+
 import { type ListaDeAbordaje, listaDeAbordaje, marcarNoShow, verificarCodigo } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -18,7 +20,8 @@ import { hora, mas } from '@/ui/fechas';
 import { Visto } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
-const VIAJE = '55555555-5555-4555-8555-555555555557';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, el del traspaso. */
+const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555557';
 const FILAS = [
   ['1', '2', '3'],
   ['4', '5', '6'],
@@ -27,13 +30,15 @@ const FILAS = [
 ] as const;
 
 export default function Abordaje() {
+  const { viaje } = useLocalSearchParams<{ viaje?: string }>();
+  const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<ListaDeAbordaje | null>(null);
   const [tecleado, setTecleado] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const recargar = useCallback(async () => {
-    setDatos(await listaDeAbordaje(VIAJE));
-  }, []);
+    setDatos(await listaDeAbordaje(viajeId));
+  }, [viajeId]);
 
   useEffect(() => {
     recargar();
@@ -49,7 +54,7 @@ export default function Abordaje() {
   };
 
   const confirmar = async () => {
-    const resultado = await verificarCodigo(VIAJE, tecleado);
+    const resultado = await verificarCodigo(viajeId, tecleado);
     if (resultado.ok) {
       setTecleado('');
       await recargar();

@@ -9,6 +9,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { useLocalSearchParams } from 'expo-router';
+
+import { useMiIdOEntrar } from '@/servicios/sesion';
+
 import { type HiloDelViaje, enviarMensaje, hiloDelViaje } from '@/servicios/mensajes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -18,17 +22,23 @@ import { cuando } from '@/ui/fechas';
 import { Atras, Avion, Mas } from '@/ui/iconos';
 import { familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-const RESERVA = '77777777-7777-4777-8777-777777777700';
-const YO = '99999999-9999-4999-8999-999999999999'; // Daniela, mientras no haya sesión
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
+const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777700';
+/** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
+const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 export default function Chat() {
+  const { reserva } = useLocalSearchParams<{ reserva?: string }>();
+  const reservaId = reserva ?? DEL_RECORRIDO;
+  const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
   const [hilo, setHilo] = useState<HiloDelViaje | null>(null);
   const [texto, setTexto] = useState('');
   const lista = useRef<ScrollView>(null);
 
   const recargar = useCallback(async () => {
-    setHilo(await hiloDelViaje(RESERVA, YO));
-  }, []);
+    if (!yo) return;
+    setHilo(await hiloDelViaje(reservaId, yo));
+  }, [reservaId, yo]);
 
   useEffect(() => {
     recargar();
@@ -38,7 +48,8 @@ export default function Chat() {
 
   const mandar = async () => {
     if (!texto.trim()) return;
-    await enviarMensaje(RESERVA, YO, texto);
+    if (!yo) return;
+    await enviarMensaje(reservaId, yo, texto);
     setTexto('');
     await recargar();
     lista.current?.scrollToEnd({ animated: true });

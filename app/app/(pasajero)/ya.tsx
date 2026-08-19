@@ -132,7 +132,7 @@ export default function Ya() {
               </View>
 
               <View style={{ marginTop: 18 }}>
-                <Boton alPulsar={() => router.push('/(pasajero)/reservar')}>
+                <Boton alPulsar={() => router.push({ pathname: '/(pasajero)/reservar', params: { viaje: primero.id } })}>
                   {`Pedir puesto · ${formatearDineroRedondo(Number(primero.price_cents ?? 0))}`}
                 </Boton>
               </View>
@@ -156,7 +156,7 @@ export default function Ya() {
             <Pressable
               key={v.id}
               accessibilityRole="button"
-              onPress={() => router.push('/(pasajero)/viaje')}
+              onPress={() => router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })}
               style={estilos.fila}
             >
               <Text style={estilos.filaCuando}>{faltan(v.departure_at!)}</Text>

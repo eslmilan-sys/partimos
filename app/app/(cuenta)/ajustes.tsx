@@ -25,15 +25,17 @@ import Svg, { Path } from 'react-native-svg';
 import { type Href, useRouter } from 'expo-router';
 
 import { type Cuenta, type GrupoDeAjustes, ajustes, cuenta } from '@/servicios/ajustes';
+import { salir } from '@/servicios/cuenta';
 import { type EstadoDeCedula, estadoDeCedula } from '@/servicios/seguridad';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
 import { color, espacio, familia, radio, sombra, texto } from '@/ui/tokens';
 
-/** Mientras no haya sesión, el mismo perfil que abre `6a`. */
-const PERFIL = '11111111-1111-4111-8111-111111111111';
+/** Sin sesión que preguntar —solo en simulado—, el mismo perfil que abre `6a`. */
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 /** `--radius-sheet` son 28 px; `radio.hoja` se quedó en 26. Manda el traspaso. */
 const RADIO_HOJA = 28;
@@ -63,6 +65,7 @@ const RELLENO_DINERO = [10, 11, 11];
 
 export default function Ajustes() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [grupos, setGrupos] = useState<GrupoDeAjustes[] | null>(null);
   const [quien, setQuien] = useState<Cuenta | null>(null);
   const [cedula, setCedula] = useState<EstadoDeCedula | null>(null);
@@ -72,12 +75,13 @@ export default function Ajustes() {
   const [compartirLlegada, setCompartirLlegada] = useState(true);
 
   useEffect(() => {
-    Promise.all([ajustes(PERFIL), cuenta(PERFIL), estadoDeCedula(PERFIL)]).then(([g, c, v]) => {
+    if (!yo) return;
+    Promise.all([ajustes(yo), cuenta(yo), estadoDeCedula(yo)]).then(([g, c, v]) => {
       setGrupos(g);
       setQuien(c);
       setCedula(v);
     });
-  }, []);
+  }, [yo]);
 
   if (!grupos || !quien || !cedula) return <View style={estilos.pantalla} />;
 
@@ -193,7 +197,12 @@ export default function Ajustes() {
           accessibilityLabel={salida.filas[0].etiqueta}
           // Cerrar sesión deja la app como recién instalada, no en la puerta
           // de mitad de recorrido: sin sesión no hay viaje detrás que mirar.
-          onPress={() => router.replace('/(cuenta)/apertura')}
+          // Primero se cierra de verdad; navegar sin cerrarla dejaba la sesión
+          // abierta y volver atrás te devolvía dentro.
+          onPress={async () => {
+            await salir();
+            router.replace('/(cuenta)/apertura');
+          }}
           style={({ pressed }) => [estilos.cerrar, pressed && { backgroundColor: color.rojo50 }]}
         >
           <Text style={estilos.cerrarTexto}>{salida.filas[0].etiqueta}</Text>

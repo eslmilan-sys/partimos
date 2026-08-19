@@ -24,11 +24,11 @@ import { hora } from '@/ui/fechas';
 import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
-const VIAJE = '55555555-5555-4555-8555-555555555555';
+const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 export default function Pagar() {
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
-  const viajeId = viaje ?? VIAJE;
+  const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<ReservaPreparada | null>(null);
   const [metodos, setMetodos] = useState<MetodoDePago[]>([]);
   const [canal, setCanal] = useState<CanalDePago>('yappy_app');

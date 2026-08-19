@@ -15,7 +15,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import Svg, { Path, Rect } from 'react-native-svg';
 
 import { type Edicion, equipajeEnConflicto, guardarEdicion, prepararEdicion } from '@/servicios/panel';
@@ -27,30 +27,33 @@ import { cuando } from '@/ui/fechas';
 import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-const VIAJE = '55555555-5555-4555-8555-555555555555';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, el del traspaso. */
+const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 export default function Editar() {
   const router = useRouter();
+  const { viaje } = useLocalSearchParams<{ viaje?: string }>();
+  const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Edicion | null>(null);
   const [puestos, setPuestos] = useState(3);
   const [maletas, setMaletas] = useState(true);
   const [mujeres, setMujeres] = useState(false);
 
   useEffect(() => {
-    prepararEdicion(VIAJE).then((e) => {
+    prepararEdicion(viajeId).then((e) => {
       setDatos(e);
       const p = e.campos.find((c) => c.clave === 'puestos');
       setPuestos(Number(p?.valor.split(' ')[0] ?? 3));
       setMaletas(e.campos.find((c) => c.clave === 'maletas')?.valor === 'Sí');
       setMujeres(e.campos.find((c) => c.clave === 'mujeres')?.valor === 'Sí');
     });
-  }, []);
+  }, [viajeId]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 
   const cerrados = datos.campos.filter((c) => c.cerrado);
   const vendidos = datos.campos.find((c) => c.clave === 'puestos')?.valor.split('· ')[1] ?? '';
-  const conflicto = equipajeEnConflicto(VIAJE, maletas);
+  const conflicto = equipajeEnConflicto(viajeId, maletas);
 
   return (
     <View style={estilos.pantalla}>
@@ -140,7 +143,7 @@ export default function Editar() {
         <Boton
           tono="azul"
           alPulsar={async () => {
-            await guardarEdicion(VIAJE, { puestos, maletas, mujeres });
+            await guardarEdicion(viajeId, { puestos, maletas, mujeres });
             router.back();
           }}
         >

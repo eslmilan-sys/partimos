@@ -9,6 +9,8 @@
 import { useEffect, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useLocalSearchParams } from 'expo-router';
+
 import { type Llegada, resumenDeLlegada } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Amanecer, CampoRojo } from '@/ui/CampoRojo';
@@ -17,14 +19,17 @@ import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { hora } from '@/ui/fechas';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
-const RESERVA = '77777777-7777-4777-8777-777777777710';
+/** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
+const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777710';
 
 export default function LlegadaPantalla() {
+  const { reserva } = useLocalSearchParams<{ reserva?: string }>();
+  const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Llegada | null>(null);
 
   useEffect(() => {
-    resumenDeLlegada(RESERVA).then(setDatos);
-  }, []);
+    resumenDeLlegada(reservaId).then(setDatos);
+  }, [reservaId]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 

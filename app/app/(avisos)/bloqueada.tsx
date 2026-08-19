@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, useRouter } from 'expo-router';
 
 import { type Aviso, avisoDeBloqueo, bandeja, marcarLeido } from '@/servicios/avisos';
+import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { tabular } from '@/ui/dinero';
@@ -28,24 +29,29 @@ import { useReloj } from '@/ui/reloj';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 import { Vidrio } from '@/ui/Vidrio';
 
-/** Mientras no haya sesión: la pasajera del recorrido del diseño. */
-const DANIELA = '99999999-9999-4999-8999-999999999999';
+/** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
+const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 /** Los que caben en la pantalla sin empujar el reloj. */
 const CUANTOS_CABEN = 2;
 
 export default function Bloqueada() {
   const router = useRouter();
+  // La pantalla bloqueada no manda a entrar: es el teléfono antes de abrir la
+  // app. Sin sesión no hay avisos que apilar, y ésa es la verdad que enseña.
+  const yo = useMiId(DEL_RECORRIDO);
   const [pila, setPila] = useState<Aviso[]>([]);
 
   // El reloj de la pantalla bloqueada es el del teléfono: se mueve solo.
   const ahora = useReloj(20_000);
 
   useEffect(() => {
-    cargar().then(setPila);
-  }, []);
+    if (yo) cargar(yo).then(setPila);
+  }, [yo]);
 
-  const refrescar = () => cargar().then(setPila);
+  const refrescar = () => {
+    if (yo) cargar(yo).then(setPila);
+  };
 
   const abrir = (aviso: Aviso) => {
     marcarLeido(aviso.id).then(refrescar);
@@ -92,8 +98,8 @@ export default function Bloqueada() {
  * resuelve sin desbloquear— y debajo el más nuevo sin leer, que es el que la
  * bandeja devuelve como aviso de bloqueo.
  */
-async function cargar(): Promise<Aviso[]> {
-  const [ultimo, caja] = await Promise.all([avisoDeBloqueo(DANIELA), bandeja(DANIELA)]);
+async function cargar(perfilId: string): Promise<Aviso[]> {
+  const [ultimo, caja] = await Promise.all([avisoDeBloqueo(perfilId), bandeja(perfilId)]);
   const conAccion = caja.pideAccion.find((a) => !a.leido) ?? null;
   const suelto = ultimo && ultimo.id !== conAccion?.id ? ultimo : null;
   return [conAccion, suelto].filter((a): a is Aviso => a !== null).slice(0, CUANTOS_CABEN);

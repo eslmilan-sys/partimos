@@ -23,6 +23,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { type Href, useRouter } from 'expo-router';
 
 import { type Aviso, type Bandeja, bandeja, marcarLeido, marcarTodo } from '@/servicios/avisos';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { tabular } from '@/ui/dinero';
@@ -30,15 +31,16 @@ import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, color, espacio, familia, radio } from '@/ui/tokens';
 
 /** Daniela, la pasajera del simulado. Mientras no haya sesión, esta es la convención. */
-const PERFIL = '99999999-9999-4999-8999-999999999999';
+const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 export default function Avisos() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<Bandeja | null>(null);
 
   const cargar = useCallback(() => {
-    bandeja(PERFIL).then(setDatos);
-  }, []);
+    if (yo) bandeja(yo).then(setDatos);
+  }, [yo]);
 
   useEffect(cargar, [cargar]);
 
@@ -51,7 +53,8 @@ export default function Avisos() {
   };
 
   const leerTodo = async () => {
-    await marcarTodo(PERFIL);
+    if (!yo) return;
+    await marcarTodo(yo);
     cargar();
   };
 

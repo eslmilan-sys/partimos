@@ -19,7 +19,7 @@ import { tabular } from '@/ui/dinero';
 import { Atras, Estrella } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-const ANDRES = '11111111-1111-4111-8111-111111111111';
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 const TONOS = {
   verde: { fondo: '#DFF1E8', tinta: '#0E5A3F', punto: true },
@@ -32,7 +32,7 @@ export default function Perfil() {
   const [datos, setDatos] = useState<PerfilPublico | null>(null);
 
   useEffect(() => {
-    perfilPublico(perfilParam ?? ANDRES).then(setDatos);
+    perfilPublico(perfilParam ?? DEL_RECORRIDO).then(setDatos);
   }, [perfilParam]);
 
   if (!datos) return <View style={estilos.pantalla} />;

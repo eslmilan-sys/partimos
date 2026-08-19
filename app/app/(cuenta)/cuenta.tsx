@@ -18,6 +18,7 @@ import Svg, { Path } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 
 import { type Cuenta, cuenta } from '@/servicios/ajustes';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { BarraDePestanas } from '@/ui/BarraDePestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -25,8 +26,8 @@ import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { Carro, Chat, Escudo, Lupa, Persona } from '@/ui/iconos';
 import { TRACK_MICRO, color, familia, radio, sombra } from '@/ui/tokens';
 
-/** Mientras no haya sesión, el conductor del recorrido del diseño. */
-const PERFIL = '11111111-1111-4111-8111-111111111111';
+/** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 /** El verde de «verificado» es `--green-100/700` del traspaso; no está en tokens. */
 const VERDE_FONDO = '#DFF1E8';
@@ -34,17 +35,22 @@ const VERDE_TINTA = '#0E5A3F';
 
 export default function TuCuenta() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<Cuenta | null>(null);
 
   useEffect(() => {
-    cuenta(PERFIL).then(setDatos);
-  }, []);
+    if (!yo) return;
+    cuenta(yo).then(setDatos);
+  }, [yo]);
 
   if (!datos) return <View style={estilos.pantalla} />;
 
   // «Mi perfil» es la única de las cuatro que ya tiene pantalla en la app.
   const filas: { etiqueta: string; valor?: string | null; alPulsar?: () => void }[] = [
-    { etiqueta: 'Mi perfil', alPulsar: () => router.push('/(pasajero)/perfil') },
+    {
+      etiqueta: 'Mi perfil',
+      alPulsar: () => router.push({ pathname: '/(pasajero)/perfil', params: { perfil: yo } }),
+    },
     { etiqueta: 'Mi carro', valor: datos.carro },
     { etiqueta: 'Cómo se paga', valor: datos.metodo },
     { etiqueta: 'Verificación', valor: datos.cedula },
@@ -139,7 +145,9 @@ export default function TuCuenta() {
           valor="Perfil"
           alCambiar={(v) => {
             if (v === 'Buscar') router.push('/(pasajero)');
-            if (v === 'Mensajes') router.push('/(pasajero)/chat');
+            // La pestaña abre la lista de conversaciones, no una conversación suelta:
+            // desde la cuenta no hay reserva que diga con quién se habla.
+            if (v === 'Mensajes') router.push('/(pasajero)/conversaciones');
           }}
           pestanas={[
             { valor: 'Buscar', etiqueta: 'Buscar', icono: (a) => <Lupa tinta={tinta(a)} /> },

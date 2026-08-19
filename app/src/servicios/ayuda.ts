@@ -23,6 +23,8 @@ const demora = <T,>(valor: T, ms = 120): Promise<T> =>
 
 export type ViajeDeAyuda = {
   reservaId: string;
+  /** De qué viaje, para las filas que llevan a `16b` «Cómo se paga». */
+  viajeId: string;
   destino: string;
   cuando: string;
   linea: string;
@@ -40,6 +42,7 @@ export async function viajeDeAyuda(reservaId: string): Promise<ViajeDeAyuda | nu
 
   return demora({
     reservaId,
+    viajeId: reserva.trip_id,
     destino: (viaje?.destination_label ?? '').split(' · ')[0],
     cuando: viaje?.departure_at ?? '',
     linea: `${aporte % 100 === 0 ? aporte / 100 : (aporte / 100).toFixed(2).replace('.', ',')} $ · ${NOMBRE_DEL_CANAL[reserva.payment_channel]} · ${nombre}`,

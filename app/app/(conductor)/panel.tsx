@@ -18,6 +18,8 @@ import { useRouter } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
 
 import { type ViajePublicado, viajesPublicados } from '@/servicios/panel';
+import { perfilResumido } from '@/servicios/perfiles';
+import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { BarraDePestanas } from '@/ui/BarraDePestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -27,16 +29,20 @@ import { cuando, diaAbrev, hora } from '@/ui/fechas';
 import { Carro, Chat, Lupa, Mas, Persona } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
-/** Mientras no haya sesión, el conductor del recorrido del diseño. */
-const CONDUCTOR = '11111111-1111-4111-8111-111111111111';
+/** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 export default function Panel() {
   const router = useRouter();
+  const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [viajes, setViajes] = useState<ViajePublicado[]>([]);
+  const [nombre, setNombre] = useState<string | null>(null);
 
   useEffect(() => {
-    viajesPublicados(CONDUCTOR).then(setViajes);
-  }, []);
+    if (!yo) return;
+    viajesPublicados(yo).then(setViajes);
+    perfilResumido(yo).then((p) => setNombre(p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : null));
+  }, [yo]);
 
   const [hoy, ...resto] = viajes;
 
@@ -46,7 +52,7 @@ export default function Panel() {
       <BarraDeEstado />
 
       <View style={estilos.cabecera}>
-        <Text style={estilos.epigrafeCampo}>Conductor · Andrés C.</Text>
+        <Text style={estilos.epigrafeCampo}>{nombre ? `Conductor · ${nombre}` : 'Conductor'}</Text>
         <Text style={estilos.titular}>
           {'Tus viajes '}
           <Text style={estilos.titularFuerte}>publicados</Text>
@@ -104,7 +110,9 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         <View style={estilos.puntoVivo} />
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.push('/(conductor)/editar')}
+          onPress={() =>
+            router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
+          }
           style={{ marginLeft: 'auto' }}
         >
           <Text style={estilos.enlace}>Editar</Text>
@@ -124,7 +132,9 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${viaje.solicitudes} solicitudes nuevas`}
-          onPress={() => router.push('/(conductor)/solicitudes')}
+          onPress={() =>
+            router.push({ pathname: '/(conductor)/solicitudes', params: { viaje: viaje.id } })
+          }
           style={estilos.solicitudes}
         >
           <View style={estilos.contador}>
@@ -151,7 +161,9 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         </Text>
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.push('/(conductor)/editar')}
+          onPress={() =>
+            router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
+          }
           style={{ marginLeft: 'auto' }}
         >
           <Text style={estilos.enlace}>Editar</Text>
