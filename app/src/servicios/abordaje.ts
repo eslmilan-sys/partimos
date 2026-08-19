@@ -10,6 +10,7 @@ import { seCobraEnLaApp } from '@/dominio/tarifas';
 import type { ReservaFila } from '@/tipos';
 
 import { fuente } from './_fuente';
+import { liberarAporte } from './pagos';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -71,7 +72,20 @@ export type PasajeroDeAbordaje = {
   nombre: string;
   puestos: number;
   abordado: boolean;
+  /** Bajó y su aporte ya está liberado: el viaje, para esa persona, cerró. */
+  cerrado: boolean;
 };
+
+/**
+ * EL VIAJE TIENE DOS MOMENTOS Y UN SOLO SITIO PARA TECLEAR.
+ *
+ * `subir` mientras quede alguien por abordar; `bajar` cuando ya están todos
+ * dentro y toca cerrar con el segundo código; `listo` cuando no queda nadie.
+ * Antes solo existía el primero: el código de llegada se le enseñaba al
+ * pasajero en `1i` y **no había dónde teclearlo**, así que ningún aporte se
+ * liberaba nunca. Es la mitad que faltaba del viaje.
+ */
+export type FaseDelViaje = 'subir' | 'bajar' | 'listo';
 
 export type ListaDeAbordaje = {
   parada: string;
@@ -79,7 +93,11 @@ export type ListaDeAbordaje = {
   pasajeros: PasajeroDeAbordaje[];
   /** El que toca teclear ahora: el primero sin marcar. */
   siguiente: PasajeroDeAbordaje | null;
+  /** El primero que subió y todavía no ha bajado. */
+  siguientePorBajar: PasajeroDeAbordaje | null;
+  fase: FaseDelViaje;
   abordados: number;
+  cerrados: number;
   total: number;
 };
 
@@ -101,17 +119,24 @@ export async function listaDeAbordaje(viajeId: string): Promise<ListaDeAbordaje>
         nombre: p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : 'Alguien',
         puestos: r.seats,
         abordado: r.boarded_at != null,
+        cerrado: r.released_at != null,
       };
     });
 
   const abordados = pasajeros.filter((p) => p.abordado).length;
+  const cerrados = pasajeros.filter((p) => p.cerrado).length;
+  const siguiente = pasajeros.find((p) => !p.abordado) ?? null;
+  const siguientePorBajar = pasajeros.find((p) => p.abordado && !p.cerrado) ?? null;
 
   return demora({
     parada: primera?.custom_label ?? viaje.origin_label ?? '',
     salida: primera?.scheduled_at ?? viaje.departure_at,
     pasajeros,
-    siguiente: pasajeros.find((p) => !p.abordado) ?? null,
+    siguiente,
+    siguientePorBajar,
+    fase: siguiente ? 'subir' : siguientePorBajar ? 'bajar' : 'listo',
     abordados,
+    cerrados,
     total: pasajeros.length,
   });
 }
@@ -140,6 +165,46 @@ export async function verificarCodigo(
   await fuente.actualizarReserva(reserva.id, { boarded_at: new Date().toISOString() });
   const p = fuente.perfiles.find((x) => x.id === reserva.passenger_id);
 
+  return demora({
+    ok: true,
+    reservaId: reserva.id,
+    nombre: p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : 'Alguien',
+  } as const);
+}
+
+/**
+ * EL SEGUNDO CÓDIGO: EL QUE SUELTA LA PLATA.
+ *
+ * El conductor lo teclea al bajar a cada quien. Ese tecleo hace tres cosas de
+ * una vez, y por eso están juntas: la reserva pasa a `completed`, el pago
+ * retenido se captura y `released_at` queda escrito. Sin esto el aporte se
+ * quedaba retenido para siempre —era el «pago nunca liberado» del informe— y
+ * el conductor no cobraba nunca.
+ *
+ * Solo se cierra a quien subió: sin `boarded_at` no hay viaje que cerrar, y
+ * ese es justo el hecho en que se apoya el reembolso por conductor que no
+ * llegó.
+ */
+export async function verificarLlegada(
+  viajeId: string,
+  codigo: string,
+): Promise<ResultadoDeAbordaje> {
+  const reserva = fuente.reservas.find(
+    (r) =>
+      r.trip_id === viajeId &&
+      (r.status === 'confirmed' || r.status === 'completed') &&
+      r.arrival_code === codigo,
+  );
+  if (!reserva) return demora({ ok: false, motivo: 'no-coincide' } as const);
+  if (!reserva.boarded_at) return demora({ ok: false, motivo: 'no-coincide' } as const);
+  if (reserva.released_at) return demora({ ok: false, motivo: 'ya-abordo' } as const);
+
+  const ahora = new Date().toISOString();
+  await fuente.actualizarReserva(reserva.id, { status: 'completed', completed_at: ahora });
+  // libera el aporte y escribe `released_at`
+  await liberarAporte(reserva.id);
+
+  const p = fuente.perfiles.find((x) => x.id === reserva.passenger_id);
   return demora({
     ok: true,
     reservaId: reserva.id,

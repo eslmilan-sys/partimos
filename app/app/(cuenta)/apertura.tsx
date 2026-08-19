@@ -70,7 +70,7 @@ const estilos = StyleSheet.create({
   pantalla: {
     flex: 1,
     backgroundColor: color.rojo600,
-    maxWidth: 390,
+    maxWidth: espacio.marco,
     width: '100%',
     alignSelf: 'center',
   },

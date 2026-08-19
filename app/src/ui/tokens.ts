@@ -83,6 +83,22 @@ export const radio = {
 } as const;
 
 export const espacio = {
+  /**
+   * EL ANCHO DEL MARCO.
+   *
+   * El traspaso se dibujó a 390, que es el iPhone «normal». Pero el 14 Pro
+   * mide 393, el Plus 428, el Pro Max 430 y el 16 Pro Max 440: en todos ellos
+   * un marco de 390 centrado deja una franja de fondo a cada lado. Sobre el
+   * campo rojo esa franja se ve como una raya clara pegada al borde, que es
+   * exactamente lo que se veía en el teléfono, y al tocar cerca del borde la
+   * página se desplazaba de lado.
+   *
+   * 440 cubre todos los iPhone en venta, así que en el teléfono la pantalla
+   * llena la ventana y no hay franja. En el escritorio el marco sigue siendo
+   * un teléfono, 50 px más ancho: nada del diseño depende de un ancho exacto,
+   * todo mide en porcentaje o en flex.
+   */
+  marco: 440,
   gutter: 26,
   seccion: 32,
   entreTarjetas: 10,

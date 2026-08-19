@@ -116,7 +116,7 @@ const estilos = StyleSheet.create({
     padding: espacio.gutter,
     paddingBottom: 60,
     backgroundColor: color.sand100,
-    maxWidth: 390,
+    maxWidth: espacio.marco,
     width: '100%',
     alignSelf: 'center',
   },

@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -24,7 +25,7 @@ import {
 import { hayCorredor, nombreDeCiudad, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Pestanas } from '@/ui/Pestanas';
-import { CampoRojo } from '@/ui/CampoRojo';
+import { CampoRojo, motivoDe } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { hora } from '@/ui/fechas';
@@ -142,7 +143,10 @@ export default function Resultados() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={214} />
+      {/* El dibujo del destino detrás del campo: la torre para la capital, la
+          palmera para la costa, el hibisco para Azuero. El campo liso no
+          decía a dónde vas. */}
+      <CampoRojo altura={214} motivo={motivoDe(destino)} />
 
       <BarraDeEstado />
 
@@ -155,15 +159,6 @@ export default function Resultados() {
             style={estilos.circulo}
           >
             <Atras />
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Filtros"
-            onPress={() => setHojaAbierta(true)}
-            style={estilos.circulo}
-          >
-            <IconoFiltros />
-            {cuantosFiltros(filtros) > 0 ? <View style={estilos.punto} /> : null}
           </Pressable>
         </View>
 
@@ -179,28 +174,25 @@ export default function Resultados() {
         </Text>
       </View>
 
-      <View style={estilos.filtros}>
-        <Chip
-          activo={!!filtros.aceptaMaletas}
-          etiqueta="Acepta maletas"
-          alPulsar={() => alternar('aceptaMaletas')}
-        />
-        <Chip
-          activo={!!filtros.soloMujeres}
-          etiqueta="Solo mujeres"
-          alPulsar={() => alternar('soloMujeres')}
-        />
-        <Chip activo={!!filtros.yappy} etiqueta="Yappy" alPulsar={() => alternar('yappy')} />
-      </View>
+      <BarraDeFiltros
+        filtros={filtros}
+        alAlternar={alternar}
+        alOrdenar={(o) => setFiltros((f) => ({ ...f, orden: o }))}
+        alAbrir={() => setHojaAbierta(true)}
+      />
 
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={estilos.lista}
         showsVerticalScrollIndicator={false}
       >
+        {/* El orden ya está puesto y a la vista en la barra: repetirlo aquí
+            era decir dos veces lo mismo con palabras distintas. */}
         <View style={estilos.filaSeccion}>
           <Epigrafe>{`Salidas de ${cuandoTexto(dia).toLowerCase()}`}</Epigrafe>
-          <Text style={estilos.orden}>{COMO_SE_ORDENA[filtros.orden ?? 'temprano']}</Text>
+          <Text style={estilos.orden}>
+            {viajes.length === 1 ? '1 viaje' : `${viajes.length} viajes`}
+          </Text>
         </View>
 
         {viajes.length === 0 ? (
@@ -254,6 +246,102 @@ export default function Resultados() {
         <Pestanas valor="Buscar" />
       </View>
     </View>
+  );
+}
+
+/**
+ * LA BARRA DE FILTROS.
+ *
+ * Antes había dos sitios para lo mismo: tres pastillas sueltas sobre la arena
+ * y un icono arriba que abría una hoja con **esas mismas tres** más el orden.
+ * Nada decía cuántos filtros tenías puestos ni por qué estaba ordenado así,
+ * y las pastillas se salían del ancho en cuanto una etiqueta era larga.
+ *
+ * Ahora es una sola tira blanca, del ancho de la pantalla y con desliz
+ * horizontal, así que ninguna pastilla se corta. Empieza por lo que resume
+ * —«Filtros» con su cuenta— y sigue por el orden, que es lo que más cambia lo
+ * que ves y estaba escondido. La hoja sigue existiendo para elegir con calma.
+ */
+function BarraDeFiltros({
+  filtros,
+  alAlternar,
+  alOrdenar,
+  alAbrir,
+}: {
+  filtros: Filtros;
+  alAlternar: (clave: keyof Filtros) => void;
+  alOrdenar: (orden: Orden) => void;
+  alAbrir: () => void;
+}) {
+  const cuantos = cuantosFiltros(filtros);
+  const orden: Orden = filtros.orden ?? 'temprano';
+
+  return (
+    <View style={estilos.barra}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={cuantos === 0 ? 'Filtros' : `Filtros, ${cuantos} puestos`}
+        onPress={alAbrir}
+        style={({ pressed }) => [estilos.botonFiltros, pressed && { backgroundColor: color.sand200 }]}
+      >
+        <IconoFiltros tamano={16} tinta={color.ink900} />
+        <Text style={estilos.botonFiltrosTexto}>Filtros</Text>
+        {cuantos > 0 ? (
+          <View style={estilos.cuenta}>
+            <Text style={estilos.cuentaTexto}>{String(cuantos)}</Text>
+          </View>
+        ) : null}
+      </Pressable>
+
+      <View style={estilos.separadorBarra} />
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={estilos.barraTira}
+      >
+        {/* El orden es un interruptor de dos posiciones, no un filtro: se
+            enseña siempre puesto, con el valor que está en uso. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Ordenar: ${COMO_SE_ORDENA[orden]}`}
+          onPress={() => alOrdenar(orden === 'temprano' ? 'barato' : 'temprano')}
+          style={[estilos.chip, estilos.chipOrden]}
+        >
+          <Text style={[estilos.chipTexto, { color: color.ink900 }]}>
+            {orden === 'temprano' ? 'Más temprano' : 'Aporte más bajo'}
+          </Text>
+          <Intercambio />
+        </Pressable>
+
+        <Chip
+          activo={!!filtros.aceptaMaletas}
+          etiqueta="Acepta maletas"
+          alPulsar={() => alAlternar('aceptaMaletas')}
+        />
+        <Chip
+          activo={!!filtros.soloMujeres}
+          etiqueta="Solo mujeres"
+          alPulsar={() => alAlternar('soloMujeres')}
+        />
+        <Chip activo={!!filtros.yappy} etiqueta="Yappy" alPulsar={() => alAlternar('yappy')} />
+      </ScrollView>
+    </View>
+  );
+}
+
+/** Las dos flechas del interruptor de orden. No está en `@/ui/iconos`. */
+function Intercambio() {
+  return (
+    <Svg viewBox="0 0 24 24" width={14} height={14} fill="none">
+      <Path
+        d="M7 4v13m0 0l-3-3m3 3l3-3M17 20V7m0 0l-3 3m3-3l3 3"
+        stroke={color.ink500}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
   );
 }
 
@@ -390,7 +478,7 @@ const estilos = StyleSheet.create({
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
-    maxWidth: 390,
+    maxWidth: espacio.marco,
     width: '100%',
     alignSelf: 'center',
   },
@@ -423,18 +511,59 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
 
-  filtros: { flexDirection: 'row', gap: 8, paddingHorizontal: espacio.gutter },
-
-  /** El punto que dice que hay filtros puestos sin tener que abrir la hoja. */
-  punto: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: color.rojo500,
+  /* La tira blanca: del ancho de la pantalla, para que el desliz horizontal
+     empiece y acabe en el borde y no dentro de una caja centrada. */
+  barra: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: color.blanco,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: color.bordeSutil,
+    paddingLeft: espacio.gutter,
+    height: 56,
   },
+  barraTira: { flexDirection: 'row', gap: 8, alignItems: 'center', paddingRight: espacio.gutter },
+  botonFiltros: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    height: 34,
+    paddingHorizontal: 12,
+    borderRadius: radio.pastilla,
+  },
+  botonFiltrosTexto: {
+    fontSize: 13.5,
+    lineHeight: 19.57,
+    fontWeight: '600',
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  /** La cuenta va en rojo: es lo que tú has tocado, no un dato de la pantalla. */
+  cuenta: {
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.rojo500,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cuentaTexto: {
+    fontSize: 11,
+    lineHeight: 15.95,
+    fontWeight: '700',
+    color: '#fff',
+    fontFamily: familia,
+    ...tabular,
+  },
+  separadorBarra: {
+    width: 1,
+    height: 22,
+    backgroundColor: color.bordeSutil,
+    marginHorizontal: 10,
+  },
+  chipOrden: { backgroundColor: color.sand200, borderColor: 'transparent' },
 
   velo: { flex: 1, backgroundColor: 'rgba(18,9,12,.42)' },
   hoja: {
@@ -449,7 +578,7 @@ const estilos = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 34,
     gap: 14,
-    maxWidth: 390,
+    maxWidth: espacio.marco,
     alignSelf: 'center',
     width: '100%',
   },

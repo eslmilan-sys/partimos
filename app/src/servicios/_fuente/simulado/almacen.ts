@@ -474,6 +474,19 @@ export async function guardarMensaje(mensaje: Message): Promise<Message> {
   return mensaje;
 }
 
+/**
+ * El pago cambia de estado una sola vez en su vida: de retenido a cobrado,
+ * cuando el viaje se cierra. `liberarAporte` lo hacía tocando el objeto en
+ * memoria, que en el simulado se nota y contra la base no: la fila se quedaba
+ * `authorized` para siempre.
+ */
+export async function actualizarPago(id: string, cambios: Partial<Payment>): Promise<Payment> {
+  const i = pagos.findIndex((p) => p.id === id);
+  if (i < 0) throw new Error(`No existe el pago ${id}`);
+  pagos[i] = { ...pagos[i], ...cambios };
+  return pagos[i];
+}
+
 export async function actualizarReserva(
   id: string,
   cambios: Partial<ReservaFila>,

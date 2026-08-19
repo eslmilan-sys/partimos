@@ -131,14 +131,30 @@ export async function guardarMetodoPreferido(
   await demora(null);
 }
 
-/** El aporte retenido pasa al conductor. Solo ocurre con la llegada confirmada. */
+/**
+ * El aporte retenido pasa al conductor. Solo ocurre con la llegada confirmada.
+ *
+ * Se escribe, no se toca en memoria: antes esto era `pago.status = 'captured'`
+ * sobre el objeto cargado, así que en el simulado parecía funcionar y contra
+ * la base la fila se quedaba en `authorized` y `released_at` en nulo.
+ */
 export async function liberarAporte(reservaId: string): Promise<Payment | null> {
+  const ahora = new Date().toISOString();
+  /**
+   * En efectivo NO HAY PAGO QUE CAPTURAR, y el viaje se cierra igual.
+   *
+   * Aquí se salía antes de tiempo cuando no había fila en `payments` —que es
+   * lo normal: en efectivo la plata va de mano a mano y la plataforma no la
+   * toca nunca—, así que `released_at` no se escribía y el viaje se quedaba
+   * abierto para siempre. La marca de cerrado es de la reserva; capturar el
+   * pago es lo que se hace **además**, cuando lo hay.
+   */
   const pago = fuente.pagos.find((p) => p.booking_id === reservaId);
-  if (!pago) return demora(null);
-  pago.status = 'captured';
-  pago.captured_at = new Date().toISOString();
-  await fuente.actualizarReserva(reservaId, { released_at: pago.captured_at });
-  return demora(pago);
+  const cobrado = pago
+    ? await fuente.actualizarPago(pago.id, { status: 'captured', captured_at: ahora })
+    : null;
+  await fuente.actualizarReserva(reservaId, { released_at: ahora });
+  return demora(cobrado);
 }
 
 /* ------------------------------------------------------------------ */

@@ -1,9 +1,15 @@
 /**
- * `1g` Código de abordaje — lado conductor.
+ * `1g` Los dos códigos — lado conductor.
  *
- * El conductor teclea los cuatro dígitos de cada pasajero al subirlo. Esa marca
- * es la prueba de que el viaje pasó: sin ella no se libera el aporte, y el
- * reembolso por «el conductor no llegó» se apoya en que no exista.
+ * El conductor teclea cuatro dígitos al subir a cada quien, y otros cuatro al
+ * bajarlo. El primero prueba que el viaje pasó —sin él el reembolso por «el
+ * conductor no llegó» se sostiene—; el segundo cierra el viaje y suelta el
+ * aporte retenido.
+ *
+ * **El segundo no existía.** El pasajero veía su código de llegada en `1i` y
+ * no había dónde teclearlo, así que ningún aporte se liberaba nunca. La misma
+ * pantalla hace ahora los dos momentos, porque son el mismo gesto en dos
+ * paradas: no hacía falta otra pantalla, hacía falta la segunda mitad.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -11,7 +17,13 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useLocalSearchParams } from 'expo-router';
 
-import { type ListaDeAbordaje, listaDeAbordaje, marcarNoShow, verificarCodigo } from '@/servicios/abordaje';
+import {
+  type ListaDeAbordaje,
+  listaDeAbordaje,
+  marcarNoShow,
+  verificarCodigo,
+  verificarLlegada,
+} from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Boton, Epigrafe } from '@/ui/controles';
@@ -53,11 +65,23 @@ export default function Abordaje() {
     setTecleado((c) => c + t);
   };
 
+  const bajando = datos.fase === 'bajar';
+  /** A quién le toca ahora: el que sube, o el que baja. */
+  const siguiente = bajando ? datos.siguientePorBajar : datos.siguiente;
+
   const confirmar = async () => {
-    const resultado = await verificarCodigo(viajeId, tecleado);
+    const resultado = bajando
+      ? await verificarLlegada(viajeId, tecleado)
+      : await verificarCodigo(viajeId, tecleado);
     if (resultado.ok) {
       setTecleado('');
       await recargar();
+    } else if (bajando) {
+      setError(
+        resultado.motivo === 'ya-abordo'
+          ? 'Ese viaje ya está cerrado.'
+          : 'Ese código de llegada no es de este viaje. Pídeselo otra vez.',
+      );
     } else {
       setError(
         resultado.motivo === 'ya-abordo'
@@ -67,7 +91,6 @@ export default function Abordaje() {
     }
   };
 
-  const siguiente = datos.siguiente;
   const digitos = [0, 1, 2, 3];
 
   return (
@@ -81,7 +104,7 @@ export default function Abordaje() {
           {`${datos.parada} · ${hora(datos.salida)}`}
         </Text>
         <Text style={estilos.titular}>
-          {'Suben '}
+          {bajando ? 'Bajan ' : 'Suben '}
           <Text style={estilos.titularFuerte}>
             {datos.total === 1 ? '1 persona' : `${datos.total} personas`}
           </Text>
@@ -96,16 +119,22 @@ export default function Abordaje() {
         <View style={estilos.hoja}>
           <View style={estilos.filaTitulo}>
             <Epigrafe>
-              {siguiente ? `Código de ${siguiente.nombre.split(' ')[0]}` : 'Todos abordaron'}
+              {siguiente
+                ? bajando
+                  ? `Llegada de ${siguiente.nombre.split(' ')[0]}`
+                  : `Código de ${siguiente.nombre.split(' ')[0]}`
+                : 'Viaje cerrado'}
             </Epigrafe>
             <Text style={estilos.contador}>
-              {`${datos.abordados} de ${datos.total} abordaron`}
+              {bajando
+                ? `${datos.cerrados} de ${datos.total} bajaron`
+                : `${datos.abordados} de ${datos.total} abordaron`}
             </Text>
           </View>
 
           {!siguiente ? (
             <Text style={estilos.todosDentro}>
-              Ya están todos dentro. El viaje puede empezar.
+              El viaje está cerrado. Cada aporte ya salió hacia ti.
             </Text>
           ) : (
           <>
@@ -186,10 +215,10 @@ export default function Abordaje() {
               <Text style={[estilos.nombrePasajero, p.abordado && { color: color.ink500 }]}>
                 {p.nombre}
               </Text>
-              {p.abordado ? (
+              {p.cerrado || p.abordado ? (
                 <View style={estilos.abordo}>
                   <Visto tamano={15} tinta={color.verde500} />
-                  <Text style={estilos.abordoTexto}>abordó</Text>
+                  <Text style={estilos.abordoTexto}>{p.cerrado ? 'bajó' : 'abordó'}</Text>
                 </View>
               ) : (
                 <Text style={estilos.puestos}>
@@ -204,9 +233,9 @@ export default function Abordaje() {
 
       <View style={estilos.pie}>
         <Boton desactivado={tecleado.length < 4 || !siguiente} alPulsar={confirmar}>
-          Confirmar abordaje
+          {bajando ? 'Cerrar el viaje' : 'Confirmar abordaje'}
         </Boton>
-        {siguiente ? (
+        {siguiente && !bajando ? (
           <Pressable
             accessibilityRole="button"
             onPress={async () => {
@@ -220,7 +249,11 @@ export default function Abordaje() {
             </Text>
           </Pressable>
         ) : (
-          <Text style={estilos.noShow}>Ya puedes salir.</Text>
+          <Text style={estilos.noShow}>
+            {bajando
+              ? 'Al cerrar, el aporte de cada quien sale hacia ti.'
+              : 'Ya no queda nada por hacer aquí.'}
+          </Text>
         )}
       </View>
     </View>
@@ -231,7 +264,7 @@ const estilos = StyleSheet.create({
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
-    maxWidth: 390,
+    maxWidth: espacio.marco,
     width: '100%',
     alignSelf: 'center',
   },

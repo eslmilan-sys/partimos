@@ -278,10 +278,13 @@ export default function Inicio() {
                   <Text style={estilos.cifraGancho}>
                     {formatearDineroRedondo(gancho.recuperasCentavos)}
                   </Text>
+                  {/* «si llevas» y no «llevando»: la tarjeta es un ejemplo de
+                      una ruta cualquiera, no un viaje que esta persona tenga
+                      publicado. Sin el «si» se lee como si ya fuera a Chitré. */}
                   <Text style={estilos.fraseGancho}>
                     {'Lo que '}
                     <Text style={estilos.fraseGanchoFuerte}>recuperas</Text>
-                    {` llevando ${enLetra(gancho.puestos)} puestos a ${gancho.destino}`}
+                    {` si llevas ${enLetra(gancho.puestos)} puestos a ${gancho.destino}`}
                   </Text>
                 </View>
                 <Pressable
@@ -339,7 +342,7 @@ const estilos = StyleSheet.create({
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
-    maxWidth: 390,
+    maxWidth: espacio.marco,
     width: '100%',
     alignSelf: 'center',
   },

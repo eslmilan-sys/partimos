@@ -22,7 +22,7 @@ import MapaPa from '../../assets/motivos/pa-mapa.svg';
 import Palmera from '../../assets/motivos/pa-palmera.svg';
 import Skyline from '../../assets/motivos/pa-skyline.svg';
 import SkylineTornillo from '../../assets/motivos/pa-skyline-tornillo.svg';
-import { campoRojo } from './tokens';
+import { campoRojo, espacio } from './tokens';
 
 /**
  * Los motivos que se recortan contra el borde del campo, en tinta oscura al
@@ -33,28 +33,91 @@ const MOTIVOS = {
   hibisco: { svg: Hibisco, ancho: 158, alto: 158, sitio: { right: -36, top: -28 }, opacidad: 0.2 },
   mapa: { svg: MapaPa, ancho: 180, alto: 180, sitio: { right: -20, bottom: -16 }, opacidad: 0.2 },
   // la ciudad va al pie, de lado a lado, como una línea de horizonte
-  skyline: { svg: Skyline, ancho: 390, alto: 196, sitio: { left: 0, right: 0, bottom: 0 }, opacidad: 0.26 },
+  skyline: { svg: Skyline, ancho: espacio.marco, alto: 196, sitio: { left: 0, right: 0, bottom: 0 }, opacidad: 0.26 },
   /**
    * La silueta con la torre Tornillo, la que trajo el cliente. En `4a` no es
    * marca de agua sino la línea de horizonte de la pantalla entera: va al pie,
    * a plena opacidad, con sus tres capas de profundidad ya dentro del propio
    * archivo.
    */
-  tornillo: { svg: SkylineTornillo, ancho: 390, alto: 120, sitio: { left: 0, right: 0, bottom: 0 }, opacidad: 1 },
+  tornillo: { svg: SkylineTornillo, ancho: espacio.marco, alto: 120, sitio: { left: 0, right: 0, bottom: 0 }, opacidad: 1 },
 } as const;
+
+export type Motivo = keyof typeof MOTIVOS;
+
+/**
+ * QUÉ DIBUJO LE TOCA A CADA SITIO.
+ *
+ * Las pantallas de una ruta llevaban el campo rojo liso, y liso el campo es
+ * una franja de color sin nada que mirar. Los cinco motivos del traspaso ya
+ * estaban en `assets/motivos`: lo que faltaba era decidir cuál va con qué.
+ *
+ * El reparto es por lo que hay en el sitio, no por gusto: la torre para la
+ * capital, la palmera para la costa, el hibisco para Azuero —es su flor— y el
+ * mapa del país para lo que queda, que es tierra adentro.
+ */
+const MOTIVO_DE: Record<string, Motivo> = {
+  // la capital y su cinturón: silueta de ciudad
+  'panama-city': 'tornillo',
+  colon: 'skyline',
+  arraijan: 'skyline',
+  'la-chorrera': 'skyline',
+  capira: 'skyline',
+  chepo: 'skyline',
+
+  // costa y playa: palmera
+  coronado: 'palmera',
+  'san-carlos': 'palmera',
+  chame: 'palmera',
+  'rio-hato': 'palmera',
+  pedasi: 'palmera',
+  'las-tablas': 'palmera',
+  guarare: 'palmera',
+  'las-lajas': 'palmera',
+  almirante: 'palmera',
+  changuinola: 'palmera',
+
+  // Azuero y el interior de tierra llana: el hibisco, que es su flor
+  chitre: 'hibisco',
+  parita: 'hibisco',
+  'los-santos': 'hibisco',
+  santiago: 'hibisco',
+  sona: 'hibisco',
+  aguadulce: 'hibisco',
+  penonome: 'hibisco',
+  nata: 'hibisco',
+  anton: 'hibisco',
+
+  // tierras altas y frontera: el mapa del país, que es el que queda por
+  // defecto, escrito aquí para que se vea que es una decisión y no un hueco
+  david: 'mapa',
+  boquete: 'mapa',
+  volcan: 'mapa',
+  'el-valle': 'mapa',
+  'la-concepcion': 'mapa',
+  'paso-canoas': 'mapa',
+  tole: 'mapa',
+};
+
+/** El del sitio, o el mapa del país cuando no le hemos puesto ninguno. */
+export function motivoDe(slug: string | null | undefined): Motivo {
+  return (slug && MOTIVO_DE[slug]) || 'mapa';
+}
 
 type Props = {
   /** 326 en una pantalla de inicio, 186–214 en una secundaria. */
   altura?: number;
   ancho?: number;
   /** Marca de agua en tinta oscura al 20 %, cortada por el borde. */
-  motivo?: keyof typeof MOTIVOS;
+  motivo?: Motivo;
   children?: ReactNode;
 };
 
 export function CampoRojo({
   altura = campoRojo.alturaSecundaria,
-  ancho = 390,
+  /* El ancho del marco y no 390: en un iPhone de 430 el degradado terminaba
+     antes que la pantalla y quedaba una franja clara pegada al borde. */
+  ancho = espacio.marco,
   motivo,
   children,
 }: Props) {
@@ -201,7 +264,7 @@ export function Bandera({
   children,
 }: {
   altura?: number;
-  motivo?: keyof typeof MOTIVOS;
+  motivo?: Motivo;
   children?: ReactNode;
 }) {
   return (

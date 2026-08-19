@@ -69,14 +69,39 @@ ${pesos
  * altura de verdad, la que cambia. El «vh» de reserva es para los navegadores
  * viejos que no conocen «dvh».
  */
-html, body { height: 100%; margin: 0; }
+html, body { height: 100%; margin: 0; width: 100%; }
 body {
   background-color: #FAF7F3;
   /* Nada de rebote elástico: la app no es una página. */
   overscroll-behavior: none;
+
+  /*
+   * NADA SE MUEVE DE LADO Y NADA HACE ZOOM AL TOCARLO.
+   *
+   * En el teléfono pasaban dos cosas al pulsar. Una: el doble toque del
+   * navegador acerca la página, y como los botones están juntos, un toque
+   * rápido seguido de otro se leía como doble toque y todo daba un salto de
+   * escala. «touch-action: manipulation» le quita al navegador ese gesto y le
+   * deja los que sí son nuestros.
+   *
+   * Dos: si algo sobresale un pixel por la derecha, el navegador permite
+   * arrastrar la página de lado, y al pulsar cerca del borde se iba sola. La
+   * app no es una página: no hay nada que ver a los lados.
+   *
+   * «text-size-adjust» impide que iOS agrande los textos por su cuenta al
+   * girar el teléfono, que descuadra la escala tipográfica entera.
+   */
+  touch-action: manipulation;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
+/* El resaltado gris de iOS al tocar: los botones ya tienen su estado pulsado. */
+* { -webkit-tap-highlight-color: transparent; }
 #root {
   display: flex;
+  width: 100%;
+  overflow-x: hidden;
   height: 100vh;
   height: 100dvh;
 }

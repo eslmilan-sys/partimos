@@ -253,6 +253,15 @@ export async function actualizarReserva(id: string, cambios: Partial<ReservaFila
   return data as ReservaFila;
 }
 
+/** El paso de «retenido» a «cobrado», que es el único cambio que un pago tiene. */
+export async function actualizarPago(id: string, cambios: Partial<Payment>): Promise<Payment> {
+  const { data, error } = await tabla('payments').update(cambios).eq('id', id).select().single();
+  if (error) throw new Error(`payments: ${error.message}`);
+  const i = pagos.findIndex((p) => p.id === id);
+  if (i >= 0) pagos[i] = data as Payment;
+  return data as Payment;
+}
+
 /** Sin tabla de avisos no hay nada que marcar. */
 export const marcarAvisoLeido = async (_id: string): Promise<AvisoPendiente | null> => null;
 export const marcarTodosLeidos = async (_perfilId: string): Promise<number> => 0;

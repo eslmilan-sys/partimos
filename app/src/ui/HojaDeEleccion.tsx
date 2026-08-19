@@ -103,7 +103,7 @@ const estilos = StyleSheet.create({
     paddingBottom: 26,
     maxHeight: 460,
     width: '100%',
-    maxWidth: 390,
+    maxWidth: espacio.marco,
     alignSelf: 'center',
     ...(Platform.OS === 'web' ? { boxShadow: '0 -18px 48px rgba(26,20,32,.18)' as never } : null),
   },

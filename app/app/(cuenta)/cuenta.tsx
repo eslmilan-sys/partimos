@@ -18,13 +18,14 @@ import Svg, { Path } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 
 import { type Cuenta, cuenta } from '@/servicios/ajustes';
+import { salir } from '@/servicios/cuenta';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { Escudo } from '@/ui/iconos';
-import { TRACK_MICRO, color, familia, radio, sombra } from '@/ui/tokens';
+import { TRACK_MICRO, color, espacio, familia, radio, sombra } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
@@ -45,15 +46,39 @@ export default function TuCuenta() {
 
   if (!datos) return <View style={estilos.pantalla} />;
 
-  // «Mi perfil» es la única de las cuatro que ya tiene pantalla en la app.
-  const filas: { etiqueta: string; valor?: string | null; alPulsar?: () => void }[] = [
+  /**
+   * LAS CUATRO LLEVAN A ALGUNA PARTE.
+   *
+   * Tres de ellas eran texto con una punta de flecha al lado y nada detrás:
+   * se pulsaba «Mi carro» y no pasaba nada, que es peor que no ponerlo. Las
+   * pantallas existían las cuatro veces —el carro en el recorrido del
+   * conductor, el método en el del pasajero, la cédula en el paso 03—; lo que
+   * faltaba era el camino.
+   *
+   * Cuando la fila está vacía, el valor lo dice y no se queda en blanco: «Sin
+   * carro» invita a entrar, un hueco no.
+   */
+  const filas: { etiqueta: string; valor?: string | null; alPulsar: () => void }[] = [
     {
       etiqueta: 'Mi perfil',
+      valor: 'Cómo te ven',
       alPulsar: () => router.push({ pathname: '/(pasajero)/perfil', params: { perfil: yo } }),
     },
-    { etiqueta: 'Mi carro', valor: datos.carro },
-    { etiqueta: 'Cómo se paga', valor: datos.metodo },
-    { etiqueta: 'Verificación', valor: datos.cedula },
+    {
+      etiqueta: 'Mi carro',
+      valor: datos.carro ?? 'Sin carro',
+      alPulsar: () => router.push('/(conductor)/carro'),
+    },
+    {
+      etiqueta: 'Cómo se paga',
+      valor: datos.metodo,
+      alPulsar: () => router.push('/(pasajero)/metodos'),
+    },
+    {
+      etiqueta: 'Verificación',
+      valor: datos.cedula,
+      alPulsar: () => router.push('/(conductor)/cedula'),
+    },
   ];
 
   return (
@@ -137,7 +162,27 @@ export default function TuCuenta() {
           <Text style={estilos.avisoTexto}>{datos.queTeFalta}</Text>
         </View>
 
-        <Text style={estilos.enlacesDelPie}>Ayuda · Términos · Cerrar sesión</Text>
+        {/* Tres enlaces, no una frase: antes era un solo texto sin nada
+            detrás, y «Cerrar sesión» no cerraba nada. */}
+        <View style={estilos.enlacesDelPie}>
+          <Pressable accessibilityRole="button" onPress={() => router.push('/(ayuda)')}>
+            <Text style={estilos.enlace}>Ayuda</Text>
+          </Pressable>
+          <Text style={estilos.enlaceSeparador}>·</Text>
+          <Pressable accessibilityRole="button" onPress={() => router.push('/(cuenta)/ajustes')}>
+            <Text style={estilos.enlace}>Ajustes</Text>
+          </Pressable>
+          <Text style={estilos.enlaceSeparador}>·</Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={async () => {
+              await salir();
+              router.replace('/(cuenta)/apertura');
+            }}
+          >
+            <Text style={estilos.enlace}>Cerrar sesión</Text>
+          </Pressable>
+        </View>
       </View>
 
       <View style={estilos.pie}>
@@ -171,7 +216,7 @@ const estilos = StyleSheet.create({
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
-    maxWidth: 390,
+    maxWidth: espacio.marco,
     width: '100%',
     alignSelf: 'center',
   },
@@ -349,12 +394,19 @@ const estilos = StyleSheet.create({
     paddingTop: 14,
     paddingHorizontal: 4,
     paddingBottom: 22,
-    textAlign: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  enlace: {
     fontSize: 13,
     lineHeight: 18.85,
-    color: color.ink500,
+    fontWeight: '500',
+    color: color.ink600,
     fontFamily: familia,
   },
+  enlaceSeparador: { fontSize: 13, lineHeight: 18.85, color: color.ink300, fontFamily: familia },
 
   pie: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 22 },
 });

@@ -124,6 +124,19 @@ export async function obtenerViaje(viajeId: string): Promise<ViajeFila | null> {
   return demora(fuente.viajes.find((v) => v.id === viajeId) ?? null);
 }
 
+/**
+ * El slug de la ciudad a la que va el viaje.
+ *
+ * `destination_label` es texto para leer —«Chitré · Parque Unión»—, no una
+ * clave: el dibujo del campo y la fotografía se eligen por el slug, y sacarlo
+ * del texto sería adivinarlo. Se saca del corredor, que es quien lo sabe.
+ */
+export function slugDestinoDe(viaje: ViajeFila): string | null {
+  const corredor = fuente.corredores.find((c) => c.id === viaje.corridor_id);
+  if (!corredor) return null;
+  return fuente.ciudades.find((x) => x.id === corredor.destination_city_id)?.slug ?? null;
+}
+
 export async function paradasDelViaje(viajeId: string): Promise<TripStop[]> {
   return demora(fuente.paradas.filter((p) => p.trip_id === viajeId).sort((a, b) => a.sequence - b.sequence));
 }

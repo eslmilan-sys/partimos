@@ -6,12 +6,14 @@
  * diferencia con el conductor, que tiene la cédula en el paso 03.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { SIN_PROVEEDOR, correoValido, entrarCon } from '@/servicios/cuenta';
+import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
+import { useSesion } from '@/servicios/sesion';
 import { Aviso } from '@/ui/Aviso';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
@@ -19,6 +21,7 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { Escudo } from '@/ui/iconos';
+import { diaLargo, hora } from '@/ui/fechas';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 /** Los dos que dibuja el traspaso. El nombre se escribe una vez, no dos. */
@@ -27,13 +30,40 @@ const OTROS = [
   { quien: 'apple', nombre: 'Apple' },
 ] as const;
 
+/** Sin sesión que preguntar —solo en simulado—: la persona del recorrido. */
+const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
+
 export default function Puerta() {
   const router = useRouter();
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
   const [correo, setCorreo] = useState('');
   const [quePaso, setQuePaso] = useState<string | null>(null);
+  const [datos, setDatos] = useState<ReservaPreparada | null>(null);
+
+  /**
+   * A QUIEN YA TIENE CUENTA, ESTA PANTALLA NO LE TOCA.
+   *
+   * Es la puerta de quien llega sin cuenta. Con la sesión abierta pedir otra
+   * vez el correo no es un paso de más: es decirle que no sabemos quién es.
+   * Si hay sesión, se pasa de largo hacia el puesto, y con `replace` para que
+   * volver atrás no devuelva aquí.
+   */
+  const { id: yo, preguntando } = useSesion(YO_DEL_RECORRIDO);
+
+  useEffect(() => {
+    if (preguntando || !yo) return;
+    router.replace({ pathname: '/(pasajero)/reservar', params: viaje ? { viaje } : {} });
+  }, [preguntando, yo, viaje, router]);
+
+  /* El viaje que se queda detrás es el de verdad, no uno dibujado: quien lo
+     mira reconoce el que acaba de elegir. */
+  useEffect(() => {
+    if (!viaje) return;
+    prepararReserva(viaje).then(setDatos).catch(() => setDatos(null));
+  }, [viaje]);
 
   const listo = correoValido(correo);
+  const conductor = datos?.conductor ?? 'el conductor';
 
   return (
     <View style={estilos.pantalla}>
@@ -42,10 +72,11 @@ export default function Puerta() {
       <BarraDeEstado />
 
       <View style={estilos.cabecera}>
-        <Text style={estilos.epigrafeCampo}>Sábado 14 de junio</Text>
+        <Text style={estilos.epigrafeCampo}>
+          {datos ? diaLargo(datos.salida) : ' '}
+        </Text>
         <Text style={estilos.titular}>
-          <Text style={estilos.titularFuerte}>06:30</Text>
-          {' · 3 h 20'}
+          <Text style={estilos.titularFuerte}>{datos ? hora(datos.salida) : ''}</Text>
         </Text>
       </View>
 
@@ -54,18 +85,18 @@ export default function Puerta() {
           <View style={estilos.parada}>
             <View style={estilos.puntoLleno} />
             <View style={{ flex: 1 }}>
-              <Text style={estilos.paradaNombre}>Albrook · Terminal</Text>
-              <Text style={estilos.paradaDetalle}>Junto a la entrada principal</Text>
+              <Text style={estilos.paradaNombre}>{datos?.origen.etiqueta ?? ''}</Text>
+              <Text style={estilos.paradaDetalle}>Donde arranca el carro</Text>
             </View>
-            <Text style={estilos.paradaHora}>06:30</Text>
+            <Text style={estilos.paradaHora}>{datos ? hora(datos.origen.hora) : ''}</Text>
           </View>
           <View style={[estilos.parada, { paddingBottom: 0 }]}>
             <View style={estilos.puntoFinal} />
             <View style={{ flex: 1 }}>
-              <Text style={estilos.paradaNombre}>Chitré · Parque Unión</Text>
-              <Text style={estilos.paradaDetalle}>Frente a la iglesia</Text>
+              <Text style={estilos.paradaNombre}>{datos?.destino ?? ''}</Text>
+              <Text style={estilos.paradaDetalle}>Donde te deja</Text>
             </View>
-            <Text style={estilos.paradaHora}>09:50</Text>
+            <Text style={estilos.paradaHora} />
           </View>
         </View>
       </View>
@@ -83,8 +114,7 @@ export default function Puerta() {
             <Text style={estilos.tituloFuerte}>tu cuenta</Text>
           </Text>
           <Text style={estilos.explicacion}>
-            Te pedimos el correo una vez. Con eso te avisamos cuando Andrés acepte y te guardamos
-            el código de abordaje.
+            {`Te pedimos el correo una vez. Con eso te avisamos cuando ${conductor} acepte y te guardamos el código de abordaje.`}
           </Text>
         </View>
 
@@ -135,7 +165,7 @@ const estilos = StyleSheet.create({
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
-    maxWidth: 390,
+    maxWidth: espacio.marco,
     width: '100%',
     alignSelf: 'center',
   },

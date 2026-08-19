@@ -268,7 +268,7 @@ const estilos = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 22,
     width: '100%',
-    maxWidth: 390,
+    maxWidth: espacio.marco,
     alignSelf: 'center',
   },
 
@@ -306,7 +306,10 @@ const estilos = StyleSheet.create({
   entrada: {
     flex: 1,
     fontFamily: familia,
-    fontSize: 15,
+    /* 16 y no 15: por debajo de 16 px, Safari en el iPhone acerca la página
+       al enfocar el campo, y al salir no la devuelve. Es el «zoom» que se
+       veía al tocar para escribir un lugar. */
+    fontSize: 16,
     color: color.ink900,
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' as never } : null),
   },
