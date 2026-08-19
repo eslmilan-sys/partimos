@@ -17,7 +17,9 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { type ViajeEnResultados, buscarViajes, proximoDiaConViajes } from '@/servicios/viajes';
+import { type Destino, ciudadesDeSalida } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { Mapa } from '@/ui/Mapa';
 import { Vidrio } from '@/ui/Vidrio';
 import { Boton, Insignia } from '@/ui/controles';
@@ -33,16 +35,28 @@ const SITIOS = [
   { top: 292, left: 262 },
 ];
 
+/** De dónde se sale por defecto, igual que en `3a`. */
+const DESDE_POR_DEFECTO: Destino = {
+  nombre: 'Ciudad de Panamá',
+  contexto: 'Panamá',
+  ciudad: 'panama',
+  lat: 8.9824,
+  lng: -79.5199,
+};
+
 export default function YaMapa() {
   const router = useRouter();
   const [viajes, setViajes] = useState<ViajeEnResultados[]>([]);
+  const [desde, setDesde] = useState<Destino>(DESDE_POR_DEFECTO);
+  const [buscando, setBuscando] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const dia = await proximoDiaConViajes('panama', 'chitre');
-      setViajes(await buscarViajes('panama', 'chitre', dia));
+      const origen = desde.ciudad ?? 'panama';
+      const dia = await proximoDiaConViajes(origen, 'chitre');
+      setViajes(await buscarViajes(origen, 'chitre', dia));
     })();
-  }, []);
+  }, [desde]);
 
   const [primero, ...resto] = viajes;
 
@@ -55,8 +69,14 @@ export default function YaMapa() {
         <Vidrio radioEsquina={radio.control} estilo={{ flex: 1 }}>
           <View style={estilos.dentroBarra}>
             <View style={estilos.punto} />
-            <Text style={estilos.origen}>Albrook · Terminal</Text>
-            <Pressable accessibilityRole="button">
+            <Text style={estilos.origen} numberOfLines={1}>
+              {desde.nombre}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cambiar de dónde sales"
+              onPress={() => setBuscando(true)}
+            >
               <Text style={estilos.cambiar}>cambiar</Text>
             </Pressable>
           </View>
@@ -66,7 +86,12 @@ export default function YaMapa() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Buscar"
-            onPress={() => router.push('/(pasajero)/resultados')}
+            onPress={() =>
+              router.push({
+                pathname: '/(pasajero)/resultados',
+                params: { origen: desde.ciudad ?? 'panama', destino: 'chitre' },
+              })
+            }
             style={estilos.botonLupa}
           >
             <Lupa tamano={20} tinta={color.ink900} />
@@ -164,6 +189,16 @@ export default function YaMapa() {
           </View>
         </Vidrio>
       ) : null}
+      <BuscadorDeLugar
+        abierto={buscando}
+        titulo="Desde dónde sales"
+        sugerencias={ciudadesDeSalida()}
+        alElegir={(d) => {
+          setDesde(d);
+          setBuscando(false);
+        }}
+        alCerrar={() => setBuscando(false)}
+      />
     </View>
   );
 }

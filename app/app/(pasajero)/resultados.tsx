@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
@@ -21,6 +21,7 @@ import {
   diaEnPanama,
   proximoDiaConViajes,
 } from '@/servicios/viajes';
+import { hayCorredor, nombreDeCiudad } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
@@ -32,17 +33,61 @@ import { familia, color, espacio, radio } from '@/ui/tokens';
 
 
 
+/** La ruta del traspaso, cuando la pantalla se abre suelta desde el índice. */
+const ORIGEN_POR_DEFECTO = 'panama';
+const DESTINO_POR_DEFECTO = 'chitre';
+
 export default function Resultados() {
   const router = useRouter();
+  // `3a` manda a dónde vas. Sin eso —solo abriendo la pantalla suelta— la ruta
+  // del traspaso, que es la que tiene viajes sembrados.
+  const params = useLocalSearchParams<{
+    origen?: string;
+    destino?: string;
+    etiquetaDestino?: string;
+  }>();
+
+  /**
+   * La ruta se lee del parámetro **después** del primer render, y no durante.
+   *
+   * El sitio sale prerenderizado sin parámetros, así que el HTML que llega ya
+   * dice «→ Chitré»; pintar «→ Colón» en el primer render del navegador es una
+   * discordancia de hidratación —React 418, medido— y React tira el árbol y lo
+   * rehace. Es el mismo patrón que usan las otras pantallas con parámetro:
+   * pantalla vacía hasta que se sabe qué enseñar.
+   */
+  const [ruta, setRuta] = useState<{ origen: string; destino: string; etiqueta: string } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    setRuta({
+      origen: params.origen || ORIGEN_POR_DEFECTO,
+      destino: params.destino || DESTINO_POR_DEFECTO,
+      etiqueta: params.etiquetaDestino || '',
+    });
+  }, [params.origen, params.destino, params.etiquetaDestino]);
+
+  const origen = ruta?.origen ?? ORIGEN_POR_DEFECTO;
+  const destino = ruta?.destino ?? DESTINO_POR_DEFECTO;
+  // Un sitio de Mapbox no es una ciudad que servimos: se busca, no se encuentra,
+  // y la pantalla tiene que decir eso y no «nadie sale con esos filtros».
+  const servimosLaRuta = hayCorredor(origen, destino);
   const [filtros, setFiltros] = useState<Filtros>({});
   const [hojaAbierta, setHojaAbierta] = useState(false);
   const [viajes, setViajes] = useState<ViajeEnTarjeta[]>([]);
   const [dia, setDia] = useState<string | null>(null);
 
   const buscar = useCallback(async () => {
-    const fecha = await proximoDiaConViajes('panama', 'chitre');
+    if (!ruta) return;
+    if (!servimosLaRuta) {
+      setDia(null);
+      setViajes([]);
+      return;
+    }
+    const fecha = await proximoDiaConViajes(origen, destino);
     setDia(fecha);
-    const encontrados = await buscarViajes('panama', 'chitre', fecha, filtros);
+    const encontrados = await buscarViajes(origen, destino, fecha, filtros);
     setViajes(
       encontrados
         .map(
@@ -66,7 +111,7 @@ export default function Resultados() {
         )
         .sort((a, b) => a.salida.localeCompare(b.salida)),
     );
-  }, [filtros]);
+  }, [filtros, ruta, origen, destino, servimosLaRuta]);
 
   useEffect(() => {
     buscar();
@@ -74,6 +119,8 @@ export default function Resultados() {
 
   const alternar = (clave: keyof Filtros) =>
     setFiltros((f) => ({ ...f, [clave]: f[clave] ? undefined : true }));
+
+  if (!ruta) return <View style={estilos.pantalla} />;
 
   return (
     <View style={estilos.pantalla}>
@@ -103,9 +150,11 @@ export default function Resultados() {
         </View>
 
         <Text style={estilos.titular}>
-          {'Panamá'}
+          {nombreDeCiudad(origen)}
           {'\n'}
-          <Text style={estilos.titularFuerte}>→ Chitré</Text>
+          <Text style={estilos.titularFuerte}>
+            {`→ ${ruta.etiqueta || nombreDeCiudad(destino)}`}
+          </Text>
         </Text>
         <Text style={estilos.subtitulo}>
           {`${cuandoTexto(dia)} · 1 puesto · ${viajes.length} ${viajes.length === 1 ? 'viaje' : 'viajes'}`}
@@ -138,8 +187,22 @@ export default function Resultados() {
 
         {viajes.length === 0 ? (
           <View style={estilos.vacio}>
-            <Text style={estilos.vacioTitulo}>Nadie sale hoy con esos filtros.</Text>
-            <Text style={estilos.vacioTexto}>Quita alguno o mira mañana.</Text>
+            {servimosLaRuta ? (
+              <>
+                <Text style={estilos.vacioTitulo}>Nadie sale hoy con esos filtros.</Text>
+                <Text style={estilos.vacioTexto}>Quita alguno o mira mañana.</Text>
+              </>
+            ) : (
+              <>
+                {/* Una búsqueda sin resultados no es un fallo: es un aviso a los
+                    conductores. PRODUCT.md lo dice, y por eso se nombra la ruta
+                    en vez de decir «no hay nada». */}
+                <Text style={estilos.vacioTitulo}>Todavía no hay esa ruta.</Text>
+                <Text style={estilos.vacioTexto}>
+                  {`Nadie ha publicado ${nombreDeCiudad(origen)} → ${ruta.etiqueta || nombreDeCiudad(destino)}. Guárdala y te avisamos cuando alguien la abra.`}
+                </Text>
+              </>
+            )}
           </View>
         ) : (
           <View style={{ gap: 8 }}>
