@@ -1,0 +1,90 @@
+# La app, publicada por CI. Nunca se commitea el compilado: se construye aquí y
+# se sube directo a Pages, que es lo que evita las tres copias sin etiqueta del
+# repositorio viejo.
+#
+# La dirección que sale de esto es
+#     https://eslmilan-sys.github.io/partimos/app/
+# y tiene que estar en «Redirect URLs» del proyecto Supabase, o el enlace de
+# confirmación del correo vuelve a la Site URL y cae en una página de error.
+
+name: App
+
+on:
+  push:
+    branches: [main, 'claude/**']
+  workflow_dispatch:
+
+# Lo que Pages necesita para aceptar el envío. `id-token` es el que firma.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un despliegue a la vez; el que llega después espera, no cancela al de en medio.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+
+      # Las reglas de negocio y el contrato de tipos antes que nada: publicar
+      # algo que no compila es publicar una pantalla en blanco.
+      - run: npm run typecheck
+      - run: npm test
+
+      - name: Exportar el sitio
+        env:
+          # Estas llaves son públicas a propósito —lo que protege los datos son
+          # las políticas RLS, no el secreto de una cadena compilada en el
+          # paquete—. Van aquí en claro por la misma razón que en .env.example.
+          EXPO_PUBLIC_SUPABASE_URL: https://zcwueglgirqxwazhfidi.supabase.co
+          EXPO_PUBLIC_SUPABASE_LLAVE: sb_publishable_isfWgZ9aT6QTUDtubxr_Iw_xdPLvp9e
+          # Contra la base de verdad. Es el objetivo: que quien pruebe vea sus
+          # propios datos y no el recorrido del traspaso.
+          EXPO_PUBLIC_FUENTE: supabase
+          # Sin jeton, la búsqueda de sitios ofrece el campo libre en vez de
+          # sugerencias. Se pone como secreto del repositorio cuando exista.
+          EXPO_PUBLIC_MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
+          # El subcamino de Pages. Solo al exportar: `npx expo start` sigue
+          # sirviendo desde la raíz.
+          PARTIMOS_BASE_URL: /partimos/app/
+        run: npx expo export --platform web --output-dir dist
+
+      # Pages sirve lo que se le sube tal cual. La app cuelga de /app/ para
+      # dejar la raíz libre para el sitio de `web/`.
+      - name: Poner la app bajo /app/
+        run: mkdir -p ../publicar/app && cp -r dist/. ../publicar/app/
+
+      # Sin esto, GitHub Pages pasa la carpeta por Jekyll y se come todo lo que
+      # empieza por guion bajo — que es donde Expo deja el paquete.
+      - run: touch ../publicar/.nojekyll
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: publicar
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - id: pages
+        uses: actions/deploy-pages@v4
