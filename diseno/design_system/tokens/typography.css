@@ -1,0 +1,27 @@
+:root{
+--font-display:"Helvetica Neue",Helvetica,"Inter Tight",Arial,sans-serif;
+--font-ui:"Helvetica Neue",Helvetica,"Inter Tight",Arial,sans-serif;
+/* No monospace in this system. Times, prices and plates use the UI font with
+   tabular figures, so columns still align without a typewriter voice. */
+--font-data:"Helvetica Neue",Helvetica,"Inter Tight",Arial,sans-serif;
+--font-mono:var(--font-data);
+--numeric-tabular:tabular-nums; /* @kind other */
+
+--weight-light:300;--weight-regular:400;--weight-medium:500;--weight-semibold:600;--weight-bold:700; /* @kind font */
+
+/* type scale — display is tight & optical, body is roomy */
+--size-display-xl:72px;--size-display-l:56px;--size-display-m:40px;--size-display-s:32px;
+--size-title-l:28px;--size-title-m:22px;--size-title-s:18px;
+--size-body-l:17px;--size-body-m:15px;--size-body-s:13px;
+--size-label:13px;--size-micro:11px;
+
+--lh-display:1.02; /* @kind font */--lh-title:1.18; /* @kind font */--lh-body:1.45; /* @kind font */--lh-tight:1.3; /* @kind font */
+--track-display:-0.04em;--track-title:-0.022em;--track-body:-0.006em;--track-micro:0.1em; /* @kind font */
+
+/* roles */
+--text-display:var(--weight-semibold) var(--size-display-l)/var(--lh-display) var(--font-display); /* @kind font */
+--text-title:var(--weight-semibold) var(--size-title-m)/var(--lh-title) var(--font-display); /* @kind font */
+--text-body:var(--weight-regular) var(--size-body-m)/var(--lh-body) var(--font-ui); /* @kind font */
+--text-label:var(--weight-medium) var(--size-label)/1.2 var(--font-ui); /* @kind font */
+--text-eyebrow:var(--weight-semibold) var(--size-micro)/1.2 var(--font-ui); /* @kind font */
+}

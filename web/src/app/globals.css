@@ -1,0 +1,1766 @@
+@import "tailwindcss";
+
+@property --glass-alpha {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.74;
+}
+
+/* =====================================================================
+   PARTIMOS — « SOL »
+   ---------------------------------------------------------------------
+   Le soleil du Panama. Ambre et bleu profond sur un fond presque blanc.
+
+   Trois décisions qui portent tout le reste :
+
+   1. LE FOND EST UN BLANC À PEINE TIÉDI, #FCFCFA — et non plus le crème
+      #FFFBEB. Le crème teintait TOUT : chaque carte blanche y prenait un
+      halo jaune, chaque photo virait au sépia, et l'ambre s'y noyait au
+      lieu d'y trancher. La chaleur ne se met plus dans le fond de page,
+      elle se met LÀ OÙ ELLE TRAVAILLE : la lumière du premier écran, le
+      bouton, le tracé, la section sombre. Le reste respire en blanc.
+
+      Conséquence sur la rampe : les gris cessent d'être des beiges. Un
+      #E7DDC9 posé sur du blanc se lit comme une tache jaune, pas comme une
+      bordure. La rampe garde juste ce qu'il faut de chaud (les valeurs
+      sombres restent brunes) pour ne pas devenir clinique.
+
+   2. L'ACTION EST AMBRE AVEC DU TEXTE ENCRE, pas blanc. #26221C sur
+      #F59E0B donne 7,4:1 — le bouton devient l'élément le PLUS lisible de
+      la page. Presque personne ne fait ça : le réflexe est de poser du
+      blanc sur sa couleur de marque, ce qui donne un bouton plus difficile
+      à lire que le texte courant.
+
+   3. LE BLEU EST LA COULEUR DE LECTURE. Liens, focus, icônes. Il porte la
+      confiance pendant que l'ambre porte l'envie.
+
+   AUCUN DÉGRADÉ SUR DU TEXTE. L'emphase se fait à la graisse et à la
+   taille — un texte en dégradé est plus dur à lire et se démode plus vite
+   qu'un texte gras. Sur une SURFACE, en revanche, un dégradé très sourd
+   donne à une grande zone sombre la profondeur qu'un aplat n'a pas ; c'est
+   le seul endroit où on s'y autorise.
+
+   Le VERT reste la marque et rien d'autre. Le ROUGE reste l'erreur.
+
+   Contrastes vérifiés au calcul : texte principal 15,4:1 sur le fond,
+   secondaire 6,0:1, lien bleu 6,5:1, encre sur bouton ambre 7,4:1.
+   ===================================================================== */
+
+@theme {
+  /* ---- Rampe neutre : brune dans l'ombre, neutre dans la lumière ----
+     Les valeurs sombres gardent leur brun — c'est ce qui empêche la section
+     sombre de virer au gris d'interface. Les valeurs claires, elles, sont
+     désaturées : sur du blanc, un beige ne se lit pas comme une bordure
+     mais comme une salissure. */
+  --color-ink-950: #17140f;
+  --color-ink-900: #26221c; /* texte principal — 15,4:1 sur le fond */
+  --color-ink-800: #3a342a;
+  --color-ink-700: #4e4638;
+  --color-ink-600: #5b5346;
+  --color-ink-500: #665f50; /* texte secondaire — 6,0:1 sur le fond */
+  --color-ink-400: #9c968a; /* secondaire sur fond sombre — 5,4:1 dessus */
+  --color-ink-300: #c8c3b8; /* secondaire sur fond sombre — 9,0:1 dessus */
+  --color-ink-200: #e2dfd8; /* bordures */
+  --color-ink-100: #f1efea; /* survol, remplissages sourds */
+  /* Le fond du site. Pas #FFFFFF : à blanc pur, les cartes `bg-white` n'ont
+     plus rien au-dessus de quoi flotter et la page s'aplatit. À #FAF9F7 elles
+     gardent 1,05:1 d'écart — assez pour se détacher, trop peu pour se
+     remarquer. */
+  --color-ink-50: #faf9f7;
+
+  /* =================================================================
+     SOL — LA RAMPE ORANGE-JAUNE, ET LA SEULE.
+     =================================================================
+
+     CE QU'ELLE REMPLACE, ET POURQUOI.
+
+     Le produit portait TROIS familles d'accent qui se disputaient :
+     un bleu (#0284c7) pour les liens, un ambre (#f59e0b) pour les
+     boutons du site, un orange (#e2540c) pour l'app. Le résultat était
+     exactement ce qui a été reproché : « le login de l'application web
+     a une palette différente ». Ce n'était pas une impression — c'était
+     littéralement vrai, écrit dans la feuille de style.
+
+     Une seule rampe, du jaune au brun brûlé, avec une DÉRIVE DE TEINTE
+     de 42° (clair) vers 20° (foncé). C'est cette dérive qui fait qu'une
+     rampe chaude paraît naturelle : un orange qu'on assombrit sans
+     tourner vers le rouge donne de la boue, et un jaune qu'on éclaircit
+     sans tourner vers le beurre donne du fluo.
+
+     LES RÔLES SE SÉPARENT PAR LA VALEUR, PLUS PAR LA TEINTE.
+
+     C'était le travail du bleu : distinguer « ce qu'on peut lire et
+     toucher » de « ce qu'on peut appuyer ». En monochrome, cette
+     distinction se fait autrement, et c'est plus exigeant :
+       · une ACTION est une SURFACE — un dégradé sol-600→700, du blanc
+         dessus, une ombre teintée ;
+       · un LIEN est du TEXTE — sol-700 nu, sans fond, souligné au
+         survol.
+     Deux choses de la même famille ne se confondent que si on leur
+     donne le même traitement. On ne le fait nulle part.
+
+     LES CHIFFRES SONT VÉRIFIÉS, PAS ESTIMÉS. Chaque valeur porte son
+     rapport de contraste réel — c'est ce qui a permis de découvrir au
+     passage que l'orange de l'app (#e2540c, 3,8:1 avec du blanc) était
+     SOUS le seuil AA depuis le début. sol-600 le corrige à 4,6:1. */
+  --color-sol-50: #fff8ee; /* fond d'un bloc entier — il ne crie pas */
+  --color-sol-100: #ffebd1; /* pastille, survol, bandeau doux */
+  --color-sol-200: #fbd8a3; /* bordure teintée, séparateur */
+  --color-sol-300: #f7bc68; /* lueur, haut d'un dégradé de lumière */
+  --color-sol-400: #f29e33; /* ambre décoratif — encre dessus : 7,3:1 */
+  --color-sol-500: #e67813; /* l'orange vif — lueurs, orange sur la nuit : 6,3:1 */
+  --color-sol-600: #be560a; /* surface d'action — blanc dessus : 4,6:1 */
+  --color-sol-700: #9e4409; /* TEXTE orange sur clair — 6,1:1 */
+  --color-sol-800: #78330b; /* texte orange fort — 8,8:1 */
+  --color-sol-900: #4a210b; /* presque brun : du texte, jamais un fond */
+
+  /* ---- Ce que chaque famille désigne, une fois posée sur la rampe ----
+     Les noms restent : `accent`, `action`, `naranja` sont écrits dans
+     deux cents endroits, et les renommer aurait été deux cents
+     occasions de se tromper pour zéro gain visible. Ce qui change,
+     c'est qu'ils désignent enfin la MÊME famille. */
+
+  /* LECTURE — liens, focus, bordures actives. */
+  --color-accent: var(--color-sol-600); /* remplissage, blanc dessus — 4,6:1 */
+  --color-accent-ink: var(--color-sol-700); /* liens sur clair — 6,1:1 */
+  --color-accent-soft: var(--color-sol-100);
+
+  /* ACTION — la surface qu'on appuie, et l'ambre qui la qualifie. */
+  --color-action: var(--color-sol-400); /* pastille, texte ENCRE dessus — 7,3:1 */
+  --color-action-bright: var(--color-sol-300); /* survol */
+  --color-action-deep: var(--color-sol-700); /* orange sur clair — 6,1:1 */
+  /* Le jeton manquait alors que `text-action-ink` était écrit dans le
+     tableau des corridors : Tailwind ne générait donc pas la classe, et le
+     chiffre le plus important de la page — l'aporte maximum — s'affichait en
+     couleur héritée, c'est-à-dire en encre. Vérifié au navigateur avant
+     correction : rgb(38, 34, 28). */
+  --color-action-ink: var(--color-sol-800); /* TEXTE orange — 8,8:1 sur le crème */
+  --color-action-soft: var(--color-sol-100);
+
+  /* ---- LA NUIT : les grandes surfaces sombres ----
+     ─────────────────────────────────────────────────────────────────
+     ELLE A DÉJÀ ÉTÉ REFUSÉE UNE FOIS, ET IL FAUT SAVOIR POURQUOI.
+
+     Ces fonds ont d'abord été BRUNS — l'encre du texte étalée sur un
+     écran entier. Sur une grande surface, un brun moyen ne se lit pas
+     comme une couleur, il se lit comme de la boue, et le propriétaire
+     l'a dit deux fois. Le bleu nuit (#06141d) a été la réponse, et
+     c'était la bonne réponse à ce problème-là.
+
+     Il en a créé un autre, plus lent à voir : le produit est orange, et
+     ses plus grandes surfaces étaient bleues. « Recrée une palette
+     autour de l'orange-jaune et applique-la partout » — ces bandes-là
+     étaient l'endroit où ça manquait le plus.
+
+     CE QUI EST FAIT ICI N'EST PAS UN RETOUR EN ARRIÈRE. La boue était
+     un brun MOYEN (autour de 20 % de clarté), assez clair pour qu'on
+     lise sa teinte, trop sombre pour qu'elle soit belle. Cette nuit-ci
+     est un NOIR : 6 % de clarté, chroma très bas. À cette profondeur on
+     ne lit plus une teinte, on lit une température — et c'est
+     exactement ce qu'on veut, une nuit qui appartient au même monde que
+     l'ambre sans jamais prétendre être une couleur.
+
+     Les contrastes du texte y sont égaux ou meilleurs qu'avant :
+     night-200 passe de 12,05 à 12,29:1, night-300 de 8,57 à 8,10:1, et
+     l'ambre sol-400 y tient 8,7:1. */
+  --color-night-950: #16110c;
+  --color-night-900: #1f1913;
+  --color-night-800: #2e251b;
+  --color-night-700: #3e3325;
+  --color-night-300: #b3a99c; /* mentions — 8,1:1 sur night-950 */
+  --color-night-200: #d8d0c6; /* corps — 12,3:1 */
+  --color-night-100: #f0ebe4;
+
+  /* ---- Marque (jamais informatif) ---- */
+  --color-brand-green: #a0d838;
+  --color-brand-green-deep: #4d7c0f;
+
+  /* ---- Erreur uniquement ---- */
+  --color-danger: #b3261e;
+  --color-danger-soft: #fdecea;
+
+  /* ---- Typographie ---- */
+  /* Bricolage Grotesque porte les titres : il a du caractère et un axe
+     variable, là où Inter, Poppins et consorts sont les défauts que toute
+     interface générée finit par porter. Nunito Sans porte le texte — plus
+     chaud et plus rond qu'Instrument Sans, ce qui est exactement ce qui
+     manquait. */
+  --font-display: var(--font-gabarito), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- Rayons ----
+     Un rayon imbriqué se CALCULE, il ne se devine pas :
+     rayon intérieur = rayon extérieur − espacement.
+     Une carte à 24 px avec 8 px de padding porte des enfants à 16 px. Réutiliser
+     24 px à l'intérieur donne une courbe visiblement fausse. */
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius-nested: 16px; /* 24 − 8 */
+
+  /* ---- Ombres douces, jamais dures ---- */
+  /* Ombres TEINTÉES du bleu, jamais du noir : une ombre grise sur un fond
+     coloré se lit comme de la saleté, une ombre de la teinte du fond se lit
+     comme de la profondeur. */
+  /* Ombres teintées de la MATIÈRE du fond, jamais du noir : une ombre grise
+     sur un fond crème se lit comme de la saleté. */
+  --shadow-card:
+    0 1px 2px rgb(120 85 20 / 0.06), 0 10px 26px -14px rgb(120 85 20 / 0.3);
+  --shadow-lift:
+    0 2px 6px rgb(120 85 20 / 0.08), 0 20px 44px -20px rgb(120 85 20 / 0.36);
+  --shadow-float: 0 26px 64px -26px rgb(38 34 28 / 0.45);
+
+  /* ---- Tracé de la route sélectionnée sur la carte ---- */
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1000;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* ---- Entrée des panneaux (menu, connexion) ---- */
+  @keyframes sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes drawer-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* ---- Défilement du bandeau « publicados hoy » ---- */
+  @keyframes strip {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@layer base {
+  :root {
+    --rail-gutter: 0px;
+    color-scheme: light;
+
+    /* ---- LA BARRE FLOTTANTE ----
+       Une seule source pour sa hauteur et pour la place qu'elle occupe.
+       4rem et non 3.5 : c'est la respiration de la référence validée par le
+       client — le logo et les liens ont de l'air au-dessus et en dessous. */
+    --nav-h: 3.5rem;
+    --nav-gap: 0.75rem;
+    --nav-space: calc(var(--nav-h) + var(--nav-gap) * 2);
+
+    /* ---- LE VERRE ----
+       Ivoire à 0,74, pas blanc pur : la page est chaude, un verre blanc y
+       ferait un rectangle froid posé dessus.
+
+       `--on-glass-muted` est LA variable qui compte. Le verre est translucide,
+       donc sa valeur composite dépend de ce qui passe dessous, et la barre
+       survole aussi bien le premier écran clair que la section sombre. Sur
+       fond sombre, le verre composite tombe à #C6C3BD : `ink-900` y tient à
+       9,0:1, `ink-700` à 5,3:1 — mais `ink-500` chute à 3,6:1, sous le seuil.
+       D'où un jeton défini une fois plutôt qu'une couleur choisie au cas par
+       cas, qui finirait par être fausse quelque part.
+
+       Corollaire à ne pas oublier : sur du verre, PAS de texte bleu ni ambre.
+       `accent-ink` y tombe à 3,7:1, `action-ink` à 3,9:1. */
+    --glass-tint: 255 253 247;
+    --glass-alpha: 0.74;
+    --on-glass: var(--color-ink-900);
+    --on-glass-muted: var(--color-ink-700);
+
+    /* Paliers de flou, nommés une fois (grille : sm / md / xl). Pas de
+       palier « 3xl » : un blur de 64 px sur un Android d'entrée de gamme
+       coûte plus qu'il ne rend, et la cible est en données mobiles. */
+    --glass-blur-sm: 8px;
+    --glass-blur-md: 14px;
+    --glass-blur-xl: 20px;
+    /* Réservé aux PETITES surfaces (la barre) : le coût d'un flou croît avec
+       le rayon ET l'aire. 28 px sur une bande de 64 px de haut est payable ;
+       sur un écran entier, non. */
+    --glass-blur-2xl: 28px;
+  }
+
+  /* ---- CE QUI SÉPARE UN VRAI VERRE D'UN APLAT À 74 % ----
+
+     1. `saturate(180%)` EN PLUS du flou. Un flou seul délave ce qu'il y a
+        dessous : les couleurs se moyennent vers le gris et la vitre paraît
+        sale. Re-saturer rend la lumière derrière — c'est ce que fait macOS,
+        et c'est la moitié de l'effet.
+
+     2. UN LISERÉ DE LUMIÈRE EN HAUT. Une vitre a une tranche, et sa tranche
+        supérieure accroche la lumière. Ce pixel blanc à 65 % fait la
+        différence entre « du verre » et « un rectangle translucide ».
+
+     3. DEUX OMBRES, PAS UNE. Une très courte pour poser l'objet sur la page,
+        une longue et diffuse pour le décoller. Une seule ombre moyenne donne
+        toujours l'air d'un `box-shadow` par défaut.
+
+     Ce qu'il faut derrière : du CONTENU, pas un aplat. Un flou n'a de sens
+     que s'il a quelque chose à flouter — c'est là que la plupart des essais
+     de verre échouent. D'où les halos, plus bas. */
+  .glass {
+    background-color: rgb(var(--glass-tint) / var(--glass-alpha));
+    /* Le REFLET. Une vitre réelle n'est jamais uniformément translucide :
+       la lumière glisse dessus en diagonale. Un voile blanc qui s'éteint
+       avant la moitié de la surface suffit — au-delà, ça se voit, et un
+       reflet qui se voit est un reflet raté. */
+    background-image: linear-gradient(
+      160deg,
+      rgb(255 255 255 / 0.5),
+      rgb(255 255 255 / 0) 52%
+    );
+    color: var(--on-glass);
+    /* Quatre ombres, chacune un fait physique : la tranche haute qui prend
+       la lumière, la tranche basse qui porte l'épaisseur, le contact avec
+       la page, et la profondeur au-dessus d'elle. */
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.65),
+      inset 0 -1px 0 rgb(38 34 28 / 0.07),
+      inset 4px 4px 12px -3px rgb(255 255 255 / 0.35),
+      inset -4px -4px 12px -3px rgb(38 34 28 / 0.08),
+      0 1px 2px rgb(38 34 28 / 0.05),
+      0 14px 34px -14px rgb(180 83 9 / 0.2);
+  }
+
+  /* Le flou n'est appliqué QUE s'il est réellement supporté. Sinon la règle
+     `background-color` translucide resterait, sans rien flouter : on verrait
+     le texte de la page au travers de la barre. On rend donc le fond opaque
+     dans le même bloc que le repli. */
+  @supports not (
+    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+  ) {
+    .glass {
+      --glass-alpha: 1;
+    }
+  }
+
+  @supports (
+    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+  ) {
+    .glass {
+      -webkit-backdrop-filter: blur(var(--glass-blur-xl)) saturate(180%);
+      backdrop-filter: blur(var(--glass-blur-xl)) saturate(180%);
+      backdrop-filter: url(#liquid-lens) blur(var(--glass-blur-xl))
+        saturate(180%);
+    }
+  }
+
+  /* Certains utilisateurs demandent explicitement moins de transparence — sur
+     iOS et Windows c'est un réglage système, souvent activé pour une raison
+     de lisibilité. On le respecte au lieu de l'ignorer. */
+  @media (prefers-reduced-transparency: reduce) {
+    .glass {
+      --glass-alpha: 1;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  /* Verre SOMBRE, pour les objets posés sur la nuit. Même logique inversée :
+     un voile clair très faible, et le liseré passe du blanc franc à un blanc
+     discret. Vérifié sur le composite le plus CLAIR de la nuit (base #17384C
+     + lueur ambre), donc le pire cas : blanc 7,6:1, `night-200` 4,9:1. */
+  .glass-noche {
+    background-color: rgb(255 255 255 / 0.1);
+    /* Le même reflet diagonal que le verre clair, à peine posé : dans la
+       nuit, c'est lui qui dit « vitre » plutôt que « rectangle gris ». */
+    background-image: linear-gradient(
+      160deg,
+      rgb(255 255 255 / 0.09),
+      rgb(255 255 255 / 0) 50%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      inset 0 -1px 0 rgb(6 20 29 / 0.4),
+      inset 4px 4px 12px -3px rgb(255 255 255 / 0.16),
+      inset -4px -4px 12px -3px rgb(0 0 0 / 0.28),
+      0 10px 26px -14px rgb(6 20 29 / 0.6);
+  }
+
+  @supports (
+    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+  ) {
+    .glass-noche {
+      -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(160%);
+      backdrop-filter: blur(var(--glass-blur-md)) saturate(160%);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .glass-noche {
+      background-color: var(--color-night-800);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  /* ---- CE QUE LE VERRE FLOUTE ----
+     Deux halos chauds qui dérivent lentement sous le premier écran. Sans eux
+     la barre floute un aplat, et un aplat flouté reste un aplat : tout
+     l'effet tombe. Ils sont volontairement TRÈS lents (28 et 34 s) — on ne
+     doit jamais les voir bouger, seulement s'apercevoir que la page n'est pas
+     figée.
+
+     Coupés sous 768 px : un `filter: blur(70px)` sur deux grandes surfaces
+     coûte cher sur un téléphone d'entrée de gamme, et à cette largeur la
+     barre a déjà le dégradé du premier écran à flouter. Coupés aussi en
+     `reduced-motion` — c'est la TIMELINE qu'on retire, pas seulement la
+     durée. */
+  .halos {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  @media (min-width: 768px) {
+    .halos::before,
+    .halos::after {
+      content: "";
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(70px);
+      will-change: transform;
+    }
+
+    .halos::before {
+      width: 34rem;
+      height: 24rem;
+      top: -9rem;
+      right: -5rem;
+      background: radial-gradient(
+        circle,
+        rgb(251 191 36 / 0.55),
+        transparent 68%
+      );
+    }
+
+    /* Le froid doit se DEVINER, pas se voir. À 0,34 il faisait une tache
+       bleue identifiable dans le coin — donc un objet, alors que son rôle est
+       seulement d'empêcher l'ambre de tourner à l'orange uni. */
+    .halos::after {
+      width: 27rem;
+      height: 20rem;
+      top: 3rem;
+      left: -9rem;
+      background: radial-gradient(
+        circle,
+        rgb(96 165 250 / 0.2),
+        transparent 70%
+      );
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .halos::before {
+        animation: derive-a 28s ease-in-out infinite alternate;
+      }
+      .halos::after {
+        animation: derive-b 34s ease-in-out infinite alternate;
+      }
+    }
+  }
+
+  @keyframes derive-a {
+    to {
+      transform: translate3d(-3.5rem, 2rem, 0) scale(1.12);
+    }
+  }
+
+  @keyframes derive-b {
+    to {
+      transform: translate3d(3rem, -1.5rem, 0) scale(1.09);
+    }
+  }
+
+  /* La barre se resserre quand on descend : elle se rapproche du bord et perd
+     un peu de hauteur, donc elle prend moins de place une fois qu'on lit.
+
+     Piloté par le défilement NATIF — pas d'écouteur, pas de `useState`, pas
+     de rendu React à chaque image. Là où `scroll()` n'existe pas, la barre
+     reste simplement à sa taille d'ouverture : c'est la même page, sans le
+     mouvement. La hauteur réservée dans le flux, elle, ne change jamais —
+     sinon le contenu sauterait au premier pixel de défilement. */
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .nav-pill {
+        animation: nav-serre linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 140px;
+      }
+    }
+  }
+
+  /* Le verre LIQUIDE, en utilitaire : la même lentille SVG que la barre,
+     pour les autres objets flottants (carte de recherche, barre basse,
+     chat). Un seul matériau dans toute la page — c'est ce qui fait
+     « système » plutôt que « collage ». La cascade retire la déclaration
+     invalide là où url(#…) n'est pas supporté : le flou simple reste. */
+  .liquid {
+    -webkit-backdrop-filter: blur(var(--glass-blur-xl)) saturate(185%);
+    backdrop-filter: blur(var(--glass-blur-xl)) saturate(185%);
+    backdrop-filter: url(#liquid-lens) blur(var(--glass-blur-xl))
+      saturate(185%);
+  }
+
+  /* ---- PARALLAXE DU PREMIER ÉCRAN ----
+     Le texte s'éloigne en profondeur quand on descend : chaque couche
+     traîne d'une vitesse différente (le badge est le plus « loin », il
+     traîne le plus), et l'ensemble s'éteint doucement. Piloté par le
+     défilement NATIF, comme la barre — pas un écouteur JS. Les classes
+     vivent sur des CONTENEURS, jamais sur les éléments `.enter` : deux
+     animations qui écrivent transform sur le même nœud se marchent
+     dessus, et c'est l'entrée qui perdrait. */
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .para-lejos,
+      .para-medio,
+      .para-cerca {
+        animation: para-fuite linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 640px;
+      }
+      .para-lejos {
+        --para-y: 120px;
+      }
+      .para-medio {
+        --para-y: 72px;
+      }
+      .para-cerca {
+        --para-y: 34px;
+      }
+    }
+  }
+
+  @keyframes para-fuite {
+    to {
+      transform: translateY(var(--para-y));
+      opacity: 0.1;
+    }
+  }
+
+  /* Le rectangle-carro du hero est redevenu IMMOBILE (décision du
+     propriétaire) : les animations .carro-flota / .carro-avanza et
+     leurs keyframes ont été retirées. */
+
+  .nav-pill {
+    --glass-alpha: 0.6;
+    -webkit-backdrop-filter: blur(var(--glass-blur-2xl)) saturate(190%);
+    backdrop-filter: blur(var(--glass-blur-2xl)) saturate(190%);
+    backdrop-filter: url(#liquid-lens) blur(var(--glass-blur-2xl))
+      saturate(190%);
+  }
+
+  @keyframes nav-serre {
+    to {
+      height: 3rem;
+      margin-top: -0.25rem;
+      border-radius: 999px;
+      --glass-alpha: 0.82;
+    }
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* La « respiración » du fond est retirée : sur téléphone, un dégradé
+     qui dérive donne l'impression que la PAGE bouge (retour propriétaire).
+     Le fond est immobile — le mouvement appartient aux objets qui en ont
+     une raison (le carro du hero), jamais à la toile de fond. */
+
+  html {
+    scroll-behavior: smooth;
+    /* La barre flottante ne doit pas recouvrir la cible d'une ancre. Dérivé
+       de sa hauteur réelle : une constante en dur se désynchronise dès qu'on
+       touche à la barre, et le bug ne se voit qu'en cliquant une ancre. */
+    scroll-padding-top: calc(var(--nav-space) + 0.5rem);
+    /* `clip` et non `hidden` : hidden crée un conteneur de défilement
+       qu'iOS laisse « panner » au doigt — c'était le site qui bougeait
+       latéralement de quelques pixels. clip interdit tout déplacement. */
+    overflow-x: clip;
+  }
+
+  body {
+    background: var(--color-ink-50);
+    background-image: linear-gradient(
+      45deg,
+      #fefdfb,
+      #f6f9fc,
+      #fdfaf4,
+      #f8fafc
+    );
+    background-size: 380% 380%;
+    background-attachment: fixed;
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    font-size: 16.5px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Tous les montants et distances s'alignent verticalement. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: var(--color-accent-soft);
+    color: var(--color-ink-900);
+  }
+
+  /* Champs de formulaire : la remise à zéro évite les styles OS incohérents. */
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* Le chevron natif d'un `select` est rendu par le système, collé au bord,
+     sans espacement contrôlable. Laissé tel quel il jure avec tous les autres
+     champs. On le retire et on en dessine un, avec un retrait constant — et on
+     réserve la marge de droite pour que le texte ne vienne jamais dessous :
+     padding = retrait + largeur du chevron + retrait. */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-inline-end: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b5f4e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 16px;
+  }
+}
+
+@layer components {
+  /* Le dégradé de marque a été RETIRÉ du système.
+     Deux raisons : il est plus dur à lire qu'un aplat, et l'emphase se fait
+     à la graisse et à la taille — pas à la couleur qui bouge. La marque garde
+     son vert dans le logo, où c'est une forme et pas du texte. */
+
+  /* ---- LA ROUTE DES TROIS PAS ----
+     Le trait qui relie les arrêts, dessiné en CSS plutôt qu'en SVG : il doit
+     changer d'axe entre le téléphone (vertical) et le bureau (horizontal), ce
+     qu'un SVG ne fait pas sans deux tracés à tenir d'accord.
+
+     Un seul trait sobre relie les trois arrêts. Le marquage ambre n'y vit
+     plus : le budget du motif est de deux usages (pistes des corridors,
+     geste du paiement), et un connecteur n'a pas besoin d'être une route
+     pour dire « ceci mène à cela ». */
+  .ruta {
+    --ruta-epaisseur: 3px;
+  }
+
+  /* Sur téléphone : une route verticale qui descend le long des numéros. */
+  .ruta-paso::before,
+  .ruta-paso::after {
+    content: "";
+    position: absolute;
+    left: calc(28px - var(--ruta-epaisseur) / 2);
+    top: 56px;
+    bottom: -8px;
+    width: var(--ruta-epaisseur);
+    z-index: 1;
+  }
+
+  .ruta-paso:last-child::before,
+  .ruta-paso:last-child::after {
+    display: none;
+  }
+
+  .ruta-paso::before {
+    background: var(--color-ink-200);
+    border-radius: 999px;
+  }
+
+  /* À partir de 860 px la route se couche : elle traverse les trois colonnes
+     à hauteur des numéros. */
+  @media (min-width: 860px) {
+    .ruta-paso::before,
+    .ruta-paso::after {
+      left: 56px;
+      right: -28px;
+      top: calc(28px - var(--ruta-epaisseur) / 2);
+      bottom: auto;
+      width: auto;
+      height: var(--ruta-epaisseur);
+    }
+  }
+
+  /* ---- Chorégraphie d'entrée ----
+     Une séquence à l'ouverture plutôt que des micro-effets éparpillés :
+     c'est ce qui fait qu'une page « arrive » au lieu d'apparaître.
+
+     L'ordre des règles est délibéré. L'opacité à zéro n'est posée QUE dans
+     la requête `prefers-reduced-motion: no-preference` : si l'utilisateur
+     a demandé moins d'animation, ou si les animations échouent, le contenu
+     est simplement visible. Poser `opacity: 0` par défaut et compter sur
+     l'animation pour le rétablir est la façon classique de livrer une page
+     blanche. */
+  .enter {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .enter {
+      opacity: 0;
+      animation: enter-up 0.72s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .enter-1 {
+      animation-delay: 0.04s;
+    }
+    .enter-2 {
+      animation-delay: 0.12s;
+    }
+    .enter-3 {
+      animation-delay: 0.2s;
+    }
+    .enter-4 {
+      animation-delay: 0.3s;
+    }
+  }
+
+  /* LE TITRE ARRIVE EN TROIS TEMPS, DE DEUX CÔTÉS.
+     Une ligne vient de la droite, la suivante de la gauche, la dernière
+     de la droite à nouveau : le regard fait des allers-retours et se cale
+     naturellement sur la lecture. Le déplacement est court (28 px) et la
+     courbe s'arrête net — c'est ce qui sépare l'élégance du carrousel de
+     foire. Chaque ligne masque son débordement, pour qu'aucune ne semble
+     glisser par-dessus la page.
+     Sans mouvement demandé (prefers-reduced-motion), tout est déjà en
+     place : le titre ne dépend pas de l'animation pour être lisible. */
+  .linea {
+    opacity: 1;
+    display: block;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .linea {
+      opacity: 0;
+      animation: entra-derecha 0.78s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .linea-2 {
+      animation-name: entra-izquierda;
+      animation-delay: 0.13s;
+    }
+    .linea-3 {
+      animation-delay: 0.26s;
+    }
+  }
+
+  @keyframes entra-derecha {
+    from {
+      opacity: 0;
+      transform: translate3d(28px, 0, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes entra-izquierda {
+    from {
+      opacity: 0;
+      transform: translate3d(-28px, 0, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes enter-up {
+    from {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ---- LE FOND DU PREMIER ÉCRAN ----
+     Trois essais pour arriver là. Une tache radiale seule est le fond par
+     défaut de toute page générée. Des rayures diagonales marquées font papier
+     peint et écrasent le contenu.
+
+     Ce qui reste : une lumière chaude très large qui monte vers le coin haut
+     droit, sans bord visible. Le travail d'identité est porté par le contenu
+     — les pistes des corridors et le geste du paiement, les deux seuls
+     endroits où vit le trait pointillé ambre.
+
+     Depuis que la page est blanche, la lumière porte davantage : sur du
+     crème elle se noyait dans un fond déjà jaune, sur du blanc elle se voit.
+     Elle est donc à peine plus dense, et une seconde couche très froide en
+     bas à gauche l'empêche de tourner à l'orange plat — c'est le contraste
+     chaud/froid qui fait le ciel, pas la quantité d'ambre. */
+  /* Le premier écran REMONTE derrière la barre. Sans ces deux lignes, le
+     réservoir laisserait une bande blanche de 80 px au-dessus du dégradé et
+     la barre flotterait sur du vide — elle doit flotter sur la page. La marge
+     annule le réservoir pour le FOND, le padding le rend au CONTENU. */
+  .sky {
+    margin-top: calc(-1 * var(--nav-space));
+    padding-top: var(--nav-space);
+    background-color: transparent;
+    background-image:
+      /* La lumière du matin, très étalée pour n'avoir aucun bord. */
+      radial-gradient(
+        110% 80% at 94% -22%,
+        rgb(247 188 104 / 0.26),
+        rgb(242 158 51 / 0.06) 44%,
+        transparent 66%
+      ),
+      /* CE QUI RÉPOND À LA LUMIÈRE. C'était un bleu (#17384C dilué) : le
+         premier écran annonçait la couleur des sections sombres, ce qui
+         était juste tant que ces sections étaient bleues. Elles ne le
+         sont plus. C'est donc la BRAISE qui répond au matin — la même
+         rampe, prise à l'autre bout, très diluée. L'aube en haut, le
+         soir en bas, un seul ciel. */
+        radial-gradient(
+          120% 90% at -10% 108%,
+          rgb(158 68 9 / 0.1),
+          transparent 62%
+        );
+    background-repeat: no-repeat;
+  }
+
+  /* ---- LE QUARTIER DE NUIT ----
+     Nuit CHAUDE — voir la note de la palette pour le pourquoi, et
+     surtout pour pourquoi ce n'est pas le brun qui avait été refusé.
+     Trois couches, aucune agressive prise seule :
+       · une base qui descend du crépuscule au presque-noir — la lumière
+         vient d'en haut, comme partout ailleurs sur la page ;
+       · une lueur d'or en haut à gauche : les feux de la route ;
+       · une lueur de braise en bas à droite, qui donne la profondeur
+         d'un ciel plutôt que d'un panneau peint.
+
+     Le texte ne repose jamais sur le dégradé seul — les contrastes sont
+     calculés contre le composite le PLUS clair (night-700 + lueur d'or) :
+     blanc 9,9:1, night-200 6,5:1, sol-300 5,8:1.
+
+     Le quartier (Historias + Pago) est UNE toile : un seul élément porte ce
+     fond, parce que deux dégradés voisins ne tombent jamais exactement sur
+     le même pixel sur toute la largeur — la couture se voyait, le client
+     l'a vue. */
+
+  /* Les BORDS de la nuit : un dégradé court fond la section sombre dans
+     la page claire, en haut comme en bas. Sans lui, la coupure nette se
+     lit comme deux pages collées ; avec lui, c'est le même décor qui
+     passe du jour à la nuit. Posé en pseudo-éléments : aucun balisage,
+     et la section reste UNE section. */
+  .noche {
+    position: relative;
+  }
+  .noche::before,
+  .noche::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    height: 56px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .noche::before {
+    top: 0;
+    background: linear-gradient(to bottom, var(--color-ink-50), transparent);
+    opacity: 0.16;
+  }
+  .noche::after {
+    bottom: 0;
+    background: linear-gradient(to top, var(--color-ink-50), transparent);
+    opacity: 0.12;
+  }
+
+  /* LA NUIT DE LA MAISON. Deux lueurs et un dégradé — mais les lueurs
+     étaient AMBRE ET BLEUE, et le dégradé traversait trois bleus
+     écrits en dur. C'est là que la palette d'avant survivait le plus
+     longtemps : les variables avaient beau changer, ces six valeurs
+     restaient bleues. Les deux lueurs sont maintenant les deux bouts de
+     la rampe — l'or du matin en haut à gauche, la braise en bas à
+     droite — et le dégradé descend dans la nuit chaude. */
+  .noche {
+    background-color: var(--color-night-900);
+    background-image:
+      radial-gradient(
+        80% 60% at 8% 0%,
+        rgb(247 188 104 / 0.14),
+        transparent 62%
+      ),
+      radial-gradient(
+        70% 70% at 100% 100%,
+        rgb(230 120 19 / 0.16),
+        transparent 60%
+      ),
+      linear-gradient(
+        172deg,
+        var(--color-night-700) 0%,
+        var(--color-night-800) 46%,
+        var(--color-night-950) 100%
+      );
+  }
+
+  /* ---- LES PISTES SE REMPLISSENT QUAND ON ARRIVE DESSUS ----
+     Pilotées par le défilement natif (`view()`), pas par un script : la
+     révélation est un `clip-path` qui s'ouvre de gauche à droite — les tirets
+     restent nets, rien ne s'étire — et le disque d'arrivée se pose à la fin.
+     Là où `view()` n'existe pas, ou si l'utilisateur refuse le mouvement, les
+     pistes sont simplement pleines : même page, sans le geste. C'est aussi ce
+     qui garde le fichier autonome (sans script) intact. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* `cover`, pas `entry` : pour un élément de 16 px, la plage `entry` ne
+         dure que sa propre hauteur de défilement — l'animation finissait en
+         16 px, invisible. `cover` mesure la traversée de l'écran entier : le
+         remplissage occupe le premier tiers de la montée, le disque se pose
+         juste après. */
+      .ruta-trait {
+        animation: pista-llena linear both;
+        animation-timeline: view();
+        animation-range: cover 4% cover 32%;
+      }
+
+      .pista-llegada {
+        animation: llegada-pop linear both;
+        animation-timeline: view();
+        animation-range: cover 24% cover 40%;
+      }
+    }
+  }
+
+  @keyframes pista-llena {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes llegada-pop {
+    from {
+      scale: 0;
+    }
+    to {
+      scale: 1;
+    }
+  }
+
+  /* ---- L'APORTE CIRCULE ----
+     Sur le plateau de paiement, les tirets du trait Tú ──▸ A dérivent
+     lentement vers le conducteur : le geste que la section raconte — l'argent
+     va de ta main à la sienne — devient visible sans un mot. Une période de
+     motif par 1,6 s : on doit le sentir, pas le regarder. */
+  @media (prefers-reduced-motion: no-preference) {
+    .flujo-aporte {
+      animation: flujo 1.6s linear infinite;
+    }
+  }
+
+  @keyframes flujo {
+    to {
+      background-position-x: 20px;
+    }
+  }
+
+  /* Le tracé des corridors. Un dégradé donne la DIRECTION — l'ambre s'assombrit
+     vers l'arrivée — et le `mask` découpe les tirets par-dessus sans jamais les
+     étirer, quelle que soit la largeur de la piste. */
+  .ruta-trait {
+    background-image: linear-gradient(
+      90deg,
+      var(--color-action-bright),
+      var(--color-action) 55%,
+      var(--color-action-deep)
+    );
+    -webkit-mask-image: repeating-linear-gradient(
+      90deg,
+      #000 0 9px,
+      transparent 9px 16px
+    );
+    mask-image: repeating-linear-gradient(
+      90deg,
+      #000 0 9px,
+      transparent 9px 16px
+    );
+  }
+
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.14;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* ---- Apparition des sections à l'entrée dans le champ ----
+     Même principe : `view()` remplace l'IntersectionObserver que la plupart
+     des sites embarquent pour ça. Un élément déjà visible au chargement se
+     trouve au-delà de sa plage d'animation, donc il s'affiche net d'emblée —
+     aucun contenu ne reste invisible si la fonctionnalité manque ou si
+     l'utilisateur a demandé moins d'animations. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* La plage est COURTE et démarre dès le premier pixel visible : la
+         section doit être nette AVANT que l'œil n'arrive sur elle. La
+         plage d'avant (entry 8% → cover 26%) laissait des pans de page
+         fantômes au milieu de l'écran (audit C1). */
+      .reveal {
+        animation: reveal-in linear both;
+        animation-timeline: view();
+        animation-range: cover 0% cover 16%;
+      }
+    }
+  }
+
+  @keyframes reveal-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Les animations liées au scroll n'ont pas de durée : les écraser à
+     0,001 ms ne les arrête pas. On coupe la timeline elle-même. */
+  .road::after,
+  .reveal {
+    animation-timeline: none !important;
+    animation-name: none !important;
+  }
+}
+
+/* ===========================================================================
+   MODE APP INSTALLÉE
+   ===========================================================================
+
+   Installée sur l'écran d'accueil, Partimos ne doit plus être une page qui
+   vend : la personne a déjà installé, l'argumentaire a fait son travail. Il
+   reste un outil — chercher, réserver, retrouver ses viajes.
+
+   TOUT SE JOUE EN CSS, ET C'EST LA DÉCISION IMPORTANTE. La tentation était
+   de détecter le mode en JavaScript et de rendre un autre arbre. Ça aurait
+   violé la règle de la maison — « ne jamais concevoir d'abord pour le mobile
+   natif : le SEO est le canal principal » : le HTML servi aurait dépendu du
+   client, et un robot d'indexation n'a pas de `display-mode`. Ici le HTML
+   est identique pour tout le monde, Google reçoit la page marketing entière,
+   et seul l'affichage change chez qui a installé. Aucun surcoût de rendu,
+   aucun clignotement d'hydratation.
+
+   `display-mode: standalone` couvre Android, Chrome de bureau et iOS ≥ 16.4.
+   Pour les iPhone plus anciens, `PWA.tsx` pose la classe `.app-instalada`
+   sur <html> à partir de `navigator.standalone` — même effet, une ligne. */
+
+/* ATTENTION EN POSANT `.solo-app` : la règle qui révèle l'élément REND son
+   `display` au navigateur (`revert`). Sur un élément qui compte sur une
+   classe utilitaire de disposition — `flex`, `grid` — cette classe est donc
+   écrasée, et la disposition retombe en `block`. Ça s'est vu une fois : les
+   trois liens légaux du pied de page se sont empilés au lieu de tenir sur
+   une ligne.
+   La parade est constante dans ce code : on pose `.solo-app` (et `.solo-web`)
+   sur un CONTENEUR neutre, et l'élément mis en forme vit dedans. */
+.solo-app {
+  display: none;
+}
+
+@media (display-mode: standalone) {
+  .solo-web {
+    display: none !important;
+  }
+  .solo-app {
+    display: revert;
+  }
+}
+
+html.app-instalada .solo-web {
+  display: none !important;
+}
+html.app-instalada .solo-app {
+  display: revert;
+}
+
+/* LA FEUILLE DE LA PORTE.
+   Elle portait `.glass`, dont le reflet diagonal s'éteint à 52 % de la
+   surface. Sur une petite pastille c'est un éclat ; sur une feuille de
+   400 px de haut, la fin du dégradé devient une BARRE FRANCHE en travers
+   — le propriétaire l'a vue passer juste derrière les trois icônes.
+   Ici le blanc est plein (la feuille n'a rien à laisser voir : elle
+   couvre le bas de la photo), et le reflet part du haut pour mourir bien
+   au-delà du bord visible. */
+.hoja-entrada {
+  background-color: #ffffff;
+  background-image: linear-gradient(
+    to bottom,
+    rgb(255 253 247 / 0.9),
+    #ffffff 34%
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 -18px 44px -20px rgb(38 34 28 / 0.35);
+}
+
+/* QUAND UNE PORTE EST OUVERTE, IL N'Y A PAS DE NAVIGATION.
+   Le `z-index` suffisait à la couvrir, pas à la désactiver : elle restait
+   dans l'ordre de tabulation et attrapait les touches sur son bord. Et
+   surtout elle se voyait — le propriétaire a photographié « Paso 1 de 5 »
+   avec les cinq onglets par-dessus. `:has()` la retire pour de bon. */
+body:has(.puerta) nav[aria-label="Navegación principal"] {
+  display: none !important;
+}
+
+/* MÊME RÈGLE POUR LA LISTE DE SUGGESTIONS, ET POUR LA MÊME RAISON.
+
+   Le bug rapporté : « le bouton Buscar reste devant la liste ». La cause
+   n'était pas un z-index mal réglé mais un choix d'architecture manquant.
+   La barre d'onglets est `fixed z-50` — donc dans le contexte
+   d'empilement racine — et la liste `absolute z-30` dans le flux du
+   formulaire. Aucune valeur de z-index sur la liste ne peut gagner de
+   façon fiable, et même si elle gagnait, la barre resterait tactile et
+   dans l'ordre de tabulation sous les suggestions.
+
+   La règle, énoncée une fois pour toutes : UNE COUCHE MODALE MASQUE LA
+   NAVIGATION, ELLE NE SE BAT PAS AVEC ELLE. Choisir un lieu est une
+   tâche modale — on est en train de répondre à une question, pas de
+   naviguer. Pendant ce temps, les onglets n'ont rien à faire là.
+
+   Le clavier ouvert rendait le problème pire : la liste s'étendait sous
+   une barre qui, elle, ne bouge pas. En la retirant, la liste récupère
+   toute la hauteur disponible. */
+body:has(.lista-lugares) nav[aria-label="Navegación principal"] {
+  display: none !important;
+}
+
+/* Et la liste monte au-dessus de tout ce qui pourrait rester : un CTA
+   collant, une carte, un en-tête. Au-dessus des onglets (50) et des
+   feuilles (90–120), en dessous de la porte (200). */
+.lista-lugares {
+  z-index: 140;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LE VRAI COUPABLE DU « BOUTON BUSCAR DEVANT LA LISTE ».
+
+   Ce n'était JAMAIS un z-index. La carte de recherche porte `.entra-app`,
+   dont l'animation d'entrée applique `translate3d` et `blur` — et
+   `animation-fill-mode: both` garde cet état APRÈS la fin. Un élément
+   transformé ou filtré crée un CONTEXTE D'EMPILEMENT : la liste, qui vit
+   à l'intérieur, ne peut alors PAS passer au-dessus d'un frère situé
+   plus loin dans le document, quelle que soit sa valeur de z-index.
+   140, 1400 ou 14000 : aucune ne sort d'une prison qu'on ne voit pas.
+
+   D'où les trois corrections précédentes qui « marchaient » en test et
+   pas sur le téléphone : la batterie mesurait la barre d'onglets (qui
+   est ailleurs dans le document) et pas le bouton, lui bien à
+   l'intérieur du même contexte.
+
+   La parade : pendant qu'une liste est ouverte, on ANNULE l'animation
+   sur les ancêtres. Elle a de toute façon fini de jouer — la retirer ne
+   coûte rien visuellement et rend à la liste sa liberté d'empilement. */
+body:has(.lista-lugares) .entra-app {
+  animation: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DEUX BARRES FIXES AU MÊME ENDROIT, C'EST UNE DE TROP.
+
+   L'écran d'un viaje pose sa propre barre d'action (le prix et
+   « Reservar ») en `fixed bottom-0 z-[60]`. La barre d'onglets est en
+   `fixed bottom-0 z-50`. Elles se superposaient : on voyait « Buscar »
+   et « Publicar » transparaître DERRIÈRE le prix — c'est ce qui a été
+   photographié et qualifié de moche, à juste titre.
+
+   Même règle que partout ailleurs dans ce fichier : quand un écran
+   assume sa propre action principale, il remplace la navigation, il ne
+   se pose pas dessus. On ne navigue pas pendant qu'on décide de réserver. */
+body:has(.barra-accion) nav[aria-label="Navegación principal"] {
+  display: none !important;
+}
+
+/* ===========================================================================
+   IL N'Y A PLUS DE PALETTE « DE L'APP »
+   ===========================================================================
+
+   Ici vivait un bloc qui repeignait toutes les variables d'accent dès que
+   l'app était installée : le site était bleu-et-ambre, l'app orange, et
+   ce bloc traduisait l'un dans l'autre au moment du rendu.
+
+   Il ne pouvait pas suffire, et c'est ce qu'on a fini par voir. Une
+   traduction ne rattrape que ce qui passe par les VARIABLES : tout ce
+   qui était écrit en dur — un `#0284c7` dans un dégradé, une carte de
+   connexion en bleu nuit, une ombre bleutée — restait dans l'ancienne
+   palette. D'où le reproche : « le login de l'application web a une
+   palette différente ». Il avait raison, et le bloc de traduction en
+   était la cause autant que le pansement.
+
+   La rampe `sol` supprime le problème à la racine : il n'y a plus deux
+   palettes à réconcilier, donc plus rien à traduire. Ce qui reste
+   propre à l'app, c'est sa DISPOSITION (l'encoche, la barre d'onglets,
+   les écrans pleins) — jamais ses couleurs. */
+
+/* LA MARGE HAUTE DES ÉCRANS PARTAGÉS.
+   Certaines pages n'ont pas de version app séparée — publier un viaje,
+   les mentions légales : leur contenu est le même des deux côtés, et en
+   dupliquer un millier de lignes pour changer une marge serait pire que
+   le mal. Elles portent donc `.cima-app`, inerte sur le site, qui leur
+   rend la place de l'encoche quand la barre haute est masquée. Sans
+   elle, le premier titre passe sous l'heure de l'iPhone. */
+@media (display-mode: standalone) {
+  .cima-app {
+    padding-top: calc(14px + env(safe-area-inset-top)) !important;
+  }
+}
+html.app-instalada .cima-app {
+  padding-top: calc(14px + env(safe-area-inset-top)) !important;
+}
+
+/* ===========================================================================
+   L'OUVERTURE DE L'APP
+   ===========================================================================
+
+   Ce que ce mouvement APPREND — sinon il saute : l'app ouvre sur une
+   réponse, pas sur un formulaire. Les blocs arrivent donc dans l'ordre où
+   ils comptent (le salut, ton viaje, puis la recherche), et la barre
+   d'onglets monte DU BORD OÙ ELLE VIT. Deux informations en une demi-
+   seconde : ce qui est prioritaire, et d'où viendra la navigation.
+
+   Trois précautions, chacune payée par un travers classique :
+
+     · RIEN N'EST CACHÉ AU DÉPART. L'animation vit sous
+       `prefers-reduced-motion: no-preference` ; si elle ne tourne pas, le
+       contenu est déjà là, opaque et cliquable. Poser `opacity: 0` par
+       défaut, c'est offrir un écran blanc à qui a désactivé les
+       animations — ou à qui charge sur un vieux téléphone.
+     · SEULEMENT `opacity` ET `transform`. Ce sont les deux propriétés que
+       le compositeur anime sans repeindre. Sur un Android d'entrée de
+       gamme en 4G, animer autre chose se voit.
+     · ELLE NE RETARDE RIEN. Aucun écran de démarrage, aucun délai avant
+       interaction : on peut toucher la carte pendant qu'elle monte.
+
+   Sur le SITE, rien de tout ça : une page web qu'on visite n'a pas à
+   « s'ouvrir ». */
+@media (prefers-reduced-motion: no-preference) {
+  /* LE MOUVEMENT D'ENTRÉE, revu.
+     La version d'avant montait de 15 px en fondu : correct, et sans
+     caractère — n'importe quelle page fait ça. Trois changements, chacun
+     pour une raison :
+
+       · UN LÉGER RECUL D'ÉCHELLE (0,97 → 1). Un bloc qui monte SEULEMENT
+         glisse ; un bloc qui monte en s'approchant ARRIVE. C'est la
+         différence entre un texte qui défile et un objet qui se pose.
+       · UN FLOU QUI SE DISSIPE. Deux pixels, le temps du mouvement. L'œil
+         le lit comme une mise au point, pas comme un effet — et c'est ce
+         qui donne l'impression que l'écran se compose au lieu de
+         s'afficher.
+       · UNE COURBE QUI DÉPASSE À PEINE. `cubic-bezier(0.2, 0.9, 0.2, 1)`
+         freine tard : le bloc arrive vite puis se pose, au lieu de
+         ralentir mollement sur toute la durée. */
+  @keyframes entraApp {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0) scale(0.97);
+      filter: blur(2px);
+    }
+    60% {
+      filter: blur(0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+  /* LA BARRE ARRIVE DU BORD OÙ ELLE VIT, et un peu plus tard que le
+     contenu : on lit d'abord ce qu'on est venu voir, la navigation se
+     présente ensuite. Elle apparaît en fondu EN MÊME TEMPS qu'elle
+     monte — une pilule flottante qui surgit opaque du bas de l'écran
+     ressemble à un bandeau publicitaire. */
+  @keyframes entraBarra {
+    from {
+      opacity: 0;
+      transform: translate3d(0, calc(100% + 12px), 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* `--paso` échelonne : chaque bloc part 80 ms après le précédent. Assez
+     pour lire une séquence, trop peu pour attendre. */
+  html.ya-abierta .entra-app,
+  html.ya-abierta nav[aria-label="Navegación principal"] {
+    animation: none !important;
+  }
+  html.app-instalada .entra-app,
+  html.app-instalada .solo-app .entra-app {
+    animation: entraApp 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+    animation-delay: calc(var(--paso, 0) * 70ms);
+  }
+  html.app-instalada nav[aria-label="Navegación principal"] {
+    animation: entraBarra 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+    animation-delay: 260ms;
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (display-mode: standalone) {
+  html.ya-abierta .entra-app,
+  html.ya-abierta nav[aria-label="Navegación principal"] {
+    animation: none !important;
+  }
+  .entra-app {
+    animation: entraApp 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+    animation-delay: calc(var(--paso, 0) * 70ms);
+  }
+  nav[aria-label="Navegación principal"] {
+    animation: entraBarra 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+    animation-delay: 260ms;
+  }
+}
+
+/* L'ONGLET ACTIF EST UNE TUILE DE VERRE, pas un rectangle de couleur
+   plate. Le remplissage `naranja-suave` posait un bloc opaque au milieu
+   d'une pilule translucide : deux matières différentes dans le même
+   objet, et ça se voyait. Ici la pastille active est du verre TEINTÉ —
+   même matière que la barre, une nuance plus dense — avec le liseré de
+   lumière sur sa tranche haute. */
+nav[aria-label="Navegación principal"] a[aria-current="page"] {
+  background-color: rgb(226 84 12 / 0.13);
+  background-image: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 0.55),
+    rgb(255 255 255 / 0) 60%
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.75),
+    inset 0 -1px 0 rgb(184 66 10 / 0.1),
+    0 6px 14px -8px rgb(184 66 10 / 0.4);
+}
+
+/* LES ONGLETS RÉPONDENT AU DOIGT. Sur un téléphone il n'y a pas de survol :
+   le seul retour possible est celui de l'appui, et sans lui on doute
+   d'avoir touché. `:active` est instantané, `transition` ne sert qu'au
+   relâchement. */
+nav[aria-label="Navegación principal"] a {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+nav[aria-label="Navegación principal"] a:active {
+  transform: scale(0.93);
+}
+@media (prefers-reduced-motion: reduce) {
+  nav[aria-label="Navegación principal"] a,
+  nav[aria-label="Navegación principal"] a:active {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* LE PREMIER ÉCRAN NE REMONTE PLUS QUAND LA BARRE HAUTE N'EST PAS LÀ.
+   `.sky` porte `margin-top: calc(-1 * var(--nav-space))` pour glisser SOUS
+   la barre flottante — sans quoi la barre survolerait une bande blanche.
+   En mode app cette barre est masquée, donc il ne reste rien à glisser
+   dessous : la marge négative faisait alors remonter le premier écran
+   PAR-DESSUS le cockpit, et le bouton Seguridad devenait incliquable —
+   mesuré au navigateur, pas supposé (le Hero interceptait le clic). */
+@media (display-mode: standalone) {
+  .sky {
+    margin-top: 0;
+    padding-top: 0;
+  }
+}
+html.app-instalada .sky {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* La barre d'onglets FLOTTE au-dessus du bas de l'écran : sans cette
+   réserve, le dernier élément de chaque page finit dessous. Elle vaut la
+   hauteur de la pilule (64) + ce qui la décolle du bord (10) + une
+   respiration (10), plus `safe-area-inset-bottom` — la barre d'accueil
+   de l'iPhone n'est pas une invention, un bouton posé dessus est
+   inatteignable. */
+@media (display-mode: standalone) {
+  body {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+}
+html.app-instalada body {
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+/* ===========================================================================
+   LE PANNEAU DE DROITE
+   ===========================================================================
+
+   La direction du mouvement porte l'information : le fil ARRIVE de la
+   droite, donc il y RETOURNE quand on le ferme. C'est ce qui fait qu'on
+   sait où l'on est sans avoir à lire — et c'est la raison pour laquelle
+   ce panneau ne remonte pas du bas comme une feuille : le bas est déjà
+   pris par la barre d'onglets et par la feuille Seguridad, et deux gestes
+   identiques pour deux natures différentes brouillent les deux.
+
+   Sous 560 px il occupe tout l'écran : sur un téléphone, un panneau qui
+   laisse voir 40 px de la page derrière lui n'a pas l'air d'un écran, il a
+   l'air d'un accident. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes panelEntra {
+    from {
+      transform: translate3d(100%, 0, 0);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes fondoEntra {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .panel-derecha {
+    animation: panelEntra 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .panel-fondo {
+    animation: fondoEntra 0.24s ease-out both;
+  }
+  /* LA FEUILLE DU BAS — celle de la réservation. Elle monte, alors que le
+     fil de discussion arrive de la droite : deux natures, deux gestes.
+     Une feuille se pose sur ce qu'on regarde sans le remplacer (on garde
+     la fiche viaje en tête), un panneau EST l'écran suivant. */
+  @keyframes hojaEntra {
+    from {
+      transform: translate3d(0, 100%, 0);
+    }
+    to {
+      transform: none;
+    }
+  }
+  .hoja-abajo {
+    animation: hojaEntra 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+/* ===========================================================================
+   L'APP — la maquette du propriétaire
+   ===========================================================================
+
+   Le site garde sa palette. L'APP prend celle de la maquette : un orange
+   franc pour l'action, un vert profond pour le profil. Les deux vivent
+   côte à côte parce que les deux surfaces ont des métiers différents — le
+   site convainc un inconnu, l'app sert quelqu'un qui a déjà décidé.
+
+   L'orange n'est pas l'ambre du site (#f59e0b) : sur un écran de
+   téléphone tenu en plein soleil, l'ambre passe pour du jaune passé.
+   Celui-ci tient. Texte blanc dessus : 4,6:1 en 17 px gras — au-dessus du
+   seuil AA pour du texte large, qui est ce que porte un bouton d'action. */
+@theme {
+  /* L'ORANGE DE L'APP, DÉSORMAIS CELUI DU SITE.
+     ─────────────────────────────────────────────────────────────────
+     Ces quatre noms étaient une palette PARALLÈLE : #e2540c d'un côté,
+     #f59e0b de l'autre, et le même bouton n'avait pas la même couleur
+     selon l'écran où on le regardait. Ils pointent maintenant dans la
+     rampe `sol`, donc les quatre-vingt-dix endroits qui écrivent
+     `bg-naranja` ou `text-naranja` deviennent justes sans qu'on y
+     touche — et surtout sans qu'on en oublie un.
+
+     Au passage, une vraie correction d'accessibilité : l'ancien
+     #e2540c avec du texte blanc plafonnait à 3,8:1, sous le seuil AA.
+     sol-600 donne 4,6:1 pour un orange à peine plus profond. */
+  --color-naranja: var(--color-sol-600);
+  --color-naranja-vivo: var(--color-sol-500);
+  --color-naranja-hondo: var(--color-sol-700);
+  --color-naranja-suave: var(--color-sol-50);
+
+  --color-verde-perfil: #1f4d2e;
+  --color-verde-ok: #1a7f45;
+  --color-verde-suave: #e6f4ea;
+
+  /* L'AMBRE DE L'ÉTOILE. Il n'existait pas, et c'est pour ça que la note
+     était dessinée en `text-action` — l'orange des boutons. Une étoile
+     de la couleur des actions ressemble à quelque chose qu'on peut
+     appuyer ; à côté d'un vrai bouton orange, elle brouille les deux.
+     Il vit maintenant DANS la rampe, à son extrémité jaune : c'est la
+     même famille, mais quatre crans plus clair que la surface d'action
+     — assez pour qu'on ne confonde jamais une note avec une commande. */
+  --color-ambar-fuerte: var(--color-sol-400);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LE BOUTON ORANGE — UNE SEULE DÉFINITION POUR LES DEUX MOITIÉS.
+
+   Le site et l'app ne se ressemblaient pas, et voici pourquoi : le
+   bouton principal du SITE était `bg-ink-900`, c'est-à-dire presque
+   noir, quand celui de l'APP est orange. Deux boutons principaux de deux
+   couleurs différentes sur le même produit — c'est la première chose
+   qu'on remarque, et c'est ce qui a été remarqué.
+
+   L'orange gagne : c'est la couleur de la marque, elle a du punch, et
+   c'est déjà celle que porte l'app. Le noir devient l'action secondaire.
+
+   Le relief vient de trois couches, pas d'une ombre grise posée dessus :
+
+     · un DÉGRADÉ très court du haut vers le bas — deux tons d'orange
+       seulement, assez pour que la surface ne soit pas plate, pas assez
+       pour qu'on voie un dégradé ;
+     · une ombre PORTÉE COLORÉE, dans l'orange lui-même et pas en gris :
+       une ombre grise sous un objet saturé le salit, une ombre teintée
+       le fait flotter ;
+     · un liseré clair en haut, à l'intérieur, qui simule la lumière qui
+       tombe. C'est ce détail qui fait « bouton physique ».
+
+   Au survol il monte d'un pixel et son ombre s'écarte ; à l'appui il
+   s'enfonce et l'ombre se resserre. Les deux mouvements sont ceux d'un
+   objet réel qu'on presse.
+   ═══════════════════════════════════════════════════════════════════════ */
+.cta-naranja {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--color-sol-600);
+  /* DEUX COUCHES, PAS UN APLAT.
+     · une LUMIÈRE posée sur le tiers haut, qui s'éteint à 34 % — le
+       galbe d'un objet éclairé par le dessus ;
+     · un dégradé vertical dessous, du vif au profond.
+     Le premier essai posait cette lumière en ellipse : sur un bouton
+     large et bas, l'ellipse s'étale et ne se voit plus. Une bande
+     franche, bornée au tiers haut, se voit — et elle s'arrête AVANT
+     l'étiquette, qui repose donc sur du sol-600/700 où le blanc tient
+     4,6 à 6,4:1. Un dégradé qui éclairerait le centre serait plus joli
+     et illisible ; on ne choisit pas entre les deux, on borne. */
+  background-image:
+    linear-gradient(
+      180deg,
+      rgb(255 221 176 / 0.42) 0%,
+      rgb(255 221 176 / 0) 34%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-sol-500) 0%,
+      var(--color-sol-600) 30%,
+      var(--color-sol-700) 100%
+    );
+  color: #fff;
+  /* L'ombre est de la MATIÈRE du bouton, jamais grise : une ombre grise
+     sous un objet saturé le salit, une ombre de sa propre teinte le fait
+     flotter. Trois portées de rayons croissants — c'est ce qui distingue
+     une ombre observée d'une ombre décrétée. */
+  box-shadow:
+    inset 0 1px 0 rgb(255 236 214 / 0.42),
+    inset 0 -1px 0 rgb(74 33 11 / 0.22),
+    0 1px 1px rgb(74 33 11 / 0.22),
+    0 4px 10px -4px rgb(120 51 11 / 0.42),
+    0 14px 28px -14px rgb(158 68 9 / 0.55);
+  transition:
+    transform 160ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    box-shadow 160ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    filter 160ms ease;
+}
+
+/* LE REFLET QUI TRAVERSE — la seule « animation » du bouton, et elle ne
+   se déclenche qu'au survol. Une bande de lumière très pâle, inclinée,
+   qui balaie la surface une fois. C'est le détail qui fait qu'un orange
+   paraît laqué au lieu de peint ; répété en boucle il ferait publicité,
+   joué une fois au survol il fait matière. */
+.cta-naranja::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 38%,
+    rgb(255 255 255 / 0.22) 48%,
+    transparent 58%
+  );
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  opacity: 0;
+  transition:
+    background-position 620ms cubic-bezier(0.22, 0.7, 0.2, 1),
+    opacity 200ms ease;
+}
+.cta-naranja:hover:not(:disabled)::after {
+  opacity: 1;
+  background-position: -30% 0;
+}
+
+.cta-naranja:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 236 214 / 0.5),
+    inset 0 -1px 0 rgb(74 33 11 / 0.2),
+    0 2px 3px rgb(74 33 11 / 0.2),
+    0 8px 16px -6px rgb(120 51 11 / 0.42),
+    0 22px 38px -16px rgb(158 68 9 / 0.62);
+}
+.cta-naranja:active:not(:disabled) {
+  transform: translateY(0.5px) scale(0.988);
+  box-shadow:
+    inset 0 1px 0 rgb(255 236 214 / 0.28),
+    inset 0 2px 6px rgb(74 33 11 / 0.24),
+    0 1px 2px rgb(74 33 11 / 0.26),
+    0 5px 12px -7px rgb(158 68 9 / 0.5);
+}
+/* L'ANNEAU DE FOCUS EST DEHORS, PAS DESSUS. Posé à l'intérieur il se
+   perdait dans le liseré de lumière ; à deux pixels du bord, sur un
+   halo pâle, il se voit sur n'importe quel fond de la maison. */
+.cta-naranja:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-ink-50),
+    0 0 0 4px var(--color-sol-600),
+    0 14px 28px -14px rgb(158 68 9 / 0.55);
+}
+/* DÉSACTIVÉ ≠ EFFACÉ. Les appelants posaient `disabled:opacity-35` ou
+   `:opacity-50` par-dessus l'orange : le bouton devenait un fantôme
+   qu'on ne lisait plus, et un libellé illisible n'apprend rien à
+   personne. Ici il change de MATIÈRE — ambre pâle, texte brun, plus
+   d'ombre — et reste parfaitement lisible (7,6:1). L'opacité est
+   remise à 1 pour que ces utilitaires ne le rediluent pas. */
+.cta-naranja:disabled {
+  background-image: none;
+  background-color: var(--color-sol-200);
+  color: var(--color-sol-800);
+  box-shadow: none;
+  opacity: 1;
+}
+/* Le mouvement se coupe pour qui le demande — la couleur, elle, reste. */
+@media (prefers-reduced-motion: reduce) {
+  .cta-naranja,
+  .cta-naranja:hover:not(:disabled),
+  .cta-naranja:active:not(:disabled) {
+    transform: none;
+    transition: none;
+  }
+  .cta-naranja::after {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LES GRANDES SURFACES NE SONT JAMAIS ORANGE PLEIN.
+
+   Le reproche, mot pour mot : « un gros pavé orange, ça n'a pas lieu
+   d'être ». C'est juste, et la raison est physique : à saturation égale,
+   une couleur occupe l'œil proportionnellement à sa surface. Un orange
+   qui fait vibrer un bouton de 200 px² écrase une page à 60 000 px² — et
+   il tue au passage sa propre fonction, puisqu'il n'y a plus de contraste
+   entre « ce qu'on appuie » et « ce qu'on lit ».
+
+   La règle de la maison : au-delà d'un bouton, l'orange devient de la
+   LUMIÈRE et non de la peinture. Un fond crème chaud, un liseré ambré,
+   une lueur diagonale à peine perceptible — et le texte reste de l'encre.
+   ═══════════════════════════════════════════════════════════════════════ */
+.superficie-sol {
+  background-color: var(--color-sol-50);
+  background-image:
+    radial-gradient(
+      100% 120% at 12% -10%,
+      rgb(242 158 51 / 0.16),
+      rgb(242 158 51 / 0) 60%
+    ),
+    radial-gradient(
+      80% 110% at 96% 108%,
+      rgb(230 120 19 / 0.1),
+      rgb(230 120 19 / 0) 62%
+    );
+  border: 1px solid var(--color-sol-200);
+}
+
+/* ---- L'écran de bienvenue ---- */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes bienvenidaFondo {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes bienvenidaSube {
+    from { opacity: 0; transform: translate3d(0, 18px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes bienvenidaSale {
+    to { opacity: 0; transform: scale(1.04); }
+  }
+  /* Le fond entre, les trois lignes montent l'une après l'autre, puis
+     l'ensemble s'efface en s'écartant très légèrement — le geste dit
+     « je te laisse passer », pas « je disparais ». */
+  .bienvenida {
+    animation:
+      bienvenidaFondo 0.22s ease-out both,
+      bienvenidaSale 0.34s cubic-bezier(0.4, 0, 1, 1) 1.06s both;
+  }
+  .bienvenida-marca { animation: bienvenidaSube 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both; }
+  .bienvenida-linea { animation: bienvenidaSube 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+  .bienvenida-nombre { animation: bienvenidaSube 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
+}

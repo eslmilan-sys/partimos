@@ -1,0 +1,51 @@
+{
+  "name": "partimos",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'",
+    "build:static": "node scripts/build-static.mjs",
+    "build:pages": "BASE_PATH=/test/partimos node scripts/build-static.mjs",
+    "verify:sw": "node scripts/verify-sw.mjs",
+    "verify:app": "node scripts/verify-app.mjs",
+    "verify:buscar": "node scripts/verify-buscar.mjs",
+    "verify:viaje": "node scripts/verify-viaje.mjs",
+    "verify:cuenta": "node scripts/verify-cuenta.mjs",
+    "verify:paginas": "node scripts/verify-paginas.mjs",
+    "verify:puerta": "node scripts/verify-puerta.mjs",
+    "verify:geo": "node scripts/verify-geo.mjs",
+    "verify:lugares": "node scripts/verify-lugares.mjs",
+    "verify:publicar": "node scripts/verify-publicar.mjs",
+    "verify:acceso": "node scripts/verify-acceso.mjs",
+    "verify:auditoria": "node scripts/verify-auditoria.mjs",
+    "verify:mapa": "node scripts/verify-mapa.mjs",
+    "mapa": "MAPA_JSON=.mapa.json node scripts/verify-mapa.mjs && MAPA_JSON=.mapa.json node scripts/mapa-artefacto.mjs > plano.html && echo 'plano.html listo'"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@supabase/supabase-js": "^2.112.2",
+    "cmdk": "^1.1.1",
+    "lucide-react": "^1.31.0",
+    "next": "16.3.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.185.4",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.0",
+    "playwright": "^1.62.1",
+    "sharp": "^0.35.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

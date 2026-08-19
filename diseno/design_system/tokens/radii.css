@@ -1,0 +1,9 @@
+:root{
+--radius-xs:6px;--radius-s:10px;--radius-m:14px;--radius-l:20px;--radius-xl:24px;
+--radius-2xl:28px;--radius-3xl:36px;--radius-pill:999px;
+/* roles */
+--radius-control:14px;--radius-card:24px;--radius-sheet:28px;--radius-field:14px;
+--radius-badge:999px;--radius-avatar:999px;--radius-media:20px;
+/* the square accent — the one non-round shape in the system (flag quadrants) */
+--radius-square:10px;--radius-square-s:6px;--radius-tile:12px;
+}

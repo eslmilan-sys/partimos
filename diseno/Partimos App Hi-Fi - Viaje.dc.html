@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="design_system/tokens/fonts.css">
+<link rel="stylesheet" href="design_system/tokens/colors.css">
+<link rel="stylesheet" href="design_system/tokens/typography.css">
+<link rel="stylesheet" href="design_system/tokens/spacing.css">
+<link rel="stylesheet" href="design_system/tokens/radii.css">
+<link rel="stylesheet" href="design_system/tokens/elevation.css">
+<link rel="stylesheet" href="design_system/tokens/glass.css">
+<link rel="stylesheet" href="design_system/tokens/motion.css">
+<link rel="stylesheet" href="design_system/tokens/base.css">
+<link rel="stylesheet" href="design_system/styles.css">
+<script src="design_system/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--sand-200);font-family:var(--font-ui);color:var(--ink-900)}*{box-sizing:border-box}a{color:var(--rojo-600)}a:hover{color:var(--rojo-700)}</style></helmet>
+
+<section id="viaje" style="padding:44px 44px 40px">
+<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 10px">
+<span style="font:600 10px var(--font-ui);letter-spacing:.06em;padding:4px 8px;background:var(--ink-900);color:#fff;border-radius:6px">B</span>
+<span style="font:600 13px/1.2 var(--font-ui)">Pasajero · pagar y viajar</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:7px;margin:0 0 26px"><a href="Partimos App Hi-Fi.dc.html" style="font:600 11.5px var(--font-ui);padding:6px 12px;border-radius:999px;background:var(--white);color:var(--ink-700);text-decoration:none;border:1px solid var(--border-subtle)">A · Pasajero · buscar y entrar</a><span style="font:600 11.5px var(--font-ui);padding:6px 12px;border-radius:999px;background:var(--ink-900);color:#fff">B · Pasajero · pagar y viajar</span><a href="Partimos App Hi-Fi - Conductor.dc.html" style="font:600 11.5px var(--font-ui);padding:6px 12px;border-radius:999px;background:var(--white);color:var(--ink-700);text-decoration:none;border:1px solid var(--border-subtle)">C · Conductor · de la cédula al cobro</a><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html" style="font:600 11.5px var(--font-ui);padding:6px 12px;border-radius:999px;background:var(--white);color:var(--ink-700);text-decoration:none;border:1px solid var(--border-subtle)">D · Deshacer, reclamar y pedir ayuda</a><a href="Partimos App Hi-Fi - Plan.dc.html" style="font:600 11.5px var(--font-ui);padding:6px 12px;border-radius:999px;background:var(--white);color:var(--ink-700);text-decoration:none;border:1px solid var(--border-subtle)">E · El plan, la auditoría y las decisiones</a></div>
+<div style="max-width:820px;margin:0 0 30px;font:400 13.5px/1.6 var(--font-ui);color:var(--ink-600);text-wrap:pretty"><p style="margin:0">Desde que pide el puesto hasta que califica. El equipaje lo manda el interruptor del conductor, el pago enseña su tarifa antes de cobrar, y el aporte no se libera hasta la llegada.</p></div>
+<div style="display:flex;flex-direction:column;gap:26px">
+<div style="width:100%;font:600 11px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--azul-500);margin:0 0 -4px">5 · Pedir el puesto y pagar</div>
+<div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start;width:100%">
+<div id="7a" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#7a" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">7a</a>Reserva — tu punto y tu equipaje</div>
+<div data-screen-label="7a Reserva" style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:214px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">9:41</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="padding:6px 26px 0;color:#fff;flex:none">
+<div style="display:flex;align-items:center;gap:13px">
+<span style="width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></span>
+<span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--field-fg)">Chitré · sábado 14, 14:50</span>
+</div>
+<h1 style="font-size:33px;letter-spacing:-.04em;line-height:1.05;margin:12px 0 0;font-weight:400;color:#fff">Tu punto y tu <b style="font-weight:600">equipaje</b></h1>
+</div>
+<div style="flex:1;min-height:0;overflow:hidden">
+
+<div style="position:relative;margin:24px 22px 0;background:var(--white);border-radius:var(--radius-sheet);padding:20px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Dónde te recogen</div>
+<div style="position:relative;margin-top:12px">
+<span style="position:absolute;left:4.25px;top:9px;bottom:9px;width:1.5px;background:var(--rojo-300)"></span>
+<div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:12px">
+<span style="width:10px;height:10px;border-radius:999px;background:var(--rojo-500);flex:none;margin-top:5px"></span>
+<span style="flex:1;font-size:15.5px;font-weight:500;letter-spacing:-.018em">Albrook · Terminal</span>
+<span style="font-size:13px;color:var(--ink-400);font-variant-numeric:tabular-nums">14:50</span>
+</div>
+<div style="display:flex;gap:14px;align-items:flex-start">
+<span style="width:10px;height:10px;border-radius:999px;background:var(--white);box-shadow:inset 0 0 0 2px var(--azul-500);flex:none;margin-top:5px"></span>
+<span style="flex:1;font-size:15.5px;font-weight:500;letter-spacing:-.018em;color:var(--azul-700)">Tu punto</span>
+<span style="font-size:13px;color:var(--ink-400);font-variant-numeric:tabular-nums">+4 min</span>
+</div>
+</div>
+<div style="margin-top:14px">
+<x-import component-from-global-scope="PartimosDesignSystem_2469fc.Input" value="{{ direccion }}" on-change="{{ onDireccion }}" placeholder="Calle, edificio o referencia" hint="Andrés lo aprueba junto con el puesto." hint-size="100%,78px"></x-import>
+</div>
+</div>
+
+<div style="margin:6px 22px 0;background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-l);padding:14px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="flex:1;font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Equipaje</span>
+<span style="font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:999px;font-variant-numeric:tabular-nums;background:{{ maleteroBadgeFondo }};color:{{ maleteroBadgeColor }}">{{ maleteroBadge }}</span>
+</div>
+<div style="display:grid;margin-top:12px">
+<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--border-subtle)">
+<div style="flex:1;min-width:0;font-size:14.5px;font-weight:500;letter-spacing:-.015em;white-space:nowrap">Mochila <span style="font-weight:400;color:var(--ink-500)">· va contigo</span></div>
+<x-import component-from-global-scope="PartimosDesignSystem_2469fc.Stepper" value="{{ nMochila }}" on-change="{{ setMochila }}" min="{{ 0 }}" max="{{ 2 }}" hint-size="104px,36px"></x-import>
+</div>
+<sc-if value="{{ aceptaMaletas }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--border-subtle)">
+<div style="flex:1;min-width:0;font-size:14.5px;font-weight:500;letter-spacing:-.015em;white-space:nowrap">Maleta <span style="font-weight:400;color:var(--ink-500)">· al maletero</span></div>
+<x-import component-from-global-scope="PartimosDesignSystem_2469fc.Stepper" value="{{ nMaletas }}" on-change="{{ setMaletas }}" min="{{ 0 }}" max="{{ 2 }}" hint-size="104px,36px"></x-import>
+</div>
+</sc-if>
+</div>
+<div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-subtle);font-size:12.5px;line-height:1.45;color:var(--ink-600)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" style="flex:none;margin-top:2px"><rect x="3" y="7" width="18" height="13" rx="2.5"></rect><path d="M9 7V4.8h6V7"></path></svg><span>{{ equipajeNota }}</span></div>
+</div>
+</div>
+
+<div style="padding:14px 26px 26px;background:var(--white);border-top:1px solid var(--border-subtle);flex:none">
+<div style="display:flex;align-items:flex-end;gap:9px;margin-bottom:12px">
+<span style="font-size:32px;font-weight:700;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums">6<span style="font-size:17px;font-weight:500;margin-left:2px">$</span></span>
+<span style="background:var(--azul-100);color:var(--azul-700);border-radius:999px;padding:3px 8px;font-size:10.5px;font-weight:600;margin-bottom:6px;white-space:nowrap">por plaza</span>
+</div>
+<span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:58px;padding:0 32px;font-size:17px;background:var(--action-brand-bg);color:var(--action-brand-fg);width:100%" style-hover="background:var(--action-brand-bg-hover)">Pedir puesto</span>
+<div style="text-align:center;font-size:12.5px;color:var(--ink-500);margin-top:10px">No se cobra hasta que Andrés acepte.</div>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Interactivo · steppers y dirección</div>
+</div>
+<div id="7b" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#7b" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">7b</a>Pago del aporte — Yappy, tarjeta o efectivo</div>
+<div data-screen-label="7b Pago" style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:214px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">9:41</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="padding:6px 26px 0;color:#fff">
+<div style="display:flex;align-items:center;gap:13px">
+<span style="width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></span>
+<span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--field-fg)">Chitré · 14:50 · 1 puesto</span>
+</div>
+<h1 style="font-size:33px;letter-spacing:-.04em;line-height:1.05;margin:16px 0 0;font-weight:400;color:#fff">Cómo le <b style="font-weight:600">aportas</b></h1>
+</div>
+<div style="flex:1;min-height:0;overflow:hidden">
+<div style="position:relative;margin:22px 22px 0;background:var(--white);border-radius:var(--radius-sheet);padding:22px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500);margin-bottom:14px">Método</div>
+<div style="display:grid;gap:9px">
+<sc-for list="{{ metodos }}" as="m" hint-placeholder-count="3">
+<div onClick="{{ m.onClick }}" style="display:flex;align-items:center;gap:13px;padding:15px 16px;border-radius:16px;cursor:pointer;border:1.5px solid {{ m.borde }};background:{{ m.fondo }}">
+<span style="width:20px;height:20px;border-radius:999px;flex:none;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1.5px {{ m.anillo }}"><span style="width:10px;height:10px;border-radius:999px;background:{{ m.punto }}"></span></span>
+<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:500;letter-spacing:-.018em">{{ m.nombre }}</div><div style="font-size:12.5px;color:var(--ink-600);margin-top:2px;font-variant-numeric:tabular-nums">{{ m.sub }}</div></div>
+<span style="font-size:10.5px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-700)">{{ m.extra }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="margin:10px 22px 0;border-radius:var(--radius-l);border:1px solid var(--border-subtle);padding:20px;overflow:hidden;background:radial-gradient(120% 96% at 46% 122%,rgba(210,16,52,.30) 0%,rgba(224,168,60,.24) 40%,rgba(255,255,255,0) 74%),var(--white)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14.5px;color:var(--ink-700)"><span>Aporte a Andrés</span><span style="font-weight:500;font-variant-numeric:tabular-nums">6,00 $</span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14.5px;color:var(--ink-700);margin-top:10px"><span>{{ tarifaEtiqueta }}</span><span style="font-weight:500;font-variant-numeric:tabular-nums">{{ tarifaMonto }}</span></div>
+<div style="height:1px;background:var(--border-subtle);margin:15px 0"></div>
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+<span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-500);padding-bottom:5px">{{ totalEtiqueta }}</span>
+<span style="font-size:34px;font-weight:700;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums">{{ totalTexto }}</span>
+</div>
+<div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:14px">Andrés recibe los 6 $ completos. La tarifa es de Partimos.</div>
+</div>
+</div>
+<div style="padding:14px 26px 26px;background:var(--white);border-top:1px solid var(--border-subtle);flex:none">
+<span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:58px;padding:0 32px;font-size:17px;background:var(--action-brand-bg);color:var(--action-brand-fg);width:100%" style-hover="background:var(--action-brand-bg-hover)">{{ botonPago }}</span>
+<div style="text-align:center;font-size:12.5px;line-height:1.45;color:var(--ink-500);margin-top:10px">{{ notaPago }}</div>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Interactivo · el total sigue al método</div>
+</div>
+<div id="9a" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#9a" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">9a</a>Métodos de pago — con la tarifa a la vista</div>
+<div data-screen-label="9a Métodos de pago" style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:214px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">9:41</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="padding:6px 26px 0;color:#fff;flex:none">
+<div style="display:flex;align-items:center;gap:13px">
+<span style="width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></span>
+<span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--field-fg)">Cuenta · dinero</span>
+</div>
+<h1 style="font-size:33px;letter-spacing:-.04em;line-height:1.05;margin:12px 0 0;font-weight:400;color:#fff">Métodos de <b style="font-weight:600">pago</b></h1>
+</div>
+<div style="flex:1;min-height:0;overflow:hidden">
+<div style="position:relative;margin:22px 22px 0;background:var(--white);border-radius:var(--radius-sheet);padding:20px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Guardados</div>
+<div style="font-size:12.5px;color:var(--ink-500);margin:3px 0 4px">{{ predeterminadoTexto }}</div>
+<div style="display:grid">
+<sc-for list="{{ guardados }}" as="g" hint-placeholder-count="3">
+<div onClick="{{ g.onClick }}" style="display:flex;align-items:center;gap:13px;padding:12px 0;border-top:1px solid var(--border-subtle);cursor:pointer">
+<span style="width:38px;height:38px;border-radius:var(--radius-square);display:flex;align-items:center;justify-content:center;flex:none;font-size:14.5px;font-weight:600;background:{{ g.tileFondo }};color:{{ g.tileColor }}">{{ g.inicial }}</span>
+<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;letter-spacing:-.015em;font-variant-numeric:tabular-nums">{{ g.nombre }}</div><div style="font-size:12.5px;color:var(--ink-600);margin-top:1px">{{ g.sub }}</div></div>
+<span style="border-radius:999px;padding:3px 8px;font-size:10.5px;font-weight:600;white-space:nowrap;background:{{ g.badgeFondo }};color:{{ g.badgeColor }}">{{ g.badge }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="margin:11px 22px 0">
+<span style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:999px;border:1.5px solid var(--border-default);color:var(--ink-900);font-size:15.5px;font-weight:600;letter-spacing:-.015em;cursor:pointer;background:var(--white)" style-hover="background:var(--sand-100)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Añadir método</span>
+</div>
+<div style="margin:11px 22px 0;border-radius:var(--radius-l);border:1px solid var(--border-subtle);padding:18px;overflow:hidden;background:radial-gradient(120% 96% at 46% 122%,rgba(210,16,52,.30) 0%,rgba(224,168,60,.24) 40%,rgba(255,255,255,0) 74%),var(--white)">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Sobre la tarifa</div>
+<p style="font-size:13.5px;line-height:1.5;color:var(--ink-700);margin:9px 0 0">La tarifa cubre el cobro. El conductor recibe el aporte completo con cualquier método.</p>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:13px;border-top:1px solid var(--border-subtle);font-size:13.5px;color:var(--ink-700)"><span>Un viaje de 6 $ con {{ predeterminadoNombre }}</span><span style="font-weight:600;font-variant-numeric:tabular-nums">{{ predeterminadoTotal }}</span></div>
+</div>
+<div style="margin:11px 22px 0;font-size:12.5px;line-height:1.5;color:var(--ink-500)">En efectivo no hay retención: si el viaje se cancela, no hay nada que devolver.</div>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Interactivo · toca para hacerlo predeterminado</div>
+</div>
+<div id="14c" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#14c" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">14c</a>Añadir método de pago — con su tarifa antes de guardar</div>
+<div data-screen-label="14c Añadir método" style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:206px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">9:41</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="padding:4px 26px 0;color:#fff;flex:none">
+<div style="display:flex;align-items:center;gap:13px">
+<span style="width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></span>
+<span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--field-fg)">Cuenta · dinero</span>
+</div>
+<h1 style="font-size:31px;letter-spacing:-.04em;line-height:1.05;margin:12px 0 0;font-weight:400;color:#fff">Añadir <b style="font-weight:600">método</b></h1>
+</div>
+<div style="flex:1;min-height:0;overflow:hidden">
+<div style="position:relative;margin:20px 22px 0;background:var(--white);border-radius:var(--radius-sheet);padding:18px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="display:flex;gap:7px;background:var(--sand-200);border-radius:999px;padding:4px">
+<sc-for list="{{ tiposPago }}" as="t" hint-placeholder-count="2">
+<span onClick="{{ t.onClick }}" style="flex:1;text-align:center;padding:9px 0;border-radius:999px;font-size:13.5px;font-weight:600;cursor:pointer;background:{{ t.fondo }};color:{{ t.color }}">{{ t.label }}</span>
+</sc-for>
+</div>
+<div style="margin-top:15px;display:grid;gap:12px">
+<sc-for list="{{ camposPago }}" as="c" hint-placeholder-count="2">
+<x-import component-from-global-scope="PartimosDesignSystem_2469fc.Input" label="{{ c.label }}" placeholder="{{ c.ph }}" hint="{{ c.hint }}" hint-size="100%,80px"></x-import>
+</sc-for>
+</div>
+</div>
+<div style="margin:10px 22px 0;border-radius:var(--radius-l);border:1px solid var(--border-subtle);padding:18px;overflow:hidden;background:radial-gradient(120% 96% at 46% 122%,rgba(210,16,52,.30) 0%,rgba(224,168,60,.24) 40%,rgba(255,255,255,0) 74%),var(--white)">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Lo que te cuesta usarlo</div>
+<div style="display:flex;align-items:flex-end;gap:8px;margin-top:8px"><span style="font-size:31px;font-weight:700;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums">{{ tarifaPct }}</span><span style="font-size:13.5px;color:var(--ink-600);padding-bottom:3px;font-variant-numeric:tabular-nums">{{ tarifaEjemplo }}</span></div>
+<div style="font-size:12.5px;line-height:1.45;color:var(--ink-700);margin-top:12px;padding-top:12px;border-top:1px solid var(--border-subtle)">{{ notaMetodo }}</div>
+</div>
+<div style="margin:10px 22px 0;display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.45;color:var(--ink-500)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--ink-400)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><rect x="4" y="10" width="16" height="10" rx="2.4"></rect><path d="M8 10V7.6a4 4 0 0 1 8 0V10"></path></svg><span>No guardamos el número completo. Lo custodia el banco.</span></div>
+</div>
+<div style="padding:14px 26px 26px;background:var(--white);border-top:1px solid var(--border-subtle);flex:none">
+<span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:58px;padding:0 32px;font-size:17px;background:var(--action-brand-bg);color:var(--action-brand-fg);width:100%" style-hover="background:var(--action-brand-bg-hover)">{{ botonMetodo }}</span>
+<div style="text-align:center;font-size:12.5px;color:var(--ink-500);margin-top:10px">No se cobra nada al guardarlo.</div>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Interactivo · Yappy o tarjeta</div>
+</div>
+</div>
+<div style="width:100%;font:600 11px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--azul-500);margin:0 0 -4px">6 · Esperar el sí</div>
+<div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start;width:100%">
+<div id="12a" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#12a" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">12a</a>Pantalla bloqueada — N4</div>
+<div data-screen-label="12a Push bloqueada" style="width:390px;height:844px;border-radius:46px;background:var(--ink-900);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:#fff">
+<div style="position:absolute;inset:0;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,9,12,.72) 0%,rgba(18,9,12,.86) 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">4:58</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="14" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="flex:none;padding:22px 26px 0;text-align:center">
+<div style="font-size:13px;font-weight:500;letter-spacing:var(--track-micro);text-transform:uppercase;color:rgba(255,255,255,.66)">Sábado 14 de junio</div>
+<div style="font-size:74px;font-weight:400;letter-spacing:-.05em;line-height:1;margin-top:8px;font-variant-numeric:tabular-nums">4:58</div>
+</div>
+<div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding:0 14px 30px">
+<div style="border-radius:22px;padding:15px 16px;background:var(--glass-bg-ink);border:var(--glass-border-ink);box-shadow:var(--glass-highlight-ink),var(--shadow-glass);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass)">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.5px;width:20px;height:20px;flex:none"><span style="background:#fff;border-radius:1.5px"></span><span style="background:rgba(255,255,255,.5);border-radius:1.5px"></span><span style="background:rgba(255,255,255,.5);border-radius:1.5px"></span><span style="background:#fff;border-radius:1.5px"></span></span>
+<span style="flex:1;font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:rgba(255,255,255,.7)">Partimos</span>
+<span style="font-size:12px;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums">ahora</span>
+</div>
+<div style="font-size:16px;font-weight:600;letter-spacing:-.02em;margin-top:10px">Mateo Q. pidió puesto</div>
+<div style="font-size:14px;line-height:1.4;color:rgba(255,255,255,.78);margin-top:3px;font-variant-numeric:tabular-nums">Hoy 6:00 · Albrook → Chitré · 6 $</div>
+<div style="display:flex;gap:8px;margin-top:13px;padding-top:13px;border-top:1px solid rgba(255,255,255,.16)">
+<span style="flex:1;height:40px;border-radius:999px;background:var(--rojo-500);color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;letter-spacing:-.015em">Aceptar · 6 $</span>
+<span style="height:40px;padding:0 18px;border-radius:999px;border:1px solid rgba(255,255,255,.38);color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;letter-spacing:-.015em">No puedo</span>
+</div>
+</div>
+<div style="border-radius:22px;padding:15px 16px;background:var(--glass-bg-ink);border:var(--glass-border-ink);box-shadow:var(--glass-highlight-ink),var(--shadow-glass);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass)">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.5px;width:20px;height:20px;flex:none"><span style="background:#fff;border-radius:1.5px"></span><span style="background:rgba(255,255,255,.5);border-radius:1.5px"></span><span style="background:rgba(255,255,255,.5);border-radius:1.5px"></span><span style="background:#fff;border-radius:1.5px"></span></span>
+<span style="flex:1;font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:rgba(255,255,255,.7)">Partimos</span>
+<span style="font-size:12px;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums">4:41</span>
+</div>
+<div style="font-size:16px;font-weight:600;letter-spacing:-.02em;margin-top:10px">Rosa I. pidió puesto</div>
+<div style="font-size:14px;line-height:1.4;color:rgba(255,255,255,.78);margin-top:3px;font-variant-numeric:tabular-nums">Expira en 1 h 10 · Vía España</div>
+</div>
+<div style="font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.55);text-align:center;padding:4px 12px 0">Si no hay acción que tomar, el push no lleva botones.</div>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Vidrio oscuro · aceptar sin abrir la app</div>
+</div>
+<div id="11b" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#11b" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">11b</a>Bandeja de avisos — N1</div>
+<div data-screen-label="11b Avisos" style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:214px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">9:41</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="padding:6px 26px 0;color:#fff;flex:none">
+<div style="display:flex;align-items:center;gap:13px">
+<span style="width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></span>
+<span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--field-fg)">{{ avisosContador }}</span>
+</div>
+<h1 style="font-size:33px;letter-spacing:-.04em;line-height:1.05;margin:12px 0 0;font-weight:400;color:#fff">Tus <b style="font-weight:600">avisos</b></h1>
+</div>
+<div style="flex:1;min-height:0;overflow:hidden">
+<div style="position:relative;margin:22px 22px 0;background:var(--white);border-radius:var(--radius-sheet);padding:20px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:4px">
+<span style="flex:1;font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--rojo-600)">Pide acción</span>
+<span style="width:7px;height:7px;border-radius:999px;background:var(--rojo-500)"></span>
+</div>
+<sc-for list="{{ avisosAccion }}" as="a" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--border-subtle)">
+<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;letter-spacing:-.018em">{{ a.titulo }}</div><div style="font-size:12.5px;color:var(--ink-600);margin-top:2px;font-variant-numeric:tabular-nums">{{ a.sub }}</div></div>
+<span style="font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:999px;background:var(--rojo-500);color:#fff;white-space:nowrap;cursor:pointer">{{ a.accion }}</span>
+</div>
+</sc-for>
+</div>
+<div style="margin:11px 22px 0;background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-l);padding:20px">
+<div style="display:flex;align-items:baseline;gap:9px;margin-bottom:4px">
+<span style="flex:1;font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Solo para saber</span>
+<span onClick="{{ marcarTodo }}" style="font-size:12px;font-weight:600;color:var(--azul-700);cursor:pointer">Marcar leído</span>
+</div>
+<sc-for list="{{ avisosInfo }}" as="a" hint-placeholder-count="4">
+<div onClick="{{ a.onClick }}" style="display:flex;align-items:center;gap:11px;padding:12px 0;border-top:1px solid var(--border-subtle);cursor:pointer">
+<span style="width:7px;height:7px;border-radius:999px;flex:none;background:{{ a.punto }}"></span>
+<div style="flex:1;min-width:0"><div style="font-size:14.5px;letter-spacing:-.015em;font-weight:{{ a.peso }}">{{ a.titulo }}</div><div style="font-size:12.5px;color:var(--ink-500);margin-top:1px;font-variant-numeric:tabular-nums">{{ a.sub }}</div></div>
+</div>
+</sc-for>
+</div>
+<div style="margin:11px 22px 0;font-size:12.5px;line-height:1.5;color:var(--ink-500)">Solo te escribimos por tus viajes. Nunca promociones.</div>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Interactivo · toca para marcar leído</div>
+</div>
+<div id="6c" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#6c" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">6c</a>Chat del viaje — el acuerdo queda escrito</div>
+<div style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:196px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">9:41</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;padding:0 26px 18px;color:#fff">
+<div style="display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg></span>
+<span style="width:38px;height:38px;border-radius:var(--radius-square);background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.34);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600;flex:none">MB</span>
+<div style="flex:1;min-width:0"><div style="font-size:16.5px;font-weight:600;letter-spacing:-.025em;color:#fff">Moisés B.</div><div style="font-size:12.5px;color:var(--field-fg);font-variant-numeric:tabular-nums">Chitré → Panamá · hoy 6:00</div></div>
+</div>
+</div>
+<div style="position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:0 22px">
+<div style="background:var(--white);border-radius:var(--radius-l);padding:14px 16px;box-shadow:var(--shadow-s);display:flex;align-items:center;gap:12px">
+<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Tu puesto</div><div style="font-size:14.5px;font-weight:500;margin-top:4px;font-variant-numeric:tabular-nums">6 $ · Yappy · código 4917</div></div>
+<span style="display:inline-flex;align-items:center;gap:6px;border-radius:var(--radius-badge);font-family:var(--font-ui);font-weight:var(--weight-medium);letter-spacing:-.005em;flex:none;height:22px;font-size:11px;padding:0 8px;background:var(--green-100);color:var(--green-700)">Aceptado</span>
+</div>
+<div style="text-align:center;font-size:12px;color:var(--ink-500);margin:20px 0 14px;font-variant-numeric:tabular-nums">Ayer</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="align-self:flex-start;max-width:78%;background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-l) var(--radius-l) var(--radius-l) var(--radius-xs);padding:12px 14px"><p style="font-size:14.5px;line-height:1.45;margin:0">Buenas Milan, salgo puntual del Parque Unión a las 6.</p><div style="font-size:11px;color:var(--ink-400);margin-top:5px;font-variant-numeric:tabular-nums">21:04</div></div>
+<div style="align-self:flex-end;max-width:78%;background:var(--azul-500);color:#fff;border-radius:var(--radius-l) var(--radius-l) var(--radius-xs) var(--radius-l);padding:12px 14px"><p style="font-size:14.5px;line-height:1.45;margin:0">Perfecto. ¿Puedo subir una maleta mediana?</p><div style="font-size:11px;color:rgba(255,255,255,.72);margin-top:5px;font-variant-numeric:tabular-nums">21:06</div></div>
+<div style="align-self:flex-start;max-width:78%;background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-l) var(--radius-l) var(--radius-l) var(--radius-xs);padding:12px 14px"><p style="font-size:14.5px;line-height:1.45;margin:0">Sí, va en el baúl. Te espero frente a la iglesia.</p><div style="font-size:11px;color:var(--ink-400);margin-top:5px;font-variant-numeric:tabular-nums">21:09</div></div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:auto;padding:14px 0 26px">
+<span style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border-default);color:var(--ink-700);display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></span>
+<div style="flex:1;height:48px;border-radius:999px;background:var(--white);border:1px solid var(--border-default);display:flex;align-items:center;padding:0 18px;font-size:15px;color:var(--ink-400)">Escribe un mensaje</div>
+<span style="width:48px;height:48px;border-radius:999px;background:var(--azul-500);color:#fff;display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 8 6 8z"></path></svg></span>
+</div>
+</div></div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Sin celulares: el hilo es la prueba</div>
+</div>
+<div id="16a" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#16a" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">16a</a>Conversaciones — todos los chats en uno</div>
+<div data-screen-label="16a Conversaciones" style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:206px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">9:41</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="padding:4px 26px 0;color:#fff;flex:none">
+<div style="display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></span><span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--field-fg)">2 sin leer</span></div>
+<h1 style="font-size:31px;letter-spacing:-.04em;line-height:1.05;margin:12px 0 0;font-weight:400;color:#fff">Mensajes</h1>
+</div>
+<div style="flex:1;min-height:0;overflow:hidden">
+<div style="position:relative;margin:20px 22px 0;background:var(--white);border-radius:var(--radius-sheet);padding:6px 18px 14px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-top:1px solid var(--border-subtle);cursor:pointer;opacity:1">
+<span style="width:44px;height:44px;border-radius:var(--radius-square);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;background:var(--rojo-100);color:var(--rojo-700);font-family:var(--font-display);font-weight:var(--weight-semibold);font-size:17.6px;letter-spacing:-.02em">AC</span>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;min-width:0;font-size:15.5px;font-weight:600;letter-spacing:-.018em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Andrés Coll</span><span style="font-size:12px;color:var(--ink-400);flex:none;font-variant-numeric:tabular-nums">09:12</span><span style="width:8px;height:8px;border-radius:999px;background:var(--rojo-500);flex:none"></span></div>
+<div style="font-size:13.5px;line-height:1.4;color:var(--ink-700);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Te espero en la entrada principal, junto a las taquillas.</div>
+<div style="font-size:12px;color:var(--azul-700);margin-top:4px;font-variant-numeric:tabular-nums">Chitré · hoy 06:30</div>
+</div>
+</div>
+<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-top:1px solid var(--border-subtle);cursor:pointer;opacity:1">
+<span style="width:44px;height:44px;border-radius:var(--radius-square);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;background:var(--azul-100);color:var(--azul-700);font-family:var(--font-display);font-weight:var(--weight-semibold);font-size:17.6px;letter-spacing:-.02em">DL</span>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;min-width:0;font-size:15.5px;font-weight:600;letter-spacing:-.018em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Daniela L.</span><span style="font-size:12px;color:var(--ink-400);flex:none;font-variant-numeric:tabular-nums">Ayer</span><span style="width:8px;height:8px;border-radius:999px;background:var(--rojo-500);flex:none"></span></div>
+<div style="font-size:13.5px;line-height:1.4;color:var(--ink-700);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Yo también voy el sábado, ¿te sirve a las 7?</div>
+<div style="font-size:12px;color:var(--azul-700);margin-top:4px;font-variant-numeric:tabular-nums">Santiago · sáb 22</div>
+</div>
+</div>
+<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-top:1px solid var(--border-subtle);cursor:pointer;opacity:0.62">
+<span style="width:44px;height:44px;border-radius:var(--radius-square);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;background:var(--arena-100);color:var(--arena-700);font-family:var(--font-display);font-weight:var(--weight-semibold);font-size:17.6px;letter-spacing:-.02em">MB</span>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;min-width:0;font-size:15.5px;font-weight:500;letter-spacing:-.018em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Moisés B.</span><span style="font-size:12px;color:var(--ink-400);flex:none;font-variant-numeric:tabular-nums">Vie</span></div>
+<div style="font-size:13.5px;line-height:1.4;color:var(--ink-500);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Gracias por el viaje, buen camino.</div>
+<div style="font-size:12px;color:var(--azul-700);margin-top:4px;font-variant-numeric:tabular-nums">Chitré · vie 13</div>
+</div>
+</div>
+</div>
+<div style="margin:10px 22px 0;font-size:12.5px;line-height:1.5;color:var(--ink-500)">Los chats se abren cuando el conductor acepta y se cierran 48 h después de la llegada. Todo lo del punto de recogida queda por escrito aquí.</div>
+</div>
+
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">La lista aparece cuando llevas más de un viaje</div>
+</div>
+</div>
+<div style="width:100%;font:600 11px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--azul-500);margin:0 0 -4px">7 · El día del viaje</div>
+<div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start;width:100%">
+<div id="1d" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#1d" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">1d</a>Ya — variante lista, la cuenta atrás manda</div>
+<div style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:326px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">14:32</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column">
+<div style="padding:6px 26px 0;color:#fff">
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:#fff">Ya · en vivo</span><span style="width:7px;height:7px;border-radius:999px;background:#fff"></span></div>
+<h1 style="font-size:42px;letter-spacing:-.045em;line-height:1.02;margin:14px 0 0;font-weight:400;color:#fff">Salen ahora<br><b style="font-weight:600">hacia el interior</b></h1>
+<div style="font-size:14px;color:var(--field-fg);margin-top:12px;font-variant-numeric:tabular-nums">6 carros desde Albrook · actualizado hace 20 s</div>
+</div>
+<div style="position:relative;margin:30px 22px 0;background:var(--white);border-radius:var(--radius-sheet);padding:22px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+<div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--rojo-600)">{{ salidaTexto }}</div>
+<div style="font-size:23px;font-weight:400;letter-spacing:-.035em;line-height:1.24;margin-top:9px">Albrook<br>→ <b style="font-weight:600">Chitré</b></div>
+</div>
+<div style="display:flex;align-items:flex-start;gap:6px">
+<div style="font-size:32px;font-weight:700;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums">6<span style="font-size:17px;font-weight:500;margin-left:2px">$</span></div>
+<span style="background:var(--azul-100);color:var(--azul-700);border-radius:999px;padding:3px 8px;font-size:10.5px;font-weight:600;margin-top:2px;white-space:nowrap">2 puestos</span>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:7px;margin-top:12px;font-size:12.5px;color:var(--ink-600)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" style="flex:none"><rect x="3" y="7" width="18" height="13" rx="2.5"></rect><path d="M9 7V4.8h6V7"></path></svg><span style="font-variant-numeric:tabular-nums">Acepta maletas · una por pasajero</span></div>
+<div style="height:1px;background:var(--border-subtle);margin:18px 0 16px"></div>
+<div style="display:flex;align-items:center;gap:11px">
+<span style="width:36px;height:36px;border-radius:var(--radius-square);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;background:var(--rojo-100);color:var(--rojo-700);font-family:var(--font-display);font-weight:var(--weight-semibold);font-size:14.4px;letter-spacing:-.02em">AC</span>
+<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;letter-spacing:-.015em">Andrés Coll</div><div style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--ink-600);margin-top:1px;font-variant-numeric:tabular-nums"><svg viewBox="0 0 12 12" width="11" height="11" fill="var(--star)"><path d="M6 .8 7.5 4h3.4L8.2 6.2l1 3.4L6 7.7 2.8 9.6l1-3.4L1.1 4h3.4z"></path></svg>4.9 · Hyundai Accent gris</div></div>
+<span style="display:inline-flex;align-items:center;gap:6px;border-radius:var(--radius-badge);font-family:var(--font-ui);font-weight:var(--weight-medium);letter-spacing:-.005em;flex:none;height:22px;font-size:11px;padding:0 8px;background:var(--green-100);color:var(--green-700)"><span style="width:6px;height:6px;border-radius:999px;background:currentColor;opacity:.85"></span>Verificado</span>
+</div>
+<div style="margin-top:18px"><span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:58px;padding:0 32px;font-size:17px;background:var(--action-brand-bg);color:var(--action-brand-fg);width:100%" style-hover="background:var(--action-brand-bg-hover)">Pedir puesto · 6 $</span></div>
+<div style="text-align:center;font-size:12.5px;color:var(--ink-500);margin-top:11px">{{ pagoLinea }}</div>
+</div>
+<div style="padding:28px 26px 0;flex:1;min-height:0;overflow:hidden">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">También salen pronto</span><span style="font-size:12.5px;color:var(--ink-500)">ver todo</span></div>
+<div style="display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid var(--border-subtle)"><span style="font-size:15px;font-weight:600;letter-spacing:-.02em;width:62px;font-variant-numeric:tabular-nums;color:var(--rojo-600)">18 min</span><span style="flex:1;font-size:16px;letter-spacing:-.02em">Albrook → <b style="font-weight:500">Santiago</b></span><span style="font-size:14px;color:var(--ink-600);font-variant-numeric:tabular-nums">8 $</span></div>
+<div style="display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid var(--border-subtle)"><span style="font-size:15px;font-weight:600;letter-spacing:-.02em;width:62px;font-variant-numeric:tabular-nums;color:var(--ink-700)">32 min</span><span style="flex:1;font-size:16px;letter-spacing:-.02em">Vía España → <b style="font-weight:500">Penonomé</b></span><span style="font-size:14px;color:var(--ink-600);font-variant-numeric:tabular-nums">5 $</span></div>
+
+</div>
+</div>
+<div style="flex:none;padding:8px 14px 22px;position:relative"><x-import component-from-global-scope="PartimosDesignSystem_2469fc.TabBar" items="{{ navItemsYa }}" value="Buscar" hint-size="100%,62px"></x-import></div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Y1 · Ya, lista en vivo</div>
+</div>
+<div id="1e" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#1e" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">1e</a>Ya — variante mapa, manda dónde te recogen</div>
+<div style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;inset:0;background:var(--sand-100)">
+<svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%">
+<g stroke="var(--ink-100)" stroke-width="1"><line x1="-20" y1="90" x2="410" y2="90"></line><line x1="-20" y1="190" x2="410" y2="190"></line><line x1="-20" y1="300" x2="410" y2="300"></line><line x1="-20" y1="420" x2="410" y2="420"></line><line x1="-20" y1="540" x2="410" y2="540"></line><line x1="-20" y1="660" x2="410" y2="660"></line><line x1="30" y1="-20" x2="70" y2="864"></line><line x1="120" y1="-20" x2="160" y2="864"></line><line x1="215" y1="-20" x2="255" y2="864"></line><line x1="310" y1="-20" x2="350" y2="864"></line></g>
+<g stroke="var(--sand-300)" stroke-width="11" stroke-linecap="round" fill="none"><path d="M-10 520 C 90 500, 150 380, 250 350 S 360 250, 420 150"></path><path d="M70 -10 C 100 220, 190 300, 200 864"></path></g>
+<path d="M-10 520 C 90 500, 150 380, 250 350 S 360 250, 420 150" fill="none" stroke="var(--azul-200)" stroke-width="4.5" stroke-linecap="round"></path>
+<path d="M-10 520 C 90 500, 150 380, 250 350" fill="none" stroke="var(--rojo-500)" stroke-width="4.5" stroke-linecap="round"></path>
+</svg>
+</div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:var(--ink-900);flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">14:32</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="var(--ink-900)"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="var(--ink-900)" stroke-opacity=".4"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="var(--ink-900)"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="var(--ink-900)" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;padding:4px 22px 0;display:flex;align-items:center;gap:10px">
+<div style="flex:1;height:52px;border-radius:var(--radius-field);background:var(--glass-bg-strong);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);border:var(--glass-border);box-shadow:var(--glass-highlight),var(--shadow-glass);display:flex;align-items:center;gap:11px;padding:0 16px">
+<span style="width:9px;height:9px;border-radius:999px;background:var(--rojo-500);flex:none"></span>
+<span style="flex:1;font-size:15px;font-weight:500;letter-spacing:-.015em">Albrook · Terminal</span>
+<span style="font-size:12.5px;color:var(--ink-600)">cambiar</span>
+</div>
+<span style="width:52px;height:52px;border-radius:999px;background:var(--glass-bg-strong);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);border:var(--glass-border);box-shadow:var(--glass-highlight),var(--shadow-glass);display:flex;align-items:center;justify-content:center;color:var(--ink-900);flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 21 4l-7 17-2.5-7.5z"></path></svg></span>
+</div>
+<div style="position:relative;flex:1;min-height:0">
+<span style="position:absolute;left:96px;top:150px;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:var(--radius-square);background:var(--rojo-500);color:#fff;font-size:13px;font-weight:600;box-shadow:0 8px 20px -8px rgba(140,10,34,.5);font-variant-numeric:tabular-nums">6 min · 6 $</span>
+<span style="position:absolute;left:224px;top:96px;display:inline-flex;align-items:center;height:30px;padding:0 11px;border-radius:var(--radius-square);background:var(--white);color:var(--ink-900);font-size:12.5px;font-weight:600;box-shadow:var(--shadow-s);font-variant-numeric:tabular-nums">18 min</span>
+<span style="position:absolute;left:52px;top:290px;display:inline-flex;align-items:center;height:30px;padding:0 11px;border-radius:var(--radius-square);background:var(--white);color:var(--ink-900);font-size:12.5px;font-weight:600;box-shadow:var(--shadow-s);font-variant-numeric:tabular-nums">32 min</span>
+<span style="position:absolute;left:262px;top:236px;display:inline-flex;align-items:center;height:30px;padding:0 11px;border-radius:var(--radius-square);background:var(--white);color:var(--ink-900);font-size:12.5px;font-weight:600;box-shadow:var(--shadow-s);font-variant-numeric:tabular-nums">45 min</span>
+</div>
+<div style="position:relative;margin:0 12px;background:var(--glass-bg-strong);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);border:var(--glass-border);box-shadow:var(--glass-highlight),var(--shadow-glass-l);border-radius:var(--radius-sheet);padding:20px">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:14px"><span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--rojo-600)">El más cercano · sale en 6 min</span><span style="width:7px;height:7px;border-radius:999px;background:var(--rojo-500)"></span></div>
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+<div>
+<div style="font-size:22px;font-weight:400;letter-spacing:-.035em;line-height:1.24">Albrook → <b style="font-weight:600">Chitré</b></div>
+<div style="font-size:13.5px;color:var(--ink-700);margin-top:7px;font-variant-numeric:tabular-nums">3 min a pie · te espera en la bahía 4</div>
+</div>
+<div style="font-size:30px;font-weight:700;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums">6<span style="font-size:16px;font-weight:500;margin-left:2px">$</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:11px;margin:16px 0 0">
+<span style="width:36px;height:36px;border-radius:var(--radius-square);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;background:var(--rojo-100);color:var(--rojo-700);font-family:var(--font-display);font-weight:var(--weight-semibold);font-size:14.4px;letter-spacing:-.02em">AC</span>
+<div style="flex:1;min-width:0"><div style="font-size:14.5px;font-weight:500">Andrés Coll</div><div style="font-size:13px;color:var(--ink-700);font-variant-numeric:tabular-nums">4.9 · 2 puestos libres</div></div>
+<span style="display:inline-flex;align-items:center;gap:6px;border-radius:var(--radius-badge);font-family:var(--font-ui);font-weight:var(--weight-medium);letter-spacing:-.005em;flex:none;height:22px;font-size:11px;padding:0 8px;background:var(--rojo-50);color:var(--rojo-700)">Yappy</span>
+</div>
+<div style="margin-top:18px"><span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:58px;padding:0 32px;font-size:17px;background:var(--action-primary-bg);color:var(--action-primary-fg);width:100%" style-hover="background:var(--action-primary-bg-hover)">Pedir puesto · 6 $</span></div>
+<div style="display:flex;gap:8px;margin-top:12px;overflow:hidden">
+<div style="flex:1;background:rgba(255,255,255,.72);border-radius:var(--radius-tile);padding:11px 12px"><div style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums">18 min</div><div style="font-size:12px;color:var(--ink-600);margin-top:2px">Santiago · 8 $</div></div>
+<div style="flex:1;background:rgba(255,255,255,.72);border-radius:var(--radius-tile);padding:11px 12px"><div style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums">32 min</div><div style="font-size:12px;color:var(--ink-600);margin-top:2px">Penonomé · 5 $</div></div>
+</div>
+</div>
+<div style="flex:none;padding:8px 14px 22px;position:relative"><x-import component-from-global-scope="PartimosDesignSystem_2469fc.TabBar" items="{{ navItemsYa }}" value="Buscar" hint-size="100%,62px"></x-import></div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Y2 · Ya, mapa y vidrio</div>
+</div>
+<div id="1f" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#1f" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">1f</a>Código de abordaje — lado pasajero</div>
+<div style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:400px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">06:18</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;padding:2px 26px 0;color:#fff">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<span style="width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg></span>
+<span style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums">{{ salidaTexto }}<span style="width:6px;height:6px;border-radius:999px;background:#fff"></span></span>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--field-fg);margin-top:26px">Muéstrale este código a Andrés</div>
+<div style="display:flex;gap:10px;margin-top:18px">
+<sc-for list="{{ digitos }}" as="d" hint-placeholder-count="4">
+<span style="flex:1;height:96px;border-radius:var(--radius-square);background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:600;letter-spacing:-.04em;color:#fff;font-variant-numeric:tabular-nums">{{ d.v }}</span>
+</sc-for>
+</div>
+<div style="font-size:14px;color:var(--field-fg);margin-top:18px;line-height:1.45">Él lo teclea al subirte. Solo así empieza el viaje y se cuenta tu puesto.</div>
+</div>
+<div style="position:relative;flex:1;min-height:0;padding:30px 22px 0">
+<div style="background:var(--white);border-radius:var(--radius-sheet);padding:22px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="display:flex;align-items:center;gap:13px">
+<span style="width:44px;height:44px;border-radius:var(--radius-square);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;background:var(--rojo-100);color:var(--rojo-700);font-family:var(--font-display);font-weight:var(--weight-semibold);font-size:17.6px;letter-spacing:-.02em">AC</span>
+<div style="flex:1;min-width:0"><div style="font-size:16.5px;font-weight:500;letter-spacing:-.02em">Andrés Coll</div><div style="font-size:13.5px;color:var(--ink-600);margin-top:2px;font-variant-numeric:tabular-nums">Hyundai Accent gris · AB 4821</div></div>
+<x-import component-from-global-scope="PartimosDesignSystem_2469fc.IconButton" variant="outline" size="md" label="Abrir" hint-size="44px,44px"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1Z"></path></svg></x-import>
+</div>
+<div style="height:1px;background:var(--border-subtle);margin:18px 0"></div>
+<div style="display:flex;gap:14px;position:relative;padding-bottom:14px"><span style="position:absolute;left:4.5px;top:20px;bottom:0;width:1.5px;background:var(--rojo-300)"></span><span style="width:10px;height:10px;border-radius:999px;background:var(--rojo-500);flex:none;margin-top:4px"></span><span style="flex:1"><span style="font-size:16px;letter-spacing:-.018em;display:block">Albrook · bahía 4</span><span style="font-size:13px;color:var(--ink-500)">Estás a 2 min a pie</span></span><span style="font-size:13.5px;color:var(--ink-600);font-variant-numeric:tabular-nums">06:30</span></div>
+<div style="display:flex;gap:14px"><span style="width:10px;height:10px;border-radius:999px;background:var(--white);box-shadow:inset 0 0 0 2px var(--ink-200);flex:none;margin-top:4px"></span><span style="flex:1;font-size:16px;letter-spacing:-.018em">Chitré · Parque Unión</span><span style="font-size:13.5px;color:var(--ink-600);font-variant-numeric:tabular-nums">09:50</span></div>
+<div style="margin-top:20px"><span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:58px;padding:0 32px;font-size:17px;background:var(--action-brand-bg);color:var(--action-brand-fg);width:100%" style-hover="background:var(--action-brand-bg-hover)">Ver el punto de recogida</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;background:var(--azul-50);border:1px solid var(--azul-100);border-radius:var(--radius-l);padding:16px 18px;margin-top:12px">
+<span style="color:var(--azul-500);flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-3.5 7-9V6l-7-3-7 3v6c0 5.5 7 9 7 9Z"></path><path d="M9.5 12l1.8 1.8 3.4-3.6"></path></svg></span>
+<span style="flex:1;font-size:13.5px;line-height:1.45;color:var(--ink-700)">Aporte 6 $. {{ pagoLinea }}</span>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">V1 · Código de abordaje</div>
+</div>
+<div id="1h" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#1h" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">1h</a>En ruta — mapa oscuro, vidrio y el aporte a la vista</div>
+<div style="width:390px;height:844px;border-radius:46px;background:var(--ink-900);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;inset:0;background:var(--ink-900)">
+<svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%">
+<g stroke="rgba(255,255,255,.08)" stroke-width="1"><line x1="-20" y1="120" x2="410" y2="120"></line><line x1="-20" y1="240" x2="410" y2="240"></line><line x1="-20" y1="370" x2="410" y2="370"></line><line x1="-20" y1="500" x2="410" y2="500"></line><line x1="40" y1="-20" x2="80" y2="864"></line><line x1="150" y1="-20" x2="190" y2="864"></line><line x1="270" y1="-20" x2="310" y2="864"></line></g>
+<g stroke="rgba(255,255,255,.14)" stroke-width="10" stroke-linecap="round" fill="none"><path d="M-10 620 C 100 590, 140 440, 240 400 S 350 260, 420 170"></path></g>
+<path d="M-10 620 C 100 590, 140 440, 240 400 S 350 260, 420 170" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="4.5" stroke-linecap="round"></path>
+<path d="M-10 620 C 100 590, 140 440, 240 400" fill="none" stroke="var(--rojo-500)" stroke-width="4.5" stroke-linecap="round"></path>
+<circle cx="240" cy="400" r="9" fill="var(--rojo-500)"></circle><circle cx="240" cy="400" r="16" fill="var(--rojo-500)" fill-opacity=".26"></circle>
+</svg>
+</div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">08:12</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;padding:6px 22px 0;display:flex;justify-content:center">
+<div style="display:inline-flex;align-items:center;gap:12px;padding:12px 18px;border-radius:999px;background:var(--glass-bg-ink);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);border:var(--glass-border-ink);box-shadow:var(--glass-highlight-ink),var(--shadow-glass);color:#fff">
+<span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:rgba(255,255,255,.72)">Llegas</span>
+<span style="font-size:17px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">09:50</span>
+<span style="width:1px;height:16px;background:rgba(255,255,255,.24)"></span>
+<span style="font-size:14px;color:rgba(255,255,255,.8);font-variant-numeric:tabular-nums">1 h 38 · 118 km</span>
+</div>
+</div>
+<div style="position:relative;margin-top:auto;background:var(--white);border-radius:var(--radius-sheet) var(--radius-sheet) 0 0;padding:22px 26px 30px;box-shadow:var(--shadow-sheet)">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+<span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--rojo-600)">Vas en camino</span>
+<span style="font-size:12.5px;color:var(--ink-500)">Compartir mi llegada</span>
+</div>
+<div style="display:grid;gap:2px;margin-bottom:18px">
+<div style="display:flex;gap:14px;position:relative;padding-bottom:14px"><span style="position:absolute;left:4.5px;top:20px;bottom:0;width:1.5px;background:var(--rojo-300)"></span><span style="width:10px;height:10px;border-radius:999px;background:var(--rojo-500);flex:none;margin-top:4px"></span><span style="flex:1;font-size:15.5px;letter-spacing:-.018em;color:var(--ink-600)">Albrook · bahía 4</span><span style="font-size:13.5px;color:var(--ink-500);font-variant-numeric:tabular-nums">06:34</span></div>
+<div style="display:flex;gap:14px;position:relative;padding-bottom:14px"><span style="position:absolute;left:4.5px;top:20px;bottom:0;width:1.5px;background:var(--border-default)"></span><span style="width:10px;height:10px;border-radius:999px;background:var(--rojo-500);box-shadow:0 0 0 5px var(--rojo-100);flex:none;margin-top:4px"></span><span style="flex:1;font-size:16px;font-weight:500;letter-spacing:-.018em">Divisa · parada de 10 min</span><span style="font-size:13.5px;color:var(--ink-600);font-variant-numeric:tabular-nums">ahora</span></div>
+<div style="display:flex;gap:14px"><span style="width:10px;height:10px;border-radius:999px;background:var(--white);box-shadow:inset 0 0 0 2px var(--ink-200);flex:none;margin-top:4px"></span><span style="flex:1;font-size:16px;letter-spacing:-.018em">Chitré · Parque Unión</span><span style="font-size:13.5px;color:var(--ink-600);font-variant-numeric:tabular-nums">09:50</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;padding-top:18px;border-top:1px solid var(--border-subtle)">
+<span style="width:44px;height:44px;border-radius:var(--radius-square);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;background:var(--rojo-100);color:var(--rojo-700);font-family:var(--font-display);font-weight:var(--weight-semibold);font-size:17.6px;letter-spacing:-.02em">AC</span>
+<div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:500;letter-spacing:-.018em">Andrés Coll</div><div style="font-size:13px;color:var(--ink-600);font-variant-numeric:tabular-nums">AB 4821 · asiento 2</div></div>
+<x-import component-from-global-scope="PartimosDesignSystem_2469fc.IconButton" variant="outline" size="md" label="Abrir" hint-size="44px,44px"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9.5L5 19.5V16a2 2 0 0 1-1-1.7z"></path></svg></x-import>
+<x-import component-from-global-scope="PartimosDesignSystem_2469fc.IconButton" variant="outline" size="md" label="Abrir" hint-size="44px,44px"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1Z"></path></svg></x-import>
+</div>
+<div style="display:flex;align-items:center;gap:12px;background:var(--azul-50);border:1px solid var(--azul-100);border-radius:var(--radius-l);padding:15px 18px;margin-top:16px">
+<span style="color:var(--azul-500);flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"></path><path d="M15.5 7.5A3.5 3.5 0 0 0 12 6h-.5a3 3 0 0 0 0 6h1a3 3 0 0 1 0 6H12a3.5 3.5 0 0 1-3.5-1.5"></path></svg></span>
+<span style="flex:1;font-size:13.5px;line-height:1.45;color:var(--ink-700)">{{ pagoLinea }}</span>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">V3 · En ruta</div>
+</div>
+</div>
+<div style="width:100%;font:600 11px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--azul-500);margin:0 0 -4px">8 · Cerrar</div>
+<div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start;width:100%">
+<div id="1i" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#1i" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">1i</a>Llegada — el código cierra el viaje y libera el aporte</div>
+<div style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:214px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"><div style="position:absolute;right:-36px;top:-28px;width:158px;height:158px;opacity:.2;background:#1C0A10;mask:url(assets/pa-hibisco.svg) no-repeat center/contain;-webkit-mask:url(assets/pa-hibisco.svg) no-repeat center/contain;pointer-events:none"></div></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">09:48</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;padding:0 26px;color:#fff">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--field-fg)">Llegaste · 09:48</div>
+<h1 style="font-size:31px;letter-spacing:-.045em;line-height:1.06;margin:12px 0 0;font-weight:400;color:#fff">Chitré<br><b style="font-weight:600">Parque Unión</b></h1>
+</div>
+<div style="position:relative;flex:1;min-height:0;padding:28px 22px 0;display:flex;flex-direction:column">
+<div style="background:var(--white);border-radius:var(--radius-sheet);padding:22px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Código de llegada</div>
+<div style="display:flex;gap:9px;margin-top:14px">
+<span style="flex:1;height:66px;border-radius:var(--radius-square);background:var(--sand-200);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums">8</span>
+<span style="flex:1;height:66px;border-radius:var(--radius-square);background:var(--sand-200);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums">0</span>
+<span style="flex:1;height:66px;border-radius:var(--radius-square);background:var(--sand-200);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums">5</span>
+<span style="flex:1;height:66px;border-radius:var(--radius-square);background:var(--sand-200);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums">2</span>
+</div>
+<p style="font-size:13.5px;line-height:1.45;color:var(--ink-600);margin:14px 0 0">Andrés lo teclea al bajarte. Ese tecleo cierra el viaje y suelta el aporte, así nadie tiene que reclamar nada después.</p>
+</div>
+<div style="position:relative;overflow:hidden;border-radius:var(--radius-sheet);padding:22px;margin-top:12px;background:var(--white);box-shadow:var(--shadow-s)">
+<div style="position:absolute;left:-14%;right:-14%;bottom:-52%;height:116%;background:var(--grad-sunrise);filter:blur(26px);opacity:.95"></div>
+<div style="position:relative">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-700)">Se libera al cerrar</div>
+<div style="display:flex;align-items:flex-start;gap:8px;margin-top:12px">
+<div style="font-size:46px;font-weight:700;letter-spacing:-.05em;line-height:.9;font-variant-numeric:tabular-nums">6 $</div>
+<span style="background:var(--white);color:var(--ink-900);border-radius:999px;padding:4px 9px;font-size:10.5px;font-weight:600;margin-top:4px;white-space:nowrap">completo a Andrés</span>
+</div>
+<div style="font-size:15px;line-height:1.4;margin-top:14px;max-width:230px">Le llega a <b style="font-weight:600">su Yappy</b> en cuanto el viaje se cierre. Partimos no se queda nada del aporte.</div>
+<div style="display:grid;gap:9px;margin-top:20px">
+<span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:52px;padding:0 26px;font-size:16px;background:var(--action-primary-bg);color:var(--action-primary-fg);width:100%" style-hover="background:var(--action-primary-bg-hover)">Ver el recibo</span>
+</div>
+</div>
+</div>
+<div style="margin-top:12px;background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-l);padding:18px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:11px"><span style="font-size:14.5px;color:var(--ink-700)">Aporte del puesto</span><span style="font-size:14.5px;font-weight:500;font-variant-numeric:tabular-nums">6 $</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:11px;border-bottom:1px solid var(--border-subtle)"><span style="font-size:14.5px;color:var(--ink-700)">Comisión de Partimos</span><span style="font-size:14.5px;font-weight:500;font-variant-numeric:tabular-nums">0 $</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding-top:13px"><span style="font-size:15px;font-weight:600">Total</span><span style="font-size:17px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums">6 $</span></div>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">V4 · Cierre y liberación</div>
+</div>
+<div id="1j" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#1j" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">1j</a>Calificar — una pregunta, cuatro atajos</div>
+<div style="width:390px;height:844px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:196px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">09:52</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;padding:0 26px;color:#fff">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--field-fg)">Sábado 14 de junio · Chitré</div>
+<h1 style="font-size:29px;letter-spacing:-.04em;line-height:1.1;margin:11px 0 0;font-weight:400;color:#fff">¿Cómo fue<br><b style="font-weight:600">con Andrés?</b></h1>
+</div>
+<div style="position:relative;flex:1;min-height:0;padding:28px 22px 0;display:flex;flex-direction:column">
+<div style="background:var(--white);border-radius:var(--radius-sheet);padding:24px 22px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="display:flex;align-items:center;gap:13px;padding-bottom:20px;border-bottom:1px solid var(--border-subtle)">
+<span style="width:44px;height:44px;border-radius:var(--radius-square);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;background:var(--rojo-100);color:var(--rojo-700);font-family:var(--font-display);font-weight:var(--weight-semibold);font-size:17.6px;letter-spacing:-.02em">AC</span>
+<div style="flex:1"><div style="font-size:16.5px;font-weight:500;letter-spacing:-.02em">Andrés Coll</div><div style="font-size:13.5px;color:var(--ink-600);font-variant-numeric:tabular-nums">Albrook → Chitré · 3 h 14</div></div>
+</div>
+<div style="display:flex;gap:10px;justify-content:center;padding:22px 0 6px">
+<svg viewBox="0 0 24 24" width="44" height="44" fill="var(--star)"><path d="M12 2.6l2.9 6 6.6.8-4.8 4.5 1.2 6.5L12 17.2l-5.9 3.2 1.2-6.5L2.5 9.4l6.6-.8z"></path></svg>
+<svg viewBox="0 0 24 24" width="44" height="44" fill="var(--star)"><path d="M12 2.6l2.9 6 6.6.8-4.8 4.5 1.2 6.5L12 17.2l-5.9 3.2 1.2-6.5L2.5 9.4l6.6-.8z"></path></svg>
+<svg viewBox="0 0 24 24" width="44" height="44" fill="var(--star)"><path d="M12 2.6l2.9 6 6.6.8-4.8 4.5 1.2 6.5L12 17.2l-5.9 3.2 1.2-6.5L2.5 9.4l6.6-.8z"></path></svg>
+<svg viewBox="0 0 24 24" width="44" height="44" fill="var(--star)"><path d="M12 2.6l2.9 6 6.6.8-4.8 4.5 1.2 6.5L12 17.2l-5.9 3.2 1.2-6.5L2.5 9.4l6.6-.8z"></path></svg>
+<svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="var(--ink-200)" stroke-width="1.7"><path d="M12 2.6l2.9 6 6.6.8-4.8 4.5 1.2 6.5L12 17.2l-5.9 3.2 1.2-6.5L2.5 9.4l6.6-.8z"></path></svg>
+</div>
+<div style="text-align:center;font-size:13.5px;color:var(--ink-600);margin-bottom:20px">Cuatro estrellas</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+<span style="height:36px;padding:0 14px;border-radius:999px;background:var(--azul-100);color:var(--azul-700);font-size:13.5px;font-weight:500;display:inline-flex;align-items:center">Puntual</span>
+<span style="height:36px;padding:0 14px;border-radius:999px;background:var(--azul-100);color:var(--azul-700);font-size:13.5px;font-weight:500;display:inline-flex;align-items:center">Manejó tranquilo</span>
+<span style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--border-default);color:var(--ink-700);font-size:13.5px;font-weight:500;display:inline-flex;align-items:center">Punto exacto</span>
+<span style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--border-default);color:var(--ink-700);font-size:13.5px;font-weight:500;display:inline-flex;align-items:center">Buena conversa</span>
+<span style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--border-default);color:var(--ink-700);font-size:13.5px;font-weight:500;display:inline-flex;align-items:center">Carro limpio</span>
+</div>
+<div style="margin-top:20px;border:1.5px solid var(--border-default);border-radius:var(--radius-field);padding:15px 16px;min-height:84px;font-size:14.5px;color:var(--ink-400);line-height:1.45">Cuéntale algo al próximo pasajero (opcional)</div>
+</div>
+<div style="margin-top:auto;padding:18px 0 30px;display:grid;gap:10px">
+<span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:58px;padding:0 32px;font-size:17px;background:var(--action-brand-bg);color:var(--action-brand-fg);width:100%" style-hover="background:var(--action-brand-bg-hover)">Enviar calificación</span>
+<span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:52px;padding:0 26px;font-size:16px;background:var(--action-primary-bg);color:var(--action-primary-fg);width:100%" style-hover="background:var(--action-primary-bg-hover)">Ahora no</span>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">V5 · Calificar al conductor</div>
+</div>
+</div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;codigo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;4917&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viaje&quot;},&quot;minutosSalida&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:12,&quot;min&quot;:1,&quot;max&quot;:60,&quot;unit&quot;:&quot;min&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viaje&quot;},&quot;pagoPreferido&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Yappy&quot;,&quot;Tarjeta&quot;,&quot;Efectivo&quot;],&quot;default&quot;:&quot;Yappy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dinero&quot;}}">
+class Component extends DCLogic {
+  icon(d, w) {
+    return React.createElement("svg", { viewBox: "0 0 24 24", width: w || 21, height: w || 21, fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d }));
+  }
+  carIcon() {
+    return React.createElement("svg", { viewBox: "0 0 24 24", width: 21, height: 21, fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" },
+      React.createElement("path", { d: "M5 14h14M6.5 14 8 8.5h8L17.5 14M4 14v3.5h16V14" }),
+      React.createElement("circle", { cx: 7.5, cy: 17.5, r: 1.6 }),
+      React.createElement("circle", { cx: 16.5, cy: 17.5, r: 1.6 }));
+  }
+  nav(extra) {
+    const P = {
+      buscar: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM21 21l-4.3-4.3",
+      viajes: "M5 14h14M6.5 14 8 8.5h8L17.5 14M4 14v3.5h16V14",
+      chat: "M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9.5L5 19.5V16a2 2 0 0 1-1-1.7z",
+      user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 21a7 7 0 0 1 14 0",
+    };
+    const base = [
+      { value: "Buscar", label: "Buscar", icon: this.icon(P.buscar) },
+      { value: "Mis viajes", label: "Mis viajes", icon: this.carIcon() },
+      { value: "Mensajes", label: "Mensajes", icon: this.icon(P.chat) },
+      { value: "Perfil", label: "Perfil", icon: this.icon(P.user) },
+    ];
+    return extra === "cuenta"
+      ? [base[0], base[1], base[2], { value: "Cuenta", label: "Cuenta", icon: this.icon(P.user) }]
+      : base;
+  }
+  state = { mochila: 0, maletas: 1, aceptaMaletas: true, periodo: "mes", aporte: 6, sols: { mateo: "pendiente", rosa: "pendiente" }, leidos: [], pParadas: 2, pPuestos: 3, pAporte: null, pMaletas: true, pMujeres: false, motivoCancel: "hora", marca: "Hyundai", modeloCat: "Elantra", anio: "2019", carroColor: "gris", carroPuestos: 4, fotoCarro: false, tipoPago: "Yappy", edPuestos: 3, edMaletas: true, edMujeres: false, tel: "", rutasOn: { chitre: true, santiago: true, david: false }, motivoReporte: "conducir", bloquear: true, direccion: "Vía Argentina, Riba Smith", metodo: "Yappy", motivo: "conductor", puestos: 3, avisoRuta: true, avisoMensajes: true, avisoSalida: true, soloMujeres: false, compartirLlegada: true, predeterminado: "Yappy" };
+  money(n) { return n.toFixed(2).replace(".", ",") + " $"; }
+  ajustesVals() {
+    const s = this.state;
+    const on = [s.avisoRuta, s.avisoMensajes, s.avisoSalida].filter(Boolean).length;
+    return {
+      avisoRuta: s.avisoRuta, avisoMensajes: s.avisoMensajes, avisoSalida: s.avisoSalida,
+      soloMujeres: s.soloMujeres, compartirLlegada: s.compartirLlegada,
+      setAvisoRuta: (v) => this.setState({ avisoRuta: v }),
+      setAvisoMensajes: (v) => this.setState({ avisoMensajes: v }),
+      setAvisoSalida: (v) => this.setState({ avisoSalida: v }),
+      setSoloMujeres: (v) => this.setState({ soloMujeres: v }),
+      setCompartirLlegada: (v) => this.setState({ compartirLlegada: v }),
+      avisosTexto: on === 0 ? "Ninguno activo. No te escribimos." : on === 3 ? "Los tres activos" : on + " de 3 activos",
+    };
+  }
+  equipajeVals() {
+    const s = this.state;
+    const ok = s.aceptaMaletas;
+    return {
+      nMochila: s.mochila, nMaletas: s.maletas, aceptaMaletas: ok,
+      setMochila: (v) => this.setState({ mochila: v }),
+      setMaletas: (v) => this.setState({ maletas: v }),
+      direccion: s.direccion,
+      onDireccion: (e) => this.setState({ direccion: e.target.value }),
+      maleteroBadge: ok ? "Acepta maletas" : "Solo mochila",
+      maleteroBadgeFondo: ok ? "var(--azul-100)" : "var(--sand-200)",
+      maleteroBadgeColor: ok ? "var(--azul-700)" : "var(--ink-700)",
+      equipajeNota: !ok
+        ? "Andrés no lleva maletas en este viaje. Solo lo que va contigo en el asiento."
+        : s.maletas > 0
+          ? "Andrés ve tu equipaje cuando le llega la solicitud."
+          : "Andrés acepta una maleta por pasajero.",
+    };
+  }
+  solicitudesVals() {
+    const defs = [
+      { id: "mateo", nombre: "Mateo Q.", hue: "azul", rating: "4.8 · 12 viajes", punto: "Vía Argentina, Riba Smith", extra: "+4 min", equipaje: "Mochila y una maleta", expira: "3 h 40", urgente: false },
+      { id: "rosa", nombre: "Rosa I.", hue: "rojo", rating: "Nueva · sin viajes", punto: "Vía España, El Dorado", extra: "+2 min", equipaje: "Solo mochila", expira: "1 h 10", urgente: true },
+    ];
+    const st = this.state.sols;
+    const vivas = defs.filter((d) => st[d.id] !== "rechazada");
+    const aceptadas = defs.filter((d) => st[d.id] === "aceptada").length;
+    const pendientes = defs.filter((d) => st[d.id] === "pendiente").length;
+    const vendidos = 1 + aceptadas;
+    return {
+      solicitudes: vivas.map((d) => ({
+        nombre: d.nombre, hue: d.hue, rating: d.rating, punto: d.punto, extra: d.extra, equipaje: d.equipaje,
+        expira: st[d.id] === "aceptada" ? "Confirmado" : "Expira en " + d.expira,
+        expiraFondo: st[d.id] === "aceptada" ? "var(--sand-200)" : d.urgente ? "var(--rojo-500)" : "var(--rojo-100)",
+        expiraColor: st[d.id] === "aceptada" ? "var(--ink-600)" : d.urgente ? "#fff" : "var(--rojo-700)",
+        pendiente: st[d.id] === "pendiente",
+        aceptada: st[d.id] === "aceptada",
+        aceptar: () => this.setState((p) => ({ sols: { ...p.sols, [d.id]: "aceptada" } })),
+        rechazar: () => this.setState((p) => ({ sols: { ...p.sols, [d.id]: "rechazada" } })),
+      })),
+      sinSolicitudes: pendientes === 0 && vivas.length === 0,
+      puestosTexto: (pendientes === 0 ? "Sin solicitudes nuevas" : pendientes === 1 ? "1 solicitud nueva" : pendientes + " solicitudes nuevas")
+        + " · " + vendidos + " de 3 puestos vendidos",
+    };
+  }
+  avisosVals() {
+    const defs = [
+      { id: 3, titulo: "Rosa I. pidió puesto", sub: "Hace 20 min · expira en 1 h 10" },
+      { id: 4, titulo: "Te aportaron 6 $", sub: "Ayer · Yappy · 7788" },
+      { id: 5, titulo: "Alguien publicó tu ruta guardada", sub: "Sáb 22 · Albrook → Santiago" },
+      { id: 6, titulo: "Daniela L. te calificó", sub: "Viaje del viernes · 5,0" },
+    ];
+    const leidos = this.state.leidos;
+    const sinLeer = defs.filter((d) => !leidos.includes(d.id)).length;
+    return {
+      avisosAccion: [
+        { titulo: "Andrés aceptó tu puesto", sub: "Hoy 6:00 · Albrook → Chitré", accion: "Ver código" },
+        { titulo: "Califica a Moisés B.", sub: "Viaje del viernes", accion: "Calificar" },
+      ],
+      avisosInfo: defs.map((d) => ({
+        titulo: d.titulo, sub: d.sub,
+        peso: leidos.includes(d.id) ? "400" : "600",
+        punto: leidos.includes(d.id) ? "transparent" : "var(--azul-500)",
+        onClick: () => this.setState((p) => ({ leidos: p.leidos.includes(d.id) ? p.leidos : p.leidos.concat(d.id) })),
+      })),
+      marcarTodo: () => this.setState({ leidos: defs.map((d) => d.id) }),
+      avisosContador: sinLeer === 0 ? "Todo leído" : sinLeer + " sin leer",
+    };
+  }
+  promesasVals() {
+    const s = this.state;
+    const rutasDef = [
+      { id: "chitre", ruta: "Albrook → Chitré", cuando: "Viernes por la tarde", estado: "3 viajes esta semana", hay: true },
+      { id: "santiago", ruta: "Albrook → Santiago", cuando: "Sábados temprano", estado: "Nada por ahora", hay: false },
+      { id: "david", ruta: "Chitré → Albrook", cuando: "Domingos después de las 15:00", estado: "1 viaje nuevo", hay: true },
+    ];
+    const activas = rutasDef.filter((r) => s.rutasOn[r.id]).length;
+    const motivosRep = [
+      { id: "conducir", label: "Conducía de forma peligrosa", cons: "Lo revisamos hoy mismo y puede quedar suspendido mientras miramos." },
+      { id: "trato", label: "Me trató mal", cons: "Lo lee una persona, no un robot. Te contamos en qué queda." },
+      { id: "cobro", label: "Me pidió más dinero", cons: "El aporte es el que dice la app. Si pidió más, lo sancionamos." },
+      { id: "otro", label: "Otra cosa", cons: "Cuéntanoslo con tus palabras en el paso siguiente." },
+    ];
+    const rep = motivosRep.find((m) => m.id === s.motivoReporte) || motivosRep[0];
+    const pasos = [
+      { t: "Lo pediste", c: "Sáb 14 · 10:12", hecho: true },
+      { t: "Revisado y aprobado", c: "Sáb 14 · 10:40", hecho: true },
+      { t: "Enviado a tu Yappy", c: "Lun 16 · estimado", hecho: false, activo: true },
+      { t: "En tu cuenta", c: "Lun 16 o mar 17", hecho: false },
+    ];
+    const check = React.createElement("svg", { viewBox: "0 0 24 24", width: 11, height: 11, fill: "none", stroke: "#fff", strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M5 12.5l4.5 4.5L19 7.5" }));
+    return {
+      rutasContador: activas === 0 ? "Sin avisos activos" : activas + (activas === 1 ? " ruta avisando" : " rutas avisando"),
+      rutas: rutasDef.map((r) => ({
+        ruta: r.ruta, cuando: r.cuando,
+        activo: !!s.rutasOn[r.id],
+        toggle: (v) => this.setState((p) => ({ rutasOn: Object.assign({}, p.rutasOn, { [r.id]: v }) })),
+        punto: s.rutasOn[r.id] ? "var(--rojo-500)" : "var(--ink-200)",
+        estado: s.rutasOn[r.id] ? r.estado : "Avisos apagados",
+        estadoColor: s.rutasOn[r.id] && r.hay ? "var(--azul-700)" : "var(--ink-500)",
+      })),
+      rutasNota: activas === 0
+        ? "Con los avisos apagados no te escribimos, pero la ruta se queda guardada para buscarla en un toque."
+        : "Te escribimos una sola vez por viaje nuevo, y nunca antes de las 7 de la mañana.",
+      temasAyuda: [
+        { label: "No llegó a recogerme", pista: "Reembolso" },
+        { label: "Me cobraron mal", pista: "Revisamos" },
+        { label: "Quiero cancelar", pista: "Ahora" },
+        { label: "Algo pasó en el viaje", pista: "Urgente" },
+      ].map((t) => ({
+        label: t.label, pista: t.pista,
+        fondo: t.pista === "Urgente" ? "var(--rojo-100)" : "var(--azul-100)",
+        color: t.pista === "Urgente" ? "var(--rojo-700)" : "var(--azul-700)",
+      })),
+      reembEtiqueta: "en camino",
+      reembResumen: "Andrés canceló el viaje, así que vuelve todo con la tarifa. Sale el lunes con los envíos de la semana.",
+      pasosReemb: pasos.map((p) => ({
+        titulo: p.t, cuando: p.c,
+        peso: p.hecho || p.activo ? "600" : "400",
+        color: p.hecho || p.activo ? "var(--ink-900)" : "var(--ink-500)",
+        fondo: p.hecho ? "var(--green-500)" : p.activo ? "var(--azul-500)" : "var(--white)",
+        anillo: p.hecho || p.activo ? "none" : "inset 0 0 0 2px var(--border-default)",
+        icono: p.hecho ? check : null,
+      })),
+      motivosReporte: motivosRep.map((m) => ({
+        label: m.label,
+        borde: m.id === s.motivoReporte ? "var(--azul-500)" : "var(--border-subtle)",
+        fondo: m.id === s.motivoReporte ? "var(--azul-100)" : "var(--white)",
+        punto: m.id === s.motivoReporte ? "var(--azul-500)" : "transparent",
+        anillo: m.id === s.motivoReporte ? "var(--azul-500)" : "var(--border-default)",
+        onClick: () => this.setState({ motivoReporte: m.id }),
+      })),
+      reporteConsecuencia: rep.cons,
+      bloquear: s.bloquear,
+      setBloquear: (v) => this.setState({ bloquear: v }),
+      reporteNota: s.bloquear
+        ? "Moisés no sabrá que lo reportaste ni que lo bloqueaste."
+        : "Moisés no sabrá que lo reportaste.",
+    };
+  }
+  bloqueoVals() {
+    const s = this.state;
+    // 14a — cancelar
+    const motivos = [
+      { id: "hora", label: "No me sirve la hora" },
+      { id: "otro", label: "Conseguí otro carro" },
+      { id: "plan", label: "Se cayó mi plan" },
+    ];
+    const reglas = {
+      hora: "Faltan más de 2 h, así que vuelve entero con la tarifa. Le liberamos el puesto a Andrés para que lo venda.",
+      otro: "Vuelve entero. Si ya tienes otro carro, avísale a Andrés por el chat para que no te espere.",
+      plan: "Vuelve entero. A menos de 2 h de la salida se quedaría 1 $ el conductor por el puesto perdido.",
+    };
+    // 14b — carro, del catálogo
+    const colores = [
+      { id: "gris", hex: "#8E8B93", n: "Gris" }, { id: "blanco", hex: "#F4F1EC", n: "Blanco" }, { id: "negro", hex: "#26232B", n: "Negro" },
+      { id: "azul", hex: "#005293", n: "Azul" }, { id: "rojo", hex: "#D21034", n: "Rojo" },
+    ];
+    const col = colores.find((c) => c.id === s.carroColor) || colores[0];
+    const nombreColor = col.n.toLowerCase();
+    const catalogo = {
+      Toyota: ["Corolla", "Yaris", "Hilux", "Rush"],
+      Hyundai: ["Elantra", "Accent", "Tucson", "Creta"],
+      Kia: ["Rio", "Picanto", "Sportage"],
+      Nissan: ["Sentra", "Versa", "Frontier"],
+      Mitsubishi: ["Lancer", "Mirage", "Outlander"],
+    };
+    const marcas = Object.keys(catalogo);
+    const modelos = catalogo[s.marca] || [];
+    const anios = ["2024", "2022", "2020", "2019", "2017", "2015", "2012"];
+    const cycle = (list, cur, key, extra) => () => {
+      const i = list.indexOf(cur);
+      this.setState(Object.assign({ [key]: list[(i + 1) % list.length] }, extra ? extra(list[(i + 1) % list.length]) : null));
+    };
+    const plazasPorModelo = { Hilux: 4, Frontier: 4, Rush: 6, Outlander: 6, Tucson: 4, Sportage: 4, Creta: 4, Picanto: 3 };
+    // 14c — método
+    const esTarjeta = s.tipoPago === "Tarjeta";
+    // 14d — editar
+    const cambios = s.edPuestos !== 3 || !s.edMaletas || s.edMujeres;
+    return {
+      motivosCancel: motivos.map((m) => ({
+        label: m.label,
+        borde: m.id === s.motivoCancel ? "var(--azul-500)" : "var(--border-subtle)",
+        fondo: m.id === s.motivoCancel ? "var(--azul-100)" : "var(--white)",
+        punto: m.id === s.motivoCancel ? "var(--azul-500)" : "transparent",
+        anillo: m.id === s.motivoCancel ? "var(--azul-500)" : "var(--border-default)",
+        onClick: () => this.setState({ motivoCancel: m.id }),
+      })),
+      reglaCancel: reglas[s.motivoCancel] || reglas.hora,
+      horasRestantes: "19 h",
+      ventanaTexto: "Devolución completa",
+      ventanaFondo: "var(--azul-100)",
+      ventanaColor: "var(--azul-700)",
+      marcaValor: s.marca, marcaContador: marcas.indexOf(s.marca) + 1 + " de " + marcas.length,
+      marcaCursor: "pointer", marcaOpacidad: "1",
+      marcaNext: cycle(marcas, s.marca, "marca", (nueva) => ({ modeloCat: catalogo[nueva][0], carroPuestos: plazasPorModelo[catalogo[nueva][0]] || 4 })),
+      modeloCatValor: s.modeloCat, modeloCatContador: modelos.indexOf(s.modeloCat) + 1 + " de " + modelos.length,
+      modeloCatCursor: "pointer", modeloCatOpacidad: "1",
+      modeloCatNext: cycle(modelos, s.modeloCat, "modeloCat", (m) => ({ carroPuestos: plazasPorModelo[m] || 4 })),
+      anioValor: s.anio, anioContador: "", anioCursor: "pointer", anioOpacidad: "1",
+      anioNext: cycle(anios, s.anio, "anio"),
+      colorNombre: col.n,
+      placaValor: "AB-1234",
+      colores: colores.map((c) => ({
+        hex: c.hex,
+        anillo: c.id === s.carroColor
+          ? "inset 0 0 0 1px rgba(38,35,43,.14), 0 0 0 2px var(--white), 0 0 0 4px var(--azul-500)"
+          : "inset 0 0 0 1px rgba(38,35,43,.14)",
+        onClick: () => this.setState({ carroColor: c.id }),
+      })),
+      carroPuestos: s.carroPuestos,
+      setCarroPuestos: (v) => this.setState({ carroPuestos: v }),
+      vistaHex: col.hex,
+      vistaStroke: col.id === "negro" || col.id === "azul" || col.id === "rojo" ? "rgba(255,255,255,.9)" : "var(--ink-700)",
+      toggleFoto: () => this.setState({ fotoCarro: !s.fotoCarro }),
+      fotoEtiqueta: s.fotoCarro ? "Lista" : "Obligatoria",
+      fotoEtiquetaColor: s.fotoCarro ? "var(--azul-700)" : "var(--rojo-600)",
+      fotoBorde: s.fotoCarro ? "1px solid var(--border-subtle)" : "1.5px dashed var(--border-default)",
+      fotoFondo: s.fotoCarro ? "var(--white)" : "var(--sand-100)",
+      fotoIconoFondo: s.fotoCarro ? "var(--azul-100)" : "var(--sand-200)",
+      fotoIconoColor: s.fotoCarro ? "var(--azul-700)" : "var(--ink-600)",
+      fotoTitulo: s.fotoCarro ? "Foto añadida" : "Tomar la foto",
+      fotoSub: s.fotoCarro
+        ? "Se ve la placa. La revisamos con tu cédula."
+        : "De atrás y con la placa legible. Así el pasajero reconoce el carro al subir.",
+      vistaTitulo: s.marca + " " + s.modeloCat + " " + nombreColor,
+      vistaSub: "AB-•••• · " + s.anio + " · " + s.carroPuestos + (s.carroPuestos === 1 ? " puesto" : " puestos"),
+      tiposPago: [{ id: "Yappy", label: "Yappy" }, { id: "Tarjeta", label: "Tarjeta" }].map((t) => ({
+        label: t.label,
+        fondo: t.id === s.tipoPago ? "var(--white)" : "transparent",
+        color: t.id === s.tipoPago ? "var(--ink-900)" : "var(--ink-600)",
+        onClick: () => this.setState({ tipoPago: t.id }),
+      })),
+      camposPago: esTarjeta
+        ? [{ label: "Número de la tarjeta", ph: "4242 4242 4242 4242", hint: "" }, { label: "Vence · CVV", ph: "09/29 · 123", hint: "Visa y Mastercard de bancos panameños." }]
+        : [{ label: "Celular de tu Yappy", ph: "6000-0000", hint: "El banco te pedirá confirmar en su app." }],
+      tarifaPct: esTarjeta ? "8 %" : "5 %",
+      tarifaEjemplo: esTarjeta ? "0,48 $ en un viaje de 6 $" : "0,30 $ en un viaje de 6 $",
+      notaMetodo: esTarjeta
+        ? "La tarjeta funciona con cualquier banco, pero es el método más caro. Con Yappy pagas 5 %."
+        : "Es el método más barato en Panamá y el que usa casi todo el mundo aquí.",
+      botonMetodo: esTarjeta ? "Guardar la tarjeta" : "Guardar el Yappy",
+      edPuestos: s.edPuestos, edMaletas: s.edMaletas, edMujeres: s.edMujeres,
+      setEdPuestos: (v) => this.setState({ edPuestos: v }),
+      setEdMaletas: (v) => this.setState({ edMaletas: v }),
+      setEdMujeres: (v) => this.setState({ edMujeres: v }),
+      edAviso: s.edMujeres
+        ? "Daniela ya tiene puesto: si dejas el viaje solo para mujeres, ella se queda igual."
+        : !s.edMaletas
+          ? "Daniela reservó con una maleta. Si dejas de aceptarlas, hay que hablarlo con ella antes."
+          : "Los cambios se avisan a quien ya tiene puesto.",
+      edAvisoFondo: !s.edMaletas ? "var(--rojo-100)" : "var(--sand-100)",
+      edAvisoColor: !s.edMaletas ? "var(--rojo-700)" : "var(--ink-600)",
+      edBoton: cambios ? "Guardar los cambios" : "Guardar",
+      tel: s.tel,
+      onTel: (e) => this.setState({ tel: e.target.value }),
+      botonEntrar: s.tel && s.tel.length >= 8 ? "Enviar el código" : "Enviar el código",
+      notaEntrar: s.tel && s.tel.length >= 8 ? "Te llega un SMS de 4 dígitos." : "El mismo número con el que te registraste.",
+    };
+  }
+  publicar5cVals() {
+    const s = this.state, COSTO = 20.6, TOPE = 7, CAP = 4;
+    const todas = [
+      { nombre: "La Chorrera", hora: "15:35" },
+      { nombre: "Penonomé", hora: "16:40" },
+      { nombre: "Aguadulce", hora: "17:10" },
+      { nombre: "Divisa", hora: "17:35" },
+    ];
+    const paradas = todas.slice(0, s.pParadas);
+    const auto = Math.min(TOPE, Math.max(3, Math.ceil(COSTO / (s.pPuestos + 1))));
+    const aporte = s.pAporte ?? auto;
+    const recupera = aporte * s.pPuestos;
+    return {
+      paradas: paradas.map((p, i) => ({ nombre: p.nombre, hora: p.hora, quitar: () => this.setState({ pParadas: s.pParadas - 1 }) })),
+      horaLlegada: paradas.length >= 3 ? "18:25" : paradas.length === 2 ? "18:20" : "18:05",
+      anadirParada: () => this.setState({ pParadas: Math.min(todas.length, s.pParadas + 1) }),
+      anadirTexto: s.pParadas >= todas.length ? "No hay más paradas en esta ruta" : "Añadir " + todas[s.pParadas].nombre,
+      pAporte: aporte, pPuestos: s.pPuestos, pMaletas: s.pMaletas, pMujeres: s.pMujeres,
+      setPAporte: (v) => this.setState({ pAporte: v }),
+      setPPuestos: (v) => this.setState({ pPuestos: v, pAporte: null }),
+      setPMaletas: (v) => this.setState({ pMaletas: v }),
+      setPMujeres: (v) => this.setState({ pMujeres: v }),
+      aporteTexto: aporte + " $",
+      aporteOrigen: s.pAporte == null ? "calculado" : aporte >= TOPE ? "tope de la ruta" : "lo pusiste tú",
+      cuentaTexto: "Gasolina y peajes: " + this.money(COSTO) + ". Con " + s.pPuestos + (s.pPuestos === 1 ? " puesto recuperas " : " puestos recuperas ") + this.money(recupera)
+        + (recupera >= COSTO ? " y cubres el viaje." : " de " + this.money(COSTO) + "."),
+      botonPublicar: "Publicar · " + s.pPuestos + (s.pPuestos === 1 ? " puesto a " : " puestos a ") + aporte + " $",
+      notaPublicar: s.pMujeres
+        ? "Se publica ahora, visible solo para pasajeras."
+        : "Se publica ahora. Puedes editarlo mientras nadie haya pagado.",
+    };
+  }
+  conductorVals() {
+    const s = this.state;
+    const mes = [
+      { ruta: "Albrook → Chitré", detalle: "Vie 13 · 3 puestos · Yappy", monto: "18 $" },
+      { ruta: "Chitré → Albrook", detalle: "Dom 15 · 2 puestos · efectivo", monto: "12 $" },
+      { ruta: "Albrook → Santiago", detalle: "Sáb 7 · 3 puestos · Yappy", monto: "24 $" },
+    ];
+    const todo = [
+      { ruta: "Junio", detalle: "9 viajes · 24 puestos", monto: "148 $" },
+      { ruta: "Mayo", detalle: "7 viajes · 19 puestos", monto: "121 $" },
+      { ruta: "Abril", detalle: "4 viajes · 11 puestos", monto: "68 $" },
+    ];
+    const esMes = s.periodo === "mes";
+    return {
+      periodos: [{ id: "mes", label: "Este mes" }, { id: "todo", label: "Todo" }].map((p) => ({
+        label: p.label,
+        fondo: p.id === s.periodo ? "var(--azul-500)" : "var(--sand-200)",
+        color: p.id === s.periodo ? "#fff" : "var(--ink-700)",
+        onClick: () => this.setState({ periodo: p.id }),
+      })),
+      aportes: esMes ? mes : todo,
+      aporteTotal: esMes ? "54 $" : "337 $",
+      aporteEtiqueta: esMes ? "junio" : "desde marzo",
+      aporteResumen: esMes
+        ? "3 viajes, 8 puestos. La gasolina de junio te sale casi cubierta."
+        : "20 viajes, 54 puestos. Nada de esto es ingreso: es gasto compartido.",
+    };
+  }
+  pagoVals() {
+    const defs = [
+      { id: "Yappy", nombre: "Yappy", sub: "Tarifa 5 % · 0,30 $", pct: 0.05, extra: "Recomendado" },
+      { id: "Tarjeta", nombre: "Tarjeta", sub: "Tarifa 8 % · 0,48 $", pct: 0.08, extra: "" },
+      { id: "Efectivo", nombre: "Efectivo", sub: "Sin tarifa · le pagas al subir", pct: 0, extra: "" },
+    ];
+    const sel = this.state.metodo;
+    const d = defs.find((x) => x.id === sel) || defs[0];
+    const tarifa = 6 * d.pct;
+    const efectivo = sel === "Efectivo";
+    return {
+      metodos: defs.map((m) => ({
+        nombre: m.nombre, sub: m.sub, extra: m.extra,
+        borde: m.id === sel ? "var(--azul-500)" : "var(--border-subtle)",
+        fondo: m.id === sel ? "var(--azul-100)" : "var(--white)",
+        punto: m.id === sel ? "var(--azul-500)" : "transparent",
+        anillo: m.id === sel ? "var(--azul-500)" : "var(--border-default)",
+        onClick: () => this.setState({ metodo: m.id }),
+      })),
+      tarifaEtiqueta: efectivo ? "Tarifa Partimos" : "Tarifa Partimos · " + Math.round(d.pct * 100) + " %",
+      tarifaMonto: efectivo ? "0,00 $" : this.money(tarifa),
+      totalTexto: this.money(6 + tarifa),
+      totalEtiqueta: efectivo ? "Pagas al subir" : "Pagas ahora",
+      botonPago: efectivo ? "Confirmar el puesto" : "Confirmar y pagar",
+      notaPago: efectivo
+        ? "No se cobra nada ahora. Le pagas 6 $ en efectivo al subir."
+        : "Se retiene hasta la salida. Si el viaje se cancela, se devuelve entero.",
+    };
+  }
+  publicarVals() {
+    const s = this.state;
+    return {
+      nPuestos: s.puestos, nAporte: s.aporte,
+      setPuestos: (v) => this.setState({ puestos: v }),
+      setAporte: (v) => this.setState({ aporte: v }),
+      setAceptaMaletas: (v) => this.setState({ aceptaMaletas: v }),
+      previewPuestos: s.puestos === 1 ? "1 puesto" : s.puestos + " puestos",
+      previewMaletero: s.aceptaMaletas ? "Acepta maletas" : "Solo mochila",
+      previewAporte: s.aporte + " $ por puesto",
+      previewPuestoFondo: s.puestos === 1 ? "var(--rojo-100)" : "var(--azul-100)",
+      previewPuestoColor: s.puestos === 1 ? "var(--rojo-700)" : "var(--azul-700)",
+    };
+  }
+  pagosVals() {
+    const defs = [
+      { id: "Yappy", nombre: "Yappy · 6699", inicial: "Y", sub: "Tarifa 5 % · 0,30 $", pct: 0.05, tile: "azul" },
+      { id: "Tarjeta", nombre: "Visa · 4242", inicial: "V", sub: "Tarifa 8 % · 0,48 $", pct: 0.08, tile: "sand" },
+      { id: "Efectivo", nombre: "Efectivo", inicial: "$", sub: "Sin tarifa · pagas al subir", pct: 0, tile: "sand" },
+    ];
+    const sel = this.state.predeterminado;
+    const d = defs.find((x) => x.id === sel) || defs[0];
+    return {
+      guardados: defs.map((m) => ({
+        nombre: m.nombre, sub: m.sub, inicial: m.inicial,
+        tileFondo: m.tile === "azul" ? "var(--azul-100)" : "var(--sand-200)",
+        tileColor: m.tile === "azul" ? "var(--azul-700)" : "var(--ink-700)",
+        badge: m.id === sel ? "Predeterminado" : "Usar",
+        badgeFondo: m.id === sel ? "var(--azul-100)" : "var(--sand-200)",
+        badgeColor: m.id === sel ? "var(--azul-700)" : "var(--ink-700)",
+        onClick: () => this.setState({ predeterminado: m.id, metodo: m.id }),
+      })),
+      predeterminadoTexto: d.id === "Efectivo" ? "Pagas en efectivo al subir" : "Se cobra en " + d.nombre.split(" · ")[0],
+      predeterminadoNombre: d.nombre.split(" · ")[0],
+      predeterminadoTotal: this.money(6 + 6 * d.pct),
+    };
+  }
+  reembolsoVals() {
+    const defs = [
+      { id: "yo", label: "Cancelé yo", titulo: "Completo si faltan más de 2 h", texto: "Faltan 19 h, así que vuelve entero. A menos de 2 h se devuelve menos 1 $, que se queda el conductor.", monto: "6,00 $", plazo: "3 a 5 días hábiles" },
+      { id: "conductor", label: "El conductor canceló", titulo: "Completo, y te buscamos puesto", texto: "Vuelve todo, tarifa incluida. Si hay otro carro a tu hora te lo proponemos antes.", monto: "6,30 $", plazo: "3 a 5 días hábiles" },
+      { id: "novino", label: "El conductor no llegó", titulo: "Completo, tras revisar el código", texto: "El código de abordaje nunca se marcó. Lo revisamos y el conductor no recibe el aporte.", monto: "6,30 $", plazo: "En 24 h" },
+      { id: "nopaso", label: "El viaje no pasó", titulo: "Automático a las 2 h de la salida", texto: "Si nadie marca la salida, el aporte vuelve solo. No hace falta que hagas nada.", monto: "6,30 $", plazo: "Automático" },
+    ];
+    const sel = this.state.motivo;
+    const d = defs.find((x) => x.id === sel) || defs[0];
+    return {
+      motivos: defs.map((m) => ({
+        label: m.label,
+        borde: m.id === sel ? "var(--azul-500)" : "var(--border-subtle)",
+        fondo: m.id === sel ? "var(--azul-100)" : "var(--white)",
+        punto: m.id === sel ? "var(--azul-500)" : "transparent",
+        anillo: m.id === sel ? "var(--azul-500)" : "var(--border-default)",
+        onClick: () => this.setState({ motivo: m.id }),
+      })),
+      reglaTitulo: d.titulo, reglaTexto: d.texto, reglaMonto: d.monto, plazoTexto: d.plazo,
+    };
+  }
+  renderVals() {
+    const codigo = String(this.props.codigo ?? "4917").slice(0, 4);
+    const pago = this.props.pagoPreferido ?? "Yappy";
+    const min = this.props.minutosSalida ?? 12;
+    const pagoLinea = pago === "Efectivo"
+      ? "Le pagas 6 $ en efectivo al llegar."
+      : pago === "Tarjeta"
+        ? "Se cobran 6 $ a tu tarjeta cuando Andrés acepte."
+        : "Se le manda por Yappy al cerrar el viaje.";
+    return {
+      navItems: this.nav(),
+      navItemsYa: this.nav("cuenta"),
+      paradasViaje: [
+        { time: "6:00", place: "Chitré · Parque Unión", detail: "Frente a la iglesia", state: "done" },
+        { time: "6:50", place: "Divisa · parada de 10 min" },
+        { time: "9:40", place: "Panamá · Albrook", detail: "Escoges el punto al reservar" },
+      ],
+      digitos: codigo.split("").map((v) => ({ v })),
+      pagoLinea,
+      salidaTexto: `Sale en ${min} min`,
+      ...this.equipajeVals(),
+      ...this.pagoVals(),
+      ...this.publicarVals(),
+      ...this.reembolsoVals(),
+      ...this.ajustesVals(),
+      ...this.pagosVals(),
+      ...this.conductorVals(),
+      ...this.publicar5cVals(),
+      ...this.bloqueoVals(),
+      ...this.promesasVals(),
+      ...this.solicitudesVals(),
+      ...this.avisosVals(),
+    };
+  }
+}
+</script>
+</body>
+</html>

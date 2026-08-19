@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Partimos",
+    "slug": "partimos-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "partimos",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FAF7F3",
+    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#D21034"
+    },
+    "ios": { "supportsTablet": false },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#D21034"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}

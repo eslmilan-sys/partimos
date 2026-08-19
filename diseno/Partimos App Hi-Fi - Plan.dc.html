@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="design_system/tokens/fonts.css">
+<link rel="stylesheet" href="design_system/tokens/colors.css">
+<link rel="stylesheet" href="design_system/tokens/typography.css">
+<link rel="stylesheet" href="design_system/tokens/spacing.css">
+<link rel="stylesheet" href="design_system/tokens/radii.css">
+<link rel="stylesheet" href="design_system/tokens/elevation.css">
+<link rel="stylesheet" href="design_system/tokens/glass.css">
+<link rel="stylesheet" href="design_system/tokens/motion.css">
+<link rel="stylesheet" href="design_system/tokens/base.css">
+<link rel="stylesheet" href="design_system/styles.css">
+<script src="design_system/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--sand-200);font-family:var(--font-ui);color:var(--ink-900)}*{box-sizing:border-box}a{color:var(--rojo-600)}a:hover{color:var(--rojo-700)}</style></helmet>
+
+<section id="plan" style="padding:44px 44px 40px">
+<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 10px">
+<span style="font:600 10px var(--font-ui);letter-spacing:.06em;padding:4px 8px;background:var(--ink-900);color:#fff;border-radius:6px">E</span>
+<span style="font:600 13px/1.2 var(--font-ui)">El plan, la auditoría y las decisiones</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:7px;margin:0 0 26px"><a href="Partimos App Hi-Fi.dc.html" style="font:600 11.5px var(--font-ui);padding:6px 12px;border-radius:999px;background:var(--white);color:var(--ink-700);text-decoration:none;border:1px solid var(--border-subtle)">A · Pasajero · buscar y entrar</a><a href="Partimos App Hi-Fi - Viaje.dc.html" style="font:600 11.5px var(--font-ui);padding:6px 12px;border-radius:999px;background:var(--white);color:var(--ink-700);text-decoration:none;border:1px solid var(--border-subtle)">B · Pasajero · pagar y viajar</a><a href="Partimos App Hi-Fi - Conductor.dc.html" style="font:600 11.5px var(--font-ui);padding:6px 12px;border-radius:999px;background:var(--white);color:var(--ink-700);text-decoration:none;border:1px solid var(--border-subtle)">C · Conductor · de la cédula al cobro</a><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html" style="font:600 11.5px var(--font-ui);padding:6px 12px;border-radius:999px;background:var(--white);color:var(--ink-700);text-decoration:none;border:1px solid var(--border-subtle)">D · Deshacer, reclamar y pedir ayuda</a><span style="font:600 11.5px var(--font-ui);padding:6px 12px;border-radius:999px;background:var(--ink-900);color:#fff">E · El plan, la auditoría y las decisiones</span></div>
+<div style="max-width:820px;margin:0 0 30px;font:400 13.5px/1.6 var(--font-ui);color:var(--ink-600);text-wrap:pretty"><p style="margin:0">Lo que no es una pantalla de uso: los dos recorridos en orden, la auditoría de lo que falta, el mapa de avisos y las decisiones de color que sostienen el resto.</p></div>
+<div style="display:flex;flex-direction:column;gap:26px">
+<div style="width:100%;font:600 11px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--azul-500);margin:0 0 -4px">Los recorridos</div>
+<div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start;width:100%">
+<div id="13a" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#13a" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">13a</a>Recorrido del pasajero — 17 pasos</div>
+<div data-screen-label="13a Recorrido pasajero" style="width:520px;background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-sheet);overflow:hidden;font-family:var(--font-ui);color:var(--ink-900);box-shadow:var(--shadow-s)">
+<div style="padding:20px 22px;background:var(--sand-100);border-bottom:1px solid var(--border-subtle)">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Pasajero</div>
+<div style="font-size:21px;font-weight:400;letter-spacing:-.03em;margin-top:6px">Busca primero, <b style="font-weight:600">cuenta después</b></div>
+</div>
+<div style="padding:8px 22px 20px">
+
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">01</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Instala y abre la app</span><a href="Partimos App Hi-Fi.dc.html#4a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">4a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Apertura</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">02</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Elige salida sin registrarse</span><a href="Partimos App Hi-Fi.dc.html#1a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">1a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Bienvenida</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">03</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Busca ruta, día y hora</span><a href="Partimos App Hi-Fi.dc.html#3a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">3a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Inicio</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">04</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Ve los viajes, con precio y maletas</span><a href="Partimos App Hi-Fi.dc.html#1b" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">1b</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Resultados · también <a href="Partimos App Hi-Fi.dc.html#3b" style="color:var(--azul-700);text-decoration:none;font-weight:600">3b</a> <a href="Partimos App Hi-Fi.dc.html#3c" style="color:var(--azul-700);text-decoration:none;font-weight:600">3c</a></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">05</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Abre uno y mira quién conduce</span><a href="Partimos App Hi-Fi.dc.html#5a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">5a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Detalle · perfil <a href="Partimos App Hi-Fi.dc.html#6b" style="color:var(--azul-700);text-decoration:none;font-weight:600">6b</a></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle);background:linear-gradient(90deg,rgba(210,16,52,.05),rgba(255,255,255,0) 60%)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--rojo-600);flex:none;font-variant-numeric:tabular-nums">06</span><span style="flex:1;font-size:14px;font-weight:500;letter-spacing:-.012em">Toca pedir puesto — aquí está la puerta</span><a href="Partimos App Hi-Fi.dc.html#1c" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--rojo-100);color:var(--rojo-700);text-decoration:none;flex:none">1c</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">La Puerta</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">07</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Da su celular y el código</span><a href="Partimos App Hi-Fi.dc.html#4b" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">4b</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Luego <a href="Partimos App Hi-Fi.dc.html#4c" style="color:var(--azul-700);text-decoration:none;font-weight:600">4c</a> <a href="Partimos App Hi-Fi.dc.html#4d" style="color:var(--azul-700);text-decoration:none;font-weight:600">4d</a> · vuelve <a href="Partimos App Hi-Fi.dc.html#4e" style="color:var(--azul-700);text-decoration:none;font-weight:600">4e</a></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">08</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Escribe su punto y su equipaje</span><a href="Partimos App Hi-Fi - Viaje.dc.html#7a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">7a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Reserva</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle);background:linear-gradient(90deg,rgba(210,16,52,.05),rgba(255,255,255,0) 60%)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--rojo-600);flex:none;font-variant-numeric:tabular-nums">09</span><span style="flex:1;font-size:14px;font-weight:500;letter-spacing:-.012em">Elige método y ve la tarifa</span><a href="Partimos App Hi-Fi - Viaje.dc.html#7b" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--rojo-100);color:var(--rojo-700);text-decoration:none;flex:none">7b</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Pago · guardados <a href="Partimos App Hi-Fi - Viaje.dc.html#9a" style="color:var(--azul-700);text-decoration:none;font-weight:600">9a</a></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">10</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Espera el sí — le llega el aviso</span><a href="Partimos App Hi-Fi - Viaje.dc.html#12a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">12a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Push · bandeja <a href="Partimos App Hi-Fi - Viaje.dc.html#11b" style="color:var(--azul-700);text-decoration:none;font-weight:600">11b</a></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">11</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Acuerda el punto por escrito</span><a href="Partimos App Hi-Fi - Viaje.dc.html#6c" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">6c</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Chat del viaje</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">12</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">El día llega y la cuenta atrás manda</span><a href="Partimos App Hi-Fi - Viaje.dc.html#1d" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">1d</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Ya · mapa <a href="Partimos App Hi-Fi - Viaje.dc.html#1e" style="color:var(--azul-700);text-decoration:none;font-weight:600">1e</a></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">13</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Muestra su código al subir</span><a href="Partimos App Hi-Fi - Viaje.dc.html#1f" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">1f</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Código de abordaje</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">14</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Viaja y ve el camino</span><a href="Partimos App Hi-Fi - Viaje.dc.html#1h" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">1h</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">En ruta</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle);background:linear-gradient(90deg,rgba(210,16,52,.05),rgba(255,255,255,0) 60%)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--rojo-600);flex:none;font-variant-numeric:tabular-nums">15</span><span style="flex:1;font-size:14px;font-weight:500;letter-spacing:-.012em">Llega — y se libera el aporte</span><a href="Partimos App Hi-Fi - Viaje.dc.html#1i" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--rojo-100);color:var(--rojo-700);text-decoration:none;flex:none">1i</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Llegada</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">16</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Califica en una pregunta</span><a href="Partimos App Hi-Fi - Viaje.dc.html#1j" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">1j</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Calificar</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">17</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Si algo se cayó, pide su plata</span><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#7d" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">7d</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Reembolso</span></div>
+
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">La cuenta entra en el paso 06, no en el 01</div>
+</div>
+<div id="13b" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#13b" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">13b</a>Recorrido del conductor — 14 pasos</div>
+<div data-screen-label="13b Recorrido conductor" style="width:520px;background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-sheet);overflow:hidden;font-family:var(--font-ui);color:var(--ink-900);box-shadow:var(--shadow-s)">
+<div style="padding:20px 22px;background:var(--sand-100);border-bottom:1px solid var(--border-subtle)">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Conductor</div>
+<div style="font-size:21px;font-weight:400;letter-spacing:-.03em;margin-top:6px">Cédula antes de <b style="font-weight:600">publicar</b></div>
+</div>
+<div style="padding:8px 22px 20px">
+
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">01</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Instala y abre la app</span><a href="Partimos App Hi-Fi.dc.html#4a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">4a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Apertura</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">02</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Crea cuenta con su celular</span><a href="Partimos App Hi-Fi.dc.html#4b" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">4b</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Luego <a href="Partimos App Hi-Fi.dc.html#4c" style="color:var(--azul-700);text-decoration:none;font-weight:600">4c</a> <a href="Partimos App Hi-Fi.dc.html#4d" style="color:var(--azul-700);text-decoration:none;font-weight:600">4d</a></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">03</span><span style="flex:1;font-size:14px;font-weight:500;letter-spacing:-.012em">Verifica su cédula — obligatorio</span><a href="Partimos App Hi-Fi - Conductor.dc.html#6d" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">6d</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Verificación · <a href="Partimos App Hi-Fi - Conductor.dc.html#6a" style="color:var(--azul-700);text-decoration:none;font-weight:600">6a</a></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">04</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Toca el gancho de conductor</span><a href="Partimos App Hi-Fi.dc.html#3a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">3a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Inicio</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">05</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Pone ruta, día y hora</span><a href="Partimos App Hi-Fi - Conductor.dc.html#5c" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">5c</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Publicar</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle);background:linear-gradient(90deg,rgba(210,16,52,.05),rgba(255,255,255,0) 60%)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--rojo-600);flex:none;font-variant-numeric:tabular-nums">06</span><span style="flex:1;font-size:14px;font-weight:500;letter-spacing:-.012em">Ve el tope del aporte y el reparto</span><a href="Partimos App Hi-Fi - Conductor.dc.html#5d" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--rojo-100);color:var(--rojo-700);text-decoration:none;flex:none">5d</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">El tope</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">07</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Dice puestos, aporte y si lleva maletas</span><a href="Partimos App Hi-Fi - Conductor.dc.html#7c" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">7c</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Puestos y maletas</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">08</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Queda publicado y lo administra</span><a href="Partimos App Hi-Fi - Conductor.dc.html#10a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">10a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Panel · lista <a href="Partimos App Hi-Fi - Conductor.dc.html#5b" style="color:var(--azul-700);text-decoration:none;font-weight:600">5b</a></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">09</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Le piden puesto a las 4:58</span><a href="Partimos App Hi-Fi - Viaje.dc.html#12a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">12a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Push con acciones</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle);background:linear-gradient(90deg,rgba(210,16,52,.05),rgba(255,255,255,0) 60%)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--rojo-600);flex:none;font-variant-numeric:tabular-nums">10</span><span style="flex:1;font-size:14px;font-weight:500;letter-spacing:-.012em">Acepta — y ahí se le cobra</span><a href="Partimos App Hi-Fi - Conductor.dc.html#11a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--rojo-100);color:var(--rojo-700);text-decoration:none;flex:none">11a</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Solicitudes</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">11</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Cierra el punto con el pasajero</span><a href="Partimos App Hi-Fi - Viaje.dc.html#6c" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">6c</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Chat del viaje</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">12</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Marca a cada uno al subir</span><a href="Partimos App Hi-Fi - Conductor.dc.html#1g" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">1g</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Código · lado conductor</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-subtle)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--ink-300);flex:none;font-variant-numeric:tabular-nums">13</span><span style="flex:1;font-size:14px;letter-spacing:-.012em">Conduce y cierra el viaje</span><a href="Partimos App Hi-Fi - Viaje.dc.html#1h" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">1h</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">En ruta · <a href="Partimos App Hi-Fi - Viaje.dc.html#1i" style="color:var(--azul-700);text-decoration:none;font-weight:600">1i</a></span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;background:linear-gradient(90deg,rgba(210,16,52,.05),rgba(255,255,255,0) 60%)"><span style="width:22px;font-size:12px;font-weight:700;color:var(--rojo-600);flex:none;font-variant-numeric:tabular-nums">14</span><span style="flex:1;font-size:14px;font-weight:500;letter-spacing:-.012em">Cobra el lunes lo del mes</span><a href="Partimos App Hi-Fi - Conductor.dc.html#10b" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--rojo-100);color:var(--rojo-700);text-decoration:none;flex:none">10b</a><span style="width:158px;font-size:13px;color:var(--ink-600);flex:none">Aportes</span></div>
+
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Nada se cobra hasta el paso 10</div>
+</div>
+<div id="13c" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#13c" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">13c</a>Fuera del recorrido</div>
+<div data-screen-label="13c Fuera del recorrido" style="width:340px;background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-sheet);overflow:hidden;font-family:var(--font-ui);color:var(--ink-900);box-shadow:var(--shadow-s)">
+<div style="padding:20px 22px 8px">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Se llega desde cualquier paso</div>
+<div style="display:grid;margin-top:6px">
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border-subtle)"><a href="Partimos App Hi-Fi - Conductor.dc.html#6a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">6a</a><span style="flex:1;font-size:14px;letter-spacing:-.012em">Cuenta — qué falta</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border-subtle)"><a href="Partimos App Hi-Fi.dc.html#6b" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">6b</a><span style="flex:1;font-size:14px;letter-spacing:-.012em">Perfil público</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border-subtle)"><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#8a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">8a</a><span style="flex:1;font-size:14px;letter-spacing:-.012em">Ajustes</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border-subtle)"><a href="Partimos App Hi-Fi - Viaje.dc.html#9a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">9a</a><span style="flex:1;font-size:14px;letter-spacing:-.012em">Métodos de pago</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border-subtle)"><a href="Partimos App Hi-Fi - Viaje.dc.html#11b" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">11b</a><span style="flex:1;font-size:14px;letter-spacing:-.012em">Bandeja de avisos</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border-subtle)"><a href="Partimos App Hi-Fi - Conductor.dc.html#5b" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">5b</a><span style="flex:1;font-size:14px;letter-spacing:-.012em">Mis viajes</span></div>
+</div>
+</div>
+<div style="padding:4px 22px 20px">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500);margin-top:12px">No son pantallas</div>
+<div style="display:grid;margin-top:6px">
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border-subtle)"><a href="#12b" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">12b</a><span style="flex:1;font-size:14px;letter-spacing:-.012em">Mapa de eventos</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border-subtle)"><a href="#2a" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sand-200);color:var(--ink-900);text-decoration:none;flex:none">2a</a><span style="flex:1;font-size:14px;letter-spacing:-.012em">Los tres rojos · <a href="#2b" style="color:var(--azul-700);text-decoration:none;font-weight:600">2b</a> <a href="#2c" style="color:var(--azul-700);text-decoration:none;font-weight:600">2c</a></span></div>
+</div>
+<p style="font-size:12.5px;line-height:1.5;color:var(--ink-500);margin:16px 0 0">Los dos recorridos se cruzan en tres pantallas: el chat <a href="Partimos App Hi-Fi - Viaje.dc.html#6c" style="color:var(--azul-700);text-decoration:none;font-weight:600">6c</a>, el código <a href="Partimos App Hi-Fi - Viaje.dc.html#1f" style="color:var(--azul-700);text-decoration:none;font-weight:600">1f</a>/<a href="Partimos App Hi-Fi - Conductor.dc.html#1g" style="color:var(--azul-700);text-decoration:none;font-weight:600">1g</a> y el viaje en ruta <a href="Partimos App Hi-Fi - Viaje.dc.html#1h" style="color:var(--azul-700);text-decoration:none;font-weight:600">1h</a>.</p>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Nada de esto interrumpe un recorrido</div>
+</div>
+</div>
+<div style="width:100%;font:600 11px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--azul-500);margin:0 0 -4px">Documentos</div>
+<div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start;width:100%">
+<div id="12b" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#12b" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">12b</a>Mapa de eventos y reglas — N5</div>
+<div data-screen-label="12b Mapa de eventos" style="width:560px;background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-sheet);overflow:hidden;font-family:var(--font-ui);color:var(--ink-900);box-shadow:var(--shadow-s)">
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:14px 22px;background:var(--sand-100);border-bottom:1px solid var(--border-subtle);font-size:10.5px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">
+<span>Evento</span><span>A quién</span><span>Push</span><span>Bandeja</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">Piden puesto</span><span style="color:var(--ink-600)">Conductor</span><span style="color:var(--rojo-700);font-weight:500">Con acciones</span><span style="color:var(--ink-600)">Sí</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">Puesto aceptado y cobrado</span><span style="color:var(--ink-600)">Pasajero</span><span style="color:var(--rojo-700);font-weight:500">Con acciones</span><span style="color:var(--ink-600)">Sí</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">No puedo llevarte</span><span style="color:var(--ink-600)">Pasajero</span><span style="color:var(--ink-600)">Sí</span><span style="color:var(--ink-600)">Sí</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">Solicitud a 1 h de expirar</span><span style="color:var(--ink-600)">Conductor</span><span style="color:var(--ink-600)">Sí</span><span style="color:var(--ink-400)">No</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">Mensaje nuevo</span><span style="color:var(--ink-600)">Los dos</span><span style="color:var(--ink-600)">Sí</span><span style="color:var(--ink-400)">Vive en el chat</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">1 h antes de salir</span><span style="color:var(--ink-600)">Los dos</span><span style="color:var(--ink-600)">Sí</span><span style="color:var(--ink-600)">Sí</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">Voy en camino</span><span style="color:var(--ink-600)">Pasajero</span><span style="color:var(--ink-600)">Sí</span><span style="color:var(--ink-400)">No</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">Aporte liberado</span><span style="color:var(--ink-600)">Conductor</span><span style="color:var(--ink-600)">Sí</span><span style="color:var(--ink-600)">Sí</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">Califica el viaje</span><span style="color:var(--ink-600)">Los dos</span><span style="color:var(--ink-400)">No</span><span style="color:var(--rojo-700);font-weight:500">Pide acción</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">Reembolso enviado</span><span style="color:var(--ink-600)">Pasajero</span><span style="color:var(--ink-600)">Sí</span><span style="color:var(--ink-600)">Sí</span>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:14px;padding:13px 22px;border-bottom:1px solid var(--border-subtle);font-size:13.5px;align-items:baseline">
+<span style="font-weight:500;letter-spacing:-.015em">Alguien publicó tu ruta</span><span style="color:var(--ink-600)">Pasajero</span><span style="color:var(--ink-600)">Si lo pidió</span><span style="color:var(--ink-600)">Sí</span>
+</div>
+<div style="padding:22px">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--rojo-600);margin-bottom:14px">Las cinco reglas</div>
+<div style="display:grid;gap:11px">
+<div style="display:flex;gap:12px;align-items:baseline"><span style="width:20px;font-size:13px;font-weight:700;color:var(--azul-500);flex:none;font-variant-numeric:tabular-nums">01</span><span style="flex:1;font-size:13.5px;line-height:1.5;color:var(--ink-700)">El título dice qué pasó. La segunda línea, la ruta y la hora.</span></div>
+<div style="display:flex;gap:12px;align-items:baseline"><span style="width:20px;font-size:13px;font-weight:700;color:var(--azul-500);flex:none;font-variant-numeric:tabular-nums">02</span><span style="flex:1;font-size:13.5px;line-height:1.5;color:var(--ink-700)">Si hay una acción, va dentro del push. Aceptar sin abrir la app es la diferencia.</span></div>
+<div style="display:flex;gap:12px;align-items:baseline"><span style="width:20px;font-size:13px;font-weight:700;color:var(--azul-500);flex:none;font-variant-numeric:tabular-nums">03</span><span style="flex:1;font-size:13.5px;line-height:1.5;color:var(--ink-700)">Un evento, un aviso. Solo el dinero se repite en dos canales.</span></div>
+<div style="display:flex;gap:12px;align-items:baseline"><span style="width:20px;font-size:13px;font-weight:700;color:var(--azul-500);flex:none;font-variant-numeric:tabular-nums">04</span><span style="flex:1;font-size:13.5px;line-height:1.5;color:var(--ink-700)">El permiso se pide cuando ya le importa: al reservar o al publicar, nunca al abrir.</span></div>
+<div style="display:flex;gap:12px;align-items:baseline"><span style="width:20px;font-size:13px;font-weight:700;color:var(--azul-500);flex:none;font-variant-numeric:tabular-nums">05</span><span style="flex:1;font-size:13.5px;line-height:1.5;color:var(--ink-700)">Nada de promociones. Si no es tu viaje, no te escribimos.</span></div>
+</div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">Documento · qué evento va por dónde</div>
+</div>
+<div id="2a" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#2a" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">2a</a>Rojo más claro — más aire, menos peso</div>
+<div style="width:390px;height:600px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:326px;background:radial-gradient(88% 60% at 86% 0%,rgba(255,232,212,.52) 0%,rgba(255,232,212,0) 62%),linear-gradient(166deg,#E63A52 0%,#D8203F 46%,#C50E2F 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">14:32</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;padding:6px 26px 0;color:#fff">
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:#fff">Ya · en vivo</span><span style="width:7px;height:7px;border-radius:999px;background:#fff"></span></div>
+<h1 style="font-size:42px;letter-spacing:-.045em;line-height:1.02;margin:14px 0 0;font-weight:400;color:#fff">Salen ahora<br><b style="font-weight:600">hacia el interior</b></h1>
+<div style="font-size:14px;color:rgba(255,255,255,.86);margin-top:12px;font-variant-numeric:tabular-nums">6 carros desde Albrook</div>
+</div>
+<div style="position:relative;margin:30px 22px 0;background:var(--white);border-radius:var(--radius-sheet);padding:22px;box-shadow:0 18px 40px -18px rgba(170,22,50,.26)">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+<div><div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--rojo-600)">Sale en 6 min</div><div style="font-size:23px;font-weight:400;letter-spacing:-.035em;line-height:1.24;margin-top:9px">Albrook<br>→ <b style="font-weight:600">Chitré</b></div></div>
+<div style="display:flex;align-items:flex-start;gap:6px"><div style="font-size:32px;font-weight:700;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums">6<span style="font-size:17px;font-weight:500;margin-left:2px">$</span></div><span style="background:var(--azul-100);color:var(--azul-700);border-radius:999px;padding:3px 8px;font-size:10.5px;font-weight:600;margin-top:2px;white-space:nowrap">2 puestos</span></div>
+</div>
+<div style="margin-top:20px"><span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:58px;padding:0 32px;font-size:17px;background:var(--action-brand-bg);color:var(--action-brand-fg);width:100%" style-hover="background:var(--action-brand-bg-hover)">Pedir puesto · 6 $</span></div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">#E63A52 → #C50E2F</div>
+</div>
+<div id="2b" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#2b" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:rgba(38,35,43,.08);color:var(--ink-900);border-radius:5px;text-decoration:none">2b</a>Rojo profundo — el más caro de los tres</div>
+<div style="width:390px;height:600px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:326px;background:radial-gradient(90% 62% at 82% 0%,rgba(226,96,116,.42) 0%,rgba(226,96,116,0) 64%),linear-gradient(168deg,#A80B27 0%,#8C0A22 56%,#590716 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">14:32</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;padding:6px 26px 0;color:#fff">
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:#fff">Ya · en vivo</span><span style="width:7px;height:7px;border-radius:999px;background:#fff"></span></div>
+<h1 style="font-size:42px;letter-spacing:-.045em;line-height:1.02;margin:14px 0 0;font-weight:400;color:#fff">Salen ahora<br><b style="font-weight:600">hacia el interior</b></h1>
+<div style="font-size:14px;color:var(--field-fg);margin-top:12px;font-variant-numeric:tabular-nums">6 carros desde Albrook</div>
+</div>
+<div style="position:relative;margin:30px 22px 0;background:var(--white);border-radius:var(--radius-sheet);padding:22px;box-shadow:0 18px 40px -18px rgba(60,5,15,.34)">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+<div><div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--rojo-600)">Sale en 6 min</div><div style="font-size:23px;font-weight:400;letter-spacing:-.035em;line-height:1.24;margin-top:9px">Albrook<br>→ <b style="font-weight:600">Chitré</b></div></div>
+<div style="display:flex;align-items:flex-start;gap:6px"><div style="font-size:32px;font-weight:700;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums">6<span style="font-size:17px;font-weight:500;margin-left:2px">$</span></div><span style="background:var(--azul-100);color:var(--azul-700);border-radius:999px;padding:3px 8px;font-size:10.5px;font-weight:600;margin-top:2px;white-space:nowrap">2 puestos</span></div>
+</div>
+<div style="margin-top:20px"><span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:58px;padding:0 32px;font-size:17px;background:var(--action-brand-bg);color:var(--action-brand-fg);width:100%" style-hover="background:var(--action-brand-bg-hover)">Pedir puesto · 6 $</span></div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">#A80B27 → #590716</div>
+</div>
+<div id="2c" style="display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-ui);color:var(--ink-600)"><a href="#2c" style="font:600 10.5px var(--font-ui);padding:3px 7px;background:var(--rojo-500);color:#fff;border-radius:5px;text-decoration:none">2c</a>Rojo con luz — aplicado en el turno 1</div>
+<div style="width:390px;height:600px;border-radius:46px;background:var(--sand-100);position:relative;overflow:hidden;box-shadow:var(--shadow-l),0 0 0 1px var(--border-subtle);display:flex;flex-direction:column;font-family:var(--font-ui);color:var(--ink-900)">
+<div style="position:absolute;top:0;left:0;right:0;height:326px;background:radial-gradient(86% 60% at 88% 0%,rgba(255,216,188,.34) 0%,rgba(255,216,188,0) 62%),radial-gradient(96% 76% at 2% 100%,rgba(94,7,23,.62) 0%,rgba(94,7,23,0) 70%),linear-gradient(166deg,#DD1D3F 0%,#D21034 44%,#AF0B29 100%)"></div>
+<div style="height:44px;padding:0 26px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex:none;position:relative"><span style="font-size:14px;font-weight:600;letter-spacing:-.01em">14:32</span><span style="display:flex;gap:5px;align-items:center"><svg viewBox="0 0 18 12" width="17" height="11" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="9" y="3" width="3" height="9" rx="1"></rect><rect x="13.5" y="0" width="3" height="12" rx="1"></rect></svg><svg viewBox="0 0 26 13" width="24" height="12" fill="none"><rect x="0.6" y="0.6" width="21" height="11.8" rx="3.4" stroke="#fff" stroke-opacity=".45"></rect><rect x="2.4" y="2.4" width="17.4" height="8.2" rx="2.2" fill="#fff"></rect><path d="M23.4 4.4v4.2c1.2-.4 1.7-1.1 1.7-2.1s-.5-1.7-1.7-2.1Z" fill="#fff" fill-opacity=".5"></path></svg></span></div>
+<div style="position:relative;padding:6px 26px 0;color:#fff">
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:#fff">Ya · en vivo</span><span style="width:7px;height:7px;border-radius:999px;background:#fff"></span></div>
+<h1 style="font-size:42px;letter-spacing:-.045em;line-height:1.02;margin:14px 0 0;font-weight:400;color:#fff">Salen ahora<br><b style="font-weight:600">hacia el interior</b></h1>
+<div style="font-size:14px;color:var(--field-fg);margin-top:12px;font-variant-numeric:tabular-nums">6 carros desde Albrook</div>
+</div>
+<div style="position:relative;margin:30px 22px 0;background:var(--white);border-radius:var(--radius-sheet);padding:22px;box-shadow:0 18px 40px -18px rgba(120,10,30,.28)">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+<div><div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--rojo-600)">Sale en 6 min</div><div style="font-size:23px;font-weight:400;letter-spacing:-.035em;line-height:1.24;margin-top:9px">Albrook<br>→ <b style="font-weight:600">Chitré</b></div></div>
+<div style="display:flex;align-items:flex-start;gap:6px"><div style="font-size:32px;font-weight:700;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums">6<span style="font-size:17px;font-weight:500;margin-left:2px">$</span></div><span style="background:var(--azul-100);color:var(--azul-700);border-radius:999px;padding:3px 8px;font-size:10.5px;font-weight:600;margin-top:2px;white-space:nowrap">2 puestos</span></div>
+</div>
+<div style="margin-top:20px"><span style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-ui);font-weight:var(--weight-semibold);letter-spacing:-.01em;border:1px solid transparent;border-radius:var(--radius-pill);cursor:pointer;white-space:nowrap;flex:none;height:58px;padding:0 32px;font-size:17px;background:var(--action-brand-bg);color:var(--action-brand-fg);width:100%" style-hover="background:var(--action-brand-bg-hover)">Pedir puesto · 6 $</span></div>
+</div>
+</div>
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-400)">#DD1D3F → #AF0B29 + luz arena</div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="auditoria" style="padding:44px 44px 40px;border-bottom:1px solid rgba(38,35,43,.1)">
+<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 10px">
+<a href="#auditoria" style="font:600 10px var(--font-ui);letter-spacing:.06em;padding:4px 8px;background:var(--ink-900);color:#fff;border-radius:6px;text-decoration:none">0</a>
+<span style="font:600 13px/1.2 var(--font-ui)">Auditoría — 58 pantallas, ningún hueco abierto</span>
+</div>
+<div style="max-width:820px;margin:0 0 30px;font:400 13.5px/1.6 var(--font-ui);color:var(--ink-600);text-wrap:pretty">
+<p style="margin:0">Los dos recorridos completos se pueden recorrer de principio a fin. Lo que falta se detecta por <strong style="font-weight:600">callejones sin salida</strong>: botones que ya existen en las pantallas y no llevan a ninguna parte. Cada hueco de abajo cita el botón que lo delata, así que la lista no es una lluvia de ideas — es deuda.</p>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+<div data-screen-label="0 Auditoría" style="width:600px;background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-sheet);overflow:hidden;font-family:var(--font-ui);color:var(--ink-900);box-shadow:var(--shadow-s)">
+
+<div style="padding:20px 22px;background:var(--sand-100);border-bottom:1px solid var(--border-subtle);display:flex;align-items:flex-end;gap:14px">
+<div style="flex:1">
+<div style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Estado</div>
+<div style="font-size:21px;font-weight:400;letter-spacing:-.03em;margin-top:6px">Los recorridos cierran, <b style="font-weight:600">y los bordes también</b></div>
+</div>
+<div style="text-align:right;flex:none"><div style="font-size:32px;font-weight:700;letter-spacing:-.045em;line-height:.9;font-variant-numeric:tabular-nums">58</div><div style="font-size:12px;color:var(--ink-500);margin-top:3px">pantallas</div></div>
+</div>
+
+<div style="padding:20px 22px 8px">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:6px"><span style="width:7px;height:7px;border-radius:999px;background:var(--rojo-500)"></span><span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--rojo-600)">Bloquea el producto · 5 · ya hechas</span></div>
+
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">01</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Cancelar un viaje</span><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#14a" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--green-100,var(--sand-200));color:var(--ink-700);text-decoration:none;flex:none">14a ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">El reembolso <a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#7d" style="color:var(--azul-700);text-decoration:none;font-weight:600">7d</a> parte de «cancelé yo», pero cancelar no existe. Lado pasajero y lado conductor, con la consecuencia a la vista antes de confirmar.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">02</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Registrar el carro</span><a href="Partimos App Hi-Fi - Conductor.dc.html#14b" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--green-100,var(--sand-200));color:var(--ink-700);text-decoration:none;flex:none">14b ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">5c da por hecho un carro guardado y ofrece «Cambiar». Nadie lo ha dado de alta nunca: marca, placa, puestos, foto.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">03</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Añadir método de pago</span><a href="Partimos App Hi-Fi - Viaje.dc.html#14c" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--green-100,var(--sand-200));color:var(--ink-700);text-decoration:none;flex:none">14c ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">«Añadir método» en <a href="Partimos App Hi-Fi - Viaje.dc.html#9a" style="color:var(--azul-700);text-decoration:none;font-weight:600">9a</a> y «Cambiar» en <a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#7d" style="color:var(--azul-700);text-decoration:none;font-weight:600">7d</a> y <a href="Partimos App Hi-Fi - Conductor.dc.html#10b" style="color:var(--azul-700);text-decoration:none;font-weight:600">10b</a> no llevan a nada. Sin esto no hay primer pago.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">04</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Editar un viaje publicado</span><a href="Partimos App Hi-Fi - Conductor.dc.html#14d" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--green-100,var(--sand-200));color:var(--ink-700);text-decoration:none;flex:none">14d ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">«Editar» aparece dos veces en <a href="Partimos App Hi-Fi - Conductor.dc.html#10a" style="color:var(--azul-700);text-decoration:none;font-weight:600">10a</a> y la regla ya está escrita: se puede mientras nadie haya pagado.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">05</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Entrar con una cuenta que ya existe</span><a href="Partimos App Hi-Fi.dc.html#14e" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--green-100,var(--sand-200));color:var(--ink-700);text-decoration:none;flex:none">14e ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px"><a href="Partimos App Hi-Fi.dc.html#4b" style="color:var(--azul-700);text-decoration:none;font-weight:600">4b</a> solo sabe registrar. Quien reinstala o cambia de teléfono no tiene puerta, y «Cerrar sesión» en <a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#8a" style="color:var(--azul-700);text-decoration:none;font-weight:600">8a</a> lleva a un sitio que no existe.</div></div></div>
+
+<div style="display:flex;align-items:center;gap:9px;margin:22px 0 6px"><span style="width:7px;height:7px;border-radius:999px;background:var(--azul-500)"></span><span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--azul-500)">Rompe una promesa hecha en pantalla · 5 · ya hechas</span></div>
+
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">06</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Avisarme de una ruta</span><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#15a" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--sand-200);color:var(--ink-700);text-decoration:none;flex:none">15a ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">«Avisarme» está en <a href="Partimos App Hi-Fi.dc.html#3b" style="color:var(--azul-700);text-decoration:none;font-weight:600">3b</a>, el aviso de ruta guardada está en <a href="Partimos App Hi-Fi - Viaje.dc.html#11b" style="color:var(--azul-700);text-decoration:none;font-weight:600">11b</a> y en <a href="#12b" style="color:var(--azul-700);text-decoration:none;font-weight:600">12b</a>. Falta la pantalla de rutas guardadas donde se gestiona.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">07</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Ayuda y soporte</span><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#15b" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--sand-200);color:var(--ink-700);text-decoration:none;flex:none">15b ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">«Escribir a soporte» en <a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#7d" style="color:var(--azul-700);text-decoration:none;font-weight:600">7d</a>, «Ayuda y reembolsos» en <a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#8a" style="color:var(--azul-700);text-decoration:none;font-weight:600">8a</a>, «Ayuda · Términos» en <a href="Partimos App Hi-Fi - Conductor.dc.html#6a" style="color:var(--azul-700);text-decoration:none;font-weight:600">6a</a>. Tres entradas, cero destino. La web ya tiene /ayuda.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">08</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Estado de un reembolso</span><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#15c" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--sand-200);color:var(--ink-700);text-decoration:none;flex:none">15c ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px"><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#7d" style="color:var(--azul-700);text-decoration:none;font-weight:600">7d</a> promete «en 24 h» y «3 a 5 días hábiles». Nadie puede volver a mirar en qué va.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">09</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Reportar y bloquear</span><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#15d" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--sand-200);color:var(--ink-700);text-decoration:none;flex:none">15d ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">El chat <a href="Partimos App Hi-Fi - Viaje.dc.html#6c" style="color:var(--azul-700);text-decoration:none;font-weight:600">6c</a> y la calificación <a href="Partimos App Hi-Fi - Viaje.dc.html#1j" style="color:var(--azul-700);text-decoration:none;font-weight:600">1j</a> son los sitios donde algo va mal, y no hay salida. La web tiene /seguridad; la app no.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">10</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Quién es el que pide puesto</span><a href="Partimos App Hi-Fi - Conductor.dc.html#15e" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--sand-200);color:var(--ink-700);text-decoration:none;flex:none">15e ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">En <a href="Partimos App Hi-Fi - Conductor.dc.html#11a" style="color:var(--azul-700);text-decoration:none;font-weight:600">11a</a> el conductor acepta a «Rosa I. · Nueva · sin viajes» con una línea de texto. El pasajero puede ver el perfil del conductor <a href="Partimos App Hi-Fi.dc.html#6b" style="color:var(--azul-700);text-decoration:none;font-weight:600">6b</a>; al revés, no.</div></div></div>
+
+<div style="display:flex;align-items:center;gap:9px;margin:22px 0 6px"><span style="width:7px;height:7px;border-radius:999px;background:var(--ink-300)"></span><span style="font-size:11px;font-weight:600;letter-spacing:var(--track-micro);text-transform:uppercase;color:var(--ink-500)">Se puede vivir sin ellas · 4 · ya hechas</span></div>
+
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">11</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Lista de conversaciones</span><a href="Partimos App Hi-Fi - Viaje.dc.html#16a" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--sand-200);color:var(--ink-700);text-decoration:none;flex:none">16a ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">Con un viaje a la vez el chat se abre desde el viaje. Hace falta cuando alguien lleva tres.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">12</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Comprobante del viaje</span><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#16c" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--sand-200);color:var(--ink-700);text-decoration:none;flex:none">16c ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">El conductor ve su dinero en <a href="Partimos App Hi-Fi - Conductor.dc.html#10b" style="color:var(--azul-700);text-decoration:none;font-weight:600">10b</a>. El pasajero no tiene dónde ver lo que pagó.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">13</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Cómo se paga</span><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#16b" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--sand-200);color:var(--ink-700);text-decoration:none;flex:none">16b ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">Existe en la web con 109 líneas de copy. Dentro de la app, la tarifa solo se explica en el momento de pagar.</div></div></div>
+<div style="display:flex;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--border-subtle)"><span style="width:20px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">14</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:14.5px;font-weight:500;letter-spacing:-.015em">Pedir el permiso de avisos</span><a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#16d" style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--sand-200);color:var(--ink-700);text-decoration:none;flex:none">16d ✓</a></div><div style="font-size:12.5px;line-height:1.45;color:var(--ink-600);margin-top:2px">La regla 04 de <a href="#12b" style="color:var(--azul-700);text-decoration:none;font-weight:600">12b</a> dice que el permiso se pide al reservar o al publicar. La pantalla que lo pide no está.</div></div></div>
+
+<div style="margin-top:18px;padding:16px 18px;border-radius:var(--radius-l);background:var(--sand-100);font-size:12.5px;line-height:1.5;color:var(--ink-600)">Lo que queda por delante no son pantallas que falten, sino decisiones de ingeniería: la pasarela real de Yappy, la verificación de cédula contra el registro, mapas de verdad en lugar de marcadores, y el backend que sostiene la retención del aporte.</div>
+</div>
+</div>
+
+</div>
+<p style="margin:30px 0 0;font:400 12.5px/1.6 var(--font-ui);color:var(--ink-600)">La auditoría se queda como registro de lo que se cerró y por qué.</p>
+</section>
+
+<section id="notas" style="padding:44px 44px 40px">
+<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 10px"><a href="#notas" style="font:600 10px var(--font-ui);letter-spacing:.06em;padding:4px 8px;background:var(--ink-900);color:#fff;border-radius:6px;text-decoration:none">D</a><span style="font:600 13px/1.2 var(--font-ui)">Notas de las decisiones — turnos 7 a 12</span></div>
+<div style="max-width:820px;margin:0 0 22px;font:400 13.5px/1.6 var(--font-ui);color:var(--ink-600);text-wrap:pretty"><p style="margin:0">El lienzo está ordenado por recorrido, no por turno, así que las decisiones que sostienen el diseño quedan aquí, en el orden en que se tomaron. Las de los primeros seis turnos se perdieron al reorganizar el tablero; lo que decidieron sigue vivo en las pantallas.</p></div>
+<div style="max-width:860px">
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--border-subtle)"><span style="width:26px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">07</span><div style="flex:1;min-width:0"><div style="font:600 13.5px/1.3 var(--font-ui);letter-spacing:-.015em;margin-bottom:6px">Equipaje, punto propio, pago y reembolso</div><div style="margin:0;font:400 13.5px/1.6 var(--font-ui);color:var(--ink-600);text-wrap:pretty">
+<p style="margin:0 0 9px">El equipaje se decide una vez y de la forma más corta posible: el conductor dice <strong style="font-weight:600">sí o no a las maletas</strong> al publicar <a href="Partimos App Hi-Fi - Conductor.dc.html#7c" style="text-decoration:none;font-weight:600">7c</a>, y la reserva <a href="Partimos App Hi-Fi - Viaje.dc.html#7a" style="text-decoration:none;font-weight:600">7a</a> se adapta sola — apágalo en 7c y la fila de maleta desaparece de 7a, dejando solo la mochila. Sin espacios que contar ni matemáticas de maletero.</p>
+<p style="margin:0">La recogida se pide escribiendo la dirección, con el minuto que le añade al conductor a la vista: es lo único que evita que la gente proponga puntos imposibles. El pago <a href="Partimos App Hi-Fi - Viaje.dc.html#7b" style="text-decoration:none;font-weight:600">7b</a> enseña la tarifa de cada método y siempre la misma verdad — el conductor recibe los 6 $ completos. El reembolso <a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#7d" style="text-decoration:none;font-weight:600">7d</a> empieza por lo que pasó, y la regla y el monto cambian con el motivo.</p>
+</div></div></div>
+<div style="display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--border-subtle)"><span style="width:26px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">08</span><div style="flex:1;min-width:0"><div style="font:600 13.5px/1.3 var(--font-ui);letter-spacing:-.015em;margin-bottom:6px">Ajustes — lo último que faltaba</div><div style="margin:0;font:400 13.5px/1.6 var(--font-ui);color:var(--ink-600);text-wrap:pretty">
+<p style="margin:0">La cuenta <a href="Partimos App Hi-Fi - Conductor.dc.html#6a" style="text-decoration:none;font-weight:600">6a</a> dice quién eres; ajustes <a href="Partimos App Hi-Fi - Deshacer y ayuda.dc.html#8a" style="text-decoration:none;font-weight:600">8a</a> dice cómo quieres que funcione. Cuatro bloques separados por espacio y eyebrows azules, sin una sola línea divisoria entre secciones: avisos, viaje, dinero y cuenta. Los interruptores funcionan y la línea bajo cada eyebrow resume el estado, para no tener que leer tres filas y contar. Cerrar sesión va perfilado en rojo — nunca relleno, porque el rojo relleno es lo que se toca para avanzar.</p>
+</div></div></div>
+<div style="display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--border-subtle)"><span style="width:26px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">09</span><div style="flex:1;min-width:0"><div style="font:600 13.5px/1.3 var(--font-ui);letter-spacing:-.015em;margin-bottom:6px">Métodos de pago · y una pasada de consistencia</div><div style="margin:0;font:400 13.5px/1.6 var(--font-ui);color:var(--ink-600);text-wrap:pretty">
+<p style="margin:0 0 9px">La página que faltaba: dos pantallas decían «Cambiar» sin sitio a dónde ir. <a href="Partimos App Hi-Fi - Viaje.dc.html#9a" style="text-decoration:none;font-weight:600">9a</a> guarda los métodos, enseña la tarifa de cada uno antes de elegir y marca cuál es el predeterminado — se aplica al tocarlo, sin botón de guardar. El efectivo vive en la misma lista que Yappy y la tarjeta, porque en Panamá es un método, no una excepción.</p>
+<p style="margin:0">Consistencia: la píldora del precio ya no va inclinada en <a href="Partimos App Hi-Fi - Viaje.dc.html#7a" style="text-decoration:none;font-weight:600">7a</a> — todas las píldoras del sistema son rectas y comparten receta (10,5px/600, azul cuando informa, rojo solo cuando queda un puesto, y esa regla ahora la sigue también la vista previa de <a href="Partimos App Hi-Fi - Conductor.dc.html#7c" style="text-decoration:none;font-weight:600">7c</a>). Las barras inferiores quedan iguales en las cuatro pantallas nuevas: precio, botón, una línea centrada. El degradado del campo es el mismo en todas las pantallas de producto; las variantes de rojo del lote <a href="#plan" style="text-decoration:none;font-weight:600">2</a> se quedan como estaban porque su trabajo es comparar.</p>
+</div></div></div>
+<div style="display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--border-subtle)"><span style="width:26px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">10</span><div style="flex:1;min-width:0"><div style="font:600 13.5px/1.3 var(--font-ui);letter-spacing:-.015em;margin-bottom:6px">El lado del conductor — panel y aportes</div><div style="margin:0;font:400 13.5px/1.6 var(--font-ui);color:var(--ink-600);text-wrap:pretty">
+<p style="margin:0 0 9px">Hasta ahora el conductor solo podía publicar. El panel <a href="Partimos App Hi-Fi - Conductor.dc.html#10a" style="text-decoration:none;font-weight:600">10a</a> es su pantalla de todos los días: un viaje por tarjeta, los puestos que quedan, y lo único urgente arriba y en rojo — las solicitudes que expiran en 4 h. Nada se cobra hasta que él toque aceptar, así que esa fila es el corazón del modelo.</p>
+<p style="margin:0">Los aportes <a href="Partimos App Hi-Fi - Conductor.dc.html#10b" style="text-decoration:none;font-weight:600">10b</a> responden la pregunta del conductor con una cifra, no con una tabla: cuánto le entró y cuándo sale. El degradado aparece una vez, en esa cifra. Abajo, viaje por viaje, con el método con el que le pagaron — y el destino del dinero al final, porque es lo que va a querer revisar.</p>
+</div></div></div>
+<div style="display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--border-subtle)"><span style="width:26px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">11</span><div style="flex:1;min-width:0"><div style="font:600 13.5px/1.3 var(--font-ui);letter-spacing:-.015em;margin-bottom:6px">Solicitudes y avisos — el modelo cerrado</div><div style="margin:0;font:400 13.5px/1.6 var(--font-ui);color:var(--ink-600);text-wrap:pretty">
+<p style="margin:0 0 9px">Las solicitudes <a href="Partimos App Hi-Fi - Conductor.dc.html#11a" style="text-decoration:none;font-weight:600">11a</a> son el momento en que el dinero se mueve, así que la pantalla dice las tres cosas que el conductor necesita para decidir y nada más: quién es, dónde lo recoge y cuánto le añade al camino, y qué equipaje trae. Acepta una y ahí mismo se le cobra: el botón lo dice, el contador de puestos baja y la tarjeta se convierte en un recibo. Rechazar no pide motivo.</p>
+<p style="margin:0">La bandeja <a href="Partimos App Hi-Fi - Viaje.dc.html#11b" style="text-decoration:none;font-weight:600">11b</a> separa lo que pide acción de lo que solo informa, y no lleva nada más — sin promociones. Los avisos con acción quedan fijos arriba hasta resolverse; el resto se marca leído al tocarlo y el contador del campo baja contigo.</p>
+</div></div></div>
+<div style="display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--border-subtle)"><span style="width:26px;flex:none;font:700 12px var(--font-ui);color:var(--ink-300);font-variant-numeric:tabular-nums">12</span><div style="flex:1;min-width:0"><div style="font:600 13.5px/1.3 var(--font-ui);letter-spacing:-.015em;margin-bottom:6px">Fuera de la app — el push y el mapa de eventos</div><div style="margin:0;font:400 13.5px/1.6 var(--font-ui);color:var(--ink-600);text-wrap:pretty">
+<p style="margin:0 0 9px">Casi todo se decide fuera de la app: a las 4:58 de la mañana nadie la abre. En <a href="Partimos App Hi-Fi - Viaje.dc.html#12a" style="text-decoration:none;font-weight:600">12a</a> el push lleva la acción encima — el conductor acepta y cobra sin desbloquear más que el aviso. Es la única superficie del sistema con vidrio oscuro, y funciona porque debajo hay color, no negro.</p>
+<p style="margin:0">El cuadro <a href="#12b" style="text-decoration:none;font-weight:600">12b</a> es la parte que no se ve pero decide todo: qué evento va a quién, por qué canal, y con qué acción. Sin él, cada pantalla inventa su propio aviso y la gente apaga los permisos.</p>
+</div></div></div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;codigo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;4917&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Viaje&quot;},&quot;minutosSalida&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:12,&quot;min&quot;:1,&quot;max&quot;:60,&quot;unit&quot;:&quot;min&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Viaje&quot;},&quot;pagoPreferido&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Yappy&quot;,&quot;Tarjeta&quot;,&quot;Efectivo&quot;],&quot;default&quot;:&quot;Yappy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dinero&quot;}}">
+class Component extends DCLogic {
+  icon(d, w) {
+    return React.createElement("svg", { viewBox: "0 0 24 24", width: w || 21, height: w || 21, fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d }));
+  }
+  carIcon() {
+    return React.createElement("svg", { viewBox: "0 0 24 24", width: 21, height: 21, fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" },
+      React.createElement("path", { d: "M5 14h14M6.5 14 8 8.5h8L17.5 14M4 14v3.5h16V14" }),
+      React.createElement("circle", { cx: 7.5, cy: 17.5, r: 1.6 }),
+      React.createElement("circle", { cx: 16.5, cy: 17.5, r: 1.6 }));
+  }
+  nav(extra) {
+    const P = {
+      buscar: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM21 21l-4.3-4.3",
+      viajes: "M5 14h14M6.5 14 8 8.5h8L17.5 14M4 14v3.5h16V14",
+      chat: "M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9.5L5 19.5V16a2 2 0 0 1-1-1.7z",
+      user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 21a7 7 0 0 1 14 0",
+    };
+    const base = [
+      { value: "Buscar", label: "Buscar", icon: this.icon(P.buscar) },
+      { value: "Mis viajes", label: "Mis viajes", icon: this.carIcon() },
+      { value: "Mensajes", label: "Mensajes", icon: this.icon(P.chat) },
+      { value: "Perfil", label: "Perfil", icon: this.icon(P.user) },
+    ];
+    return extra === "cuenta"
+      ? [base[0], base[1], base[2], { value: "Cuenta", label: "Cuenta", icon: this.icon(P.user) }]
+      : base;
+  }
+  state = { mochila: 0, maletas: 1, aceptaMaletas: true, periodo: "mes", aporte: 6, sols: { mateo: "pendiente", rosa: "pendiente" }, leidos: [], pParadas: 2, pPuestos: 3, pAporte: null, pMaletas: true, pMujeres: false, motivoCancel: "hora", marca: "Hyundai", modeloCat: "Elantra", anio: "2019", carroColor: "gris", carroPuestos: 4, fotoCarro: false, tipoPago: "Yappy", edPuestos: 3, edMaletas: true, edMujeres: false, tel: "", rutasOn: { chitre: true, santiago: true, david: false }, motivoReporte: "conducir", bloquear: true, direccion: "Vía Argentina, Riba Smith", metodo: "Yappy", motivo: "conductor", puestos: 3, avisoRuta: true, avisoMensajes: true, avisoSalida: true, soloMujeres: false, compartirLlegada: true, predeterminado: "Yappy" };
+  money(n) { return n.toFixed(2).replace(".", ",") + " $"; }
+  ajustesVals() {
+    const s = this.state;
+    const on = [s.avisoRuta, s.avisoMensajes, s.avisoSalida].filter(Boolean).length;
+    return {
+      avisoRuta: s.avisoRuta, avisoMensajes: s.avisoMensajes, avisoSalida: s.avisoSalida,
+      soloMujeres: s.soloMujeres, compartirLlegada: s.compartirLlegada,
+      setAvisoRuta: (v) => this.setState({ avisoRuta: v }),
+      setAvisoMensajes: (v) => this.setState({ avisoMensajes: v }),
+      setAvisoSalida: (v) => this.setState({ avisoSalida: v }),
+      setSoloMujeres: (v) => this.setState({ soloMujeres: v }),
+      setCompartirLlegada: (v) => this.setState({ compartirLlegada: v }),
+      avisosTexto: on === 0 ? "Ninguno activo. No te escribimos." : on === 3 ? "Los tres activos" : on + " de 3 activos",
+    };
+  }
+  equipajeVals() {
+    const s = this.state;
+    const ok = s.aceptaMaletas;
+    return {
+      nMochila: s.mochila, nMaletas: s.maletas, aceptaMaletas: ok,
+      setMochila: (v) => this.setState({ mochila: v }),
+      setMaletas: (v) => this.setState({ maletas: v }),
+      direccion: s.direccion,
+      onDireccion: (e) => this.setState({ direccion: e.target.value }),
+      maleteroBadge: ok ? "Acepta maletas" : "Solo mochila",
+      maleteroBadgeFondo: ok ? "var(--azul-100)" : "var(--sand-200)",
+      maleteroBadgeColor: ok ? "var(--azul-700)" : "var(--ink-700)",
+      equipajeNota: !ok
+        ? "Andrés no lleva maletas en este viaje. Solo lo que va contigo en el asiento."
+        : s.maletas > 0
+          ? "Andrés ve tu equipaje cuando le llega la solicitud."
+          : "Andrés acepta una maleta por pasajero.",
+    };
+  }
+  solicitudesVals() {
+    const defs = [
+      { id: "mateo", nombre: "Mateo Q.", hue: "azul", rating: "4.8 · 12 viajes", punto: "Vía Argentina, Riba Smith", extra: "+4 min", equipaje: "Mochila y una maleta", expira: "3 h 40", urgente: false },
+      { id: "rosa", nombre: "Rosa I.", hue: "rojo", rating: "Nueva · sin viajes", punto: "Vía España, El Dorado", extra: "+2 min", equipaje: "Solo mochila", expira: "1 h 10", urgente: true },
+    ];
+    const st = this.state.sols;
+    const vivas = defs.filter((d) => st[d.id] !== "rechazada");
+    const aceptadas = defs.filter((d) => st[d.id] === "aceptada").length;
+    const pendientes = defs.filter((d) => st[d.id] === "pendiente").length;
+    const vendidos = 1 + aceptadas;
+    return {
+      solicitudes: vivas.map((d) => ({
+        nombre: d.nombre, hue: d.hue, rating: d.rating, punto: d.punto, extra: d.extra, equipaje: d.equipaje,
+        expira: st[d.id] === "aceptada" ? "Confirmado" : "Expira en " + d.expira,
+        expiraFondo: st[d.id] === "aceptada" ? "var(--sand-200)" : d.urgente ? "var(--rojo-500)" : "var(--rojo-100)",
+        expiraColor: st[d.id] === "aceptada" ? "var(--ink-600)" : d.urgente ? "#fff" : "var(--rojo-700)",
+        pendiente: st[d.id] === "pendiente",
+        aceptada: st[d.id] === "aceptada",
+        aceptar: () => this.setState((p) => ({ sols: { ...p.sols, [d.id]: "aceptada" } })),
+        rechazar: () => this.setState((p) => ({ sols: { ...p.sols, [d.id]: "rechazada" } })),
+      })),
+      sinSolicitudes: pendientes === 0 && vivas.length === 0,
+      puestosTexto: (pendientes === 0 ? "Sin solicitudes nuevas" : pendientes === 1 ? "1 solicitud nueva" : pendientes + " solicitudes nuevas")
+        + " · " + vendidos + " de 3 puestos vendidos",
+    };
+  }
+  avisosVals() {
+    const defs = [
+      { id: 3, titulo: "Rosa I. pidió puesto", sub: "Hace 20 min · expira en 1 h 10" },
+      { id: 4, titulo: "Te aportaron 6 $", sub: "Ayer · Yappy · 7788" },
+      { id: 5, titulo: "Alguien publicó tu ruta guardada", sub: "Sáb 22 · Albrook → Santiago" },
+      { id: 6, titulo: "Daniela L. te calificó", sub: "Viaje del viernes · 5,0" },
+    ];
+    const leidos = this.state.leidos;
+    const sinLeer = defs.filter((d) => !leidos.includes(d.id)).length;
+    return {
+      avisosAccion: [
+        { titulo: "Andrés aceptó tu puesto", sub: "Hoy 6:00 · Albrook → Chitré", accion: "Ver código" },
+        { titulo: "Califica a Moisés B.", sub: "Viaje del viernes", accion: "Calificar" },
+      ],
+      avisosInfo: defs.map((d) => ({
+        titulo: d.titulo, sub: d.sub,
+        peso: leidos.includes(d.id) ? "400" : "600",
+        punto: leidos.includes(d.id) ? "transparent" : "var(--azul-500)",
+        onClick: () => this.setState((p) => ({ leidos: p.leidos.includes(d.id) ? p.leidos : p.leidos.concat(d.id) })),
+      })),
+      marcarTodo: () => this.setState({ leidos: defs.map((d) => d.id) }),
+      avisosContador: sinLeer === 0 ? "Todo leído" : sinLeer + " sin leer",
+    };
+  }
+  promesasVals() {
+    const s = this.state;
+    const rutasDef = [
+      { id: "chitre", ruta: "Albrook → Chitré", cuando: "Viernes por la tarde", estado: "3 viajes esta semana", hay: true },
+      { id: "santiago", ruta: "Albrook → Santiago", cuando: "Sábados temprano", estado: "Nada por ahora", hay: false },
+      { id: "david", ruta: "Chitré → Albrook", cuando: "Domingos después de las 15:00", estado: "1 viaje nuevo", hay: true },
+    ];
+    const activas = rutasDef.filter((r) => s.rutasOn[r.id]).length;
+    const motivosRep = [
+      { id: "conducir", label: "Conducía de forma peligrosa", cons: "Lo revisamos hoy mismo y puede quedar suspendido mientras miramos." },
+      { id: "trato", label: "Me trató mal", cons: "Lo lee una persona, no un robot. Te contamos en qué queda." },
+      { id: "cobro", label: "Me pidió más dinero", cons: "El aporte es el que dice la app. Si pidió más, lo sancionamos." },
+      { id: "otro", label: "Otra cosa", cons: "Cuéntanoslo con tus palabras en el paso siguiente." },
+    ];
+    const rep = motivosRep.find((m) => m.id === s.motivoReporte) || motivosRep[0];
+    const pasos = [
+      { t: "Lo pediste", c: "Sáb 14 · 10:12", hecho: true },
+      { t: "Revisado y aprobado", c: "Sáb 14 · 10:40", hecho: true },
+      { t: "Enviado a tu Yappy", c: "Lun 16 · estimado", hecho: false, activo: true },
+      { t: "En tu cuenta", c: "Lun 16 o mar 17", hecho: false },
+    ];
+    const check = React.createElement("svg", { viewBox: "0 0 24 24", width: 11, height: 11, fill: "none", stroke: "#fff", strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M5 12.5l4.5 4.5L19 7.5" }));
+    return {
+      rutasContador: activas === 0 ? "Sin avisos activos" : activas + (activas === 1 ? " ruta avisando" : " rutas avisando"),
+      rutas: rutasDef.map((r) => ({
+        ruta: r.ruta, cuando: r.cuando,
+        activo: !!s.rutasOn[r.id],
+        toggle: (v) => this.setState((p) => ({ rutasOn: Object.assign({}, p.rutasOn, { [r.id]: v }) })),
+        punto: s.rutasOn[r.id] ? "var(--rojo-500)" : "var(--ink-200)",
+        estado: s.rutasOn[r.id] ? r.estado : "Avisos apagados",
+        estadoColor: s.rutasOn[r.id] && r.hay ? "var(--azul-700)" : "var(--ink-500)",
+      })),
+      rutasNota: activas === 0
+        ? "Con los avisos apagados no te escribimos, pero la ruta se queda guardada para buscarla en un toque."
+        : "Te escribimos una sola vez por viaje nuevo, y nunca antes de las 7 de la mañana.",
+      temasAyuda: [
+        { label: "No llegó a recogerme", pista: "Reembolso" },
+        { label: "Me cobraron mal", pista: "Revisamos" },
+        { label: "Quiero cancelar", pista: "Ahora" },
+        { label: "Algo pasó en el viaje", pista: "Urgente" },
+      ].map((t) => ({
+        label: t.label, pista: t.pista,
+        fondo: t.pista === "Urgente" ? "var(--rojo-100)" : "var(--azul-100)",
+        color: t.pista === "Urgente" ? "var(--rojo-700)" : "var(--azul-700)",
+      })),
+      reembEtiqueta: "en camino",
+      reembResumen: "Andrés canceló el viaje, así que vuelve todo con la tarifa. Sale el lunes con los envíos de la semana.",
+      pasosReemb: pasos.map((p) => ({
+        titulo: p.t, cuando: p.c,
+        peso: p.hecho || p.activo ? "600" : "400",
+        color: p.hecho || p.activo ? "var(--ink-900)" : "var(--ink-500)",
+        fondo: p.hecho ? "var(--green-500)" : p.activo ? "var(--azul-500)" : "var(--white)",
+        anillo: p.hecho || p.activo ? "none" : "inset 0 0 0 2px var(--border-default)",
+        icono: p.hecho ? check : null,
+      })),
+      motivosReporte: motivosRep.map((m) => ({
+        label: m.label,
+        borde: m.id === s.motivoReporte ? "var(--azul-500)" : "var(--border-subtle)",
+        fondo: m.id === s.motivoReporte ? "var(--azul-100)" : "var(--white)",
+        punto: m.id === s.motivoReporte ? "var(--azul-500)" : "transparent",
+        anillo: m.id === s.motivoReporte ? "var(--azul-500)" : "var(--border-default)",
+        onClick: () => this.setState({ motivoReporte: m.id }),
+      })),
+      reporteConsecuencia: rep.cons,
+      bloquear: s.bloquear,
+      setBloquear: (v) => this.setState({ bloquear: v }),
+      reporteNota: s.bloquear
+        ? "Moisés no sabrá que lo reportaste ni que lo bloqueaste."
+        : "Moisés no sabrá que lo reportaste.",
+    };
+  }
+  bloqueoVals() {
+    const s = this.state;
+    // 14a — cancelar
+    const motivos = [
+      { id: "hora", label: "No me sirve la hora" },
+      { id: "otro", label: "Conseguí otro carro" },
+      { id: "plan", label: "Se cayó mi plan" },
+    ];
+    const reglas = {
+      hora: "Faltan más de 2 h, así que vuelve entero con la tarifa. Le liberamos el puesto a Andrés para que lo venda.",
+      otro: "Vuelve entero. Si ya tienes otro carro, avísale a Andrés por el chat para que no te espere.",
+      plan: "Vuelve entero. A menos de 2 h de la salida se quedaría 1 $ el conductor por el puesto perdido.",
+    };
+    // 14b — carro, del catálogo
+    const colores = [
+      { id: "gris", hex: "#8E8B93", n: "Gris" }, { id: "blanco", hex: "#F4F1EC", n: "Blanco" }, { id: "negro", hex: "#26232B", n: "Negro" },
+      { id: "azul", hex: "#005293", n: "Azul" }, { id: "rojo", hex: "#D21034", n: "Rojo" },
+    ];
+    const col = colores.find((c) => c.id === s.carroColor) || colores[0];
+    const nombreColor = col.n.toLowerCase();
+    const catalogo = {
+      Toyota: ["Corolla", "Yaris", "Hilux", "Rush"],
+      Hyundai: ["Elantra", "Accent", "Tucson", "Creta"],
+      Kia: ["Rio", "Picanto", "Sportage"],
+      Nissan: ["Sentra", "Versa", "Frontier"],
+      Mitsubishi: ["Lancer", "Mirage", "Outlander"],
+    };
+    const marcas = Object.keys(catalogo);
+    const modelos = catalogo[s.marca] || [];
+    const anios = ["2024", "2022", "2020", "2019", "2017", "2015", "2012"];
+    const cycle = (list, cur, key, extra) => () => {
+      const i = list.indexOf(cur);
+      this.setState(Object.assign({ [key]: list[(i + 1) % list.length] }, extra ? extra(list[(i + 1) % list.length]) : null));
+    };
+    const plazasPorModelo = { Hilux: 4, Frontier: 4, Rush: 6, Outlander: 6, Tucson: 4, Sportage: 4, Creta: 4, Picanto: 3 };
+    // 14c — método
+    const esTarjeta = s.tipoPago === "Tarjeta";
+    // 14d — editar
+    const cambios = s.edPuestos !== 3 || !s.edMaletas || s.edMujeres;
+    return {
+      motivosCancel: motivos.map((m) => ({
+        label: m.label,
+        borde: m.id === s.motivoCancel ? "var(--azul-500)" : "var(--border-subtle)",
+        fondo: m.id === s.motivoCancel ? "var(--azul-100)" : "var(--white)",
+        punto: m.id === s.motivoCancel ? "var(--azul-500)" : "transparent",
+        anillo: m.id === s.motivoCancel ? "var(--azul-500)" : "var(--border-default)",
+        onClick: () => this.setState({ motivoCancel: m.id }),
+      })),
+      reglaCancel: reglas[s.motivoCancel] || reglas.hora,
+      horasRestantes: "19 h",
+      ventanaTexto: "Devolución completa",
+      ventanaFondo: "var(--azul-100)",
+      ventanaColor: "var(--azul-700)",
+      marcaValor: s.marca, marcaContador: marcas.indexOf(s.marca) + 1 + " de " + marcas.length,
+      marcaCursor: "pointer", marcaOpacidad: "1",
+      marcaNext: cycle(marcas, s.marca, "marca", (nueva) => ({ modeloCat: catalogo[nueva][0], carroPuestos: plazasPorModelo[catalogo[nueva][0]] || 4 })),
+      modeloCatValor: s.modeloCat, modeloCatContador: modelos.indexOf(s.modeloCat) + 1 + " de " + modelos.length,
+      modeloCatCursor: "pointer", modeloCatOpacidad: "1",
+      modeloCatNext: cycle(modelos, s.modeloCat, "modeloCat", (m) => ({ carroPuestos: plazasPorModelo[m] || 4 })),
+      anioValor: s.anio, anioContador: "", anioCursor: "pointer", anioOpacidad: "1",
+      anioNext: cycle(anios, s.anio, "anio"),
+      colorNombre: col.n,
+      placaValor: "AB-1234",
+      colores: colores.map((c) => ({
+        hex: c.hex,
+        anillo: c.id === s.carroColor
+          ? "inset 0 0 0 1px rgba(38,35,43,.14), 0 0 0 2px var(--white), 0 0 0 4px var(--azul-500)"
+          : "inset 0 0 0 1px rgba(38,35,43,.14)",
+        onClick: () => this.setState({ carroColor: c.id }),
+      })),
+      carroPuestos: s.carroPuestos,
+      setCarroPuestos: (v) => this.setState({ carroPuestos: v }),
+      vistaHex: col.hex,
+      vistaStroke: col.id === "negro" || col.id === "azul" || col.id === "rojo" ? "rgba(255,255,255,.9)" : "var(--ink-700)",
+      toggleFoto: () => this.setState({ fotoCarro: !s.fotoCarro }),
+      fotoEtiqueta: s.fotoCarro ? "Lista" : "Obligatoria",
+      fotoEtiquetaColor: s.fotoCarro ? "var(--azul-700)" : "var(--rojo-600)",
+      fotoBorde: s.fotoCarro ? "1px solid var(--border-subtle)" : "1.5px dashed var(--border-default)",
+      fotoFondo: s.fotoCarro ? "var(--white)" : "var(--sand-100)",
+      fotoIconoFondo: s.fotoCarro ? "var(--azul-100)" : "var(--sand-200)",
+      fotoIconoColor: s.fotoCarro ? "var(--azul-700)" : "var(--ink-600)",
+      fotoTitulo: s.fotoCarro ? "Foto añadida" : "Tomar la foto",
+      fotoSub: s.fotoCarro
+        ? "Se ve la placa. La revisamos con tu cédula."
+        : "De atrás y con la placa legible. Así el pasajero reconoce el carro al subir.",
+      vistaTitulo: s.marca + " " + s.modeloCat + " " + nombreColor,
+      vistaSub: "AB-•••• · " + s.anio + " · " + s.carroPuestos + (s.carroPuestos === 1 ? " puesto" : " puestos"),
+      tiposPago: [{ id: "Yappy", label: "Yappy" }, { id: "Tarjeta", label: "Tarjeta" }].map((t) => ({
+        label: t.label,
+        fondo: t.id === s.tipoPago ? "var(--white)" : "transparent",
+        color: t.id === s.tipoPago ? "var(--ink-900)" : "var(--ink-600)",
+        onClick: () => this.setState({ tipoPago: t.id }),
+      })),
+      camposPago: esTarjeta
+        ? [{ label: "Número de la tarjeta", ph: "4242 4242 4242 4242", hint: "" }, { label: "Vence · CVV", ph: "09/29 · 123", hint: "Visa y Mastercard de bancos panameños." }]
+        : [{ label: "Celular de tu Yappy", ph: "6000-0000", hint: "El banco te pedirá confirmar en su app." }],
+      tarifaPct: esTarjeta ? "8 %" : "5 %",
+      tarifaEjemplo: esTarjeta ? "0,48 $ en un viaje de 6 $" : "0,30 $ en un viaje de 6 $",
+      notaMetodo: esTarjeta
+        ? "La tarjeta funciona con cualquier banco, pero es el método más caro. Con Yappy pagas 5 %."
+        : "Es el método más barato en Panamá y el que usa casi todo el mundo aquí.",
+      botonMetodo: esTarjeta ? "Guardar la tarjeta" : "Guardar el Yappy",
+      edPuestos: s.edPuestos, edMaletas: s.edMaletas, edMujeres: s.edMujeres,
+      setEdPuestos: (v) => this.setState({ edPuestos: v }),
+      setEdMaletas: (v) => this.setState({ edMaletas: v }),
+      setEdMujeres: (v) => this.setState({ edMujeres: v }),
+      edAviso: s.edMujeres
+        ? "Daniela ya tiene puesto: si dejas el viaje solo para mujeres, ella se queda igual."
+        : !s.edMaletas
+          ? "Daniela reservó con una maleta. Si dejas de aceptarlas, hay que hablarlo con ella antes."
+          : "Los cambios se avisan a quien ya tiene puesto.",
+      edAvisoFondo: !s.edMaletas ? "var(--rojo-100)" : "var(--sand-100)",
+      edAvisoColor: !s.edMaletas ? "var(--rojo-700)" : "var(--ink-600)",
+      edBoton: cambios ? "Guardar los cambios" : "Guardar",
+      tel: s.tel,
+      onTel: (e) => this.setState({ tel: e.target.value }),
+      botonEntrar: s.tel && s.tel.length >= 8 ? "Enviar el código" : "Enviar el código",
+      notaEntrar: s.tel && s.tel.length >= 8 ? "Te llega un SMS de 4 dígitos." : "El mismo número con el que te registraste.",
+    };
+  }
+  publicar5cVals() {
+    const s = this.state, COSTO = 20.6, TOPE = 7, CAP = 4;
+    const todas = [
+      { nombre: "La Chorrera", hora: "15:35" },
+      { nombre: "Penonomé", hora: "16:40" },
+      { nombre: "Aguadulce", hora: "17:10" },
+      { nombre: "Divisa", hora: "17:35" },
+    ];
+    const paradas = todas.slice(0, s.pParadas);
+    const auto = Math.min(TOPE, Math.max(3, Math.ceil(COSTO / (s.pPuestos + 1))));
+    const aporte = s.pAporte ?? auto;
+    const recupera = aporte * s.pPuestos;
+    return {
+      paradas: paradas.map((p, i) => ({ nombre: p.nombre, hora: p.hora, quitar: () => this.setState({ pParadas: s.pParadas - 1 }) })),
+      horaLlegada: paradas.length >= 3 ? "18:25" : paradas.length === 2 ? "18:20" : "18:05",
+      anadirParada: () => this.setState({ pParadas: Math.min(todas.length, s.pParadas + 1) }),
+      anadirTexto: s.pParadas >= todas.length ? "No hay más paradas en esta ruta" : "Añadir " + todas[s.pParadas].nombre,
+      pAporte: aporte, pPuestos: s.pPuestos, pMaletas: s.pMaletas, pMujeres: s.pMujeres,
+      setPAporte: (v) => this.setState({ pAporte: v }),
+      setPPuestos: (v) => this.setState({ pPuestos: v, pAporte: null }),
+      setPMaletas: (v) => this.setState({ pMaletas: v }),
+      setPMujeres: (v) => this.setState({ pMujeres: v }),
+      aporteTexto: aporte + " $",
+      aporteOrigen: s.pAporte == null ? "calculado" : aporte >= TOPE ? "tope de la ruta" : "lo pusiste tú",
+      cuentaTexto: "Gasolina y peajes: " + this.money(COSTO) + ". Con " + s.pPuestos + (s.pPuestos === 1 ? " puesto recuperas " : " puestos recuperas ") + this.money(recupera)
+        + (recupera >= COSTO ? " y cubres el viaje." : " de " + this.money(COSTO) + "."),
+      botonPublicar: "Publicar · " + s.pPuestos + (s.pPuestos === 1 ? " puesto a " : " puestos a ") + aporte + " $",
+      notaPublicar: s.pMujeres
+        ? "Se publica ahora, visible solo para pasajeras."
+        : "Se publica ahora. Puedes editarlo mientras nadie haya pagado.",
+    };
+  }
+  conductorVals() {
+    const s = this.state;
+    const mes = [
+      { ruta: "Albrook → Chitré", detalle: "Vie 13 · 3 puestos · Yappy", monto: "18 $" },
+      { ruta: "Chitré → Albrook", detalle: "Dom 15 · 2 puestos · efectivo", monto: "12 $" },
+      { ruta: "Albrook → Santiago", detalle: "Sáb 7 · 3 puestos · Yappy", monto: "24 $" },
+    ];
+    const todo = [
+      { ruta: "Junio", detalle: "9 viajes · 24 puestos", monto: "148 $" },
+      { ruta: "Mayo", detalle: "7 viajes · 19 puestos", monto: "121 $" },
+      { ruta: "Abril", detalle: "4 viajes · 11 puestos", monto: "68 $" },
+    ];
+    const esMes = s.periodo === "mes";
+    return {
+      periodos: [{ id: "mes", label: "Este mes" }, { id: "todo", label: "Todo" }].map((p) => ({
+        label: p.label,
+        fondo: p.id === s.periodo ? "var(--azul-500)" : "var(--sand-200)",
+        color: p.id === s.periodo ? "#fff" : "var(--ink-700)",
+        onClick: () => this.setState({ periodo: p.id }),
+      })),
+      aportes: esMes ? mes : todo,
+      aporteTotal: esMes ? "54 $" : "337 $",
+      aporteEtiqueta: esMes ? "junio" : "desde marzo",
+      aporteResumen: esMes
+        ? "3 viajes, 8 puestos. La gasolina de junio te sale casi cubierta."
+        : "20 viajes, 54 puestos. Nada de esto es ingreso: es gasto compartido.",
+    };
+  }
+  pagoVals() {
+    const defs = [
+      { id: "Yappy", nombre: "Yappy", sub: "Tarifa 5 % · 0,30 $", pct: 0.05, extra: "Recomendado" },
+      { id: "Tarjeta", nombre: "Tarjeta", sub: "Tarifa 8 % · 0,48 $", pct: 0.08, extra: "" },
+      { id: "Efectivo", nombre: "Efectivo", sub: "Sin tarifa · le pagas al subir", pct: 0, extra: "" },
+    ];
+    const sel = this.state.metodo;
+    const d = defs.find((x) => x.id === sel) || defs[0];
+    const tarifa = 6 * d.pct;
+    const efectivo = sel === "Efectivo";
+    return {
+      metodos: defs.map((m) => ({
+        nombre: m.nombre, sub: m.sub, extra: m.extra,
+        borde: m.id === sel ? "var(--azul-500)" : "var(--border-subtle)",
+        fondo: m.id === sel ? "var(--azul-100)" : "var(--white)",
+        punto: m.id === sel ? "var(--azul-500)" : "transparent",
+        anillo: m.id === sel ? "var(--azul-500)" : "var(--border-default)",
+        onClick: () => this.setState({ metodo: m.id }),
+      })),
+      tarifaEtiqueta: efectivo ? "Tarifa Partimos" : "Tarifa Partimos · " + Math.round(d.pct * 100) + " %",
+      tarifaMonto: efectivo ? "0,00 $" : this.money(tarifa),
+      totalTexto: this.money(6 + tarifa),
+      totalEtiqueta: efectivo ? "Pagas al subir" : "Pagas ahora",
+      botonPago: efectivo ? "Confirmar el puesto" : "Confirmar y pagar",
+      notaPago: efectivo
+        ? "No se cobra nada ahora. Le pagas 6 $ en efectivo al subir."
+        : "Se retiene hasta la salida. Si el viaje se cancela, se devuelve entero.",
+    };
+  }
+  publicarVals() {
+    const s = this.state;
+    return {
+      nPuestos: s.puestos, nAporte: s.aporte,
+      setPuestos: (v) => this.setState({ puestos: v }),
+      setAporte: (v) => this.setState({ aporte: v }),
+      setAceptaMaletas: (v) => this.setState({ aceptaMaletas: v }),
+      previewPuestos: s.puestos === 1 ? "1 puesto" : s.puestos + " puestos",
+      previewMaletero: s.aceptaMaletas ? "Acepta maletas" : "Solo mochila",
+      previewAporte: s.aporte + " $ por puesto",
+      previewPuestoFondo: s.puestos === 1 ? "var(--rojo-100)" : "var(--azul-100)",
+      previewPuestoColor: s.puestos === 1 ? "var(--rojo-700)" : "var(--azul-700)",
+    };
+  }
+  pagosVals() {
+    const defs = [
+      { id: "Yappy", nombre: "Yappy · 6699", inicial: "Y", sub: "Tarifa 5 % · 0,30 $", pct: 0.05, tile: "azul" },
+      { id: "Tarjeta", nombre: "Visa · 4242", inicial: "V", sub: "Tarifa 8 % · 0,48 $", pct: 0.08, tile: "sand" },
+      { id: "Efectivo", nombre: "Efectivo", inicial: "$", sub: "Sin tarifa · pagas al subir", pct: 0, tile: "sand" },
+    ];
+    const sel = this.state.predeterminado;
+    const d = defs.find((x) => x.id === sel) || defs[0];
+    return {
+      guardados: defs.map((m) => ({
+        nombre: m.nombre, sub: m.sub, inicial: m.inicial,
+        tileFondo: m.tile === "azul" ? "var(--azul-100)" : "var(--sand-200)",
+        tileColor: m.tile === "azul" ? "var(--azul-700)" : "var(--ink-700)",
+        badge: m.id === sel ? "Predeterminado" : "Usar",
+        badgeFondo: m.id === sel ? "var(--azul-100)" : "var(--sand-200)",
+        badgeColor: m.id === sel ? "var(--azul-700)" : "var(--ink-700)",
+        onClick: () => this.setState({ predeterminado: m.id, metodo: m.id }),
+      })),
+      predeterminadoTexto: d.id === "Efectivo" ? "Pagas en efectivo al subir" : "Se cobra en " + d.nombre.split(" · ")[0],
+      predeterminadoNombre: d.nombre.split(" · ")[0],
+      predeterminadoTotal: this.money(6 + 6 * d.pct),
+    };
+  }
+  reembolsoVals() {
+    const defs = [
+      { id: "yo", label: "Cancelé yo", titulo: "Completo si faltan más de 2 h", texto: "Faltan 19 h, así que vuelve entero. A menos de 2 h se devuelve menos 1 $, que se queda el conductor.", monto: "6,00 $", plazo: "3 a 5 días hábiles" },
+      { id: "conductor", label: "El conductor canceló", titulo: "Completo, y te buscamos puesto", texto: "Vuelve todo, tarifa incluida. Si hay otro carro a tu hora te lo proponemos antes.", monto: "6,30 $", plazo: "3 a 5 días hábiles" },
+      { id: "novino", label: "El conductor no llegó", titulo: "Completo, tras revisar el código", texto: "El código de abordaje nunca se marcó. Lo revisamos y el conductor no recibe el aporte.", monto: "6,30 $", plazo: "En 24 h" },
+      { id: "nopaso", label: "El viaje no pasó", titulo: "Automático a las 2 h de la salida", texto: "Si nadie marca la salida, el aporte vuelve solo. No hace falta que hagas nada.", monto: "6,30 $", plazo: "Automático" },
+    ];
+    const sel = this.state.motivo;
+    const d = defs.find((x) => x.id === sel) || defs[0];
+    return {
+      motivos: defs.map((m) => ({
+        label: m.label,
+        borde: m.id === sel ? "var(--azul-500)" : "var(--border-subtle)",
+        fondo: m.id === sel ? "var(--azul-100)" : "var(--white)",
+        punto: m.id === sel ? "var(--azul-500)" : "transparent",
+        anillo: m.id === sel ? "var(--azul-500)" : "var(--border-default)",
+        onClick: () => this.setState({ motivo: m.id }),
+      })),
+      reglaTitulo: d.titulo, reglaTexto: d.texto, reglaMonto: d.monto, plazoTexto: d.plazo,
+    };
+  }
+  renderVals() {
+    const codigo = String(this.props.codigo ?? "4917").slice(0, 4);
+    const pago = this.props.pagoPreferido ?? "Yappy";
+    const min = this.props.minutosSalida ?? 12;
+    const pagoLinea = pago === "Efectivo"
+      ? "Le pagas 6 $ en efectivo al llegar."
+      : pago === "Tarjeta"
+        ? "Se cobran 6 $ a tu tarjeta cuando Andrés acepte."
+        : "Se le manda por Yappy al cerrar el viaje.";
+    return {
+      navItems: this.nav(),
+      navItemsYa: this.nav("cuenta"),
+      paradasViaje: [
+        { time: "6:00", place: "Chitré · Parque Unión", detail: "Frente a la iglesia", state: "done" },
+        { time: "6:50", place: "Divisa · parada de 10 min" },
+        { time: "9:40", place: "Panamá · Albrook", detail: "Escoges el punto al reservar" },
+      ],
+      digitos: codigo.split("").map((v) => ({ v })),
+      pagoLinea,
+      salidaTexto: `Sale en ${min} min`,
+      ...this.equipajeVals(),
+      ...this.pagoVals(),
+      ...this.publicarVals(),
+      ...this.reembolsoVals(),
+      ...this.ajustesVals(),
+      ...this.pagosVals(),
+      ...this.conductorVals(),
+      ...this.publicar5cVals(),
+      ...this.bloqueoVals(),
+      ...this.promesasVals(),
+      ...this.solicitudesVals(),
+      ...this.avisosVals(),
+    };
+  }
+}
+</script>
+</body>
+</html>

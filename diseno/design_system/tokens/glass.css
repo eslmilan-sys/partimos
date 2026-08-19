@@ -1,0 +1,31 @@
+:root{
+/* ============================================================
+   GLASS — the one translucent layer.
+   Glass only exists ON TOP of something with colour: an azul surface,
+   the signature gradient, a map, a photograph. Over the plain sand page
+   it turns grey and dirty — use a card instead.
+   ============================================================ */
+--blur-glass:saturate(180%) blur(22px); /* @kind other */
+--blur-glass-s:saturate(140%) blur(12px); /* @kind other */
+--blur-glass-l:saturate(200%) blur(34px); /* @kind other */
+
+/* light glass — over gradients, photography, azul surfaces */
+--glass-bg:rgba(255,255,255,.58); /* @kind color */
+--glass-bg-strong:rgba(255,255,255,.76); /* @kind color */
+--glass-bg-faint:rgba(255,255,255,.34); /* @kind color */
+/* dark glass — over maps at night and over rojo */
+--glass-bg-ink:rgba(38,35,43,.52); /* @kind color */
+--glass-bg-azul:rgba(0,58,105,.44); /* @kind color */
+
+/* the edge is what makes glass read as glass: a hairline plus a top highlight */
+--glass-border:1px solid rgba(255,255,255,.55); /* @kind other */
+--glass-border-ink:1px solid rgba(255,255,255,.16); /* @kind other */
+--glass-highlight:inset 0 1px 0 rgba(255,255,255,.72); /* @kind other */
+--glass-highlight-ink:inset 0 1px 0 rgba(255,255,255,.14); /* @kind other */
+--shadow-glass:0 8px 32px -10px rgba(0,39,65,.26),0 2px 8px -4px rgba(0,39,65,.14);
+--shadow-glass-l:0 20px 60px -18px rgba(0,39,65,.34),0 4px 14px -6px rgba(0,39,65,.16);
+
+/* composites — reach for these rather than assembling the parts */
+--glass-card:var(--glass-bg);
+--glass-pad-blur:var(--blur-glass);
+}

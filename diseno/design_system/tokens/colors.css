@@ -1,0 +1,73 @@
+:root{
+/* ============================================================
+   PARTIMOS · Panama. Both flag colours carry the brand, split by job:
+     AZUL owns surfaces — headers, hero fields, bars, dark chrome.
+     ROJO owns interaction — buttons, links, active states, the FAB.
+     WHITE separates them. They never touch.
+   Flag anchors: azul #005293, rojo #D21034.
+   ============================================================ */
+/* --- Rojo — interaction: every button, link, active state, FAB --- */
+--rojo-50:#FDF2F3;--rojo-100:#F9DEE2;--rojo-200:#F2BBC3;--rojo-300:#E68A98;
+--rojo-400:#DC4E64;--rojo-500:#D21034;--rojo-600:#B00C2A;--rojo-700:#8C0A22;--rojo-800:#5E0717;
+/* --- Azul — surfaces: headers, hero fields, bars, dark chrome --- */
+--azul-50:#EEF3F8;--azul-100:#DBE7F0;--azul-200:#B4CCE0;--azul-300:#7AA6C7;
+--azul-400:#2E76A8;--azul-500:#005293;--azul-600:#00436F;--azul-700:#003A69;--azul-800:#002741;
+/* --- Arena (tertiary warm: gradient light, soft surfaces, ratings) --- */
+--arena-50:#FDF7F1;--arena-100:#FBEDDF;--arena-200:#F6DCC2;--arena-300:#EFC49B;--arena-500:#D99A57;--arena-700:#A06F33;
+/* --- Neutrals: warm, never blue-grey --- */
+--ink-900:#26232B;--ink-800:#332F39;--ink-700:#4A4552;--ink-600:#6B6672;--ink-500:#857F8C;
+--ink-400:#A19BA8;--ink-300:#B7B2BC;--ink-200:#D8D4DB;--ink-100:#EBE7EC;
+--sand-50:#FCFAF7;--sand-100:#FAF7F3;--sand-200:#F3EFE9;--sand-300:#E9E4DC;
+--white:#FFFFFF;--black:#141216;
+/* --- Semantic hues --- */
+--green-100:#DFF1E8;--green-500:#157A57;--green-700:#0E5A3F;
+--blue-100:var(--azul-100);--blue-500:var(--azul-500);--blue-700:var(--azul-700);
+/* Danger cannot be "red" here — red is the brand. Errors use rojo-700 WITH an
+   alert icon and a label; destructive buttons are outlined, never filled. */
+--red-100:var(--rojo-100);--red-500:var(--rojo-600);--red-700:var(--rojo-700);
+
+/* ============ SEMANTIC ALIASES ============ */
+/* text */
+--text-primary:var(--ink-900);--text-secondary:var(--ink-600);--text-tertiary:var(--ink-400);
+--text-inverse:var(--white);--text-accent:var(--rojo-600);--text-on-accent:var(--white);
+--text-on-brand:var(--white);--text-brand:var(--azul-700);--text-link:var(--rojo-600);
+--text-danger:var(--rojo-700);--text-success:var(--green-500);
+/* surfaces */
+--surface-page:var(--sand-100);--surface-card:var(--white);--surface-muted:var(--sand-200);
+--surface-sunken:var(--sand-300);--surface-inverse:var(--ink-900);
+/* azul is the surface brand: headers, hero fields, informational bars */
+--surface-brand:var(--azul-500);--surface-brand-deep:var(--azul-700);--surface-brand-soft:var(--azul-50);
+--surface-accent:var(--rojo-500);--surface-accent-soft:var(--rojo-50);
+--surface-overlay:rgba(38,35,43,.48);
+/* borders */
+--border-subtle:var(--ink-100);--border-default:var(--ink-200);--border-strong:var(--ink-900);
+--border-accent:var(--rojo-500);--border-focus:var(--rojo-500);
+/* interaction — ROJO is the default action colour. Ink is text and chrome. */
+--action-primary-bg:var(--rojo-500);--action-primary-bg-hover:var(--rojo-600);--action-primary-fg:var(--white);
+--action-ink-bg:var(--ink-900);--action-ink-bg-hover:var(--ink-800);--action-ink-fg:var(--white);
+--action-brand-bg:var(--azul-500);--action-brand-bg-hover:var(--azul-600);--action-brand-fg:var(--white);
+--action-quiet-bg:var(--sand-200);--action-quiet-bg-hover:var(--sand-300);
+/* map / route states */
+--route-line:var(--azul-700);--route-active:var(--rojo-500);--route-done:var(--ink-300);
+/* ratings — warm gold */
+--oro-300:#F2CE7A;--oro-500:#E0A83C;--oro-700:#A87A22;
+--star:var(--oro-500);
+
+/* The Bandera field: the red header every primary screen opens with. Warm, not flat —
+   a deep rojo lifting toward the brand red, so the field has light in it. */
+--grad-bandera:linear-gradient(168deg,#D91238 0%,#D21034 46%,#B60C2A 100%); /* @kind color */
+--field-fg:rgba(255,255,255,.78); /* @kind color */
+
+/* ============ SIGNATURE GRADIENT ============================
+   Built from the flag: a rojo mass in one corner, an azul mass in the
+   opposite one, arena light between them, white base. They must never
+   blend into purple — white always sits in the middle.
+   ============================================================ */
+--grad-sunrise:radial-gradient(58% 66% at 14% 10%,#8CBEDD 0%,rgba(140,190,221,0) 62%),radial-gradient(62% 70% at 86% 86%,#F2A0AC 0%,rgba(242,160,172,0) 66%),radial-gradient(74% 62% at 52% 52%,#FFDCC0 0%,rgba(255,220,192,0) 72%),linear-gradient(140deg,#F2F8FC 0%,#FFF8F2 100%); /* @kind color */
+--grad-sunset:radial-gradient(64% 72% at 88% 84%,#DC4E64 0%,rgba(220,78,100,0) 66%),radial-gradient(60% 68% at 12% 14%,#2E76A8 0%,rgba(46,118,168,0) 62%),linear-gradient(140deg,#FFF3E6 0%,#FDF2F3 100%); /* @kind color */
+--grad-dusk:linear-gradient(160deg,#DC4E64 0%,#B00C2A 46%,#5E0717 100%); /* @kind color */
+--grad-canal:linear-gradient(160deg,#2E76A8 0%,#005293 45%,#002741 100%); /* @kind color */
+--grad-haze:radial-gradient(90% 70% at 50% 0%,#F9DEE2 0%,rgba(250,247,243,0) 70%); /* @kind color */
+--grad-ink:linear-gradient(180deg,#241F28 0%,#17151A 100%); /* @kind color */
+--grad-protect:linear-gradient(180deg,rgba(23,21,26,0) 0%,rgba(23,21,26,.72) 100%); /* @kind color */
+}

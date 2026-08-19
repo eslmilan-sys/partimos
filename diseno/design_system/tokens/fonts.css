@@ -1,0 +1,5 @@
+/* Partimos type. The brand voice is Helvetica-grade neutral grotesk — sophisticated
+   precisely because it is unremarkable. On Apple devices that IS Helvetica Neue;
+   elsewhere Inter Tight stands in (nearly identical proportions, tighter than Inter).
+   There is no monospace in this system: data uses the UI font with tabular numerals. */
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap");

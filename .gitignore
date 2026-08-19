@@ -1,0 +1,17 @@
+# Rien de compilé n'entre ici. C'est la règle 1 de CLAUDE.md, et la raison
+# pour laquelle l'ancien dépôt avait trois copies du site.
+node_modules/
+.next/
+out/
+dist/
+web-build/
+.expo/
+expo-env.d.ts
+
+# Les secrets réels. Les clés publiques, elles, sont versionnées exprès :
+# web/.env.production explique pourquoi.
+.env
+.env*.local
+
+.DS_Store
+*.tsbuildinfo

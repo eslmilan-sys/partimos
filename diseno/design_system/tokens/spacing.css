@@ -1,0 +1,12 @@
+:root{
+--space-0:0;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;
+--space-6:24px;--space-7:32px;--space-8:40px;--space-9:56px;--space-10:72px;--space-11:96px;--space-12:128px;
+/* rhythm — Partimos runs airier than a default app: whitespace is the layout device.
+   Screen gutter 26, section break 32, list gap 10, card padding 22. */
+--gutter-mobile:26px;--gutter-desktop:48px;--content-max:1160px; /* @kind spacing */
+--section-gap:32px;--list-gap:10px; /* @kind spacing */
+--card-pad:22px;--card-pad-l:26px;--sheet-pad:26px;
+--row-h:60px;--row-pad-y:15px;--control-h:52px;--control-h-s:40px;--tap-min:44px; /* @kind spacing */
+--field-h:326px;--field-h-s:186px; /* @kind spacing */
+--nav-h:64px;--tabbar-h:72px;
+}

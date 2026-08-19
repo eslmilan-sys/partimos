@@ -1,0 +1,43 @@
+{
+  "name": "partimos-app",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "dependencies": {
+    "@expo-google-fonts/inter-tight": "^0.4.2",
+    "@expo/metro-runtime": "~57.0.11",
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@supabase/supabase-js": "^2.112.3",
+    "expo": "~57.0.14",
+    "expo-blur": "~57.0.2",
+    "expo-constants": "~57.0.12",
+    "expo-font": "~57.0.1",
+    "expo-linear-gradient": "~57.0.1",
+    "expo-linking": "~57.0.6",
+    "expo-router": "~57.0.14",
+    "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.2",
+    "react": "19.2.3",
+    "react-dom": "^19.2.3",
+    "react-native": "0.86.2",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-svg": "^15.15.4",
+    "react-native-web": "^0.21.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "~19.2.2",
+    "react-native-svg-transformer": "^1.5.3",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types src/dominio/*.test.ts",
+    "export:web": "rm -rf ../app && PARTIMOS_BASE_URL=/test/app expo export --platform web --output-dir ../app"
+  },
+  "private": true
+}
