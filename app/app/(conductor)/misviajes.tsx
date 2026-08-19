@@ -18,6 +18,7 @@ import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import { type MisViajes, type PuestoMio, misViajes } from '@/servicios/panel';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -120,6 +121,10 @@ export default function MisViajesPantalla() {
           ) : null}
         </View>
       </ScrollView>
+
+      <View style={estilos.pie}>
+        <Pestanas valor="Mis viajes" />
+      </View>
     </View>
   );
 }
@@ -184,13 +189,13 @@ function cuantoFalta(cuandoISO: string): string {
 }
 
 const estilos = StyleSheet.create({
+  pie: { paddingHorizontal: espacio.gutter, paddingBottom: 10, paddingTop: 6 },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
     maxWidth: 390,
     width: '100%',
     alignSelf: 'center',
-    ...(Platform.OS === 'web' ? { height: 844, maxHeight: 844 } : null),
   },
 
   cabecera: { paddingHorizontal: espacio.gutter },

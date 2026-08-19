@@ -2,11 +2,21 @@
  * La barra de estado que el diseño dibuja dentro del marco: 44 px de alto,
  * 26 de gutter, la hora a la izquierda y cobertura + batería a la derecha.
  *
- * En el teléfono la tapa la barra real del sistema; en el navegador es la que
- * hace que la pantalla se vea como en el traspaso.
+ * **Solo se dibuja donde no estorba.** En el teléfono —con app o con
+ * navegador— el sistema ya enseña su propia barra con la hora de verdad, así
+ * que dibujar otra pone dos relojes uno encima del otro: se vio en el
+ * teléfono, «15:17» del sistema y «9:41» nuestro justo debajo. Eso no es una
+ * app, es una maqueta.
+ *
+ * En una ventana ancha sí: ahí la barra es lo que enmarca la pantalla como en
+ * el traspaso, y no compite con nada. El corte está en 480 px, que es más que
+ * cualquier teléfono y menos que cualquier escritorio.
  */
 
-import { Platform, StyleSheet, Text, View } from 'react-native';
+/** Por encima de esto la ventana es un escritorio, no un teléfono. */
+const ANCHO_DE_ESCRITORIO = 480;
+
+import { Platform, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { Bateria, Cobertura } from './iconos';
 import { familia, color, espacio } from './tokens';
@@ -22,8 +32,12 @@ export function BarraDeEstado({
   hora?: string;
   tono?: 'claro' | 'oscuro';
 }) {
-  // En el móvil manda la barra del sistema; solo la dibujamos en web.
-  if (Platform.OS !== 'web') return <View style={{ height: 0 }} />;
+  const { width } = useWindowDimensions();
+
+  // En el móvil manda la barra del sistema, la dibuje quien la dibuje.
+  if (Platform.OS !== 'web' || width < ANCHO_DE_ESCRITORIO) {
+    return <View style={{ height: 0 }} />;
+  }
 
   const tinta = tono === 'claro' ? '#fff' : color.ink900;
 

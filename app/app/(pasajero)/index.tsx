@@ -17,16 +17,19 @@ import { aDondeSeVaDesde, ciudadesDeSalida, CIUDAD_POR_DEFECTO } from '@/servici
 import {
   type GanchoDeConductor,
   type RutaPopular,
+  diaEnPanama,
   ganchoDeConductor,
   rutasPopulares,
 } from '@/servicios/viajes';
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
+import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Pestanas } from '@/ui/Pestanas';
-import { Amanecer, CampoRojo } from '@/ui/CampoRojo';
+import { Amanecer, Bandera } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { Marca } from '@/ui/iconos';
+import { diaCorto, diaLargo } from '@/ui/fechas';
+import { Marca, Pin } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -39,6 +42,40 @@ const FOTOS: Record<string, number> = {
 /** Los puestos se escriben con letra: en una frase, «tres» se lee y «3» se cuenta. */
 const LETRAS = ['cero', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis'];
 const enLetra = (n: number) => LETRAS[n] ?? String(n);
+
+/**
+ * Los quince días que se pueden elegir.
+ *
+ * Quince y no un calendario entero: los viajes se publican con dos o tres días
+ * de antelación —lo dice PRODUCT.md—, así que un mes de casillas vacías sería
+ * enseñar sobre todo días sin nadie. Se calcula al abrir, no al cargar el
+ * módulo, para que «Hoy» siga siendo hoy si la app queda abierta.
+ */
+const LOS_PROXIMOS_DIAS = (): Opcion[] =>
+  Array.from({ length: 15 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const dia = diaEnPanama(d);
+    return { valor: dia, etiqueta: comoSeLlamaElDia(dia), debajo: i === 0 ? undefined : diaLargo(d.toISOString()) };
+  });
+
+/** «Hoy» y «Mañana» tienen nombre; el resto se dice por su fecha. */
+function comoSeLlamaElDia(dia: string): string {
+  const hoy = diaEnPanama(new Date());
+  if (dia === hoy) return 'Hoy';
+  const manana = new Date();
+  manana.setDate(manana.getDate() + 1);
+  if (dia === diaEnPanama(manana)) return 'Mañana';
+  return diaCorto(`${dia}T12:00:00-05:00`);
+}
+
+/** Cuatro es el máximo: un carro de cinco plazas lleva cuatro pasajeros. */
+const CUANTOS_PUESTOS: Opcion[] = [
+  { valor: '1', etiqueta: '1 pasajero' },
+  { valor: '2', etiqueta: '2 pasajeros' },
+  { valor: '3', etiqueta: '3 pasajeros' },
+  { valor: '4', etiqueta: '4 pasajeros' },
+];
 
 /** De dónde se sale por defecto: es de donde sale casi todo el mundo. */
 const DESDE_POR_DEFECTO: Lugar = {
@@ -59,6 +96,10 @@ export default function Inicio() {
   const [hacia, setHacia] = useState<Lugar | null>(null);
   /** Cuál de los dos campos tiene la hoja abierta, o ninguno. */
   const [buscando, setBuscando] = useState<'desde' | 'hacia' | null>(null);
+  /** Qué día sales, como 'AAAA-MM-DD' en hora de Panamá. */
+  const [cuando, setCuando] = useState(() => diaEnPanama(new Date()));
+  const [pasajeros, setPasajeros] = useState(1);
+  const [eligiendo, setEligiendo] = useState<'cuando' | 'pasajeros' | null>(null);
 
   useEffect(() => {
     rutasPopulares().then(setRutas);
@@ -78,28 +119,38 @@ export default function Inicio() {
         : [];
 
   const buscar = () => {
+    /* Sin destino no se busca: mandar a resultados con la ruta del traspaso
+       enseñaría viajes que nadie pidió. Se abre el campo que falta, que es lo
+       que la persona iba a tener que hacer de todas formas. */
+    if (!hacia) {
+      setBuscando('hacia');
+      return;
+    }
     router.push({
       pathname: '/(pasajero)/resultados',
       params: {
         origen: desde.citySlug ?? CIUDAD_POR_DEFECTO,
-        destino: hacia?.citySlug ?? '',
-        etiquetaDestino: hacia?.nombre ?? '',
+        destino: hacia.citySlug ?? '',
+        etiquetaDestino: hacia.nombre,
+        dia: cuando,
+        pasajeros: String(pasajeros),
       },
     });
   };
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={326} motivo="skyline" />
-
-      <BarraDeEstado />
-
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 8 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={estilos.cabecera}>
+        {/* El campo y lo que va encima se desplazan juntos: fuera del
+            ScrollView el campo se quedaba clavado y «RUTAS POPULARES»
+            terminaba escrito sobre el rojo. */}
+        <Bandera altura={326} motivo="skyline">
+          <BarraDeEstado />
+          <View style={estilos.cabecera}>
           <View style={estilos.filaSaludo}>
             <Text style={estilos.saludo}>
               {'Hola, '}
@@ -149,14 +200,26 @@ export default function Inicio() {
           </Pressable>
 
           <View style={estilos.filaCajas}>
-            <View style={estilos.caja}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Cuándo sales: ${comoSeLlamaElDia(cuando)}. Cambiar`}
+              onPress={() => setEligiendo('cuando')}
+              style={estilos.caja}
+            >
               <Text style={estilos.etiquetaCaja}>Cuándo</Text>
-              <Text style={estilos.valorCaja}>Hoy</Text>
-            </View>
-            <View style={estilos.caja}>
+              <Text style={estilos.valorCaja}>{comoSeLlamaElDia(cuando)}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${pasajeros} ${pasajeros === 1 ? 'pasajero' : 'pasajeros'}. Cambiar`}
+              onPress={() => setEligiendo('pasajeros')}
+              style={estilos.caja}
+            >
               <Text style={estilos.etiquetaCaja}>Pasajeros</Text>
-              <Text style={[estilos.valorCaja, tabular]}>1 pasajero</Text>
-            </View>
+              <Text style={[estilos.valorCaja, tabular]}>
+                {`${pasajeros} ${pasajeros === 1 ? 'pasajero' : 'pasajeros'}`}
+              </Text>
+            </Pressable>
           </View>
 
           <View style={{ marginTop: 14 }}>
@@ -165,6 +228,7 @@ export default function Inicio() {
             </Boton>
           </View>
         </View>
+        </Bandera>
 
         <View style={estilos.seccionRutas}>
           <View style={estilos.filaSeccion}>
@@ -185,10 +249,15 @@ export default function Inicio() {
               }
               style={[estilos.filaRuta, i > 0 && estilos.filaRutaConLinea]}
             >
-              <View style={estilos.miniatura}>
+              {/* Sin foto no se deja el hueco gris: un rectángulo vacío se lee
+                  como una imagen que no cargó. Va un pin en arena, que es un
+                  sitio sin retrato y no un fallo. */}
+              <View style={[estilos.miniatura, !FOTOS[r.foto] && estilos.miniaturaSinFoto]}>
                 {FOTOS[r.foto] ? (
                   <Image source={FOTOS[r.foto]} style={estilos.foto} resizeMode="cover" />
-                ) : null}
+                ) : (
+                  <Pin tamano={18} tinta={color.ink400} />
+                )}
               </View>
               <Text style={estilos.nombreRuta} numberOfLines={1}>
                 {`${r.origen} → `}
@@ -243,6 +312,24 @@ export default function Inicio() {
         }}
         alCerrar={() => setBuscando(null)}
       />
+
+      <HojaDeEleccion
+        abierta={eligiendo === 'cuando'}
+        titulo="Cuándo sales"
+        opciones={LOS_PROXIMOS_DIAS()}
+        elegido={cuando}
+        alElegir={setCuando}
+        alCerrar={() => setEligiendo(null)}
+      />
+
+      <HojaDeEleccion
+        abierta={eligiendo === 'pasajeros'}
+        titulo="Cuántos van"
+        opciones={CUANTOS_PUESTOS}
+        elegido={String(pasajeros)}
+        alElegir={(v) => setPasajeros(Number(v))}
+        alCerrar={() => setEligiendo(null)}
+      />
     </View>
   );
 }
@@ -255,7 +342,6 @@ const estilos = StyleSheet.create({
     maxWidth: 390,
     width: '100%',
     alignSelf: 'center',
-    ...(Platform.OS === 'web' ? { height: 844, maxHeight: 844 } : null),
   },
 
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 8 },
@@ -335,6 +421,11 @@ const estilos = StyleSheet.create({
   verTodas: { fontSize: 13, lineHeight: 18.85, fontWeight: '500', color: color.rojo600, fontFamily: familia },
   filaRuta: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 11 },
   filaRutaConLinea: { borderTopWidth: 1, borderTopColor: color.bordeSutil },
+  miniaturaSinFoto: {
+    backgroundColor: color.sand200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   miniatura: {
     width: 52,
     height: 40,

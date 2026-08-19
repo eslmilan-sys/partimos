@@ -24,6 +24,7 @@ import { useRouter } from 'expo-router';
 import { cambiarAviso, cuantasAvisando, rutasGuardadas, type RutaGuardada } from '@/servicios/rutas';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
@@ -129,6 +130,10 @@ export default function Rutas() {
           <Text>Te escribimos una sola vez por viaje nuevo, y nunca antes de las 7 de la mañana.</Text>
         </Text>
       </View>
+
+      <View style={estilos.pie}>
+        <Pestanas valor="Perfil" />
+      </View>
     </View>
   );
 }
@@ -165,13 +170,13 @@ function PalancaDeAviso({
 }
 
 const estilos = StyleSheet.create({
+  pie: { paddingHorizontal: espacio.gutter, paddingBottom: 10, paddingTop: 6 },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
     maxWidth: 390,
     width: '100%',
     alignSelf: 'center',
-    ...(Platform.OS === 'web' ? { height: 844, maxHeight: 844 } : null),
   },
 
   cabecera: { paddingTop: 4, paddingHorizontal: espacio.gutter },

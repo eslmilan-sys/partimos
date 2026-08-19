@@ -25,6 +25,7 @@ import { type Href, useRouter } from 'expo-router';
 import { type Aviso, type Bandeja, bandeja, marcarLeido, marcarTodo } from '@/servicios/avisos';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
@@ -158,18 +159,22 @@ export default function Avisos() {
 
         <Text style={estilos.promesa}>Solo te escribimos por tus viajes. Nunca promociones.</Text>
       </ScrollView>
+
+      <View style={estilos.pie}>
+        <Pestanas valor="Perfil" />
+      </View>
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
+  pie: { paddingHorizontal: espacio.gutter, paddingBottom: 10, paddingTop: 6 },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
     maxWidth: 390,
     width: '100%',
     alignSelf: 'center',
-    ...(Platform.OS === 'web' ? { height: 844, maxHeight: 844 } : null),
   },
 
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 6 },

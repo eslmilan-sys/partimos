@@ -20,6 +20,7 @@ import { useRouter } from 'expo-router';
 import { type ViajeEnResultados, buscarViajes, proximoDiaConViajes } from '@/servicios/viajes';
 import { ciudadesDeSalida, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Pestanas } from '@/ui/Pestanas';
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { Mapa } from '@/ui/Mapa';
 import { Vidrio } from '@/ui/Vidrio';
@@ -202,6 +203,10 @@ export default function YaMapa() {
         }}
         alCerrar={() => setBuscando(false)}
       />
+
+      <View style={estilos.pie}>
+        <Pestanas valor="Buscar" />
+      </View>
     </View>
   );
 }
@@ -214,13 +219,13 @@ function faltan(salidaISO: string): string {
 }
 
 const estilos = StyleSheet.create({
+  pie: { paddingHorizontal: espacio.gutter, paddingBottom: 10, paddingTop: 6 },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
     maxWidth: 390,
     width: '100%',
     alignSelf: 'center',
-    ...(Platform.OS === 'web' ? { height: 844, maxHeight: 844 } : null),
   },
 
   arriba: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 4, paddingHorizontal: 22 },

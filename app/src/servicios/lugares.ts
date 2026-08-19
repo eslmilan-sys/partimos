@@ -28,7 +28,7 @@
  * Lo que de verdad protege la cuota es la restricción por dominio en la
  * consola de Mapbox. Sin ella, el plan gratuito se lo queda quien pase.
  */
-import type { CiudadConocida, Lugar } from '@/dominio/lugar';
+import { type CiudadConocida, type Lugar, normalizar as normalizarNombre } from '@/dominio/lugar';
 
 import { fuente } from './_fuente';
 
@@ -202,6 +202,35 @@ const comoLugar = (c: CiudadConocida): Lugar => ({
   lng: c.lng,
   fuente: 'catalogo',
 });
+
+/**
+ * LAS CIUDADES QUE CASAN CON LO ESCRITO — sin red, sin jeton, sin esperar.
+ *
+ * Es la mitad de la búsqueda que **siempre** funciona: las 32 filas de
+ * `cities` ya están en el almacén, así que escribir «david» encuentra David
+ * aunque no haya ni una llave de proveedor configurada.
+ *
+ * Se perdió una vez, al reescribir la hoja para juntar las cuatro fuentes: la
+ * lista pasó a filtrar solo las sugerencias del campo —que en «Desde» era una
+ * sola ciudad—, así que escribir cualquier otra no devolvía nada. Vive aquí
+ * para que no vuelva a depender de lo que una pantalla le pase.
+ */
+export function ciudadesQueCasan(texto: string): Lugar[] {
+  const q = normalizarNombre(texto);
+  if (!q) return [];
+  return fuente.ciudades
+    .filter((c) => c.is_active !== false)
+    .filter((c) => normalizarNombre(c.name).includes(q) || c.slug.includes(q))
+    // Las que empiezan por lo escrito van antes que las que solo lo contienen.
+    .sort(
+      (a, b) =>
+        Number(normalizarNombre(b.name).startsWith(q)) -
+        Number(normalizarNombre(a.name).startsWith(q)),
+    )
+    .map((c) =>
+      comoLugar({ slug: c.slug, name: c.name, province: c.province, lat: c.lat, lng: c.lng }),
+    );
+}
 
 /** Las ciudades desde las que hay corredor abierto. La lista de «Desde». */
 export function ciudadesDeSalida(): Lugar[] {

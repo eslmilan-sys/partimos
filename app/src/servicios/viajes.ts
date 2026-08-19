@@ -141,9 +141,13 @@ export type RutaPopular = {
 };
 
 /** `corridors.is_priority` marca las rutas que el producto empuja. */
-export async function rutasPopulares(limite = 2): Promise<RutaPopular[]> {
+export async function rutasPopulares(limite = 6): Promise<RutaPopular[]> {
   const rutas = fuente.corredores
-    .filter((c) => c.is_priority && c.is_active)
+    /* Antes solo salían los marcados como prioritarios, y eran dos. Una
+       pantalla de inicio con dos destinos no dice a dónde llevamos: los
+       prioritarios van delante, y detrás el resto de corredores abiertos. */
+    .filter((c) => c.is_active)
+    .sort((a, b) => Number(b.is_priority) - Number(a.is_priority))
     .slice(0, limite)
     .map((c) => {
       const destino = fuente.ciudades.find((x) => x.id === c.destination_city_id);

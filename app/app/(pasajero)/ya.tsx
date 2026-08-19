@@ -20,6 +20,7 @@ import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { type ViajeEnResultados, buscarViajes, proximoDiaConViajes } from '@/servicios/viajes';
 import { CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Insignia, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -174,6 +175,10 @@ export default function Ya() {
           ))}
         </View>
       </ScrollView>
+
+      <View style={estilos.pie}>
+        <Pestanas valor="Buscar" />
+      </View>
     </View>
   );
 }
@@ -187,13 +192,13 @@ function faltan(salidaISO: string): string {
 }
 
 const estilos = StyleSheet.create({
+  pie: { paddingHorizontal: espacio.gutter, paddingBottom: 10, paddingTop: 6 },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
     maxWidth: 390,
     width: '100%',
     alignSelf: 'center',
-    ...(Platform.OS === 'web' ? { height: 844, maxHeight: 844 } : null),
   },
 
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 6 },

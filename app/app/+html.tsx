@@ -54,5 +54,30 @@ ${pesos
   )
   .join('\n')}
 
-body { background-color: #FAF7F3; }
+/*
+ * LA APP LLENA LA VENTANA, NI MÁS NI MENOS.
+ *
+ * Las pantallas llevaban «height: 844» en web —el marco con el que se
+ * revisaba el diseño en el escritorio—. En un teléfono la ventana no mide
+ * 844: mide menos, así que la página entera desbordaba, la barra de pestañas
+ * se iba debajo del pliegue y al deslizar aparecía el fondo por detrás. Es lo
+ * que se veía en la captura.
+ *
+ * «100dvh» y no «100vh»: la barra de Safari y Chrome en el teléfono aparece y
+ * desaparece al deslizar, y «vh» cuenta la ventana grande siempre, así que
+ * con «vh» la barra de abajo queda tapada por la del navegador. «dvh» es la
+ * altura de verdad, la que cambia. El «vh» de reserva es para los navegadores
+ * viejos que no conocen «dvh».
+ */
+html, body { height: 100%; margin: 0; }
+body {
+  background-color: #FAF7F3;
+  /* Nada de rebote elástico: la app no es una página. */
+  overscroll-behavior: none;
+}
+#root {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+}
 `;

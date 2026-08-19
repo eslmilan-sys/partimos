@@ -1,12 +1,19 @@
 /**
  * La hoja de buscar un sitio — la que abre «Desde» y «Hacia» en `3a`.
  *
- * **Por qué una hoja y no un desplegable.** El teclado del teléfono se come
- * media pantalla; una lista colgando de un campo queda debajo del teclado y
- * no se ve. La hoja sube desde abajo, pone el campo arriba y la lista
- * debajo, que es donde queda sitio. De paso mata un fallo del sitio: la
+ * **Por qué una hoja y no un desplegable.** Una lista colgando de un campo
+ * queda debajo del teclado y no se ve. De paso mata un fallo del sitio: la
  * lista de sugerencias no puede tapar el botón «Buscar», porque no comparten
  * espacio.
+ *
+ * **Y por qué a pantalla completa en el teléfono.** Como cajón de abajo no
+ * funcionaba: el teclado ocupa media pantalla, la barra de autorelleno de
+ * Safari otro trozo, y quedaba UN resultado visible con el campo pegado al
+ * borde. Medido en un iPhone. Buscar un sitio es una tarea entera, no un
+ * apéndice de la pantalla anterior, así que en el teléfono ocupa la pantalla
+ * entera —el campo arriba, la lista debajo, todo el alto para los
+ * resultados—, que es lo que hace cualquier app de mapas. En una ventana
+ * ancha sigue siendo un cajón, porque ahí sí sobra sitio.
  *
  * Las reglas de disparo, que son de producto y no de gusto:
  *
@@ -32,11 +39,17 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from 'react-native';
 
 import { type Lugar, libre, normalizar } from '@/dominio/lugar';
 import { HAY_BUSQUEDA, type Punto, buscarEnTodas, situar } from '@/servicios/geobusqueda';
-import { MINIMO_PARA_BUSCAR, ciudadesConocidas, olvidarSesion } from '@/servicios/lugares';
+import {
+  MINIMO_PARA_BUSCAR,
+  ciudadesConocidas,
+  ciudadesQueCasan,
+  olvidarSesion,
+} from '@/servicios/lugares';
 
 import { Cerrar, Lupa, Pin } from './iconos';
 import { TRACK_MICRO, color, espacio, familia, interlinea, radio } from './tokens';
@@ -56,6 +69,9 @@ type Props = {
   alCerrar: () => void;
 };
 
+/** Por debajo de esto la búsqueda toma la pantalla entera. */
+const ANCHO_DE_ESCRITORIO = 480;
+
 export function BuscadorDeLugar({
   abierto,
   titulo,
@@ -64,6 +80,8 @@ export function BuscadorDeLugar({
   alElegir,
   alCerrar,
 }: Props) {
+  const { width } = useWindowDimensions();
+  const enElTelefono = width < ANCHO_DE_ESCRITORIO;
   const [texto, setTexto] = useState('');
   const [lista, setLista] = useState<Lugar[]>([]);
   const [buscando, setBuscando] = useState(false);
@@ -112,17 +130,23 @@ export function BuscadorDeLugar({
   const q = texto.trim();
   const enBlanco = q.length === 0;
 
-  /* El catálogo responde desde la primera letra, sin red: entre la primera
-     tecla y los 3 caracteres la pantalla ya enseña algo. */
-  const delCatalogo = enBlanco
-    ? []
-    : sugerencias.filter((s) => normalizar(s.nombre).includes(normalizar(q)));
-
-  const loQueSeEnseña = enBlanco
-    ? sugerencias
-    : lista.length > 0
-      ? lista
-      : delCatalogo;
+  /**
+   * LO NUESTRO SIEMPRE, LA RED ENCIMA.
+   *
+   * Las 32 ciudades responden desde la primera letra, sin red y sin jeton, así
+   * que la pantalla nunca está vacía esperando —y sobre todo, escribir una
+   * ciudad SIEMPRE la encuentra, haya proveedores configurados o no. Debajo se
+   * añade lo que las cuatro fuentes traigan y nosotros no tengamos.
+   *
+   * Antes esto filtraba solo las sugerencias que la pantalla pasaba, que en
+   * «Desde» era una sola ciudad: escribir cualquier otra no devolvía nada.
+   */
+  const loQueSeEnseña = (() => {
+    if (enBlanco) return sugerencias;
+    const nuestras = ciudadesQueCasan(q);
+    const yaEstan = new Set(nuestras.map((c) => normalizar(c.nombre)));
+    return [...nuestras, ...lista.filter((l) => !yaEstan.has(normalizar(l.nombre)))].slice(0, 8);
+  })();
 
   const elegir = async (lugar: Lugar) => {
     /* Una sugerencia de Mapbox llega sin punto: se concreta al elegir, que es
@@ -132,9 +156,17 @@ export function BuscadorDeLugar({
 
   return (
     <Modal visible={abierto} animationType="slide" transparent onRequestClose={alCerrar}>
-      <Pressable accessibilityLabel="Cerrar" onPress={alCerrar} style={estilos.velo} />
+      {/* El velo solo existe donde hay algo detrás que ver. */}
+      {enElTelefono ? null : (
+        <Pressable accessibilityLabel="Cerrar" onPress={alCerrar} style={estilos.velo} />
+      )}
 
-      <View style={estilos.hoja}>
+      <View
+        style={[
+          estilos.hoja,
+          enElTelefono ? estilos.aPantallaCompleta : estilos.comoCajon,
+        ]}
+      >
         <View style={estilos.cabecera}>
           <Text style={estilos.epigrafe}>{titulo}</Text>
           <Pressable
@@ -161,7 +193,12 @@ export function BuscadorDeLugar({
           {buscando ? <ActivityIndicator size="small" color={color.ink400} /> : null}
         </View>
 
-        <ScrollView style={estilos.lista} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          style={estilos.lista}
+          contentContainerStyle={{ paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
           {loQueSeEnseña.map((d, i) => (
             <Pressable
               key={`${d.nombre}-${d.fuente}-${i}`}
@@ -230,7 +267,6 @@ const estilos = StyleSheet.create({
     paddingHorizontal: espacio.gutter,
     paddingTop: 16,
     paddingBottom: 22,
-    maxHeight: 560,
     width: '100%',
     maxWidth: 390,
     alignSelf: 'center',
@@ -275,7 +311,21 @@ const estilos = StyleSheet.create({
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' as never } : null),
   },
 
-  lista: { marginTop: 10 },
+  /* A pantalla completa: sin esquinas redondeadas arriba —no hay nada detrás
+     de lo que despegarse— y todo el alto para los resultados. */
+  aPantallaCompleta: {
+    flex: 1,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    paddingTop: 14,
+  },
+
+  /* El tope solo en la ventana ancha, donde es un cajón sobre la página.
+     Ponerlo en la base y anularlo con `undefined` no lo anulaba: el estilo
+     seguía valiendo 560, y por debajo del cajón se veía la pantalla anterior. */
+  comoCajon: { maxHeight: 560 },
+
+  lista: { flex: 1, marginTop: 10 },
   fila: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 12 },
   icono: { width: 22, alignItems: 'center' },
   nombre: { fontFamily: familia, fontSize: 15, color: color.ink900 },

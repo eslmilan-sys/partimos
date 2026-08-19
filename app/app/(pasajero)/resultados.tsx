@@ -23,6 +23,7 @@ import {
 } from '@/servicios/viajes';
 import { hayCorredor, nombreDeCiudad, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
@@ -45,6 +46,8 @@ export default function Resultados() {
     origen?: string;
     destino?: string;
     etiquetaDestino?: string;
+    dia?: string;
+    pasajeros?: string;
   }>();
 
   /**
@@ -56,17 +59,24 @@ export default function Resultados() {
    * rehace. Es el mismo patrón que usan las otras pantallas con parámetro:
    * pantalla vacía hasta que se sabe qué enseñar.
    */
-  const [ruta, setRuta] = useState<{ origen: string; destino: string; etiqueta: string } | null>(
-    null,
-  );
+  const [ruta, setRuta] = useState<{
+    origen: string;
+    destino: string;
+    etiqueta: string;
+    /** El día que `3a` eligió. `null` = el primero con salidas. */
+    dia: string | null;
+    pasajeros: number;
+  } | null>(null);
 
   useEffect(() => {
     setRuta({
       origen: params.origen || ORIGEN_POR_DEFECTO,
       destino: params.destino || DESTINO_POR_DEFECTO,
       etiqueta: params.etiquetaDestino || '',
+      dia: params.dia || null,
+      pasajeros: Number(params.pasajeros) || 1,
     });
-  }, [params.origen, params.destino, params.etiquetaDestino]);
+  }, [params.origen, params.destino, params.etiquetaDestino, params.dia, params.pasajeros]);
 
   const origen = ruta?.origen ?? ORIGEN_POR_DEFECTO;
   const destino = ruta?.destino ?? DESTINO_POR_DEFECTO;
@@ -81,11 +91,16 @@ export default function Resultados() {
   const buscar = useCallback(async () => {
     if (!ruta) return;
     if (!servimosLaRuta) {
-      setDia(null);
+      /* El día elegido sigue siendo el día elegido aunque no haya ruta:
+         poner `null` hacía que la cabecera dijera «Hoy» después de haber
+         elegido «Mañana». */
+      setDia(ruta.dia);
       setViajes([]);
       return;
     }
-    const fecha = await proximoDiaConViajes(origen, destino);
+    /* El día elegido manda. Sin él —al abrir la pantalla suelta— el primero
+       con salidas, que es más útil que un «hoy» vacío. */
+    const fecha = ruta.dia ?? (await proximoDiaConViajes(origen, destino));
     setDia(fecha);
     const encontrados = await buscarViajes(origen, destino, fecha, filtros);
     setViajes(
@@ -109,6 +124,9 @@ export default function Resultados() {
             canal: NOMBRE_DEL_CANAL.yappy_app,
           }),
         )
+        /* Un viaje con dos puestos no sirve a tres personas: no es un
+           resultado, es una decepción a un toque de distancia. */
+        .filter((v) => v.puestosLibres >= (ruta.pasajeros ?? 1))
         .sort((a, b) => a.salida.localeCompare(b.salida)),
     );
   }, [filtros, ruta, origen, destino, servimosLaRuta]);
@@ -157,7 +175,7 @@ export default function Resultados() {
           </Text>
         </Text>
         <Text style={estilos.subtitulo}>
-          {`${cuandoTexto(dia)} · 1 puesto · ${viajes.length} ${viajes.length === 1 ? 'viaje' : 'viajes'}`}
+          {`${cuandoTexto(dia)} · ${ruta.pasajeros} ${ruta.pasajeros === 1 ? 'puesto' : 'puestos'} · ${viajes.length} ${viajes.length === 1 ? 'viaje' : 'viajes'}`}
         </Text>
       </View>
 
@@ -189,8 +207,16 @@ export default function Resultados() {
           <View style={estilos.vacio}>
             {servimosLaRuta ? (
               <>
-                <Text style={estilos.vacioTitulo}>Nadie sale hoy con esos filtros.</Text>
-                <Text style={estilos.vacioTexto}>Quita alguno o mira mañana.</Text>
+                <Text style={estilos.vacioTitulo}>
+                  {ruta.pasajeros > 1
+                    ? `Nadie lleva ${ruta.pasajeros} puestos juntos ese día.`
+                    : 'Nadie sale ese día con esos filtros.'}
+                </Text>
+                <Text style={estilos.vacioTexto}>
+                  {ruta.pasajeros > 1
+                    ? 'Prueba con menos puestos o con otro día.'
+                    : 'Quita alguno o mira otro día.'}
+                </Text>
               </>
             ) : (
               <>
@@ -223,6 +249,10 @@ export default function Resultados() {
         alCerrar={() => setHojaAbierta(false)}
         cuantos={viajes.length}
       />
+
+      <View style={estilos.pie}>
+        <Pestanas valor="Buscar" />
+      </View>
     </View>
   );
 }
@@ -356,13 +386,13 @@ function duracion(salida: string, llegada: string | null): string {
 }
 
 const estilos = StyleSheet.create({
+  pie: { paddingHorizontal: espacio.gutter, paddingBottom: 10, paddingTop: 6 },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
     maxWidth: 390,
     width: '100%',
     alignSelf: 'center',
-    ...(Platform.OS === 'web' ? { height: 844, maxHeight: 844 } : null),
   },
 
   cabecera: { paddingHorizontal: espacio.gutter, paddingBottom: 24 },

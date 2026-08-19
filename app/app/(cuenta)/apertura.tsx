@@ -73,7 +73,6 @@ const estilos = StyleSheet.create({
     maxWidth: 390,
     width: '100%',
     alignSelf: 'center',
-    ...(Platform.OS === 'web' ? { height: 844, maxHeight: 844 } : null),
   },
 
   cuerpo: { flex: 1, minHeight: 0, paddingHorizontal: espacio.gutter, paddingBottom: 34 },

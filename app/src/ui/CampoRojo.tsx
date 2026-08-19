@@ -4,6 +4,13 @@
  * Tres capas, exactamente como el CSS del traspaso: luz cálida arriba a la
  * derecha, sombra profunda abajo a la izquierda, y el degradado de bandera.
  * Una por pantalla, y nada debajo del subtítulo se sienta encima.
+ *
+ * **Dónde se coloca.** Se pinta en absoluto sobre su padre, así que el padre
+ * decide si el campo se queda quieto o se va con el desplazamiento. En una
+ * pantalla que se desplaza tiene que ir DENTRO del `ScrollView`, envuelto con
+ * la cabecera y la hoja: puesto fuera se queda clavado y el contenido de más
+ * abajo le pasa por encima —«RUTAS POPULARES» sobre el rojo, medido en el
+ * teléfono—. `Bandera` de abajo hace justo eso y es lo que hay que usar.
  */
 
 import { type ReactNode, useId } from 'react';
@@ -57,7 +64,12 @@ export function CampoRojo({
   // primero se desmonta. Uno por instancia.
   const id = useId().replace(/:/g, '');
   return (
-    <View style={[StyleSheet.absoluteFill, { height: altura, overflow: 'hidden' }]}>
+    <View
+      /* `pointerEvents="none"` porque es un fondo: sin esto, en las pantallas
+         donde el campo cubre un control, el campo se come el toque. */
+      pointerEvents="none"
+      style={[StyleSheet.absoluteFill, { height: altura, overflow: 'hidden' }]}
+    >
       <Svg width={ancho} height={altura} style={StyleSheet.absoluteFill}>
         <Defs>
           {/* linear-gradient(166deg, #DD1D3F 0%, #D21034 44%, #AF0B29 100%) */}
@@ -168,5 +180,34 @@ export function Brillo({ ancho = 346, alto = 190 }: { ancho?: number; alto?: num
         fill={`url(#brillo-${id})`}
       />
     </Svg>
+  );
+}
+
+
+/**
+ * EL ARQUETIPO ENTERO: el campo rojo con lo que va encima de él.
+ *
+ * Existe porque colocar el campo bien es una decisión que se estaba tomando
+ * cuarenta y ocho veces, y una de ellas mal. Envolver aquí la cabecera con su
+ * fondo hace que las dos se muevan juntas, que es lo único que hace falta
+ * para que nada de más abajo termine escrito sobre el rojo.
+ *
+ * La hoja blanca puede seguir desbordando por abajo —es el arquetipo, «la
+ * hoja monta sobre el borde del campo»—: lo que se mueve es el bloque entero.
+ */
+export function Bandera({
+  altura = campoRojo.alturaSecundaria,
+  motivo,
+  children,
+}: {
+  altura?: number;
+  motivo?: keyof typeof MOTIVOS;
+  children?: ReactNode;
+}) {
+  return (
+    <View style={{ position: 'relative' }}>
+      <CampoRojo altura={altura} motivo={motivo} />
+      {children}
+    </View>
   );
 }
