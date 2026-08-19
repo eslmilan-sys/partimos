@@ -118,7 +118,16 @@ export default function Chat() {
         </ScrollView>
 
         <View style={estilos.barraEscribir}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Adjuntar" style={estilos.adjuntar}>
+          {/* El punto de recogida es de lo que más se habla aquí, así que el
+              «más» abre el mapa en vez de un adjunto: no hay módulo de archivos
+              en el proyecto, y un botón que no hace nada es peor que uno que
+              hace lo útil. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ver el punto de recogida"
+            onPress={() => router.push('/(pasajero)/ya-mapa')}
+            style={estilos.adjuntar}
+          >
             <Mas tamano={19} tinta={color.ink700} />
           </Pressable>
           <View style={estilos.campoMensaje}>

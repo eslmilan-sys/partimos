@@ -123,6 +123,25 @@ export async function olvideLaContrasena(correo: string): Promise<boolean> {
   return !error;
 }
 
+/**
+ * Entrar con Google o con Apple.
+ *
+ * **No es una maqueta.** El traspaso dibuja los dos botones y hasta ahora no
+ * hacían nada; esto los conecta de verdad. El día que el proveedor esté
+ * activado en el proyecto Supabase funcionan sin tocar una línea, y mientras
+ * no lo esté la pantalla lo dice —«todavía no está activado»— en vez de
+ * quedarse quieta, que es lo que no se podía distinguir de una app rota.
+ *
+ * Vuelve a la misma dirección de la que salió, igual que el correo.
+ */
+export async function entrarCon(quien: 'google' | 'apple'): Promise<boolean> {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: quien,
+    options: { redirectTo: volverA() },
+  });
+  return !error;
+}
+
 export async function salir(): Promise<void> {
   await supabase.auth.signOut();
 }
@@ -172,3 +191,7 @@ export const QUE_PASO: Record<Fallo, string> = {
   'demasiados-intentos': 'Demasiados intentos seguidos. Espera un momento.',
   'no-se-pudo': 'No se pudo. Revisa la conexión y vuelve a intentar.',
 };
+
+/** Cuando el proveedor no está activado en el proyecto. Se dice, no se calla. */
+export const SIN_PROVEEDOR = (quien: string) =>
+  `Entrar con ${quien} todavía no está activado. Usa tu correo.`;

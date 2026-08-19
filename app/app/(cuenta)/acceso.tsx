@@ -18,6 +18,7 @@ import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import { useRouter } from 'expo-router';
 
 import { QUE_PASO, contrasenaValida, correoValido, entrar } from '@/servicios/cuenta';
+import { Aviso } from '@/ui/Aviso';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -83,7 +84,7 @@ export default function Acceso() {
             />
           </View>
 
-          {quePaso ? <Text style={estilos.malo}>{quePaso}</Text> : null}
+          {quePaso ? <Aviso>{quePaso}</Aviso> : null}
 
           <View style={{ marginTop: 16 }}>
             <Boton desactivado={!listo} alPulsar={enviar}>
@@ -128,13 +129,6 @@ function Flecha() {
 }
 
 const estilos = StyleSheet.create({
-  malo: {
-    fontFamily: familia,
-    fontSize: 13,
-    lineHeight: 18.85,
-    color: color.rojo500,
-    marginTop: 12,
-  },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,

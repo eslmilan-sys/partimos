@@ -11,7 +11,8 @@ import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { correoValido } from '@/servicios/cuenta';
+import { SIN_PROVEEDOR, correoValido, entrarCon } from '@/servicios/cuenta';
+import { Aviso } from '@/ui/Aviso';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -20,10 +21,17 @@ import { tabular } from '@/ui/dinero';
 import { Escudo } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
+/** Los dos que dibuja el traspaso. El nombre se escribe una vez, no dos. */
+const OTROS = [
+  { quien: 'google', nombre: 'Google' },
+  { quien: 'apple', nombre: 'Apple' },
+] as const;
+
 export default function Puerta() {
   const router = useRouter();
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
   const [correo, setCorreo] = useState('');
+  const [quePaso, setQuePaso] = useState<string | null>(null);
 
   const listo = correoValido(correo);
 
@@ -101,15 +109,22 @@ export default function Puerta() {
             <Escudo tamano={15} tinta={color.ink500} />
             <Text style={estilos.promesa}>Una vez, y ya. Nada de anuncios ni llamadas.</Text>
           </View>
+          {quePaso ? <Aviso>{quePaso}</Aviso> : null}
         </View>
 
         <View style={estilos.otrasEntradas}>
-          <Pressable accessibilityRole="button" style={estilos.botonQuieto}>
-            <Text style={estilos.botonQuietoTexto}>Google</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button" style={estilos.botonQuieto}>
-            <Text style={estilos.botonQuietoTexto}>Apple</Text>
-          </Pressable>
+          {OTROS.map(({ quien, nombre }) => (
+            <Pressable
+              key={quien}
+              accessibilityRole="button"
+              onPress={async () => {
+                if (!(await entrarCon(quien))) setQuePaso(SIN_PROVEEDOR(nombre));
+              }}
+              style={estilos.botonQuieto}
+            >
+              <Text style={estilos.botonQuietoTexto}>{nombre}</Text>
+            </Pressable>
+          ))}
         </View>
       </View>
     </View>

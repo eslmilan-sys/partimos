@@ -16,7 +16,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
@@ -73,7 +73,16 @@ export default function EnRuta() {
       <View style={estilos.hoja}>
         <View style={estilos.filaEpigrafe}>
           <Text style={estilos.epigrafeVivo}>Vas en camino</Text>
-          <Pressable accessibilityRole="button">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Compartir mi llegada"
+            onPress={() =>
+              Share.share({
+                title: 'Partimos',
+                message: `Voy en camino a ${puesto.destino} con ${puesto.conductor}. Llego sobre las ${hora(llegada)}.`,
+              })
+            }
+          >
             <Text style={estilos.compartir}>Compartir mi llegada</Text>
           </Pressable>
         </View>

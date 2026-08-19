@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
@@ -174,7 +174,17 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
             ? 'Nadie todavía'
             : `${viaje.puestosVendidos} de ${viaje.puestosOfrecidos} puestos vendidos`}
         </Text>
-        <Pressable accessibilityRole="button" style={{ marginLeft: 'auto' }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Compartir el viaje"
+          onPress={() =>
+            Share.share({
+              title: 'Partimos',
+              message: `${viaje.origen} → ${viaje.destino} · ${diaAbrev(viaje.cuando)} ${hora(viaje.cuando)} · ${formatearDineroRedondo(viaje.aporteCentavos)} por puesto · quedan ${viaje.puestosOfrecidos - viaje.puestosVendidos}`,
+            })
+          }
+          style={{ marginLeft: 'auto' }}
+        >
           <Text style={estilos.enlace}>Compartir el viaje</Text>
         </Pressable>
       </View>

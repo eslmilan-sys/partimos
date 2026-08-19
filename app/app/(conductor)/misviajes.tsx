@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
@@ -155,7 +155,17 @@ function Hoy({ puesto, alVerPunto }: { puesto: PuestoMio; alVerPunto: () => void
         <Pressable accessibilityRole="button" onPress={alVerPunto} style={estilos.botonAzul}>
           <Text style={estilos.botonAzulTexto}>Ver el punto</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" style={estilos.botonQuieto}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Compartir a dónde voy"
+          onPress={() =>
+            Share.share({
+              title: 'Partimos',
+              message: `Voy a ${puesto.destino} con ${puesto.conductor}. Salgo de ${puesto.punto} a las ${hora(puesto.cuando)}.`,
+            })
+          }
+          style={estilos.botonQuieto}
+        >
           <Text style={estilos.botonQuietoTexto}>Compartir</Text>
         </Pressable>
       </View>
