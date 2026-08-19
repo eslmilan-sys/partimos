@@ -12,6 +12,10 @@
  * del apellido. Cambia el sobre, no la regla.
  */
 
+import { Platform } from 'react-native';
+
+import * as Linking from 'expo-linking';
+
 import type { Profile } from '@/tipos';
 
 import { supabase } from './_fuente/supabase/cliente';
@@ -32,6 +36,25 @@ export const contrasenaValida = (clave: string): boolean => clave.length >= LARG
 export function inicialDelApellido(apellido: string): string | null {
   const limpio = apellido.trim();
   return limpio ? `${limpio[0].toUpperCase()}.` : null;
+}
+
+/**
+ * A dónde vuelve el enlace de confirmación del correo.
+ *
+ * **Sin esto, el enlace no vuelve aquí.** Supabase manda a la «Site URL» del
+ * proyecto, que apunta al sitio y no a la app, y quien pulsa el enlace acaba
+ * en una página de error sin entender qué hizo mal. Es exactamente el fallo
+ * que se vio al probar.
+ *
+ * En el navegador se vuelve a la misma dirección desde donde se pidió; en el
+ * teléfono, al esquema de la app, que es lo que hace que el enlace abra
+ * Partimos y no el navegador.
+ *
+ * La dirección tiene que estar además en la lista de «Redirect URLs» del
+ * proyecto, o Supabase la rechaza y cae otra vez en la Site URL.
+ */
+function volverA(): string {
+  return Platform.OS === 'web' ? window.location.href : Linking.createURL('/');
 }
 
 export type Fallo =
@@ -67,6 +90,7 @@ export async function registrarse(
     email: correo.trim(),
     password: clave,
     options: {
+      emailRedirectTo: volverA(),
       // El disparador `handle_new_user` lee esto para escribir el perfil, así
       // que el nombre del paso 3 llega a `profiles` sin un segundo viaje.
       data: { first_name: nombre.trim(), last_name: apellido.trim() },
@@ -93,7 +117,9 @@ export async function entrar(correo: string, clave: string): Promise<Entrada> {
 /** El correo para volver a poner contraseña, cuando se olvidó. */
 export async function olvideLaContrasena(correo: string): Promise<boolean> {
   if (!correoValido(correo)) return false;
-  const { error } = await supabase.auth.resetPasswordForEmail(correo.trim());
+  const { error } = await supabase.auth.resetPasswordForEmail(correo.trim(), {
+    redirectTo: volverA(),
+  });
   return !error;
 }
 
