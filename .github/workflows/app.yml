@@ -74,7 +74,11 @@ jobs:
       # empieza por guion bajo — que es donde Expo deja el paquete.
       - run: touch ../publicar/.nojekyll
 
+      # `enablement` deja que la propia accion encienda Pages la primera vez.
+      # Sin esto hay que ir a Settings -> Pages y elegir «GitHub Actions» a mano.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: publicar
