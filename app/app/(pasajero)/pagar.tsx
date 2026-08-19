@@ -17,6 +17,7 @@ import type { CanalDePago } from '@/dominio/tarifas';
 import { type MetodoDePago, desglosar, elegirMetodo, metodosDePago } from '@/servicios/pagos';
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { NoEsta } from '@/ui/NoEsta';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { Dinero, tabular } from '@/ui/dinero';
@@ -34,12 +35,15 @@ export default function Pagar() {
   const viajeId = viaje ?? VIAJE_DEL_RECORRIDO;
   const reservaId = reserva ?? RESERVA_DEL_RECORRIDO;
   const [datos, setDatos] = useState<ReservaPreparada | null>(null);
+  /* «Todavía no lo sé» y «no está» no son lo mismo: lo segundo dura para
+     siempre, y en blanco no hay ni por dónde salir. */
+  const [noEsta, setNoEsta] = useState(false);
   const [metodos, setMetodos] = useState<MetodoDePago[]>([]);
   const [canal, setCanal] = useState<CanalDePago>('yappy_app');
   const [confirmando, setConfirmando] = useState(false);
 
   useEffect(() => {
-    prepararReserva(viajeId).then(setDatos);
+    prepararReserva(viajeId).then(setDatos).catch(() => setNoEsta(true));
     metodosDePago(viajeId).then(setMetodos);
   }, [viajeId]);
 
@@ -48,6 +52,7 @@ export default function Pagar() {
     [datos, canal],
   );
 
+  if (noEsta) return <NoEsta />;
   if (!datos || !desglose) return <View style={estilos.pantalla} />;
 
   return (

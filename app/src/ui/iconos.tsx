@@ -290,6 +290,21 @@ export function Bateria({ tinta = '#fff' }: Props) {
  * se pulsa. Va en `rojo-700` —más oscuro que cualquier botón— y **con este
  * icono al lado**, que es lo que lo separa de una etiqueta cualquiera.
  */
+/** La campana de los avisos. Solo la lleva el inicio, arriba a la derecha. */
+export function Campana({ tamano = 21, tinta = '#fff' }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path
+        d="M12 3a5.5 5.5 0 0 0-5.5 5.5c0 3.3-.8 5-1.6 6-.4.5 0 1.2.6 1.2h13c.6 0 1-.7.6-1.2-.8-1-1.6-2.7-1.6-6A5.5 5.5 0 0 0 12 3Z"
+        stroke={tinta}
+        strokeWidth={1.7}
+        strokeLinejoin="round"
+      />
+      <Path d="M10 19a2 2 0 0 0 4 0" stroke={tinta} strokeWidth={1.7} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
 export function Alerta({ tamano = 15, tinta = color.rojo700 }: Props) {
   return (
     <Svg width={tamano} height={tamano} viewBox="0 0 16 16" fill="none">

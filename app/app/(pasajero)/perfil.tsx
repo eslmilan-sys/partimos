@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Epigrafe, Insignia } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
@@ -31,11 +32,13 @@ export default function Perfil() {
   const router = useRouter();
   const { perfil: perfilParam } = useLocalSearchParams<{ perfil?: string }>();
   const [datos, setDatos] = useState<PerfilPublico | null>(null);
+  const [noEsta, setNoEsta] = useState(false);
 
   useEffect(() => {
-    perfilPublico(perfilParam ?? DEL_RECORRIDO).then(setDatos);
+    perfilPublico(perfilParam ?? DEL_RECORRIDO).then(setDatos).catch(() => setNoEsta(true));
   }, [perfilParam]);
 
+  if (noEsta) return <NoEsta titulo="No encontramos ese perfil" explicacion="La cuenta pudo cerrarse, o el enlace es de otra persona." />;
   if (!datos) return <View style={estilos.pantalla} />;
 
   return (
@@ -94,6 +97,12 @@ export default function Perfil() {
 
           {datos.bio ? <Text style={estilos.bio}>{datos.bio}</Text> : null}
 
+          {datos.bio ? null : (
+            <Text style={estilos.sinNada}>
+              Todavía no ha escrito nada sobre sí. Se conoce por sus viajes.
+            </Text>
+          )}
+
           {datos.carro ? (
             <View style={estilos.filaCarro}>
               <Text style={estilos.carroModelo}>{datos.carro.modelo}</Text>
@@ -108,6 +117,16 @@ export default function Perfil() {
 
         <View style={estilos.seccionResenas}>
           <Epigrafe>Lo que dicen sus pasajeros</Epigrafe>
+
+          {/* Una sección con el título y nada debajo se lee como un fallo. Sin
+              reseñas la respuesta es decirlo: aquí nadie empieza con nota. */}
+          {datos.resenas.length === 0 ? (
+            <Text style={estilos.sinResenas}>
+              {datos.viajes === 0
+                ? 'Todavía no ha viajado con nadie. Todo el mundo empieza así.'
+                : 'Nadie ha escrito todavía. Las reseñas se piden al bajar del carro.'}
+            </Text>
+          ) : null}
 
           {datos.resenas.map((r, i) => (
             <View
@@ -144,6 +163,20 @@ export default function Perfil() {
 }
 
 const estilos = StyleSheet.create({
+  sinNada: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: color.ink500,
+    fontFamily: familia,
+    marginTop: 12,
+  },
+  sinResenas: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: color.ink500,
+    fontFamily: familia,
+    marginTop: 12,
+  },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,

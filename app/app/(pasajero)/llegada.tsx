@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type Llegada, resumenDeLlegada } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { NoEsta } from '@/ui/NoEsta';
 import { Amanecer, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -27,11 +28,15 @@ export default function LlegadaPantalla() {
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Llegada | null>(null);
+  /* «Todavía no lo sé» y «no está» no son lo mismo: lo segundo dura para
+     siempre, y en blanco no hay ni por dónde salir. */
+  const [noEsta, setNoEsta] = useState(false);
 
   useEffect(() => {
-    resumenDeLlegada(reservaId).then(setDatos);
+    resumenDeLlegada(reservaId).then(setDatos).catch(() => setNoEsta(true));
   }, [reservaId]);
 
+  if (noEsta) return <NoEsta />;
   if (!datos) return <View style={estilos.pantalla} />;
 
   return (

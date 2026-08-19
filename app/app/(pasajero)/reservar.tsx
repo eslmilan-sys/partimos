@@ -17,6 +17,7 @@ import { etiquetaDeMaletero, notaDeEquipaje } from '@/dominio/equipaje';
 import { type ReservaPreparada, pedirPuesto, prepararReserva } from '@/servicios/reservas';
 import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Campo, Epigrafe, Pastilla, Stepper } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
@@ -37,15 +38,19 @@ export default function Reservar() {
   // la cuenta, y esa puerta es `1c`, que vuelve a esta pantalla con el viaje.
   const yo = useMiId(YO_DEL_RECORRIDO);
   const [datos, setDatos] = useState<ReservaPreparada | null>(null);
+  /* «Todavía no lo sé» y «no está» no son lo mismo: lo segundo dura para
+     siempre, y en blanco no hay ni por dónde salir. */
+  const [noEsta, setNoEsta] = useState(false);
   const [direccion, setDireccion] = useState('Vía Argentina, Riba Smith');
   const [mochilas, setMochilas] = useState(1);
   const [maletas, setMaletas] = useState(1);
   const [pidiendo, setPidiendo] = useState(false);
 
   useEffect(() => {
-    prepararReserva(viajeId).then(setDatos);
+    prepararReserva(viajeId).then(setDatos).catch(() => setNoEsta(true));
   }, [viajeId]);
 
+  if (noEsta) return <NoEsta />;
   if (!datos) return <View style={estilos.pantalla} />;
 
   // Si el conductor no lleva maletas, no hay maleta que contar.

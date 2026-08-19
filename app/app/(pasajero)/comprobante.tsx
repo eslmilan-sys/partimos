@@ -28,6 +28,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type Comprobante, comprobante } from '@/servicios/ayuda';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { NoEsta } from '@/ui/NoEsta';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDinero, tabular } from '@/ui/dinero';
@@ -47,11 +48,15 @@ export default function ComprobantePasajero() {
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Comprobante | null>(null);
+  /* «Todavía no lo sé» y «no está» no son lo mismo: lo segundo dura para
+     siempre, y en blanco no hay ni por dónde salir. */
+  const [noEsta, setNoEsta] = useState(false);
 
   useEffect(() => {
-    comprobante(reservaId).then(setDatos);
+    comprobante(reservaId).then(setDatos).catch(() => setNoEsta(true));
   }, [reservaId]);
 
+  if (noEsta) return <NoEsta />;
   if (!datos) return <View style={estilos.pantalla} />;
 
   const cuando = new Date(datos.cuando);

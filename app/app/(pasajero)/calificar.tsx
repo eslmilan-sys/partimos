@@ -20,6 +20,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ATAJOS, type Atajo, calificar, prepararCalificacion, type Calificacion } from '@/servicios/calificaciones';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Boton } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
@@ -38,14 +39,18 @@ export default function Calificar() {
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Calificacion | null>(null);
+  /* «Todavía no lo sé» y «no está» no son lo mismo: lo segundo dura para
+     siempre, y en blanco no hay ni por dónde salir. */
+  const [noEsta, setNoEsta] = useState(false);
   const [estrellas, setEstrellas] = useState(4);
   const [elegidos, setElegidos] = useState<Atajo[]>(['puntual', 'manejo']);
   const [comentario, setComentario] = useState('');
 
   useEffect(() => {
-    prepararCalificacion(reservaId).then(setDatos);
+    prepararCalificacion(reservaId).then(setDatos).catch(() => setNoEsta(true));
   }, [reservaId]);
 
+  if (noEsta) return <NoEsta />;
   if (!datos) return <View style={estilos.pantalla} />;
 
   const alternar = (a: Atajo) =>

@@ -13,6 +13,9 @@ import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from '
 
 import { useRouter } from 'expo-router';
 
+import { bandeja } from '@/servicios/avisos';
+import { perfilResumido } from '@/servicios/perfiles';
+import { useMiId } from '@/servicios/sesion';
 import { aDondeSeVaDesde, ciudadesDeSalida, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import {
   type GanchoDeConductor,
@@ -29,7 +32,7 @@ import { Amanecer, Bandera } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, diaLargo } from '@/ui/fechas';
-import { Marca, Pin } from '@/ui/iconos';
+import { Campana, Marca, Pin } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -88,8 +91,15 @@ const DESDE_POR_DEFECTO: Lugar = {
   lng: -79.5199,
 };
 
+/** Sin sesión que preguntar —solo en simulado—: la persona del recorrido. */
+const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
+
 export default function Inicio() {
   const router = useRouter();
+  const yo = useMiId(YO_DEL_RECORRIDO);
+  /* «Hola, Milan» estaba escrito a mano y saludaba a Milan a todo el mundo. */
+  const [nombre, setNombre] = useState<string | null>(null);
+  const [sinLeer, setSinLeer] = useState(0);
   const [rutas, setRutas] = useState<RutaPopular[]>([]);
   const [gancho, setGancho] = useState<GanchoDeConductor | null>(null);
   const [desde, setDesde] = useState<Lugar>(DESDE_POR_DEFECTO);
@@ -105,6 +115,12 @@ export default function Inicio() {
     rutasPopulares().then(setRutas);
     ganchoDeConductor().then(setGancho);
   }, []);
+
+  useEffect(() => {
+    if (!yo) return;
+    perfilResumido(yo).then((p) => setNombre(p?.first_name ?? null));
+    bandeja(yo).then((b) => setSinLeer(b.sinLeer));
+  }, [yo]);
 
   // Con el campo en blanco, la hoja de «Hacia» enseña a dónde hay corredor
   // desde donde estás: una lista vacía no dice a dónde llevamos.
@@ -153,10 +169,25 @@ export default function Inicio() {
           <View style={estilos.cabecera}>
           <View style={estilos.filaSaludo}>
             <Text style={estilos.saludo}>
-              {'Hola, '}
-              <Text style={estilos.saludoFuerte}>Milan</Text>
+              {nombre ? 'Hola, ' : 'Hola'}
+              {nombre ? <Text style={estilos.saludoFuerte}>{nombre}</Text> : null}
             </Text>
-            <Marca />
+            <View style={estilos.filaDerecha}>
+              {/* La bandeja de avisos no tenía puerta: existía la pantalla y
+                  no se llegaba a ella desde ningún sitio de la app. */}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  sinLeer === 0 ? 'Avisos' : `Avisos, ${sinLeer} sin leer`
+                }
+                onPress={() => router.push('/(avisos)/avisos')}
+                style={estilos.campana}
+              >
+                <Campana />
+                {sinLeer > 0 ? <View style={estilos.puntoAviso} /> : null}
+              </Pressable>
+              <Marca />
+            </View>
           </View>
           <Text style={estilos.titular}>
             {'¿A dónde'}
@@ -348,6 +379,20 @@ const estilos = StyleSheet.create({
   },
 
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 8 },
+  filaDerecha: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  campana: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
+  /** El punto rojo dice que hay algo sin leer sin tener que abrir nada. */
+  puntoAviso: {
+    position: 'absolute',
+    top: 4,
+    right: 5,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: color.rojo500,
+    borderWidth: 1.5,
+    borderColor: '#C50E2F',
+  },
   filaSaludo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
   saludo: { fontSize: 15.5, lineHeight: 22.47, fontWeight: '500', letterSpacing: -0.19, color: '#fff', fontFamily: familia },
   saludoFuerte: { fontWeight: '600' },

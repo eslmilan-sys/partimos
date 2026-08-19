@@ -21,6 +21,7 @@ import { type Cuenta, cuenta } from '@/servicios/ajustes';
 import { salir } from '@/servicios/cuenta';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { NoEsta } from '@/ui/NoEsta';
 import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -38,12 +39,14 @@ export default function TuCuenta() {
   const router = useRouter();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<Cuenta | null>(null);
+  const [noEsta, setNoEsta] = useState(false);
 
   useEffect(() => {
     if (!yo) return;
-    cuenta(yo).then(setDatos);
+    cuenta(yo).then(setDatos).catch(() => setNoEsta(true));
   }, [yo]);
 
+  if (noEsta) return <NoEsta titulo="No encontramos ese perfil" explicacion="La cuenta pudo cerrarse, o el enlace es de otra persona." />;
   if (!datos) return <View style={estilos.pantalla} />;
 
   /**
