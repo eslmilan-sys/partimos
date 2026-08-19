@@ -28,11 +28,11 @@ import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Pestanas } from '@/ui/Pestanas';
-import { Amanecer, Bandera } from '@/ui/CampoRojo';
+import { Amanecer, Bandera, DibujoDelSitio } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, diaLargo } from '@/ui/fechas';
-import { Campana, Marca, Pin } from '@/ui/iconos';
+import { Campana, Marca } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -280,14 +280,14 @@ export default function Inicio() {
               }
               style={[estilos.filaRuta, i > 0 && estilos.filaRutaConLinea]}
             >
-              {/* Sin foto no se deja el hueco gris: un rectángulo vacío se lee
-                  como una imagen que no cargó. Va un pin en arena, que es un
-                  sitio sin retrato y no un fallo. */}
+              {/* Sin foto va el dibujo del sitio, no un pin: el pin era el
+                  mismo para Penonomé que para Bocas, y no decía nada. Solo hay
+                  cuatro fotografías; dibujos hay para todos. */}
               <View style={[estilos.miniatura, !FOTOS[r.foto] && estilos.miniaturaSinFoto]}>
                 {FOTOS[r.foto] ? (
                   <Image source={FOTOS[r.foto]} style={estilos.foto} resizeMode="cover" />
                 ) : (
-                  <Pin tamano={18} tinta={color.ink400} />
+                  <DibujoDelSitio slug={r.foto} tamano={34} />
                 )}
               </View>
               <Text style={estilos.nombreRuta} numberOfLines={1}>

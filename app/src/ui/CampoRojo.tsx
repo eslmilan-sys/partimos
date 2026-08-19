@@ -104,6 +104,37 @@ export function motivoDe(slug: string | null | undefined): Motivo {
   return (slug && MOTIVO_DE[slug]) || 'mapa';
 }
 
+/**
+ * EL DIBUJO DEL SITIO, SUELTO, PARA UNA CASILLA CUADRADA.
+ *
+ * Las rutas populares enseñan una fotografía del destino, y solo hay cuatro
+ * fotografías: las demás caían en un pin gris igual para todas, que no dice
+ * nada de a dónde vas. Aquí el dibujo del sitio hace de retrato.
+ *
+ * La silueta de ciudad no cabe en un cuadrado —es una línea de horizonte de
+ * lado a lado—, así que en este tamaño la capital y su cinturón usan el mapa
+ * del país, como el resto del interior.
+ */
+export function DibujoDelSitio({
+  slug,
+  tamano = 44,
+  opacidad = 0.28,
+}: {
+  slug: string | null | undefined;
+  tamano?: number;
+  /** Los trazos no traen relleno propio, así que salen negros: se atenúan. */
+  opacidad?: number;
+}) {
+  const cual = motivoDe(slug);
+  const cuadrado: Motivo = cual === 'skyline' || cual === 'tornillo' ? 'mapa' : cual;
+  const Dibujo = MOTIVOS[cuadrado].svg;
+  return (
+    <View style={{ opacity: opacidad }} pointerEvents="none">
+      <Dibujo width={tamano} height={tamano} />
+    </View>
+  );
+}
+
 type Props = {
   /** 326 en una pantalla de inicio, 186–214 en una secundaria. */
   altura?: number;

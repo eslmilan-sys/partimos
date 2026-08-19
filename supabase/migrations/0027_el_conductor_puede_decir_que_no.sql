@@ -1,0 +1,22 @@
+-- =====================================================================
+--  0027 · Rechazar una solicitud no es cancelar una reserva
+-- =====================================================================
+--
+--  APLICADA EN PRODUCCIÓN el 19 de agosto como
+--  `el_conductor_puede_decir_que_no`, y no escrita aquí hasta ahora. Es de
+--  donde salía el octavo valor de `booking_status` que `app/src/tipos/base.ts`
+--  listaba —se genera de producción— y que ninguna migración del repositorio
+--  creaba.
+--
+--  `11a`: el conductor no tenía forma de rechazar una solicitud sin cancelar
+--  una reserva confirmada, que es otra cosa y arrastra otras consecuencias de
+--  dinero. Rechazar una petición pendiente no debe parecerse a cancelar.
+--
+--  OJO, Y NO SE DECIDE AQUÍ: `app/src/servicios/solicitudes.ts` sigue
+--  escribiendo `cancelled_driver` al rechazar, no `rejected_driver`. Las dos
+--  cosas caen en reglas de reembolso distintas de `PRODUCT.md` —rechazar no
+--  retuvo nada; cancelar sí, y devuelve entero con crédito—, y hoy solo las
+--  separa `cancellation_reason`, que es texto libre. Cambiarlo es decisión de
+--  producto.
+
+alter type booking_status add value if not exists 'rejected_driver';
