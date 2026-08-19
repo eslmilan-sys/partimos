@@ -13,7 +13,11 @@ export const ciudades: City[] = [
     id: CIUDAD_PANAMA_ID,
     country_code: 'PA',
     name: 'Ciudad de Panamá',
-    slug: 'panama',
+    // `panama-city`, no `panama`: es el slug de la base de produccion. Los dos
+    // se separaron y con `panama` no se encontraba ningun corredor, asi que la
+    // busqueda salia vacia contra la base de verdad. Regla 5 de CLAUDE.md: el
+    // simulado tiene la forma EXACTA de las tablas.
+    slug: 'panama-city',
     province: 'Panamá',
     lat: 8.9824,
     lng: -79.5199,

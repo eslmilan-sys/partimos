@@ -11,13 +11,14 @@
  * una preferencia.
  */
 
+import type { Lugar } from '@/dominio/lugar';
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
 import { type ViajeEnResultados, buscarViajes, proximoDiaConViajes } from '@/servicios/viajes';
-import { type Destino, ciudadesDeSalida } from '@/servicios/lugares';
+import { ciudadesDeSalida, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { Mapa } from '@/ui/Mapa';
@@ -36,10 +37,12 @@ const SITIOS = [
 ];
 
 /** De dónde se sale por defecto, igual que en `3a`. */
-const DESDE_POR_DEFECTO: Destino = {
+const DESDE_POR_DEFECTO: Lugar = {
   nombre: 'Ciudad de Panamá',
   contexto: 'Panamá',
-  ciudad: 'panama',
+  citySlug: CIUDAD_POR_DEFECTO,
+  tipo: 'ciudad',
+  fuente: 'catalogo',
   lat: 8.9824,
   lng: -79.5199,
 };
@@ -47,12 +50,12 @@ const DESDE_POR_DEFECTO: Destino = {
 export default function YaMapa() {
   const router = useRouter();
   const [viajes, setViajes] = useState<ViajeEnResultados[]>([]);
-  const [desde, setDesde] = useState<Destino>(DESDE_POR_DEFECTO);
+  const [desde, setDesde] = useState<Lugar>(DESDE_POR_DEFECTO);
   const [buscando, setBuscando] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const origen = desde.ciudad ?? 'panama';
+      const origen = desde.citySlug ?? CIUDAD_POR_DEFECTO;
       const dia = await proximoDiaConViajes(origen, 'chitre');
       setViajes(await buscarViajes(origen, 'chitre', dia));
     })();
@@ -89,7 +92,7 @@ export default function YaMapa() {
             onPress={() =>
               router.push({
                 pathname: '/(pasajero)/resultados',
-                params: { origen: desde.ciudad ?? 'panama', destino: 'chitre' },
+                params: { origen: desde.citySlug ?? CIUDAD_POR_DEFECTO, destino: 'chitre' },
               })
             }
             style={estilos.botonLupa}
@@ -180,7 +183,7 @@ export default function YaMapa() {
                   style={estilos.otro}
                 >
                   <Text style={estilos.otroCuando}>{faltan(v.departure_at!)}</Text>
-                  <Text style={estilos.otroDestino}>
+                  <Text style={estilos.otroLugar}>
                     {`${(v.destination_label ?? '').split(' · ')[0]} · ${formatearDineroRedondo(Number(v.price_cents ?? 0))}`}
                   </Text>
                 </Pressable>
@@ -345,5 +348,5 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  otroDestino: { fontSize: 12, lineHeight: 17.4, color: color.ink600, fontFamily: familia, ...tabular },
+  otroLugar: { fontSize: 12, lineHeight: 17.4, color: color.ink600, fontFamily: familia, ...tabular },
 });

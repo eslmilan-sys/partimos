@@ -2,58 +2,88 @@
  * La hoja de buscar un sitio — la que abre «Desde» y «Hacia» en `3a`.
  *
  * **Por qué una hoja y no un desplegable.** El teclado del teléfono se come
- * media pantalla; una lista colgando de un campo queda debajo del teclado y no
- * se ve. La hoja sube desde abajo, pone el campo arriba y la lista debajo, que
- * es donde queda sitio.
+ * media pantalla; una lista colgando de un campo queda debajo del teclado y
+ * no se ve. La hoja sube desde abajo, pone el campo arriba y la lista
+ * debajo, que es donde queda sitio. De paso mata un fallo del sitio: la
+ * lista de sugerencias no puede tapar el botón «Buscar», porque no comparten
+ * espacio.
  *
- * **Lo nuestro arriba, Mapbox debajo.** `buscarDestino` ya devuelve la lista en
- * ese orden; aquí se marcan visualmente las ciudades que servimos, porque son
- * las únicas donde «Buscar viajes» va a encontrar algo. Un sitio de Mapbox se
- * puede elegir igualmente: sirve para decir dónde te recogen.
+ * Las reglas de disparo, que son de producto y no de gusto:
  *
- * Sin jeton de Mapbox la lista sale solo con nuestras ciudades, y la nota lo
- * dice en vez de dejar creer que no hay nada.
+ *   · **3 caracteres** antes de tocar la red. Por debajo, todo casa.
+ *   · **300 ms** de espera desde la última tecla. Una consulta por pausa,
+ *     jamás una por tecla.
+ *   · **Se cancela** la anterior en cada tecla. Una respuesta vieja que
+ *     llega después de una nueva pisaría la buena.
+ *   · **El catálogo local filtra desde la primera letra**, sin red y sin
+ *     tildes: la pantalla nunca está vacía mientras la red contesta.
+ *   · **Lo que escribiste siempre se puede elegir**, aunque ninguna base lo
+ *     conozca. «Frente a la casa amarilla» es una cita panameña de verdad.
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
-import { type Destino, buscarDestino, hayBusquedaDeLugares, olvidarSesion } from '@/servicios/lugares';
+import { type Lugar, libre, normalizar } from '@/dominio/lugar';
+import { HAY_BUSQUEDA, type Punto, buscarEnTodas, situar } from '@/servicios/geobusqueda';
+import { MINIMO_PARA_BUSCAR, ciudadesConocidas, olvidarSesion } from '@/servicios/lugares';
 
 import { Cerrar, Lupa, Pin } from './iconos';
 import { TRACK_MICRO, color, espacio, familia, interlinea, radio } from './tokens';
 
 /** Lo que se espera desde la última tecla antes de preguntar. */
-const ESPERA_MS = 220;
+const ESPERA_MS = 300;
 
 type Props = {
   abierto: boolean;
   /** «Desde» o «Hacia»: la hoja dice cuál de los dos está cambiando. */
   titulo: string;
   /** Lo que se enseña con el campo en blanco: las rutas que ya existen. */
-  sugerencias?: Destino[];
-  alElegir: (destino: Destino) => void;
+  sugerencias?: Lugar[];
+  /** Desde dónde se busca: desempata dos «Super 99» y ordena por cercanía. */
+  cerca?: Punto | null;
+  alElegir: (lugar: Lugar) => void;
   alCerrar: () => void;
 };
 
-export function BuscadorDeLugar({ abierto, titulo, sugerencias = [], alElegir, alCerrar }: Props) {
+export function BuscadorDeLugar({
+  abierto,
+  titulo,
+  sugerencias = [],
+  cerca,
+  alElegir,
+  alCerrar,
+}: Props) {
   const [texto, setTexto] = useState('');
-  const [lista, setLista] = useState<Destino[]>([]);
+  const [lista, setLista] = useState<Lugar[]>([]);
   const [buscando, setBuscando] = useState(false);
   const corte = useRef<AbortController | null>(null);
 
-  // Al cerrar se olvida todo: la próxima búsqueda empieza en blanco, y la
-  // sesión de Mapbox también —es lo que hace que se facture una y no diez.
+  /* Al cerrar se olvida todo, y también la sesión de Mapbox: es lo que hace
+     que escribir diez letras y elegir una vez cueste una sesión y no diez. */
   useEffect(() => {
     if (abierto) return;
     setTexto('');
     setLista([]);
+    setBuscando(false);
+    corte.current?.abort();
     olvidarSesion();
   }, [abierto]);
 
   useEffect(() => {
     corte.current?.abort();
-    if (texto.trim().length === 0) {
+    const q = texto.trim();
+    if (q.length < MINIMO_PARA_BUSCAR) {
       setLista([]);
       setBuscando(false);
       return;
@@ -62,20 +92,43 @@ export function BuscadorDeLugar({ abierto, titulo, sugerencias = [], alElegir, a
     corte.current = mio;
     setBuscando(true);
     const espera = setTimeout(() => {
-      buscarDestino(texto, mio.signal).then((r) => {
-        if (mio.signal.aborted) return;
-        setLista(r);
-        setBuscando(false);
-      });
+      buscarEnTodas(q, cerca ?? undefined, mio.signal).then(
+        (r) => {
+          if (mio.signal.aborted) return;
+          setLista(r);
+          setBuscando(false);
+        },
+        () => {
+          if (!mio.signal.aborted) setBuscando(false);
+        },
+      );
     }, ESPERA_MS);
     return () => {
       clearTimeout(espera);
       mio.abort();
     };
-  }, [texto]);
+  }, [texto, cerca]);
 
-  const enBlanco = texto.trim().length === 0;
-  const loQueSeEnseña = enBlanco ? sugerencias : lista;
+  const q = texto.trim();
+  const enBlanco = q.length === 0;
+
+  /* El catálogo responde desde la primera letra, sin red: entre la primera
+     tecla y los 3 caracteres la pantalla ya enseña algo. */
+  const delCatalogo = enBlanco
+    ? []
+    : sugerencias.filter((s) => normalizar(s.nombre).includes(normalizar(q)));
+
+  const loQueSeEnseña = enBlanco
+    ? sugerencias
+    : lista.length > 0
+      ? lista
+      : delCatalogo;
+
+  const elegir = async (lugar: Lugar) => {
+    /* Una sugerencia de Mapbox llega sin punto: se concreta al elegir, que es
+       la única llamada que se paga de la sesión. */
+    alElegir(await situar(lugar));
+  };
 
   return (
     <Modal visible={abierto} animationType="slide" transparent onRequestClose={alCerrar}>
@@ -105,19 +158,20 @@ export function BuscadorDeLugar({ abierto, titulo, sugerencias = [], alElegir, a
             autoFocus
             style={estilos.entrada}
           />
+          {buscando ? <ActivityIndicator size="small" color={color.ink400} /> : null}
         </View>
 
         <ScrollView style={estilos.lista} keyboardShouldPersistTaps="handled">
           {loQueSeEnseña.map((d, i) => (
             <Pressable
-              key={`${d.nombre}-${i}`}
+              key={`${d.nombre}-${d.fuente}-${i}`}
               accessibilityRole="button"
               accessibilityLabel={`${d.nombre}${d.contexto ? `, ${d.contexto}` : ''}`}
-              onPress={() => alElegir(d)}
+              onPress={() => elegir(d)}
               style={({ pressed }) => [estilos.fila, pressed && { backgroundColor: color.sand200 }]}
             >
               <View style={estilos.icono}>
-                <Pin tamano={15} tinta={d.ciudad ? color.azul500 : color.ink400} />
+                <Pin tamano={15} tinta={d.citySlug ? color.azul500 : color.ink400} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.nombre} numberOfLines={1}>
@@ -129,15 +183,36 @@ export function BuscadorDeLugar({ abierto, titulo, sugerencias = [], alElegir, a
                   </Text>
                 ) : null}
               </View>
-              {d.ciudad ? <Text style={estilos.vamos}>vamos ahí</Text> : null}
+              {d.tipo === 'ciudad' ? <Text style={estilos.vamos}>vamos ahí</Text> : null}
             </Pressable>
           ))}
 
-          {!enBlanco && !buscando && loQueSeEnseña.length === 0 ? (
+          {/* LO QUE ESCRIBISTE, SIEMPRE ELEGIBLE. Va al final: primero lo que
+              alguna base conoce, y debajo tu propia palabra, que es un punto
+              de encuentro tan válido como cualquier otro. */}
+          {!enBlanco && !loQueSeEnseña.some((d) => normalizar(d.nombre) === normalizar(q)) ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Usar «${q}» tal cual`}
+              onPress={() => alElegir(libre(ciudadesConocidas(), q, null))}
+              style={({ pressed }) => [estilos.fila, pressed && { backgroundColor: color.sand200 }]}
+            >
+              <View style={estilos.icono}>
+                <Pin tamano={15} tinta={color.ink400} />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.nombre} numberOfLines={1}>
+                  {q}
+                </Text>
+                <Text style={estilos.contexto}>Usarlo tal cual</Text>
+              </View>
+            </Pressable>
+          ) : null}
+
+          {!enBlanco && !buscando && loQueSeEnseña.length === 0 && !HAY_BUSQUEDA ? (
             <Text style={estilos.nada}>
-              {hayBusquedaDeLugares
-                ? 'No encontramos ese sitio. Prueba con el nombre de la ciudad.'
-                : 'Por ahora solo buscamos entre las ciudades que servimos.'}
+              Por ahora solo buscamos entre las ciudades que servimos. Puedes escribir tu punto y
+              usarlo tal cual.
             </Text>
           ) : null}
         </ScrollView>

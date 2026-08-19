@@ -28,6 +28,8 @@
  * Lo que de verdad protege la cuota es la restricción por dominio en la
  * consola de Mapbox. Sin ella, el plan gratuito se lo queda quien pase.
  */
+import type { CiudadConocida, Lugar } from '@/dominio/lugar';
+
 import { fuente } from './_fuente';
 
 const LLAVE = process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? '';
@@ -40,11 +42,27 @@ const LLAVE = process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? '';
 export const hayBusquedaDeLugares = LLAVE !== '';
 
 /** Menos de tres letras no es una búsqueda: es alguien empezando a escribir. */
-const MINIMO = 3;
+export const MINIMO_PARA_BUSCAR = 3;
+
+/**
+ * De donde sale casi todo el mundo, y el origen de los seis corredores.
+ *
+ * Vive aqui y no repartido por nueve pantallas porque ya se separo una vez:
+ * las pantallas escribian `'panama'` y la base dice `'panama-city'`, asi que
+ * contra la base de verdad no se encontraba corredor y la busqueda salia
+ * vacia sin decir por que.
+ */
+export const CIUDAD_POR_DEFECTO = 'panama-city';
+const MINIMO = MINIMO_PARA_BUSCAR;
 
 export type Punto = { lat: number; lng: number };
 
-export type Lugar = {
+/**
+ * Una fila cruda de Mapbox. **No es un `Lugar`**: no sabe su tipo ni su
+ * ciudad. `geobusqueda.ts` la convierte, que es donde «Multiplaza» deja de
+ * ser una cadena y pasa a ser algo que sobrevive al cambio de pantalla.
+ */
+export type SugerenciaMapbox = {
   nombre: string;
   /** «Vía España, Bella Vista» — lo que hay debajo del nombre en la lista. */
   contexto: string;
@@ -70,7 +88,7 @@ export const olvidarSesion = () => {
 };
 
 /** Nombres mientras se escribe. Sin coordenadas todavía. */
-export async function sugerir(texto: string, cerca?: Punto, corte?: AbortSignal): Promise<Lugar[]> {
+export async function sugerir(texto: string, cerca?: Punto, corte?: AbortSignal): Promise<SugerenciaMapbox[]> {
   if (!LLAVE || texto.trim().length < MINIMO) return [];
   const p = new URLSearchParams({
     q: texto.trim(),
@@ -121,7 +139,7 @@ export async function concretar(mapboxId: string, corte?: AbortSignal): Promise<
 }
 
 /** Texto a punto, sin pasar por la lista. */
-export async function geocodificar(texto: string, cerca?: Punto, corte?: AbortSignal): Promise<Lugar[]> {
+export async function geocodificar(texto: string, cerca?: Punto, corte?: AbortSignal): Promise<SugerenciaMapbox[]> {
   if (!LLAVE || texto.trim().length < MINIMO) return [];
   const p = new URLSearchParams({
     access_token: LLAVE,
@@ -157,85 +175,57 @@ export async function geocodificar(texto: string, cerca?: Punto, corte?: AbortSi
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   Buscar a dónde vas
-   ══════════════════════════════════════════════════════════════════════════ */
+   Las ciudades que servimos
+   ══════════════════════════════════════════════════════════════════════════
 
-/**
- * **Lo nuestro primero.** Es la misma decisión que el sitio escribió en
- * `web/src/lib/geosearch.ts`: la base propia se consulta antes que ningún
- * proveedor, porque responde en un viaje, no cuesta por consulta y —sobre
- * todo— es la única que sabe qué ciudades tienen corredor abierto.
- *
- * Un resultado con `ciudad` es un sitio al que Partimos **lleva**: se puede
- * buscar viajes ahí mismo. Uno sin ella es un punto del mapa, y sirve para
- * decir dónde te recogen, no para elegir ruta. Distinguirlos es lo que evita
- * la pantalla de resultados vacía sin explicación.
- */
-export type Destino = {
-  nombre: string;
-  contexto: string;
-  /** El slug de la ciudad, cuando el sitio es una ciudad que servimos. */
-  ciudad?: string;
-  lat: number | null;
-  lng: number | null;
-};
+   La búsqueda entera vive en `geobusqueda.ts`, que junta cuatro fuentes. Lo
+   que queda aquí es lo que sale del almacén y no de la red: las ciudades y
+   los corredores, que responden sin jeton y sin esperar.
+*/
 
-/** Sin tildes y en minúsculas: quien escribe «chitre» busca «Chitré». */
-const plano = (t: string) =>
-  t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+/** Las filas de `cities`, con la forma que el dominio pide. */
+export const ciudadesConocidas = (): CiudadConocida[] =>
+  fuente.ciudades.map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    province: c.province,
+    lat: c.lat,
+    lng: c.lng,
+  }));
 
-/**
- * Las ciudades que servimos y que casan con lo escrito.
- *
- * No hace falta jeton ni red: las filas ya están en el almacén. Por eso esta
- * mitad de la búsqueda funciona siempre, y la de Mapbox solo añade.
- */
-export function ciudadesQueCasan(texto: string): Destino[] {
-  const q = plano(texto);
-  if (!q) return [];
-  return fuente.ciudades
-    .filter((c) => c.is_active !== false)
-    .filter((c) => plano(c.name).includes(q) || plano(c.slug).includes(q))
-    // Las que empiezan por lo escrito van antes que las que solo lo contienen.
-    .sort((a, b) => Number(plano(b.name).startsWith(q)) - Number(plano(a.name).startsWith(q)))
-    .slice(0, 5)
-    .map((c) => ({
-      nombre: c.name,
-      contexto: c.province ?? '',
-      ciudad: c.slug,
-      lat: c.lat,
-      lng: c.lng,
-    }));
+const comoLugar = (c: CiudadConocida): Lugar => ({
+  nombre: c.name,
+  tipo: 'ciudad',
+  citySlug: c.slug,
+  contexto: c.province ?? '',
+  lat: c.lat,
+  lng: c.lng,
+  fuente: 'catalogo',
+});
+
+/** Las ciudades desde las que hay corredor abierto. La lista de «Desde». */
+export function ciudadesDeSalida(): Lugar[] {
+  const ids = new Set(fuente.corredores.map((c) => c.origin_city_id));
+  return fuente.ciudades.filter((c) => ids.has(c.id)).map((c) =>
+    comoLugar({ slug: c.slug, name: c.name, province: c.province, lat: c.lat, lng: c.lng }),
+  );
 }
 
 /**
- * Todo junto: nuestras ciudades y, debajo, lo que Mapbox conozca y nosotros no.
- *
- * Las dos mitades se piden a la vez, pero la lista sale siempre en el mismo
- * orden —lo nuestro arriba—, porque lo que se puede reservar pesa más que lo
- * que solo se puede señalar en un mapa. Se quitan los repetidos por nombre:
- * Mapbox también conoce «Chitré» y enseñarlo dos veces es ruido.
+ * A dónde hay corredor desde una ciudad. Es lo que enseña «Hacia» con el
+ * campo en blanco: una lista vacía no dice a dónde llevamos.
  */
-export async function buscarDestino(texto: string, corte?: AbortSignal): Promise<Destino[]> {
-  const nuestras = ciudadesQueCasan(texto);
-  if (!hayBusquedaDeLugares) return nuestras;
-
-  const deMapbox = await sugerir(texto, undefined, corte);
-  const yaEstan = new Set(nuestras.map((c) => plano(c.nombre)));
-
-  return [
-    ...nuestras,
-    ...deMapbox
-      .filter((l) => !yaEstan.has(plano(l.nombre)))
-      .map((l) => ({
-        nombre: l.nombre,
-        contexto: l.contexto,
-        // `sugerir` no trae punto: lo da `concretar` al elegir, y solo entonces.
-        lat: null,
-        lng: null,
-        mapboxId: l.mapboxId,
-      })),
-  ].slice(0, 8);
+export function aDondeSeVaDesde(origen: string): Lugar[] {
+  const de = fuente.ciudades.find((c) => c.slug === origen);
+  if (!de) return [];
+  return fuente.corredores
+    .filter((c) => c.origin_city_id === de.id)
+    .flatMap((c) => {
+      const a = fuente.ciudades.find((x) => x.id === c.destination_city_id);
+      return a
+        ? [comoLugar({ slug: a.slug, name: a.name, province: a.province, lat: a.lat, lng: a.lng })]
+        : [];
+    });
 }
 
 /**
@@ -249,26 +239,6 @@ export function hayCorredor(origen: string, destino: string): boolean {
   return fuente.corredores.some(
     (c) => c.origin_city_id === de.id && c.destination_city_id === a.id,
   );
-}
-
-/** Las ciudades a las que hay corredor desde una dada. Para la lista en blanco. */
-export function aDondeSeVaDesde(origen: string): Destino[] {
-  const de = fuente.ciudades.find((c) => c.slug === origen);
-  if (!de) return [];
-  return fuente.corredores
-    .filter((c) => c.origin_city_id === de.id)
-    .flatMap((c) => {
-      const a = fuente.ciudades.find((x) => x.id === c.destination_city_id);
-      return a ? [{ nombre: a.name, contexto: a.province ?? '', ciudad: a.slug, lat: a.lat, lng: a.lng }] : [];
-    });
-}
-
-/** Las ciudades desde las que hay corredor abierto. La lista de «Desde». */
-export function ciudadesDeSalida(): Destino[] {
-  const ids = new Set(fuente.corredores.map((c) => c.origin_city_id));
-  return fuente.ciudades
-    .filter((c) => ids.has(c.id))
-    .map((c) => ({ nombre: c.name, contexto: c.province ?? '', ciudad: c.slug, lat: c.lat, lng: c.lng }));
 }
 
 /** El nombre bonito de un slug de ciudad. «chitre» → «Chitré». */

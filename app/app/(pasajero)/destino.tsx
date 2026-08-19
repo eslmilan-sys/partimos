@@ -24,6 +24,7 @@ import {
   proximoDiaConViajes,
   resumenDeRuta,
 } from '@/servicios/viajes';
+import { CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Pestanas } from '@/ui/Pestanas';
 import { Insignia, Pastilla } from '@/ui/controles';
@@ -47,8 +48,8 @@ export default function Destino() {
   useEffect(() => {
     (async () => {
       setRuta(await resumenDeRuta('panama-coronado', 2));
-      const fecha = await proximoDiaConViajes('panama', 'coronado');
-      setViajes(await buscarViajes('panama', 'coronado', fecha));
+      const fecha = await proximoDiaConViajes(CIUDAD_POR_DEFECTO, 'coronado');
+      setViajes(await buscarViajes(CIUDAD_POR_DEFECTO, 'coronado', fecha));
     })();
   }, []);
 

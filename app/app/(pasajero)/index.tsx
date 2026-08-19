@@ -7,12 +7,13 @@
  * publicar.
  */
 
+import type { Lugar } from '@/dominio/lugar';
 import { useEffect, useState } from 'react';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
-import { type Destino, aDondeSeVaDesde, ciudadesDeSalida } from '@/servicios/lugares';
+import { aDondeSeVaDesde, ciudadesDeSalida, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import {
   type GanchoDeConductor,
   type RutaPopular,
@@ -39,14 +40,13 @@ const FOTOS: Record<string, number> = {
 const LETRAS = ['cero', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis'];
 const enLetra = (n: number) => LETRAS[n] ?? String(n);
 
-/** Las ciudades que abren corredor. Es lo que enseña «Desde» en blanco. */
-const DESDE_QUE_SE_SALE = ciudadesDeSalida();
-
 /** De dónde se sale por defecto: es de donde sale casi todo el mundo. */
-const DESDE_POR_DEFECTO: Destino = {
+const DESDE_POR_DEFECTO: Lugar = {
   nombre: 'Ciudad de Panamá',
   contexto: 'Panamá',
-  ciudad: 'panama',
+  citySlug: CIUDAD_POR_DEFECTO,
+  tipo: 'ciudad',
+  fuente: 'catalogo',
   lat: 8.9824,
   lng: -79.5199,
 };
@@ -55,8 +55,8 @@ export default function Inicio() {
   const router = useRouter();
   const [rutas, setRutas] = useState<RutaPopular[]>([]);
   const [gancho, setGancho] = useState<GanchoDeConductor | null>(null);
-  const [desde, setDesde] = useState<Destino>(DESDE_POR_DEFECTO);
-  const [hacia, setHacia] = useState<Destino | null>(null);
+  const [desde, setDesde] = useState<Lugar>(DESDE_POR_DEFECTO);
+  const [hacia, setHacia] = useState<Lugar | null>(null);
   /** Cuál de los dos campos tiene la hoja abierta, o ninguno. */
   const [buscando, setBuscando] = useState<'desde' | 'hacia' | null>(null);
 
@@ -67,15 +67,22 @@ export default function Inicio() {
 
   // Con el campo en blanco, la hoja de «Hacia» enseña a dónde hay corredor
   // desde donde estás: una lista vacía no dice a dónde llevamos.
+  /* Se calcula al abrir la hoja, no al cargar el módulo: contra la base el
+     almacén todavía está vacío cuando este archivo se evalúa, y la lista
+     habría salido vacía para siempre. */
   const sugerencias =
-    buscando === 'hacia' ? aDondeSeVaDesde(desde.ciudad ?? 'panama') : DESDE_QUE_SE_SALE;
+    buscando === 'hacia'
+      ? aDondeSeVaDesde(desde.citySlug ?? CIUDAD_POR_DEFECTO)
+      : buscando === 'desde'
+        ? ciudadesDeSalida()
+        : [];
 
   const buscar = () => {
     router.push({
       pathname: '/(pasajero)/resultados',
       params: {
-        origen: desde.ciudad ?? 'panama',
-        destino: hacia?.ciudad ?? '',
+        origen: desde.citySlug ?? CIUDAD_POR_DEFECTO,
+        destino: hacia?.citySlug ?? '',
         etiquetaDestino: hacia?.nombre ?? '',
       },
     });
@@ -173,7 +180,7 @@ export default function Inicio() {
               onPress={() =>
                 router.push({
                   pathname: '/(pasajero)/resultados',
-                  params: { origen: 'panama', destino: r.slug, etiquetaDestino: r.destino },
+                  params: { origen: CIUDAD_POR_DEFECTO, destino: r.slug, etiquetaDestino: r.destino },
                 })
               }
               style={[estilos.filaRuta, i > 0 && estilos.filaRutaConLinea]}

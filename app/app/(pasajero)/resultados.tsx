@@ -21,7 +21,7 @@ import {
   diaEnPanama,
   proximoDiaConViajes,
 } from '@/servicios/viajes';
-import { hayCorredor, nombreDeCiudad } from '@/servicios/lugares';
+import { hayCorredor, nombreDeCiudad, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
@@ -34,7 +34,7 @@ import { familia, color, espacio, radio } from '@/ui/tokens';
 
 
 /** La ruta del traspaso, cuando la pantalla se abre suelta desde el índice. */
-const ORIGEN_POR_DEFECTO = 'panama';
+const ORIGEN_POR_DEFECTO = CIUDAD_POR_DEFECTO;
 const DESTINO_POR_DEFECTO = 'chitre';
 
 export default function Resultados() {

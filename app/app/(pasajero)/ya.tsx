@@ -18,6 +18,7 @@ import { useRouter } from 'expo-router';
 
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { type ViajeEnResultados, buscarViajes, proximoDiaConViajes } from '@/servicios/viajes';
+import { CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Insignia, Pastilla } from '@/ui/controles';
@@ -36,8 +37,8 @@ export default function Ya() {
     (async () => {
       // El primer día con salidas, no «hoy» a secas: una pantalla de «ya»
       // vacía no dice nada, y el interior sale casi siempre de madrugada.
-      const dia = await proximoDiaConViajes('panama', 'chitre');
-      setViajes(await buscarViajes('panama', 'chitre', dia));
+      const dia = await proximoDiaConViajes(CIUDAD_POR_DEFECTO, 'chitre');
+      setViajes(await buscarViajes(CIUDAD_POR_DEFECTO, 'chitre', dia));
     })();
   }, []);
 
