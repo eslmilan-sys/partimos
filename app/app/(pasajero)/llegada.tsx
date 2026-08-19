@@ -9,7 +9,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type Llegada, resumenDeLlegada } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -23,6 +23,7 @@ import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777710';
 
 export default function LlegadaPantalla() {
+  const router = useRouter();
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Llegada | null>(null);
@@ -82,7 +83,17 @@ export default function LlegadaPantalla() {
             {' en cuanto el viaje se cierre. Partimos no se queda nada del aporte.'}
           </Text>
           <View style={{ marginTop: 20 }}>
-            <Boton tamano="md">Ver el recibo</Boton>
+            <Boton
+              tamano="md"
+              alPulsar={() =>
+                router.push({
+                  pathname: '/(pasajero)/comprobante',
+                  params: { reserva: reservaId },
+                })
+              }
+            >
+              Ver el recibo
+            </Boton>
           </View>
         </View>
 

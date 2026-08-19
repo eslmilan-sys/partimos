@@ -10,6 +10,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useRouter } from 'expo-router';
+
 import { aporteCalculado, origenDelAporte } from '@/dominio/aporte';
 import {
   type PublicacionPreparada,
@@ -35,6 +37,7 @@ const SALIDA = '2026-11-14T14:50:00-05:00';
 const MINUTOS_POR_PARADA = 5;
 
 export default function Publicar() {
+  const router = useRouter();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
   const [paradas, setParadas] = useState(2);
@@ -74,7 +77,12 @@ export default function Publicar() {
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaEpigrafe}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Atrás" style={estilos.circulo}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => router.back()}
+            style={estilos.circulo}
+          >
             <Atras />
           </Pressable>
           <Text style={estilos.epigrafeCampo}>

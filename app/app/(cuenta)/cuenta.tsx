@@ -20,10 +20,10 @@ import { useRouter } from 'expo-router';
 import { type Cuenta, cuenta } from '@/servicios/ajustes';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
-import { BarraDePestanas } from '@/ui/BarraDePestanas';
+import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { Carro, Chat, Escudo, Lupa, Persona } from '@/ui/iconos';
+import { Escudo } from '@/ui/iconos';
 import { TRACK_MICRO, color, familia, radio, sombra } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
@@ -141,25 +141,7 @@ export default function TuCuenta() {
       </View>
 
       <View style={estilos.pie}>
-        <BarraDePestanas
-          valor="Perfil"
-          alCambiar={(v) => {
-            if (v === 'Buscar') router.push('/(pasajero)');
-            // La pestaña abre la lista de conversaciones, no una conversación suelta:
-            // desde la cuenta no hay reserva que diga con quién se habla.
-            if (v === 'Mensajes') router.push('/(pasajero)/conversaciones');
-          }}
-          pestanas={[
-            { valor: 'Buscar', etiqueta: 'Buscar', icono: (a) => <Lupa tinta={tinta(a)} /> },
-            {
-              valor: 'Mis viajes',
-              etiqueta: 'Mis viajes',
-              icono: (a) => <Carro tamano={21} tinta={tinta(a)} />,
-            },
-            { valor: 'Mensajes', etiqueta: 'Mensajes', icono: (a) => <Chat tinta={tinta(a)} /> },
-            { valor: 'Perfil', etiqueta: 'Perfil', icono: (a) => <Persona tinta={tinta(a)} /> },
-          ]}
-        />
+        <Pestanas valor="Perfil" />
       </View>
     </View>
   );

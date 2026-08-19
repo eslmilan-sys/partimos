@@ -6,9 +6,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type CodigoDeAbordaje, codigoDeAbordaje } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -23,6 +23,7 @@ import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777710';
 
 export default function Codigo() {
+  const router = useRouter();
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<CodigoDeAbordaje | null>(null);
@@ -46,9 +47,14 @@ export default function Codigo() {
       >
         <View style={estilos.cabecera}>
           <View style={estilos.filaSuperior}>
-            <View style={estilos.circulo}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Atrás"
+              onPress={() => router.back()}
+              style={estilos.circulo}
+            >
               <Atras />
-            </View>
+            </Pressable>
             <View style={estilos.pastillaSalida}>
               <Text style={estilos.pastillaSalidaTexto}>{`Sale ${hora(datos.salida)}`}</Text>
               <View style={estilos.puntoBlanco} />
@@ -104,7 +110,9 @@ export default function Codigo() {
           </View>
 
           <View style={{ marginTop: 20 }}>
-            <Boton tono="azul">Ver el punto de recogida</Boton>
+            <Boton tono="azul" alPulsar={() => router.push('/(pasajero)/ya-mapa')}>
+              Ver el punto de recogida
+            </Boton>
           </View>
         </View>
 

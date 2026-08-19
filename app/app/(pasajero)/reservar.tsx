@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -59,9 +59,14 @@ export default function Reservar() {
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaEpigrafe}>
-          <View style={estilos.circulo}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => router.back()}
+            style={estilos.circulo}
+          >
             <Atras />
-          </View>
+          </Pressable>
           <Text style={estilos.epigrafeCampo}>
             {`${datos.destino} · ${diaCorto(datos.salida)}, ${hora(datos.salida)}`}
           </Text>
@@ -181,13 +186,18 @@ export default function Reservar() {
             }
             setPidiendo(true);
             try {
-              await pedirPuesto(
+              const puesto = await pedirPuesto(
                 viajeId,
                 { direccionPropia: direccion },
                 { mochilas, maletas: maletasReales },
                 { pasajeroId: yo },
               );
-              router.push({ pathname: '/(pasajero)/pagar', params: { viaje: viajeId } });
+              // `7b` cobra sobre una reserva concreta: sin este identificador el
+              // botón «Confirmar y pagar» no tenía nada que confirmar.
+              router.push({
+                pathname: '/(pasajero)/pagar',
+                params: { viaje: viajeId, reserva: puesto.id },
+              });
             } finally {
               setPidiendo(false);
             }

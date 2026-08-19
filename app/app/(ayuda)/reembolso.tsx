@@ -82,14 +82,14 @@ export default function Reembolso() {
       const fila = grupos.flatMap((g) => g.filas).find((f) => f.ruta === '/(pasajero)/metodos');
       setADonde(fila?.valor ?? '');
     });
-  }, []);
+  }, [yo, reservaId]);
 
   const previa = previas.find((p) => p.motivo === motivo);
   if (!viaje || !previa) return <View style={estilos.pantalla} />;
 
   const pedir = async () => {
-    setPidiendo(true);
     if (!yo) return;
+    setPidiendo(true);
     await cancelar(reservaId, motivo, yo);
     // `15c` — por dónde va el reembolso — todavía no está en el árbol de rutas.
     // Mientras no exista, el reembolso queda pedido y se vuelve por donde se vino.

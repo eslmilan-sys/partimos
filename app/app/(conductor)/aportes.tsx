@@ -117,7 +117,11 @@ export default function AportesPantalla() {
             <Text style={estilos.donde}>{datos.donde}</Text>
             <Text style={estilos.cadaCuando}>{datos.cadaCuando}</Text>
           </View>
-          <Pressable accessibilityRole="button">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Cambiar por dónde te llega"
+            onPress={() => router.push('/(pasajero)/metodos')}
+          >
             <Text style={estilos.cambiar}>Cambiar</Text>
           </Pressable>
         </View>

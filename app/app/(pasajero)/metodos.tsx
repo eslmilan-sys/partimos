@@ -59,7 +59,7 @@ export default function Metodos() {
       // que devuelva la lista.
       setCanal(lista.find((m) => m.nombre === quien.metodo)?.canal ?? lista[0]?.canal ?? null);
     })();
-  }, []);
+  }, [yo, viajeId]);
 
   const desglose = useMemo(
     () => (viaje && canal ? desglosar(viaje.aporteCentavos, canal, viaje.conductor) : null),
@@ -138,6 +138,9 @@ export default function Metodos() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Añadir método de pago"
+          onPress={() =>
+            router.push({ pathname: '/(pasajero)/metodo-nuevo', params: { viaje: viajeId } })
+          }
           style={estilos.anadir}
         >
           <Mas tamano={18} tinta={color.ink900} />

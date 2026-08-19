@@ -7,9 +7,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -28,6 +28,7 @@ const TONOS = {
 } as const;
 
 export default function Perfil() {
+  const router = useRouter();
   const { perfil: perfilParam } = useLocalSearchParams<{ perfil?: string }>();
   const [datos, setDatos] = useState<PerfilPublico | null>(null);
 
@@ -44,9 +45,14 @@ export default function Perfil() {
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaSuperior}>
-          <View style={estilos.circulo}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => router.back()}
+            style={estilos.circulo}
+          >
             <Atras />
-          </View>
+          </Pressable>
           <Text style={estilos.epigrafeCampo}>Perfil público</Text>
         </View>
 

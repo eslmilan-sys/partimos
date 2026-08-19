@@ -8,9 +8,9 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import {
   type ResumenDeSolicitudes,
@@ -33,6 +33,7 @@ const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 type Recibo = { nombre: string; aporteCentavos: number };
 
 export default function Solicitudes() {
+  const router = useRouter();
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<ResumenDeSolicitudes | null>(null);
@@ -83,9 +84,14 @@ export default function Solicitudes() {
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaEpigrafe}>
-          <View style={estilos.circulo}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => router.back()}
+            style={estilos.circulo}
+          >
             <Atras />
-          </View>
+          </Pressable>
           <Text style={estilos.epigrafeCampo}>
             {`${cuando(datos.viaje.salida)} · ${datos.viaje.origen} → ${datos.viaje.destino}`}
           </Text>

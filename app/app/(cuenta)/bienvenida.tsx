@@ -78,7 +78,11 @@ export default function Bienvenida() {
             <Epigrafe>¿A dónde vas?</Epigrafe>
 
             <View style={estilos.destinos}>
-              <Pressable accessibilityRole="button" style={estilos.filaDestino}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.push('/(pasajero)/resultados')}
+                style={estilos.filaDestino}
+              >
                 <View style={estilos.puntoLleno} />
                 <Text style={estilos.destinoTexto}>Ciudad de Panamá</Text>
                 <Text style={estilos.destinoPista}>Albrook</Text>

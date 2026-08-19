@@ -19,11 +19,11 @@ import {
   rutasPopulares,
 } from '@/servicios/viajes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
-import { BarraDePestanas } from '@/ui/BarraDePestanas';
+import { Pestanas } from '@/ui/Pestanas';
 import { Amanecer, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { Carro, Chat, Lupa, Marca, Mas, Persona } from '@/ui/iconos';
+import { Marca } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -168,26 +168,12 @@ export default function Inicio() {
       </ScrollView>
 
       <View style={estilos.pie}>
-        <BarraDePestanas
-          valor="Buscar"
-          pestanas={[
-            { valor: 'Buscar', etiqueta: 'Buscar', icono: (a) => <Lupa tinta={tinta(a)} /> },
-            { valor: 'Mis viajes', etiqueta: 'Mis viajes', icono: (a) => <Carro tamano={21} tinta={tinta(a)} /> },
-            { valor: 'Mensajes', etiqueta: 'Mensajes', icono: (a) => <Chat tinta={tinta(a)} /> },
-            { valor: 'Perfil', etiqueta: 'Perfil', icono: (a) => <Persona tinta={tinta(a)} /> },
-          ]}
-          fab={{
-            etiqueta: 'Publicar un viaje',
-            icono: <Mas tamano={20} tinta="#fff" />,
-            alPulsar: () => router.push('/(conductor)/publicar'),
-          }}
-        />
+        <Pestanas valor="Buscar" conPublicar />
       </View>
     </View>
   );
 }
 
-const tinta = (activo: boolean) => (activo ? color.rojo600 : color.ink700);
 
 const estilos = StyleSheet.create({
   pantalla: {

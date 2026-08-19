@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useMiIdOEntrar } from '@/servicios/sesion';
 
@@ -28,6 +28,7 @@ const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777700';
 const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 export default function Chat() {
+  const router = useRouter();
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
@@ -61,9 +62,14 @@ export default function Chat() {
       <BarraDeEstado />
 
       <View style={estilos.cabecera}>
-        <View style={estilos.circulo}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Atrás"
+          onPress={() => router.back()}
+          style={estilos.circulo}
+        >
           <Atras />
-        </View>
+        </Pressable>
         <View style={estilos.retrato}>
           <Text style={estilos.retratoTexto}>{hilo.otro.iniciales}</Text>
         </View>

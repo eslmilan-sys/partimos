@@ -21,12 +21,12 @@ import { type ViajePublicado, viajesPublicados } from '@/servicios/panel';
 import { perfilResumido } from '@/servicios/perfiles';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
-import { BarraDePestanas } from '@/ui/BarraDePestanas';
+import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { cuando, diaAbrev, hora } from '@/ui/fechas';
-import { Carro, Chat, Lupa, Mas, Persona } from '@/ui/iconos';
+import { Mas } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
@@ -83,15 +83,7 @@ export default function Panel() {
       </Pressable>
 
       <View style={estilos.pie}>
-        <BarraDePestanas
-          valor="Mis viajes"
-          pestanas={[
-            { valor: 'Buscar', etiqueta: 'Buscar', icono: (a) => <Lupa tinta={tinta(a)} /> },
-            { valor: 'Mis viajes', etiqueta: 'Mis viajes', icono: (a) => <Carro tamano={21} tinta={tinta(a)} /> },
-            { valor: 'Mensajes', etiqueta: 'Mensajes', icono: (a) => <Chat tinta={tinta(a)} /> },
-            { valor: 'Perfil', etiqueta: 'Perfil', icono: (a) => <Persona tinta={tinta(a)} /> },
-          ]}
-        />
+        <Pestanas valor="Mis viajes" />
       </View>
     </View>
   );

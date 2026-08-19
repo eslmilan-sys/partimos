@@ -74,11 +74,11 @@ jobs:
       # empieza por guion bajo — que es donde Expo deja el paquete.
       - run: touch ../publicar/.nojekyll
 
-      # `enablement` deja que la propia accion encienda Pages la primera vez.
-      # Sin esto hay que ir a Settings -> Pages y elegir «GitHub Actions» a mano.
+      # Pages tiene que estar encendido a mano una vez: Settings -> Pages ->
+      # Source: «GitHub Actions». La accion no puede encenderlo ella misma
+      # —«Create Pages site failed: Resource not accessible by integration»,
+      # medido—, porque el GITHUB_TOKEN del flujo no tiene ese permiso.
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: publicar

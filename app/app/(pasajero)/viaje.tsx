@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -56,12 +56,27 @@ export default function DetalleDelViaje() {
       <BarraDeEstado tono="oscuro" />
 
       <View style={estilos.chrome}>
-        <View style={estilos.vidrioBoton}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Atrás"
+          onPress={() => router.back()}
+          style={estilos.vidrioBoton}
+        >
           <Atras tinta={color.ink900} />
-        </View>
-        <View style={estilos.vidrioBoton}>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Compartir el viaje"
+          onPress={() =>
+            Share.share({
+              title: 'Partimos',
+              message: `${viaje.origin_label ?? ''} → ${viaje.destination_label ?? ''} · ${diaLargo(viaje.departure_at)} ${hora(viaje.departure_at)} · ${formatearDineroRedondo(viaje.price_cents)} por puesto`,
+            })
+          }
+          style={estilos.vidrioBoton}
+        >
           <Compartir />
-        </View>
+        </Pressable>
       </View>
 
       <ScrollView

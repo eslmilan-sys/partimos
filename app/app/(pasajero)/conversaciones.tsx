@@ -19,12 +19,12 @@ import { type HiloDelViaje, hiloDelViaje } from '@/servicios/mensajes';
 import { type PuestoMio, misViajes } from '@/servicios/panel';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
-import { BarraDePestanas } from '@/ui/BarraDePestanas';
+import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { diaAbrev, esHoy, hora } from '@/ui/fechas';
-import { Atras, Carro, Chat, Lupa, Persona } from '@/ui/iconos';
+import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
@@ -130,21 +130,12 @@ export default function Conversaciones() {
       </ScrollView>
 
       <View style={estilos.pie}>
-        <BarraDePestanas
-          valor="Mensajes"
-          pestanas={[
-            { valor: 'Buscar', etiqueta: 'Buscar', icono: (a) => <Lupa tinta={tinta(a)} /> },
-            { valor: 'Mis viajes', etiqueta: 'Mis viajes', icono: (a) => <Carro tamano={21} tinta={tinta(a)} /> },
-            { valor: 'Mensajes', etiqueta: 'Mensajes', icono: (a) => <Chat tinta={tinta(a)} /> },
-            { valor: 'Perfil', etiqueta: 'Perfil', icono: (a) => <Persona tinta={tinta(a)} /> },
-          ]}
-        />
+        <Pestanas valor="Mensajes" />
       </View>
     </View>
   );
 }
 
-const tinta = (activo: boolean) => (activo ? color.rojo600 : color.ink700);
 
 /** La hora si es de hoy, el día si no: en una lista nadie quiere la fecha entera. */
 function cuandoCorto(cuandoISO: string): string {

@@ -30,6 +30,17 @@ export const categorias: (VehicleCategory & { consumo_l_100km: number })[] = [
   { code: 'suv', label_es: 'SUV o pick-up', rate_per_km_cents: 32, consumo_l_100km: 11.0 },
 ];
 
+/**
+ * Cambia una fila de `profiles` en memoria. La usa `9a` para guardar por dónde
+ * te cobran, que es la única columna del perfil que la app escribe hoy.
+ */
+export async function actualizarPerfil(id: string, cambios: Partial<Profile>): Promise<Profile> {
+  const i = perfiles.findIndex((p) => p.id === id);
+  if (i < 0) throw new Error(`No existe el perfil ${id}`);
+  perfiles[i] = { ...perfiles[i], ...cambios, updated_at: new Date().toISOString() };
+  return perfiles[i];
+}
+
 export const perfiles: Profile[] = [
   {
     id: ANDRES_ID,
