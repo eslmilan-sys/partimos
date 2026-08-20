@@ -34,8 +34,8 @@ import { Amanecer, Bandera, DibujoDelSitio } from '@/ui/CampoRojo';
 import { Avatar, Boton, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, diaLargo, hora } from '@/ui/fechas';
-import { Avanza, Campana, Escudo, Estrella, Intercambio, Marca } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
+import { Avanza, Campana, Carro, Escudo, Estrella, Intercambio, Marca } from '@/ui/iconos';
+import { TRACK_MICRO, familia, color, espacio, radio, sombra } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
   chitre: require('../../assets/chitre.jpeg'),
@@ -182,7 +182,7 @@ export default function Inicio() {
             {/* El epígrafe dice a quién y cuándo: es el sitio donde el saludo
                 no compite con el titular, que es la pregunta de la pantalla. */}
             <Text style={estilos.epigrafeCampo} numberOfLines={1}>
-              {`${nombre ? `Hola, ${nombre}` : 'Panamá'} · ${diaCorto(new Date().toISOString())}`}
+              {nombre ? `Hola, ${nombre}` : 'Panamá'}
             </Text>
             <View style={estilos.filaDerecha}>
               {/* La bandeja de avisos no tenía puerta: existía la pantalla y
@@ -221,6 +221,25 @@ export default function Inicio() {
         </View>
 
         <View style={estilos.hoja}>
+          {/* LOS DOS LADOS DEL MISMO VIAJE.
+              Publicar estaba solo en el cuadrado rojo de la barra y en una
+              tarjeta al final de la página. Quien abre la app sabiendo que va
+              a manejar tenía que buscarlo. Aquí se elige de entrada. */}
+          <View style={estilos.lados}>
+            <View style={[estilos.lado, estilos.ladoActivo]}>
+              <Text style={[estilos.ladoTexto, estilos.ladoTextoActivo]}>Busco puesto</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Voy manejando: publicar mi viaje"
+              onPress={() => router.push('/(conductor)/publicar')}
+              style={({ pressed }) => [estilos.lado, pressed && { backgroundColor: color.sand200 }]}
+            >
+              <Carro tamano={17} tinta={color.ink700} />
+              <Text style={estilos.ladoTexto}>Voy manejando</Text>
+            </Pressable>
+          </View>
+
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Desde ${desde.nombre}. Cambiar`}
@@ -274,7 +293,6 @@ export default function Inicio() {
                 {hacia?.nombre ?? 'Chitré, David, Santiago…'}
               </Text>
             </View>
-            <Avanza />
           </Pressable>
 
           <View style={estilos.filaCajas}>
@@ -329,7 +347,7 @@ export default function Inicio() {
 
         {salen.length > 0 ? (
           <View style={estilos.seccionSalen}>
-            <View style={estilos.filaSeccion}>
+            <View style={[estilos.filaSeccion, { paddingHorizontal: espacio.gutter }]}>
               <Epigrafe>Salen en la próxima hora</Epigrafe>
               <Pressable
                 accessibilityRole="button"
@@ -412,7 +430,16 @@ export default function Inicio() {
         <View style={estilos.seccionRutas}>
           <View style={estilos.filaSeccion}>
             <Epigrafe>Rutas populares</Epigrafe>
-            <Text style={estilos.verTodas}>Ver todas</Text>
+            {/* Era un texto rojo sin nada detrás: parecía un enlace y no lo
+                era. «Todas» son los destinos que servimos, y la lista de
+                destinos ya existe: es la del campo «Hacia». */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ver todos los destinos"
+              onPress={() => setBuscando('hacia')}
+            >
+              <Text style={estilos.verTodas}>Ver todas</Text>
+            </Pressable>
           </View>
 
           {rutas.map((r, i) => (
@@ -552,10 +579,40 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
+  /* Los dos lados, en una pastilla: el que estás y el otro. */
+  lados: {
+    flexDirection: 'row',
+    padding: 4,
+    marginBottom: 6,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.sand100,
+  },
+  lado: {
+    flex: 1,
+    height: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    borderRadius: radio.pastilla,
+  },
+  ladoActivo: { backgroundColor: color.blanco, ...sombra.hoja },
+  ladoTexto: {
+    fontSize: 13.5,
+    lineHeight: 19.5,
+    fontWeight: '600',
+    letterSpacing: -0.14,
+    color: color.ink700,
+    fontFamily: familia,
+  },
+  ladoTextoActivo: { color: color.ink900 },
+
   invertir: {
     position: 'absolute',
     right: 20,
-    top: 62,
+    /* Centrado sobre la línea que separa los dos campos. Sube o baja con lo
+       que haya encima: hoy, el interruptor de los dos lados. */
+    top: 110,
     zIndex: 2,
     width: 40,
     height: 40,
@@ -729,7 +786,7 @@ const estilos = StyleSheet.create({
     /* El relleno vertical es la zona de toque: un texto de 19 px de alto no
        se acierta con el pulgar. */
     paddingVertical: 12,
-    paddingLeft: 12,
+    paddingLeft: 14,
   },
   filaRuta: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 11 },
   filaRutaConLinea: { borderTopWidth: 1, borderTopColor: color.bordeSutil },

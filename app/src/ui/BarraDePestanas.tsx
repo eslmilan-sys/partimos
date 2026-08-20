@@ -57,9 +57,13 @@ export function BarraDePestanas({ pestanas, valor, alCambiar, fab }: Props) {
           accessibilityRole="button"
           accessibilityLabel={fab.etiqueta}
           onPress={fab.alPulsar}
-          style={estilos.fab}
+          style={estilos.pilaFab}
         >
-          {fab.icono}
+          {/* El cuadrado rojo no decía qué hacía. Un icono sin rótulo entre
+              cuatro pestañas rotuladas es la única cosa de la barra que hay
+              que adivinar. */}
+          <View style={estilos.fab}>{fab.icono}</View>
+          <Text style={estilos.fabTexto}>Publicar</Text>
         </Pressable>
       ) : null}
       {pestanas.slice(medio).map(pestana)}
@@ -75,7 +79,9 @@ const estilos = StyleSheet.create({
     height: 72,
     paddingHorizontal: 8,
     borderRadius: radio.pastilla,
-    backgroundColor: 'rgba(255,255,255,.86)',
+    /* Casi opaca: al 86 % sobre el campo rojo de `11b` la pastilla se
+       teñía de rosa y las pestañas perdían contraste. */
+    backgroundColor: 'rgba(255,255,255,.97)',
     borderWidth: 1,
     borderColor: color.bordeSutil,
     shadowColor: '#26232B',
@@ -87,9 +93,18 @@ const estilos = StyleSheet.create({
   pestana: { alignItems: 'center', gap: 4, paddingHorizontal: 12, minWidth: 52 },
   icono: { width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
   etiqueta: { fontSize: 10.5, lineHeight: 15.22, letterSpacing: -0.05, fontFamily: familia },
+  pilaFab: { alignItems: 'center', gap: 4, paddingHorizontal: 8 },
+  fabTexto: {
+    fontSize: 10.5,
+    lineHeight: 15.22,
+    letterSpacing: -0.05,
+    fontWeight: '600',
+    color: color.rojo600,
+    fontFamily: familia,
+  },
   fab: {
-    width: 46,
-    height: 46,
+    width: 40,
+    height: 40,
     borderRadius: radio.cuadrado,
     backgroundColor: color.rojo500,
     alignItems: 'center',

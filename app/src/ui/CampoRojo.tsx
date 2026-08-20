@@ -50,7 +50,17 @@ const MOTIVOS = {
    * en la banda vacía que hay entre el titular y la hoja, y la hoja se apoya
    * en la ciudad en vez de taparla.
    */
-  ciudadDetras: { svg: SkylineTornillo, ancho: espacio.marco, alto: 135, sitio: { left: 0, right: 0, bottom: 30 }, opacidad: 1 },
+  /**
+   * La ciudad AL LADO DEL TITULAR, no debajo de la hoja.
+   *
+   * Al pie del campo quedaba tapada entera por la hoja de búsqueda: solo
+   * asomaban dos franjas de veintidós píxeles a los lados, y eso es lo que se
+   * veía torcido. Arriba a la derecha cae en la banda que el titular deja
+   * libre —el titular es corto y va a la izquierda—, se ve completa y se
+   * recorta contra el borde del campo, que es lo que el sistema pide de un
+   * motivo.
+   */
+  ciudadDetras: { svg: SkylineTornillo, ancho: 258, alto: 79, sitio: { right: -10, top: 92 }, opacidad: 0.92 },
 } as const;
 
 export type Motivo = keyof typeof MOTIVOS;
