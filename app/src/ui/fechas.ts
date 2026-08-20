@@ -80,3 +80,24 @@ export function esHoy(d: Date | string, ahora: Date = new Date()): boolean {
 export function cuando(d: Date | string): string {
   return `${esHoy(d) ? 'Hoy' : diaCorto(d)} ${hora(d)}`;
 }
+
+const soloNumero = new Intl.DateTimeFormat('es-PA', { day: 'numeric', timeZone: ZONA });
+const soloMes = new Intl.DateTimeFormat('es-PA', { month: 'short', timeZone: ZONA });
+const soloDia = new Intl.DateTimeFormat('es-PA', { weekday: 'long', timeZone: ZONA });
+
+/** «25» — el número del día, para el bloque de fecha de una ficha de viaje. */
+export function numeroDeDia(d: Date | string): string {
+  return soloNumero.format(new Date(d));
+}
+
+/** «Sep» — el mes en tres letras, con mayúscula y sin punto. */
+export function mesAbrev(d: Date | string): string {
+  const m = soloMes.format(new Date(d)).replace('.', '');
+  return m.charAt(0).toUpperCase() + m.slice(1);
+}
+
+/** «Viernes» — el día de la semana entero, con mayúscula. */
+export function diaSemana(d: Date | string): string {
+  const s = soloDia.format(new Date(d));
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}

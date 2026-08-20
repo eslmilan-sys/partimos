@@ -97,14 +97,48 @@ export type PuestoMio = {
   distanciaKm: number;
   /** Sólo el de hoy manda en la pantalla. */
   esDeHoy: boolean;
+
+  /* ── Lo que `5b` enseña en la tarjeta grande ─────────────────────────
+     La ficha de un viaje son dos extremos con su sitio, no un destino
+     suelto: «Ciudad de Panamá · Albrook» arriba y «Chitré · Parque Unión»
+     abajo. `origin_label` guarda las dos mitades unidas por « · », así que
+     se parten aquí una vez y no en cada pantalla. */
+  /** La ciudad de la que sale. */
+  origen: string;
+  /** El sitio exacto dentro de esa ciudad, si el rótulo lo trae. */
+  origenSitio: string;
+  /** El sitio exacto de la bajada. */
+  destinoSitio: string;
+  /** La llegada estimada, para poder escribir de cuándo a cuándo dura. */
+  llegada: string;
+  /** Quién maneja, para abrir su perfil y el chat. */
+  conductorId: string;
+  /** La nota media y cuántos viajes lleva; nulo si todavía no tiene. */
+  calificacion: number | null;
+  viajesDelConductor: number;
+  /** La cédula pasada por Didit. Lo que dibuja el visto azul del nombre. */
+  verificado: boolean;
+  /** El carro con el que te recoge. */
+  carro: { modelo: string; color: string; placa: string } | null;
+  /** `confirmed` cuando el conductor ya dijo que sí; `pending` mientras
+   *  espera respuesta. Es lo que decide la pastilla de estado. */
+  estado: string;
 };
 
 export type MisViajes = { proximos: PuestoMio[]; pasados: PuestoMio[]; hoy: PuestoMio | null };
 
 export async function misViajes(perfilId: string): Promise<MisViajes> {
   const ahora = Date.now();
+  /* Lo pendiente TAMBIÉN es un viaje suyo. Antes se escondía, y quien acababa
+     de pedir un puesto abría «Mis viajes» y no veía nada: parecía que la
+     petición se hubiera perdido. Ahora sale con su pastilla de PENDIENTE, que
+     es exactamente lo que hay que decirle. */
   const mios = fuente.reservas
-    .filter((r) => r.passenger_id === perfilId && r.status !== 'pending')
+    .filter(
+      (r) =>
+        r.passenger_id === perfilId &&
+        (r.status === 'pending' || r.status === 'confirmed' || r.status === 'completed'),
+    )
     .map(comoPuesto)
     .filter(Boolean) as PuestoMio[];
 
@@ -127,19 +161,41 @@ function comoPuesto(r: (typeof fuente.reservas)[number]): PuestoMio | null {
     year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'America/Panama',
   });
 
+  const [origen, origenSitio = ''] = (viaje.origin_label ?? '').split(' · ');
+  const [destino, destinoSitio = ''] = (viaje.destination_label ?? '').split(' · ');
+  const rep = conductor ? fuente.reputacion[conductor.id] : undefined;
+  const suCarro = fuente.vehiculos.find((v) => v.owner_id === viaje.driver_id && v.is_active);
+
   return {
     reservaId: r.id,
     viajeId: r.trip_id,
-    destino: (viaje.destination_label ?? '').split(' · ')[0],
+    destino,
     cuando: viaje.departure_at,
     conductor: nombre,
     iniciales: `${conductor?.first_name[0] ?? ''}${(conductor?.last_initial ?? '')[0] ?? ''}`.toUpperCase(),
     aporteCentavos: r.unit_price_cents * r.seats,
     canal: r.payment_channel,
     codigo: r.boarding_code ?? '',
-    punto: r.proposed_point ?? (viaje.origin_label ?? '').split(' · ')[0],
+    punto: r.proposed_point ?? origen,
     distanciaKm: viaje.snap_distance_km ?? 0,
     esDeHoy: enPanama.format(new Date(viaje.departure_at)) === enPanama.format(new Date()),
+
+    origen,
+    origenSitio: r.proposed_point ?? origenSitio,
+    destinoSitio,
+    llegada: viaje.arrival_estimate_at ?? viaje.departure_at,
+    conductorId: viaje.driver_id,
+    calificacion: rep?.calificacion ?? null,
+    viajesDelConductor: rep?.viajes ?? 0,
+    verificado: conductor?.is_id_verified ?? false,
+    carro: suCarro
+      ? {
+          modelo: [suCarro.make, suCarro.model].filter(Boolean).join(' '),
+          color: suCarro.color ?? '',
+          placa: suCarro.plate_last3 ?? '',
+        }
+      : null,
+    estado: r.status,
   };
 }
 

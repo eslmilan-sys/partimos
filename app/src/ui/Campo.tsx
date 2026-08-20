@@ -7,7 +7,7 @@
  * porque son cuatro las que lo usan y tienen que verse iguales.
  */
 
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { familia, color, interlinea, radio } from './tokens';
@@ -21,6 +21,7 @@ export function Campo({
   correo = false,
   mal = false,
   alTerminar,
+  glifo,
 }: {
   etiqueta: string;
   valor: string;
@@ -31,6 +32,10 @@ export function Campo({
   correo?: boolean;
   mal?: boolean;
   alTerminar?: () => void;
+  /** Un dibujo pequeño a la izquierda —un sobre, un candado—. Es de adorno y
+   *  por eso no se toca: la etiqueta de arriba es la que dice qué se escribe,
+   *  y un icono no sustituye a una palabra. */
+  glifo?: ReactNode;
 }) {
   const [enfocado, setEnfocado] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -41,6 +46,7 @@ export function Campo({
     <View style={estilos.grupo}>
       <Text style={estilos.etiqueta}>{etiqueta}</Text>
       <View style={[estilos.cajon, { borderColor: borde }]}>
+        {glifo ? <View pointerEvents="none">{glifo}</View> : null}
         <TextInput
           accessibilityLabel={etiqueta}
           value={valor}
@@ -95,6 +101,10 @@ const estilos = StyleSheet.create({
   },
   entrada: {
     flex: 1,
+    /* Sin esto el campo no encoge por debajo de su ancho intrínseco —el
+       navegador le da uno a `<input>`— y con el glifo delante y «Ver» detrás
+       la fila se salía del cajón. Medido: «Ver» tres píxeles fuera del borde. */
+    minWidth: 0,
     fontSize: 17,
     lineHeight: interlinea(17),
     fontWeight: '500',
