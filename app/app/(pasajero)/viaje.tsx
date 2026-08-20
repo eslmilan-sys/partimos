@@ -383,10 +383,10 @@ const estilos = StyleSheet.create({
   },
 
   precio: {
-    fontSize: 27,
+    fontSize: 32,
     fontWeight: '700',
-    letterSpacing: -1.21,
-    lineHeight: 27,
+    letterSpacing: -1.44,
+    lineHeight: 31,
     textAlign: 'right',
     color: '#fff',
     fontFamily: familia,
@@ -611,10 +611,10 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   precioBarra: {
-    fontSize: 26,
+    fontSize: 30,
     fontWeight: '700',
-    letterSpacing: -1.17,
-    lineHeight: 25,
+    letterSpacing: -1.35,
+    lineHeight: 29,
     color: color.ink900,
     fontFamily: familia,
     ...tabular,

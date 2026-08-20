@@ -34,7 +34,7 @@ import { Amanecer, Bandera, DibujoDelSitio } from '@/ui/CampoRojo';
 import { Avatar, Boton, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, diaLargo, hora } from '@/ui/fechas';
-import { Avanza, Campana, Escudo, Estrella, Marca } from '@/ui/iconos';
+import { Avanza, Campana, Escudo, Estrella, Intercambio, Marca } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -234,6 +234,28 @@ export default function Inicio() {
             </View>
           </Pressable>
 
+          {/* Invertir. Va sobre la línea que separa los dos campos porque es
+              lo que hace: le da la vuelta a esa línea. Vuelves de Chitré un
+              domingo y no tienes que reescribir las dos ciudades. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Invertir origen y destino"
+            disabled={!hacia}
+            onPress={() => {
+              if (!hacia) return;
+              const antes = desde;
+              setDesde(hacia);
+              setHacia(antes);
+            }}
+            style={({ pressed }) => [
+              estilos.invertir,
+              pressed && { backgroundColor: color.sand200 },
+              !hacia && { opacity: 0.35 },
+            ]}
+          >
+            <Intercambio tamano={17} tinta={color.ink700} />
+          </Pressable>
+
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={hacia ? `Hacia ${hacia.nombre}. Cambiar` : 'Elegir a dónde vas'}
@@ -333,7 +355,10 @@ export default function Inicio() {
                   <View style={estilos.cuerpoSale}>
                     <Text style={estilos.horaSale}>{hora(v.hora)}</Text>
                     <Text style={estilos.destinoSale} numberOfLines={1}>
-                      {`${v.destino} · ${formatearDineroRedondo(v.aporteCentavos)}`}
+                      {`${v.destino} · `}
+                      <Text style={estilos.precioSale}>
+                        {formatearDineroRedondo(v.aporteCentavos)}
+                      </Text>
                     </Text>
                     <View style={estilos.filaQuienSale}>
                       <Avatar nombre={v.conductor || '·'} tamano={22} />
@@ -498,6 +523,21 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
+  invertir: {
+    position: 'absolute',
+    right: 20,
+    top: 62,
+    zIndex: 2,
+    width: 40,
+    height: 40,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   seguro: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -547,6 +587,15 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   destinoSale: { fontSize: 13.5, lineHeight: 19.5, color: color.ink600, fontFamily: familia },
+  precioSale: {
+    fontSize: 17,
+    lineHeight: 24,
+    fontWeight: '700',
+    letterSpacing: -0.34,
+    color: color.ink900,
+    fontFamily: familia,
+    ...tabular,
+  },
   filaQuienSale: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   quienSale: { flex: 1, fontSize: 12.5, lineHeight: 18, color: color.ink700, fontFamily: familia },
   notaSale: { fontSize: 12, lineHeight: 18, color: color.ink600, fontFamily: familia, ...tabular },
@@ -659,9 +708,10 @@ const estilos = StyleSheet.create({
   nombreRutaFuerte: { fontWeight: '600' },
   desde: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
   precioRuta: {
-    fontSize: 16, lineHeight: 23.2,
+    fontSize: 19,
+    lineHeight: 26,
     fontWeight: '700',
-    letterSpacing: -0.56,
+    letterSpacing: -0.66,
     color: color.ink900,
     fontFamily: familia,
     ...tabular,

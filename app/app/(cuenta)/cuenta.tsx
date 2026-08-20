@@ -1,19 +1,22 @@
 /**
- * `6a` Tu cuenta — quién eres y qué te falta.
+ * `6a` Tu cuenta — quién eres y qué puedes hacer.
  *
- * Los tres números de la hoja blanca no son un marcador: «aportado» es lo que
- * has puesto tú yendo de pasajero y «recuperado» lo que te han puesto a ti
- * llevando gente. Nadie gana, y por eso los tres pesan igual, sin flechas ni
- * verdes de subida.
+ * **Dos pestañas y no una lista larga.** «Sobre ti» es lo que eres en
+ * Partimos —lo que has puesto, lo que has recuperado, tu carro— y «Cuenta» es
+ * lo que puedes tocar. Antes las dos cosas iban en la misma columna y las
+ * cuatro filas del final parecían pie de página: se leía primero el número de
+ * kilómetros y después, muy abajo, la fila que decía que te falta la cédula.
  *
- * Debajo, la lista dice de un vistazo qué falta —el carro, cómo se paga, la
- * cédula— y el aviso azul cierra con lo único que decide si puedes conducir.
- * Azul y no rojo: informa, no es algo que tocar.
+ * Cada fila lleva icono. Una lista de nueve renglones de texto se lee entera
+ * o no se lee; con icono se encuentra el que buscas de un vistazo.
+ *
+ * Los tres números no son un marcador: «aportado» es lo que has puesto tú
+ * yendo de pasajero y «recuperado» lo que te han puesto a ti llevando gente.
+ * Nadie gana, y por eso los tres pesan igual, sin flechas ni verdes de subida.
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
@@ -21,11 +24,23 @@ import { type Cuenta, cuenta } from '@/servicios/ajustes';
 import { salir } from '@/servicios/cuenta';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { CampoRojo } from '@/ui/CampoRojo';
 import { NoEsta } from '@/ui/NoEsta';
 import { Pestanas } from '@/ui/Pestanas';
-import { CampoRojo } from '@/ui/CampoRojo';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { Escudo } from '@/ui/iconos';
+import {
+  Avanza,
+  Ayuda,
+  Billete,
+  Brujula,
+  Carro,
+  Cedula,
+  Documento,
+  Escudo,
+  Mas,
+  Ruta,
+  Salir,
+} from '@/ui/iconos';
 import { TRACK_MICRO, color, espacio, familia, radio, sombra } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
@@ -35,158 +50,251 @@ const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 const VERDE_FONDO = '#DFF1E8';
 const VERDE_TINTA = '#0E5A3F';
 
+type Solapa = 'ti' | 'cuenta';
+
 export default function TuCuenta() {
   const router = useRouter();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<Cuenta | null>(null);
   const [noEsta, setNoEsta] = useState(false);
+  const [solapa, setSolapa] = useState<Solapa>('ti');
 
   useEffect(() => {
     if (!yo) return;
-    cuenta(yo).then(setDatos).catch(() => setNoEsta(true));
+    cuenta(yo)
+      .then(setDatos)
+      .catch(() => setNoEsta(true));
   }, [yo]);
 
-  if (noEsta) return <NoEsta titulo="No encontramos ese perfil" explicacion="La cuenta pudo cerrarse, o el enlace es de otra persona." />;
+  if (noEsta)
+    return (
+      <NoEsta
+        titulo="No encontramos ese perfil"
+        explicacion="La cuenta pudo cerrarse, o el enlace es de otra persona."
+      />
+    );
   if (!datos) return <View style={estilos.pantalla} />;
 
   /**
-   * LAS CUATRO LLEVAN A ALGUNA PARTE.
+   * LAS NUEVE FILAS, Y TODAS LLEVAN A ALGUNA PARTE.
    *
-   * Tres de ellas eran texto con una punta de flecha al lado y nada detrás:
-   * se pulsaba «Mi carro» y no pasaba nada, que es peor que no ponerlo. Las
-   * pantallas existían las cuatro veces —el carro en el recorrido del
-   * conductor, el método en el del pasajero, la cédula en el paso 03—; lo que
-   * faltaba era el camino.
-   *
+   * Tres de ellas eran texto con una punta de flecha al lado y nada detrás.
    * Cuando la fila está vacía, el valor lo dice y no se queda en blanco: «Sin
    * carro» invita a entrar, un hueco no.
    */
-  const filas: { etiqueta: string; valor?: string | null; alPulsar: () => void }[] = [
+  const filas: {
+    etiqueta: string;
+    valor?: string | null;
+    icono: React.ReactNode;
+    alPulsar: () => void;
+  }[] = [
     {
-      etiqueta: 'Mi perfil',
-      valor: 'Cómo te ven',
-      alPulsar: () => router.push({ pathname: '/(pasajero)/perfil', params: { perfil: yo } }),
+      etiqueta: 'Verificación',
+      valor: datos.cedula,
+      icono: <Cedula />,
+      alPulsar: () => router.push('/(conductor)/cedula'),
     },
     {
       etiqueta: 'Mi carro',
       valor: datos.carro ?? 'Sin carro',
+      icono: <Carro tamano={20} />,
       alPulsar: () => router.push('/(conductor)/carro'),
     },
     {
       etiqueta: 'Cómo se paga',
       valor: datos.metodo,
+      icono: <Billete />,
       alPulsar: () => router.push('/(pasajero)/metodos'),
     },
     {
-      etiqueta: 'Verificación',
-      valor: datos.cedula,
-      alPulsar: () => router.push('/(conductor)/cedula'),
+      etiqueta: 'Mis viajes',
+      icono: <Ruta />,
+      alPulsar: () => router.push('/(conductor)/misviajes'),
+    },
+    {
+      etiqueta: 'Publicar un viaje',
+      icono: <Mas tamano={20} tinta={color.ink600} />,
+      alPulsar: () => router.push('/(conductor)/publicar'),
+    },
+    {
+      etiqueta: 'Cómo funciona',
+      icono: <Brujula />,
+      alPulsar: () => router.push('/(ayuda)'),
+    },
+    {
+      etiqueta: 'Seguridad',
+      icono: <Escudo tamano={20} tinta={color.ink600} />,
+      alPulsar: () => router.push('/(ayuda)/reportar'),
+    },
+    {
+      etiqueta: 'Ayuda y contacto',
+      icono: <Ayuda tamano={20} />,
+      alPulsar: () => router.push('/(ayuda)'),
+    },
+    {
+      etiqueta: 'Ajustes',
+      icono: <Documento />,
+      alPulsar: () => router.push('/(cuenta)/ajustes'),
     },
   ];
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={214} />
+      <CampoRojo altura={230} motivo="mapa" />
 
       <BarraDeEstado />
 
       <View style={estilos.cabecera}>
-        <Text style={estilos.epigrafeCampo}>Tu cuenta</Text>
-        <Text style={estilos.titular}>
-          {`${datos.nombre} `}
-          <Text style={estilos.titularFuerte}>{datos.apellido}</Text>
-        </Text>
-      </View>
-
-      <View style={estilos.contenido}>
-        <View style={estilos.hoja}>
-          <View style={estilos.filaPersona}>
-            <View style={estilos.avatar}>
-              <Text style={estilos.avatarTexto}>{datos.iniciales}</Text>
-            </View>
-
-            <View style={estilos.centro}>
-              <Text style={estilos.resumen}>
-                {datos.calificacion === null
-                  ? `${datos.viajes} viajes`
-                  : `${datos.viajes} viajes · ${datos.calificacion.toFixed(1)}`}
-              </Text>
-              <Text style={estilos.desde}>{`Miembro desde ${datos.desde}`}</Text>
-            </View>
-
-            {/* El punto se sienta en el hueco que la etiqueta reserva a su
-                izquierda, que es lo que hace que la pastilla mida lo mismo. */}
-            {datos.verificado ? (
-              <View style={estilos.insignia}>
-                <View style={estilos.punto} />
-                <Text style={estilos.insigniaTexto}>Verificado</Text>
-              </View>
-            ) : null}
+        <View style={estilos.filaPersona}>
+          <View style={estilos.avatar}>
+            <Text style={estilos.avatarTexto}>{datos.iniciales}</Text>
           </View>
-
-          <View style={estilos.cifras}>
-            <View style={estilos.cifra}>
-              <Text style={estilos.cifraEtiqueta}>Aportado</Text>
-              <Text style={estilos.cifraValor}>
-                {formatearDineroRedondo(datos.aportadoCentavos)}
-              </Text>
-            </View>
-            <View style={estilos.cifra}>
-              <Text style={estilos.cifraEtiqueta}>Recuperado</Text>
-              <Text style={estilos.cifraValor}>
-                {formatearDineroRedondo(datos.recuperadoCentavos)}
-              </Text>
-            </View>
-            <View style={estilos.cifra}>
-              <Text style={estilos.cifraEtiqueta}>Km juntos</Text>
-              <Text style={estilos.cifraValor}>{conMiles(datos.kilometros)}</Text>
-            </View>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text style={estilos.nombre} numberOfLines={1}>
+              {`${datos.nombre} ${datos.apellido}`.trim()}
+            </Text>
+            <Text style={estilos.desde}>{`En Partimos desde ${datos.desde}`}</Text>
           </View>
         </View>
 
-        <View style={estilos.lista}>
-          {filas.map((f, i) => (
+        {/* El estado de la cédula, arriba y no enterrado en la lista: es lo
+            único que decide si puedes publicar. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={datos.verificado ? 'Cédula verificada' : 'Verificar la cédula'}
+          onPress={() => router.push('/(conductor)/cedula')}
+          style={[estilos.chipEstado, datos.verificado ? estilos.chipVerde : estilos.chipClaro]}
+        >
+          <Cedula tamano={15} tinta={datos.verificado ? VERDE_TINTA : color.campoTexto} />
+          <Text
+            style={[
+              estilos.chipEstadoTexto,
+              { color: datos.verificado ? VERDE_TINTA : color.campoTexto },
+            ]}
+          >
+            {datos.verificado ? 'Verificado' : 'Sin verificar'}
+          </Text>
+        </Pressable>
+      </View>
+
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={estilos.contenido}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Las dos solapas montan sobre el borde del campo, que es donde el
+            arquetipo pone la hoja blanca. */}
+        <View style={estilos.solapas}>
+          {(
+            [
+              ['ti', 'Sobre ti'],
+              ['cuenta', 'Cuenta'],
+            ] as const
+          ).map(([clave, etiqueta]) => (
             <Pressable
-              key={f.etiqueta}
+              key={clave}
               accessibilityRole="button"
-              accessibilityLabel={f.valor ? `${f.etiqueta}, ${f.valor}` : f.etiqueta}
-              onPress={f.alPulsar}
-              style={[estilos.fila, i < filas.length - 1 && estilos.filaConLinea]}
+              accessibilityState={{ selected: solapa === clave }}
+              onPress={() => setSolapa(clave)}
+              style={[estilos.solapa, solapa === clave && estilos.solapaActiva]}
             >
-              <Text style={estilos.filaEtiqueta}>{f.etiqueta}</Text>
-              {f.valor ? <Text style={estilos.filaValor}>{f.valor}</Text> : null}
-              <Avanza />
+              <Text style={[estilos.solapaTexto, solapa === clave && estilos.solapaTextoActivo]}>
+                {etiqueta}
+              </Text>
             </Pressable>
           ))}
         </View>
 
-        <View style={estilos.aviso}>
-          <Escudo tamano={19} tinta={color.azul500} />
-          <Text style={estilos.avisoTexto}>{datos.queTeFalta}</Text>
-        </View>
+        {solapa === 'ti' ? (
+          <>
+            <View style={estilos.tarjeta}>
+              <View style={estilos.cifras}>
+                <View style={estilos.cifra}>
+                  <Text style={estilos.cifraEtiqueta}>Aportado</Text>
+                  <Text style={estilos.cifraValor}>
+                    {formatearDineroRedondo(datos.aportadoCentavos)}
+                  </Text>
+                </View>
+                <View style={estilos.cifra}>
+                  <Text style={estilos.cifraEtiqueta}>Recuperado</Text>
+                  <Text style={estilos.cifraValor}>
+                    {formatearDineroRedondo(datos.recuperadoCentavos)}
+                  </Text>
+                </View>
+                <View style={estilos.cifra}>
+                  <Text style={estilos.cifraEtiqueta}>Km juntos</Text>
+                  <Text style={estilos.cifraValor}>{conMiles(datos.kilometros)}</Text>
+                </View>
+              </View>
+              <Text style={estilos.nadieGana}>
+                Nadie gana dinero con esto: unos ponen y otros recuperan.
+              </Text>
+            </View>
 
-        {/* Tres enlaces, no una frase: antes era un solo texto sin nada
-            detrás, y «Cerrar sesión» no cerraba nada. */}
-        <View style={estilos.enlacesDelPie}>
-          <Pressable accessibilityRole="button" onPress={() => router.push('/(ayuda)')}>
-            <Text style={estilos.enlace}>Ayuda</Text>
-          </Pressable>
-          <Text style={estilos.enlaceSeparador}>·</Text>
-          <Pressable accessibilityRole="button" onPress={() => router.push('/(cuenta)/ajustes')}>
-            <Text style={estilos.enlace}>Ajustes</Text>
-          </Pressable>
-          <Text style={estilos.enlaceSeparador}>·</Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={async () => {
-              await salir();
-              router.replace('/(cuenta)/apertura');
-            }}
-          >
-            <Text style={estilos.enlace}>Cerrar sesión</Text>
-          </Pressable>
-        </View>
-      </View>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() =>
+                router.push({ pathname: '/(pasajero)/perfil', params: { perfil: yo } })
+              }
+              style={({ pressed }) => [estilos.fila, estilos.filaSuelta, pressed && estilos.pulsada]}
+            >
+              <View style={estilos.cuadroIcono}>
+                <Escudo tamano={20} tinta={color.ink600} />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.filaEtiqueta}>Mi perfil público</Text>
+                <Text style={estilos.filaValor}>Lo que ve el otro antes de subirse</Text>
+              </View>
+              <Avanza />
+            </Pressable>
+
+            <View style={estilos.aviso}>
+              <Escudo tamano={19} tinta={color.azul500} />
+              <Text style={estilos.avisoTexto}>{datos.queTeFalta}</Text>
+            </View>
+          </>
+        ) : (
+          <View style={estilos.lista}>
+            {filas.map((f, i) => (
+              <Pressable
+                key={f.etiqueta}
+                accessibilityRole="button"
+                accessibilityLabel={f.valor ? `${f.etiqueta}, ${f.valor}` : f.etiqueta}
+                onPress={f.alPulsar}
+                style={({ pressed }) => [
+                  estilos.fila,
+                  i < filas.length - 1 && estilos.filaConLinea,
+                  pressed && estilos.pulsada,
+                ]}
+              >
+                <View style={estilos.cuadroIcono}>{f.icono}</View>
+                <Text style={estilos.filaEtiqueta}>{f.etiqueta}</Text>
+                {f.valor ? (
+                  <Text style={estilos.filaValor} numberOfLines={1}>
+                    {f.valor}
+                  </Text>
+                ) : null}
+                <Avanza />
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        {/* Su propio bloque, separado y en contorno: un botón destructivo va en
+            contorno y nunca en relleno rojo, que es el color de seguir. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Cerrar sesión"
+          onPress={async () => {
+            await salir();
+            router.replace('/(cuenta)/apertura');
+          }}
+          style={({ pressed }) => [estilos.cerrar, pressed && { backgroundColor: color.rojo50 }]}
+        >
+          <Salir tamano={19} />
+          <Text style={estilos.cerrarTexto}>Cerrar sesión</Text>
+        </Pressable>
+      </ScrollView>
 
       <View style={estilos.pie}>
         <Pestanas valor="Perfil" />
@@ -195,25 +303,8 @@ export default function TuCuenta() {
   );
 }
 
-const tinta = (activo: boolean) => (activo ? color.rojo600 : color.ink700);
-
 /** Miles con espacio duro: en español los kilómetros se separan así, sin punto. */
-const conMiles = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-
-/** La punta que dice que la fila lleva a otro sitio. No está en `@/ui/iconos`. */
-function Avanza() {
-  return (
-    <Svg viewBox="0 0 24 24" width={17} height={17} fill="none">
-      <Path
-        d="M9 6l6 6-6 6"
-        stroke={color.ink300}
-        strokeWidth={1.7}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
+const conMiles = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
 const estilos = StyleSheet.create({
   pantalla: {
@@ -224,192 +315,183 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  cabecera: { paddingHorizontal: 26 },
-  epigrafeCampo: {
-    fontSize: 11,
-    lineHeight: 15.95,
-    fontWeight: '600',
-    letterSpacing: 11 * TRACK_MICRO,
-    textTransform: 'uppercase',
-    color: color.campoTexto,
-    fontFamily: familia,
-  },
-  titular: {
-    fontSize: 30,
-    lineHeight: 31.8,
-    letterSpacing: -1.35,
-    fontWeight: '400',
-    color: '#fff',
-    marginTop: 12,
-    fontFamily: familia,
-  },
-  titularFuerte: { fontWeight: '600' },
-
-  contenido: { flex: 1, minHeight: 0, paddingHorizontal: 22, paddingTop: 24 },
-
-  hoja: {
-    backgroundColor: color.blanco,
-    borderRadius: 28,
-    padding: 20,
-    ...sombra.hoja,
-  },
+  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 6 },
   filaPersona: { flexDirection: 'row', alignItems: 'center', gap: 15 },
   avatar: {
-    width: 56,
-    height: 56,
+    width: 64,
+    height: 64,
     borderRadius: radio.cuadrado,
-    backgroundColor: color.rojo100,
+    backgroundColor: 'rgba(255,255,255,.18)',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
   },
   avatarTexto: {
-    fontSize: 22.4,
-    lineHeight: 32.48,
+    fontSize: 25,
+    lineHeight: 34,
     fontWeight: '600',
-    letterSpacing: -0.448,
-    color: color.rojo700,
+    letterSpacing: -0.5,
+    color: '#fff',
     fontFamily: familia,
   },
-  centro: { flex: 1, minWidth: 0 },
-  resumen: {
-    fontSize: 19,
-    lineHeight: 27.55,
+  nombre: {
+    fontSize: 26,
+    lineHeight: 30,
+    letterSpacing: -1.04,
     fontWeight: '600',
-    letterSpacing: -0.665,
-    color: color.ink900,
-    fontFamily: familia,
-    ...tabular,
-  },
-  desde: {
-    fontSize: 13,
-    lineHeight: 18.85,
-    color: color.ink600,
-    marginTop: 3,
+    color: '#fff',
     fontFamily: familia,
   },
-  insignia: {
-    height: 22,
+  desde: { fontSize: 13.5, lineHeight: 19.5, color: color.campoTexto, marginTop: 3, fontFamily: familia },
+
+  chipEstado: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    alignSelf: 'flex-start',
+    marginTop: 14,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
     borderRadius: radio.pastilla,
-    justifyContent: 'center',
-    backgroundColor: VERDE_FONDO,
   },
-  punto: {
-    position: 'absolute',
-    left: 8,
-    top: 8,
-    width: 6,
-    height: 6,
-    borderRadius: radio.pastilla,
-    backgroundColor: VERDE_TINTA,
-    opacity: 0.85,
-  },
-  insigniaTexto: {
-    paddingLeft: 20,
-    paddingRight: 8,
-    fontSize: 11,
-    lineHeight: 15.95,
-    fontWeight: '500',
-    letterSpacing: -0.055,
-    color: VERDE_TINTA,
+  chipVerde: { backgroundColor: VERDE_FONDO },
+  chipClaro: { backgroundColor: 'rgba(255,255,255,.18)' },
+  chipEstadoTexto: {
+    fontSize: 12.5,
+    lineHeight: 17,
+    fontWeight: '600',
+    letterSpacing: 12.5 * TRACK_MICRO,
+    textTransform: 'uppercase',
     fontFamily: familia,
   },
 
-  cifras: {
+  contenido: { paddingHorizontal: 22, paddingTop: 20, paddingBottom: 26 },
+
+  solapas: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 18,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: color.bordeSutil,
+    padding: 5,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.blanco,
+    ...sombra.hoja,
   },
-  cifra: { flex: 1 },
-  cifraEtiqueta: {
-    fontSize: 11,
-    lineHeight: 15.95,
+  solapa: { flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: radio.pastilla },
+  solapaActiva: { backgroundColor: color.azul500 },
+  solapaTexto: {
+    fontSize: 15,
+    lineHeight: 21.75,
     fontWeight: '600',
-    letterSpacing: 11 * TRACK_MICRO,
-    textTransform: 'uppercase',
-    color: color.ink400,
+    letterSpacing: -0.15,
+    color: color.ink700,
     fontFamily: familia,
   },
+  solapaTextoActivo: { color: '#fff' },
+
+  tarjeta: {
+    marginTop: 14,
+    backgroundColor: color.blanco,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    padding: 20,
+  },
+  cifras: { flexDirection: 'row' },
+  cifra: { flex: 1 },
+  cifraEtiqueta: { fontSize: 12, lineHeight: 17.4, color: color.ink500, fontFamily: familia },
   cifraValor: {
-    fontSize: 20,
-    lineHeight: 29,
+    fontSize: 22,
+    lineHeight: 28,
     fontWeight: '700',
-    letterSpacing: -0.8,
+    letterSpacing: -0.66,
     color: color.ink900,
-    marginTop: 5,
+    marginTop: 4,
     fontFamily: familia,
     ...tabular,
+  },
+  nadieGana: {
+    fontSize: 12.5,
+    lineHeight: 18.5,
+    color: color.ink500,
+    marginTop: 14,
+    paddingTop: 13,
+    borderTopWidth: 1,
+    borderTopColor: color.bordeSutil,
+    fontFamily: familia,
   },
 
   lista: {
+    marginTop: 14,
     backgroundColor: color.blanco,
+    borderRadius: radio.l,
     borderWidth: 1,
     borderColor: color.bordeSutil,
-    borderRadius: radio.l,
-    paddingHorizontal: 18,
-    paddingVertical: 2,
-    marginTop: 12,
+    overflow: 'hidden',
   },
-  fila: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 15 },
+  fila: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 13,
+    paddingHorizontal: 15,
+    height: 62,
+  },
+  filaSuelta: {
+    marginTop: 10,
+    backgroundColor: color.blanco,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    height: 74,
+  },
   filaConLinea: { borderBottomWidth: 1, borderBottomColor: color.bordeSutil },
+  pulsada: { backgroundColor: color.sand100 },
+  cuadroIcono: {
+    width: 38,
+    height: 38,
+    borderRadius: radio.control,
+    backgroundColor: color.sand200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   filaEtiqueta: {
     flex: 1,
-    fontSize: 16,
-    lineHeight: 23.2,
+    fontSize: 15.5,
+    lineHeight: 22.5,
     fontWeight: '500',
-    letterSpacing: -0.24,
+    letterSpacing: -0.23,
     color: color.ink900,
     fontFamily: familia,
   },
-  filaValor: {
-    fontSize: 13.5,
-    lineHeight: 19.575,
-    color: color.ink500,
-    fontFamily: familia,
-  },
+  filaValor: { fontSize: 13, lineHeight: 19, color: color.ink500, fontFamily: familia },
 
   aviso: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    backgroundColor: color.azul50,
-    borderWidth: 1,
-    borderColor: color.azul100,
+    gap: 11,
+    marginTop: 10,
+    padding: 15,
     borderRadius: radio.l,
-    paddingVertical: 15,
-    paddingHorizontal: 17,
-    marginTop: 12,
+    backgroundColor: color.azul50,
   },
-  avisoTexto: {
-    flex: 1,
-    fontSize: 13.5,
-    // 1.4, no la interlínea del cuerpo: el aviso va más apretado que el resto.
-    lineHeight: 18.9,
-    color: color.ink700,
-    fontFamily: familia,
-  },
+  avisoTexto: { flex: 1, fontSize: 13.5, lineHeight: 20, color: color.azul700, fontFamily: familia },
 
-  enlacesDelPie: {
-    marginTop: 'auto',
-    paddingTop: 14,
-    paddingHorizontal: 4,
-    paddingBottom: 22,
+  cerrar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 9,
+    marginTop: 16,
+    height: 56,
+    borderRadius: radio.l,
+    borderWidth: 1.5,
+    borderColor: color.rojo200,
+    backgroundColor: color.blanco,
   },
-  enlace: {
-    fontSize: 13,
-    lineHeight: 18.85,
-    fontWeight: '500',
-    color: color.ink600,
+  cerrarTexto: {
+    fontSize: 15.5,
+    lineHeight: 22.5,
+    fontWeight: '600',
+    letterSpacing: -0.16,
+    color: color.rojo600,
     fontFamily: familia,
   },
-  enlaceSeparador: { fontSize: 13, lineHeight: 18.85, color: color.ink300, fontFamily: familia },
 
-  pie: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 22 },
+  pie: { paddingHorizontal: espacio.gutter, paddingBottom: 10, paddingTop: 6 },
 });

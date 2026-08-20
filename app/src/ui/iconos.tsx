@@ -337,6 +337,108 @@ export function Ayuda({ tamano = 18, tinta = color.ink600 }: Props) {
   );
 }
 
+/** La cédula: el rectángulo con la foto y las dos líneas. */
+export function Cedula({ tamano = 20, tinta = color.ink600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Rect x={2.6} y={5} width={18.8} height={14} rx={3} stroke={tinta} strokeWidth={1.7} />
+      <Circle cx={8.6} cy={11.4} r={2.1} stroke={tinta} strokeWidth={1.7} />
+      <Path d="M5.4 16.2c.5-1.3 1.7-2 3.2-2s2.7.7 3.2 2" stroke={tinta} strokeWidth={1.7} strokeLinecap="round" />
+      <Path d="M14.6 10.4h4.2M14.6 13.8h4.2" stroke={tinta} strokeWidth={1.7} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Cómo se paga: el billete. Ni tarjeta ni moneda — aquí se paga de mano a mano. */
+export function Billete({ tamano = 20, tinta = color.ink600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Rect x={2.4} y={6} width={19.2} height={12} rx={2.6} stroke={tinta} strokeWidth={1.7} />
+      <Circle cx={12} cy={12} r={2.6} stroke={tinta} strokeWidth={1.7} />
+      <Path d="M6 12h.01M18 12h.01" stroke={tinta} strokeWidth={2} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Mis viajes: los dos hilos de una ruta con sus paradas. */
+export function Ruta({ tamano = 20, tinta = color.ink600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path d="M3 7h9a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h9" stroke={tinta} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+      <Circle cx={19} cy={7} r={2.2} stroke={tinta} strokeWidth={1.7} />
+      <Circle cx={5} cy={19} r={2.2} stroke={tinta} strokeWidth={1.7} />
+    </Svg>
+  );
+}
+
+/** Cómo funciona: la brújula. */
+export function Brujula({ tamano = 20, tinta = color.ink600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Circle cx={12} cy={12} r={8.8} stroke={tinta} strokeWidth={1.7} />
+      <Path d="M15.2 8.8l-1.9 4.5-4.5 1.9 1.9-4.5z" stroke={tinta} strokeWidth={1.7} strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Legal: la hoja con su esquina doblada. */
+export function Documento({ tamano = 20, tinta = color.ink600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path d="M13.6 3.2H7a2 2 0 0 0-2 2v13.6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.6z" stroke={tinta} strokeWidth={1.7} strokeLinejoin="round" />
+      <Path d="M13.4 3.4V8.4h5M8.6 13h6.8M8.6 16.4h4.4" stroke={tinta} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Cerrar sesión: la puerta con la flecha que sale. */
+export function Salir({ tamano = 20, tinta = color.rojo600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path d="M14 4.6H6.8a2 2 0 0 0-2 2v10.8a2 2 0 0 0 2 2H14" stroke={tinta} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M16.4 8.4 20 12l-3.6 3.6M19.4 12H10" stroke={tinta} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Las dos flechas de intercambiar: origen por destino, orden por orden. */
+export function Intercambio({ tamano = 18, tinta = color.ink600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path
+        d="M7 4v13m0 0l-3-3m3 3l3-3M17 20V7m0 0l-3 3m3-3l3 3"
+        stroke={tinta}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/** El cigarro tachado: en este carro no se fuma. */
+export function SinHumo({ tamano = 15, tinta = color.ink600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Rect x={2.6} y={13.4} width={14} height={4.2} rx={1.4} stroke={tinta} strokeWidth={1.6} />
+      <Path d="M18.6 13.4v-2.2M21 13.4v-3.4M17 8.6c1.6-.7 1.6-2.6 0-3.4" stroke={tinta} strokeWidth={1.6} strokeLinecap="round" />
+      <Path d="M3.4 20.2 20.6 4.2" stroke={tinta} strokeWidth={1.8} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** La huella: el carro acepta mascota. */
+export function Mascota({ tamano = 15, tinta = color.ink600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Circle cx={7} cy={8.4} r={2} stroke={tinta} strokeWidth={1.6} />
+      <Circle cx={12} cy={6.4} r={2} stroke={tinta} strokeWidth={1.6} />
+      <Circle cx={17} cy={8.4} r={2} stroke={tinta} strokeWidth={1.6} />
+      <Path d="M12 11.4c2.8 0 5 2 5 4.4 0 2-1.6 3-3.2 2.6-.6-.2-1.2-.3-1.8-.3s-1.2.1-1.8.3C8.6 18.8 7 17.8 7 15.8c0-2.4 2.2-4.4 5-4.4Z" stroke={tinta} strokeWidth={1.6} strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
 /** La campana de los avisos. Solo la lleva el inicio, arriba a la derecha. */
 export function Campana({ tamano = 21, tinta = '#fff' }: Props) {
   return (

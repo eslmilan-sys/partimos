@@ -138,18 +138,20 @@ const estilos = StyleSheet.create({
   filaSuperior: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 },
   cuando: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
   filaPrecio: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
+  /* 31 y no 26: el aporte es lo que decide, y en una lista de cuatro
+     tarjetas era del mismo tamaño que la hora. */
   precio: {
-    fontSize: 26,
+    fontSize: 31,
     fontWeight: '700',
-    letterSpacing: -1.04,
-    lineHeight: 24.7,
+    letterSpacing: -1.24,
+    lineHeight: 29.5,
     color: color.ink900,
     fontFamily: familia,
     ...tabular,
   },
   // El símbolo tiene su propia caja de línea, más apretada que la de la cifra:
   // así se apoya en la misma base en vez de estirar la fila.
-  precioSimbolo: { fontSize: 15, lineHeight: 14.25, fontWeight: '500' },
+  precioSimbolo: { fontSize: 17, lineHeight: 16, fontWeight: '500' },
 
   recorrido: { gap: 8, marginTop: 11 },
   parada: { flexDirection: 'row', alignItems: 'center', gap: 11 },

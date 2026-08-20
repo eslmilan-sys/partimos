@@ -24,8 +24,8 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { diaAbrev, esHoy, hora } from '@/ui/fechas';
-import { Atras } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, interlinea } from '@/ui/tokens';
+import { Atras, Marca } from '@/ui/iconos';
+import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
 const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
@@ -78,6 +78,34 @@ export default function Conversaciones() {
         contentContainerStyle={estilos.cuerpo}
         showsVerticalScrollIndicator={false}
       >
+        {/* El hilo de Partimos va siempre y va primero: una bandeja vacía el
+            primer día no dice nada, y quien acaba de entrar no sabe qué puede
+            hacer. No se guarda en `messages` porque no es de nadie. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Mensaje de Partimos: bienvenido a bordo"
+          onPress={() => router.push('/(pasajero)/partimos')}
+          style={({ pressed }) => [estilos.filaPartimos, pressed && { backgroundColor: color.sand100 }]}
+        >
+          <View style={estilos.marcaCuadro}>
+            <Marca tamano={22} tinta={color.rojo600} />
+          </View>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <View style={estilos.filaSuperior}>
+              <Text style={estilos.nombre} numberOfLines={1}>
+                Partimos
+              </Text>
+              <View style={estilos.puntoNuevo} />
+            </View>
+            <Text style={estilos.ultimo} numberOfLines={1}>
+              Bienvenido a bordo. Las tres cosas que puedes hacer desde ya.
+            </Text>
+            <Text style={estilos.contexto} numberOfLines={1}>
+              Un mensaje nuestro · aquí no contestamos
+            </Text>
+          </View>
+        </Pressable>
+
         <View style={estilos.lista}>
           {filas.map(({ puesto, hilo }, i) => {
             const ultimo = hilo.mensajes[hilo.mensajes.length - 1];
@@ -118,7 +146,8 @@ export default function Conversaciones() {
 
           {filas.length === 0 ? (
             <Text style={estilos.vacio}>
-              Todavía no tienes conversaciones. Se abren cuando el conductor acepta tu puesto.
+              Todavía no tienes conversaciones con nadie. Se abren cuando el conductor acepta tu
+              puesto.
             </Text>
           ) : null}
         </View>
@@ -149,6 +178,28 @@ function cuandoLargo(cuandoISO: string): string {
 }
 
 const estilos = StyleSheet.create({
+  filaPartimos: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 13,
+    padding: 15,
+    marginBottom: 10,
+    borderRadius: radio.l,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+  },
+  marcaCuadro: {
+    width: 44,
+    height: 44,
+    borderRadius: radio.cuadrado,
+    backgroundColor: color.rojo50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  /** El punto que dice que hay algo que leer. Rojo: es lo que reclama. */
+  puntoNuevo: { width: 9, height: 9, borderRadius: 5, backgroundColor: color.rojo500 },
+
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
