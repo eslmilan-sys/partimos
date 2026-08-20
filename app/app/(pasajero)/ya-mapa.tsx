@@ -27,7 +27,7 @@ import { Vidrio } from '@/ui/Vidrio';
 import { Boton, Insignia } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { Lupa } from '@/ui/iconos';
-import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, radio, TRACK_MICRO, vidrio, zonaDeToque } from '@/ui/tokens';
 
 /** Dónde cae cada carro sobre el mapa. Con proveedor real esto son coordenadas. */
 const SITIOS = [
@@ -343,6 +343,7 @@ const estilos = StyleSheet.create({
   otro: {
     flex: 1,
     backgroundColor: 'rgba(255,255,255,.72)',
+    ...(vidrio ?? {}),
     borderRadius: radio.ficha,
     paddingVertical: 11,
     paddingHorizontal: 12,

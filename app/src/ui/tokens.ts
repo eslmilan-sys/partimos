@@ -233,3 +233,20 @@ export const texto = {
  * nunca en el `Text`: lo que crece es la zona que responde, no la letra.
  */
 export const zonaDeToque = { minHeight: espacio.tap, justifyContent: 'center' } as const;
+
+/**
+ * EL VIDRIO.
+ *
+ * Una superficie translúcida sin desenfoque no es vidrio: es una capa a medio
+ * pintar. Medido en la barra de «Pedir mi puesto» —blanco al 86 % sin
+ * desenfoque—: el texto de la tarjeta de debajo se leía entero a través del
+ * pie, y las dos capas se mezclaban en una sopa gris. El desenfoque es lo que
+ * separa el primer plano del fondo; la translucidez sola sólo los junta.
+ *
+ * En el teléfono no hay `backdropFilter`, así que allí la superficie va casi
+ * opaca y punto: mejor una capa honesta que un vidrio que no filtra.
+ */
+export const vidrio =
+  Platform.OS === 'web'
+    ? ({ backdropFilter: 'blur(20px) saturate(150%)' } as never)
+    : null;

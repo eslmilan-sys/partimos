@@ -642,9 +642,14 @@ const estilos = StyleSheet.create({
     paddingHorizontal: espacio.gutter,
     paddingTop: 16,
     paddingBottom: 28,
-    backgroundColor: 'rgba(255,255,255,.86)',
+    /* **Opaca, no de vidrio.** Con el desenfoque puesto y el blanco al 82 %,
+       «Hyundai Elantra gris» se seguía leyendo a través del pie: el vidrio
+       luce cuando lo de detrás es color, y aquí detrás hay texto negro sobre
+       casi blanco, así que sólo dejaba un fantasma. La barra de abajo sí lo
+       lleva, que es donde pasa contenido de verdad por debajo. */
+    backgroundColor: color.sand50,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,.7)',
+    borderTopColor: color.bordeSutil,
     shadowColor: 'rgb(0,39,65)',
     shadowOpacity: 0.18,
     shadowRadius: 32,

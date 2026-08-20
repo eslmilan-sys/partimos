@@ -31,10 +31,10 @@
  */
 
 import { type ReactNode } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
-import { color, familia, radio } from './tokens';
+import { color, familia, radio, vidrio } from './tokens';
 
 export type Pestana = { valor: string; etiqueta: string; icono: (activo: boolean) => ReactNode };
 
@@ -143,12 +143,6 @@ export function BarraDePestanas({ pestanas, valor, alCambiar, fab }: Props) {
   );
 }
 
-/** Lo que la barra pinta detrás: azul profundo, casi opaco, con vidrio en web. */
-const VIDRIO =
-  Platform.OS === 'web'
-    ? ({ backdropFilter: 'blur(18px) saturate(140%)' } as never)
-    : null;
-
 const estilos = StyleSheet.create({
   barra: {
     flexDirection: 'row',
@@ -164,7 +158,7 @@ const estilos = StyleSheet.create({
     shadowRadius: 28,
     shadowOffset: { width: 0, height: 12 },
     elevation: 10,
-    ...(VIDRIO ?? {}),
+    ...(vidrio ?? {}),
   },
   filoSuperior: {
     position: 'absolute',
