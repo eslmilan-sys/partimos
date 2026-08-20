@@ -26,7 +26,7 @@ import { Boton, Insignia, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { hora } from '@/ui/fechas';
 import { Estrella, Maleta } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 const VERDE = { fondo: '#DFF1E8', tinta: '#0E5A3F' };
 
@@ -149,7 +149,11 @@ export default function Ya() {
         <View style={estilos.seccion}>
           <View style={estilos.filaSeccion}>
             <Text style={estilos.epigrafeSeccion}>También salen pronto</Text>
-            <Pressable accessibilityRole="button" onPress={() => router.push('/(pasajero)/resultados')}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/(pasajero)/resultados')}
+              style={zonaDeToque}
+            >
               <Text style={estilos.verTodo}>ver todo</Text>
             </Pressable>
           </View>

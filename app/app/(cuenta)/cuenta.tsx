@@ -348,6 +348,7 @@ const estilos = StyleSheet.create({
   desde: { fontSize: 13.5, lineHeight: 19.5, color: color.campoTexto, marginTop: 3, fontFamily: familia },
 
   chipEstado: {
+    minHeight: espacio.tap,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 7,

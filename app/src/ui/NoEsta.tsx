@@ -19,7 +19,7 @@ import { useRouter } from 'expo-router';
 import { BarraDeEstado } from './BarraDeEstado';
 import { CampoRojo } from './CampoRojo';
 import { Boton } from './controles';
-import { familia, color, espacio, radio } from './tokens';
+import { color, espacio, familia, radio, zonaDeToque } from './tokens';
 
 export function NoEsta({
   titulo = 'Esto ya no está aquí',
@@ -45,7 +45,7 @@ export function NoEsta({
           <Boton tamano="md" alPulsar={() => router.replace('/(pasajero)')}>
             Buscar un viaje
           </Boton>
-          <Pressable accessibilityRole="button" onPress={() => router.back()}>
+          <Pressable accessibilityRole="button" onPress={() => router.back()} style={zonaDeToque}>
             <Text style={estilos.atras}>Volver atrás</Text>
           </Pressable>
         </View>

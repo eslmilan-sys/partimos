@@ -26,7 +26,7 @@ import { Boton, Interruptor, Stepper } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { cuando } from '@/ui/fechas';
 import { Atras } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, el del traspaso. */
 const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
@@ -174,7 +174,11 @@ export default function Editar() {
         >
           Guardar
         </Boton>
-        <Pressable accessibilityRole="button" onPress={() => router.push('/(ayuda)/cancelar')}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push('/(ayuda)/cancelar')}
+          style={zonaDeToque}
+        >
           <Text style={estilos.cancelar}>Cancelar el viaje entero</Text>
         </Pressable>
       </View>

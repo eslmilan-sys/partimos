@@ -674,7 +674,8 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
   },
-  tiraItem: { flex: 1, alignItems: 'center', gap: 6 },
+  tiraItem: {
+    minHeight: espacio.tap, flex: 1, alignItems: 'center', gap: 6 },
   tiraTexto: {
     fontSize: 11.5,
     lineHeight: 16,

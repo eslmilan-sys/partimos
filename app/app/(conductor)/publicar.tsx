@@ -528,6 +528,7 @@ const estilos = StyleSheet.create({
   anadir: {
     flexDirection: 'row',
     alignItems: 'center',
+    minHeight: espacio.tap,
     gap: 8,
     marginTop: 10,
     paddingTop: 10,

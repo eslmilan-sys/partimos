@@ -18,7 +18,7 @@ import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
 import { Marca } from '@/ui/iconos';
-import { familia, color, espacio, interlinea } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, zonaDeToque } from '@/ui/tokens';
 
 export default function Apertura() {
   const router = useRouter();
@@ -58,7 +58,11 @@ export default function Apertura() {
           </Pressable>
         </View>
 
-        <Pressable accessibilityRole="button" onPress={() => router.replace('/(pasajero)')}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.replace('/(pasajero)')}
+          style={zonaDeToque}
+        >
           <Text style={estilos.sinCuenta}>Mirar los viajes sin cuenta</Text>
         </Pressable>
       </View>

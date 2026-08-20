@@ -315,6 +315,7 @@ const estilos = StyleSheet.create({
   verQuien: {
     flexDirection: 'row',
     alignItems: 'center',
+    minHeight: espacio.tap,
     gap: 8,
     alignSelf: 'flex-start',
     marginTop: 12,

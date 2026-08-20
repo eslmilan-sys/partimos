@@ -31,7 +31,7 @@ import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Campo } from '@/ui/controles';
 import { formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio, sombra } from '@/ui/tokens';
+import { color, espacio, familia, radio, sombra, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /**
  * El viaje de referencia del traspaso, Albrook → Chitré. La tarifa no se
@@ -294,7 +294,7 @@ const estilos = StyleSheet.create({
     borderRadius: radio.pastilla,
     padding: 4,
   },
-  pestana: { flex: 1, paddingVertical: 9, borderRadius: radio.pastilla },
+  pestana: { flex: 1, borderRadius: radio.pastilla, alignItems: 'center', ...zonaDeToque },
   pestanaTexto: {
     fontSize: 13.5,
     lineHeight: 19.575,

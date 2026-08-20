@@ -27,7 +27,7 @@ import { Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { cuando, diaAbrev, hora } from '@/ui/fechas';
 import { Mas } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
@@ -103,7 +103,7 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
           onPress={() =>
             router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
           }
-          style={{ marginLeft: 'auto' }}
+          style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
         >
           <Text style={estilos.enlace}>Editar</Text>
         </Pressable>
@@ -168,7 +168,7 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
           onPress={() =>
             router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
           }
-          style={{ marginLeft: 'auto' }}
+          style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
         >
           <Text style={estilos.enlace}>Editar</Text>
         </Pressable>
@@ -195,7 +195,7 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
               message: `${viaje.origen} → ${viaje.destino} · ${diaAbrev(viaje.cuando)} ${hora(viaje.cuando)} · ${formatearDineroRedondo(viaje.aporteCentavos)} por puesto · quedan ${viaje.puestosOfrecidos - viaje.puestosVendidos}`,
             })
           }
-          style={{ marginLeft: 'auto' }}
+          style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
         >
           <Text style={estilos.enlace}>Compartir el viaje</Text>
         </Pressable>

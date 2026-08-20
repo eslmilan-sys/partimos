@@ -34,7 +34,7 @@ import { Boton, Epigrafe } from '@/ui/controles';
 import { formatearDinero, tabular } from '@/ui/dinero';
 import { hora } from '@/ui/fechas';
 import { Atras } from '@/ui/iconos';
-import { familia, color, espacio, interlinea, radio, sombra, texto } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, radio, sombra, texto, zonaDeToque } from '@/ui/tokens';
 
 /** La reserva de Daniela, la pasajera, y ella misma. Mientras no haya sesión. */
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
@@ -192,6 +192,7 @@ export default function Reembolso() {
               onPress={() =>
                 router.push({ pathname: '/(pasajero)/pagar', params: { viaje: viaje.viajeId } })
               }
+              style={zonaDeToque}
             >
               <Text style={estilos.cambiar}>Cambiar</Text>
             </Pressable>

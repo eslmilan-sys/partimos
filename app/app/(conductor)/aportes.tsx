@@ -22,7 +22,7 @@ import { CampoRojo, Brillo } from '@/ui/CampoRojo';
 import { Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
@@ -122,6 +122,7 @@ export default function AportesPantalla() {
             accessibilityRole="button"
             accessibilityLabel="Cambiar por dónde te llega"
             onPress={() => router.push('/(pasajero)/metodos')}
+            style={zonaDeToque}
           >
             <Text style={estilos.cambiar}>Cambiar</Text>
           </Pressable>
@@ -184,7 +185,12 @@ const estilos = StyleSheet.create({
   },
 
   tramos: { flexDirection: 'row', gap: 7 },
-  tramo: { borderRadius: radio.pastilla, paddingVertical: 6, paddingHorizontal: 13 },
+  tramo: {
+    borderRadius: radio.pastilla,
+    paddingHorizontal: 13,
+    alignItems: 'center',
+    ...zonaDeToque,
+  },
   tramoActivo: { backgroundColor: color.azul500 },
   tramoQuieto: { backgroundColor: color.sand200 },
   tramoTexto: {

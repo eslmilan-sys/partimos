@@ -29,7 +29,7 @@ import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
 import { Atras } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio, sombra, texto } from '@/ui/tokens';
+import { color, espacio, familia, radio, sombra, texto, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Mientras no haya sesión, el viaje del recorrido del diseño: Albrook → Chitré. */
 const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
@@ -373,7 +373,7 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
   },
-  masTardeZona: { marginTop: 12 },
+  masTardeZona: { marginTop: 12, ...zonaDeToque },
   masTarde: {
     textAlign: 'center',
     fontSize: 13.5,

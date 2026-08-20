@@ -23,7 +23,7 @@ import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaLargo, hora } from '@/ui/fechas';
 import { useReloj } from '@/ui/reloj';
 import { Marca } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Cada destino del producto necesita su fotografía; éstas son las que hay. */
 const FOTOS: Record<string, number> = {
@@ -144,7 +144,11 @@ export default function Bienvenida() {
           <Boton tono="contorno" tamano="md" alPulsar={() => router.push('/(conductor)/publicar')}>
             Voy conduciendo
           </Boton>
-          <Pressable accessibilityRole="button" onPress={() => router.push('/(cuenta)/entrar')}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push('/(cuenta)/entrar')}
+            style={zonaDeToque}
+          >
             <Text style={estilos.yaTengo}>
               {'Ya tengo cuenta · '}
               <Text style={estilos.entrar}>Entrar</Text>

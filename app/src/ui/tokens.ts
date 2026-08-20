@@ -217,3 +217,19 @@ export const texto = {
   precio: { fontSize: 31, lineHeight: 27.9, fontWeight: '700' as const, letterSpacing: -1.4, ...conFuente },
   pastilla: { fontSize: 10.5, lineHeight: interlinea(10.5), fontWeight: '600' as const, ...conFuente },
 } as const;
+
+/**
+ * EL ÁREA MÍNIMA DE ALGO QUE SE TOCA, cuando lo que se toca es una palabra.
+ *
+ * React Native Web **no implementa `hitSlop`**: medido en el navegador, el
+ * rectángulo que responde al dedo es exactamente el del elemento, ni un píxel
+ * más. Un enlace de una línea mide dieciocho píxeles de alto —«ver todo»,
+ * «Compartir mi llegada», «Cambiar»—, que es menos de la mitad de los
+ * cuarenta y cuatro que pide cualquier guía táctil, y falla primero a quien
+ * tiene el pulso menos firme o va en un carro en marcha, que es exactamente
+ * quien usa esto.
+ *
+ * Así que el relleno tiene que ser de verdad. Esto se pone en el `Pressable`,
+ * nunca en el `Text`: lo que crece es la zona que responde, no la letra.
+ */
+export const zonaDeToque = { minHeight: espacio.tap, justifyContent: 'center' } as const;

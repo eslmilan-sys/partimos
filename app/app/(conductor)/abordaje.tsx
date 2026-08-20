@@ -31,7 +31,7 @@ import { Avatar, Boton, Epigrafe } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { hora, mas } from '@/ui/fechas';
 import { Visto } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
+import { color, espacio, familia, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, el del traspaso. */
 const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555557';
@@ -244,6 +244,7 @@ export default function Abordaje() {
               setTecleado('');
               await recargar();
             }}
+            style={zonaDeToque}
           >
             <Text style={estilos.noShow}>
               {`${siguiente.nombre.split(' ')[0]} no aparece · marcar como no show`}

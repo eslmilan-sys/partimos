@@ -27,7 +27,7 @@ import { Vidrio } from '@/ui/Vidrio';
 import { Boton, Insignia } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { Lupa } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Dónde cae cada carro sobre el mapa. Con proveedor real esto son coordenadas. */
 const SITIOS = [
@@ -80,6 +80,7 @@ export default function YaMapa() {
               accessibilityRole="button"
               accessibilityLabel="Cambiar de dónde sales"
               onPress={() => setBuscando(true)}
+              style={zonaDeToque}
             >
               <Text style={estilos.cambiar}>cambiar</Text>
             </Pressable>
@@ -244,7 +245,8 @@ const estilos = StyleSheet.create({
   chinchetas: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   chincheta: {
     position: 'absolute',
-    height: 30,
+    height: 40,
+    minWidth: espacio.tap,
     paddingHorizontal: 11,
     borderRadius: radio.ficha,
     backgroundColor: color.blanco,
@@ -256,7 +258,9 @@ const estilos = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
-  chinchetaViva: { height: 34, paddingHorizontal: 12, backgroundColor: color.rojo500 },
+  /* La viva es la más grande de las cuatro, no la única que se sale de la
+     medida mínima: 46 sobre 40. */
+  chinchetaViva: { height: 46, paddingHorizontal: 12, backgroundColor: color.rojo500 },
   chinchetaTexto: {
     fontSize: 12.5,
     lineHeight: 18.125,

@@ -239,7 +239,7 @@ const estilos = StyleSheet.create({
 
   atajos: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
   atajo: {
-    height: 36,
+    height: espacio.tap,
     paddingHorizontal: 14,
     borderRadius: radio.pastilla,
     alignItems: 'center',

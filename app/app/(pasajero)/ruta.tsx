@@ -29,7 +29,7 @@ import { Vidrio } from '@/ui/Vidrio';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { hora } from '@/ui/fechas';
 import { Escudo } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
 const DEL_RECORRIDO = 'aaaaaaa1-0000-4000-8000-000000000001';
@@ -83,6 +83,7 @@ export default function EnRuta() {
                 message: `Voy en camino a ${puesto.destino} con ${puesto.conductor}. Llego sobre las ${hora(llegada)}.`,
               })
             }
+            style={zonaDeToque}
           >
             <Text style={estilos.compartir}>Compartir mi llegada</Text>
           </Pressable>

@@ -45,7 +45,7 @@ import { Avatar, Boton } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { diaCorto } from '@/ui/fechas';
 import { Atras } from '@/ui/iconos';
-import { color, espacio, familia, interlinea, radio, sombra, texto } from '@/ui/tokens';
+import { color, espacio, familia, interlinea, radio, sombra, texto, zonaDeToque } from '@/ui/tokens';
 
 // Mientras no haya sesión, el puesto que la pasajera del recorrido tiene
 // comprado en el Albrook → Chitré: el viaje del que se viene hablando.
@@ -124,6 +124,7 @@ export default function Ayuda() {
               accessibilityRole="button"
               accessibilityLabel="Cambiar de viaje"
               onPress={() => router.push('/(pasajero)')}
+              style={zonaDeToque}
             >
               <Text style={estilos.cambiar}>Cambiar</Text>
             </Pressable>
@@ -323,6 +324,7 @@ const estilos = StyleSheet.create({
   filaPregunta: {
     flexDirection: 'row',
     alignItems: 'center',
+    minHeight: espacio.tap,
     gap: 11,
     paddingVertical: 12,
     borderTopWidth: 1,

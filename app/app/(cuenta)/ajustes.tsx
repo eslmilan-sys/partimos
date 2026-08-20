@@ -374,6 +374,7 @@ const estilos = StyleSheet.create({
   filaDato: {
     flexDirection: 'row',
     alignItems: 'center',
+    minHeight: espacio.tap,
     gap: 12,
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,

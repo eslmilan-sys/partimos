@@ -374,7 +374,13 @@ const estilos = StyleSheet.create({
     borderRadius: radio.pastilla,
     padding: 4,
   },
-  opcion: { flex: 1, height: 34, borderRadius: radio.pastilla, alignItems: 'center', justifyContent: 'center' },
+  opcion: {
+    flex: 1,
+    height: espacio.tap,
+    borderRadius: radio.pastilla,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   opcionActiva: {
     backgroundColor: color.blanco,
     shadowColor: '#26232B',
