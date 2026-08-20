@@ -23,6 +23,7 @@ import { useRouter } from 'expo-router';
 import { type PuestoMio, misViajes } from '@/servicios/panel';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Mapa } from '@/ui/Mapa';
 import { Vidrio } from '@/ui/Vidrio';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -45,7 +46,7 @@ export default function EnRuta() {
     misViajes(yo).then((m) => setPuesto(m.hoy ?? m.proximos[0] ?? null));
   }, [yo]);
 
-  if (!puesto) return <View style={estilos.pantalla} />;
+  if (!puesto) return <Cargando />;
 
   const llegada = new Date(new Date(puesto.cuando).getTime() + 210 * 60_000).toISOString();
   const paradas: Parada[] = [

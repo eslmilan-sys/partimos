@@ -158,9 +158,7 @@ export default function Conversaciones() {
         </Text>
       </ScrollView>
 
-      <View style={estilos.pie}>
         <Pestanas valor="Mensajes" />
-      </View>
     </View>
   );
 }

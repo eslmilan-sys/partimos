@@ -22,6 +22,7 @@ import {
   type PasoDelReembolso,
 } from '@/servicios/cancelaciones';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe } from '@/ui/controles';
 import { formatearDinero, tabular } from '@/ui/dinero';
@@ -57,7 +58,7 @@ export default function Estado() {
     estadoDelReembolso(reembolsoId).then(setDatos);
   }, [reembolsoId]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   return (
     <View style={estilos.pantalla}>

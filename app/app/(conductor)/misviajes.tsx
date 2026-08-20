@@ -18,6 +18,7 @@ import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import { type MisViajes, type PuestoMio, misViajes } from '@/servicios/panel';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Epigrafe } from '@/ui/controles';
@@ -41,7 +42,7 @@ export default function MisViajesPantalla() {
     misViajes(yo).then(setDatos);
   }, [yo]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const hoy = datos.hoy ?? datos.proximos[0] ?? null;
   const lista = (pestana === 'proximos' ? datos.proximos : datos.pasados).filter(
@@ -122,9 +123,7 @@ export default function MisViajesPantalla() {
         </View>
       </ScrollView>
 
-      <View style={estilos.pie}>
         <Pestanas valor="Mis viajes" />
-      </View>
     </View>
   );
 }

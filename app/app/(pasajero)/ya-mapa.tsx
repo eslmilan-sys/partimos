@@ -204,9 +204,7 @@ export default function YaMapa() {
         alCerrar={() => setBuscando(false)}
       />
 
-      <View style={estilos.pie}>
         <Pestanas valor="Buscar" />
-      </View>
     </View>
   );
 }

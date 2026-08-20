@@ -49,7 +49,9 @@ export function TarjetaDeViaje({
       accessibilityRole="button"
       accessibilityLabel={`Salida ${viaje.salida}, ${formatearDineroRedondo(viaje.aporteCentavos)} por puesto, con ${viaje.conductor.nombre}`}
       onPress={alPulsar}
-      style={estilos.tarjeta}
+      /* Se hunde un poco al tocarla: sin respuesta al dedo, una tarjeta
+         entera que navega no parece que se pueda tocar. */
+      style={({ pressed }) => [estilos.tarjeta, pressed && estilos.pulsada]}
     >
       {marca ? (
         <View style={estilos.marca}>
@@ -153,6 +155,7 @@ const estilos = StyleSheet.create({
     color: color.rojo700,
     fontFamily: familia,
   },
+  pulsada: { backgroundColor: color.sand100, borderColor: color.bordePorDefecto },
   filaSuperior: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 },
   cuando: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
   filaPrecio: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },

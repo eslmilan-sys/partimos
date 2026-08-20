@@ -25,6 +25,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
 
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
 import { Atras } from '@/ui/iconos';
@@ -105,7 +106,7 @@ export default function PermisoDeAvisos() {
     prepararReserva(viajeId).then(setDatos);
   }, [viajeId]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   // Se conteste que sí o que no, de aquí se sigue a pedir el puesto: el
   // permiso no bloquea nada.

@@ -20,6 +20,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ATAJOS, type Atajo, calificar, prepararCalificacion, type Calificacion } from '@/servicios/calificaciones';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Boton } from '@/ui/controles';
@@ -51,7 +52,7 @@ export default function Calificar() {
   }, [reservaId]);
 
   if (noEsta) return <NoEsta />;
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const alternar = (a: Atajo) =>
     setElegidos((e) => (e.includes(a) ? e.filter((x) => x !== a) : [...e, a]));

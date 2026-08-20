@@ -29,6 +29,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import { type ComoSePaga, comoSePaga } from '@/servicios/ayuda';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
@@ -69,7 +70,7 @@ export default function Pagos() {
     comoSePaga(viajeId).then(setDatos);
   }, [viajeId]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   // Los rótulos parten en dos líneas fijas, no por ancho: así las tres
   // columnas cierran a la misma altura aunque digan cosas de largo distinto.

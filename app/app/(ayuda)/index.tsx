@@ -39,6 +39,7 @@ import {
   viajeDeAyuda,
 } from '@/servicios/ayuda';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Boton } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
@@ -79,7 +80,7 @@ export default function Ayuda() {
     viajeDeAyuda(reservaId).then(setViaje);
   }, [reservaId]);
 
-  if (!viaje) return <View style={estilos.pantalla} />;
+  if (!viaje) return <Cargando />;
 
   return (
     <View style={estilos.pantalla}>

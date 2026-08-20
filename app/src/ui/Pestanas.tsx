@@ -11,6 +11,8 @@
  * es la de navegación.
  */
 
+import { StyleSheet, View } from 'react-native';
+
 import { useRouter } from 'expo-router';
 
 import { BarraDePestanas } from './BarraDePestanas';
@@ -55,6 +57,16 @@ export function Pestanas({ valor, conPublicar = false }: Props) {
   const router = useRouter();
 
   return (
+    /**
+     * EL MARCO DE LA BARRA VIVE AQUÍ.
+     *
+     * Cada pantalla envolvía la barra en su propio `pie`, y no todas con los
+     * mismos números: unas con 26 de lado y 10 abajo, otras con 14 y 22. Se
+     * notaba al pasar de una a otra —la pastilla cambiaba de ancho y saltaba
+     * de altura— y era imposible que no volviera a pasar mientras el número
+     * estuviera escrito once veces.
+     */
+    <View style={estilos.marco}>
     <BarraDePestanas
       valor={valor}
       pestanas={LAS_CUATRO}
@@ -73,5 +85,12 @@ export function Pestanas({ valor, conPublicar = false }: Props) {
           : undefined
       }
     />
+    </View>
   );
 }
+
+const estilos = StyleSheet.create({
+  /* Separada del borde: es una pastilla que flota sobre la página, no una
+     barra pegada abajo. 22 debajo deja sitio al indicador del iPhone. */
+  marco: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 22 },
+});

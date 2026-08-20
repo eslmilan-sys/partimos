@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Epigrafe, Insignia } from '@/ui/controles';
@@ -39,7 +40,7 @@ export default function Perfil() {
   }, [perfilParam]);
 
   if (noEsta) return <NoEsta titulo="No encontramos ese perfil" explicacion="La cuenta pudo cerrarse, o el enlace es de otra persona." />;
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   return (
     <View style={estilos.pantalla}>

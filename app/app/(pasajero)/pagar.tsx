@@ -17,6 +17,7 @@ import type { CanalDePago } from '@/dominio/tarifas';
 import { type MetodoDePago, desglosar, elegirMetodo, metodosDePago } from '@/servicios/pagos';
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
@@ -53,7 +54,7 @@ export default function Pagar() {
   );
 
   if (noEsta) return <NoEsta />;
-  if (!datos || !desglose) return <View style={estilos.pantalla} />;
+  if (!datos || !desglose) return <Cargando />;
 
   return (
     <View style={estilos.pantalla}>

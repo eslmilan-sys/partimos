@@ -21,6 +21,7 @@ import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { type PublicacionPreparada, prepararPublicacion } from '@/servicios/viajes';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Interruptor, Pastilla, Stepper } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -48,7 +49,7 @@ export default function Puestos() {
     });
   }, [yo]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const aporte = aporteElegido ?? aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos);
 

@@ -30,6 +30,7 @@ import { type Previsualizacion, cancelar, previsualizar } from '@/servicios/canc
 import { type PuestoMio, misViajes } from '@/servicios/panel';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
 import { formatearDinero, tabular } from '@/ui/dinero';
@@ -78,7 +79,7 @@ export default function Cancelar() {
     previsualizar(reservaId, RAZONES[elegida].motivo).then(setPrevia);
   }, [reservaId, elegida]);
 
-  if (!puesto || !previa) return <View style={estilos.pantalla} />;
+  if (!puesto || !previa) return <Cargando />;
 
   const conductor = puesto.conductor.split(' ')[0];
   // Las horas se dicen enteras, como las dice la regla en su propio texto.

@@ -23,6 +23,7 @@ import {
 } from '@/servicios/viajes';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { NoEsta } from '@/ui/NoEsta';
@@ -106,7 +107,7 @@ export default function Publicar() {
         explicacion="Para publicar un viaje hace falta un carro registrado: la marca, el modelo y cuántos puestos tiene. Se hace una vez."
       />
     );
-  if (!datos || !cuenta) return <View style={estilos.pantalla} />;
+  if (!datos || !cuenta) return <Cargando />;
 
   const laRuta = rutas.find((r) => r.slug === ruta);
 

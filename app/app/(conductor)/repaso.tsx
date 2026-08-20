@@ -27,6 +27,7 @@ import {
 } from '@/servicios/viajes';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Bandera, motivoDe } from '@/ui/CampoRojo';
 import { NoEsta } from '@/ui/NoEsta';
 import { Boton, Epigrafe } from '@/ui/controles';
@@ -79,7 +80,7 @@ export default function Repaso() {
         explicacion="Vuelve a la pantalla de publicar y elige la ruta, el día y la hora."
       />
     );
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const aporte = aporteElegido ?? aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos);
   const cuenta = repartoDelCosto(datos.costoCentavos, aporte, puestos);

@@ -18,6 +18,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { type Solicitud, aceptarSolicitud, listarSolicitudes, rechazarSolicitud } from '@/servicios/solicitudes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe, Insignia } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -56,7 +57,7 @@ export default function Solicitante() {
     });
   }, [viajeId, solicitudParam]);
 
-  if (!solicitud || !perfil) return <View style={estilos.pantalla} />;
+  if (!solicitud || !perfil) return <Cargando />;
 
   const sinEstrellas = perfil.calificacion == null;
 

@@ -25,6 +25,7 @@ import { type Href, useRouter } from 'expo-router';
 import { type Aviso, type Bandeja, bandeja, marcarLeido, marcarTodo } from '@/servicios/avisos';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { tabular } from '@/ui/dinero';
@@ -45,7 +46,7 @@ export default function Avisos() {
 
   useEffect(cargar, [cargar]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const abrir = async (aviso: Aviso) => {
     await marcarLeido(aviso.id);
@@ -160,9 +161,7 @@ export default function Avisos() {
         <Text style={estilos.promesa}>Solo te escribimos por tus viajes. Nunca promociones.</Text>
       </ScrollView>
 
-      <View style={estilos.pie}>
         <Pestanas valor="Perfil" />
-      </View>
     </View>
   );
 }

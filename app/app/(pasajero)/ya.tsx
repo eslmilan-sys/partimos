@@ -176,9 +176,7 @@ export default function Ya() {
         </View>
       </ScrollView>
 
-      <View style={estilos.pie}>
         <Pestanas valor="Buscar" />
-      </View>
     </View>
   );
 }

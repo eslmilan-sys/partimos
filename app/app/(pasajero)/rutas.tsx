@@ -24,6 +24,7 @@ import { useRouter } from 'expo-router';
 import { cambiarAviso, cuantasAvisando, rutasGuardadas, type RutaGuardada } from '@/servicios/rutas';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe } from '@/ui/controles';
@@ -56,7 +57,7 @@ export default function Rutas() {
     if (yo) setAvisando(await cuantasAvisando(yo));
   }, []);
 
-  if (!rutas) return <View style={estilos.pantalla} />;
+  if (!rutas) return <Cargando />;
 
   return (
     <View style={estilos.pantalla}>
@@ -131,9 +132,7 @@ export default function Rutas() {
         </Text>
       </View>
 
-      <View style={estilos.pie}>
         <Pestanas valor="Perfil" />
-      </View>
     </View>
   );
 }

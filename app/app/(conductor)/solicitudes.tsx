@@ -19,6 +19,7 @@ import {
   rechazarSolicitud,
 } from '@/servicios/solicitudes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Boton, Epigrafe, Insignia } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -48,7 +49,7 @@ export default function Solicitudes() {
     recargar();
   }, [recargar]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const aceptar = async (id: string, nombre: string, aporteCentavos: number) => {
     setOcupado(id);

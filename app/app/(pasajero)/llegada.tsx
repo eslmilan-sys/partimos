@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type Llegada, resumenDeLlegada } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { Amanecer, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe, Pastilla } from '@/ui/controles';
@@ -37,7 +38,7 @@ export default function LlegadaPantalla() {
   }, [reservaId]);
 
   if (noEsta) return <NoEsta />;
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   return (
     <View style={estilos.pantalla}>

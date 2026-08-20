@@ -12,6 +12,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type CodigoDeAbordaje, codigoDeAbordaje } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Boton } from '@/ui/controles';
@@ -37,7 +38,7 @@ export default function Codigo() {
   }, [reservaId]);
 
   if (noEsta) return <NoEsta />;
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   return (
     <View style={estilos.pantalla}>

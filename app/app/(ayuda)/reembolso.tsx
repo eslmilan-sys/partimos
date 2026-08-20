@@ -28,6 +28,7 @@ import {
 } from '@/servicios/cancelaciones';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { formatearDinero, tabular } from '@/ui/dinero';
@@ -85,7 +86,7 @@ export default function Reembolso() {
   }, [yo, reservaId]);
 
   const previa = previas.find((p) => p.motivo === motivo);
-  if (!viaje || !previa) return <View style={estilos.pantalla} />;
+  if (!viaje || !previa) return <Cargando />;
 
   const pedir = async () => {
     if (!yo) return;

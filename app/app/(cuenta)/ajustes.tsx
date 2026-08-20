@@ -29,6 +29,7 @@ import { salir } from '@/servicios/cuenta';
 import { type EstadoDeCedula, estadoDeCedula } from '@/servicios/seguridad';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
@@ -83,7 +84,7 @@ export default function Ajustes() {
     });
   }, [yo]);
 
-  if (!grupos || !quien || !cedula) return <View style={estilos.pantalla} />;
+  if (!grupos || !quien || !cedula) return <Cargando />;
 
   // El servicio promete los cuatro grupos en este orden, y ese orden es la
   // pantalla: cambiarlo allí cambia esto, que es lo que queremos.

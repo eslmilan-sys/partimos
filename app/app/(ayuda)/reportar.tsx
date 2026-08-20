@@ -42,6 +42,7 @@ import {
 } from '@/servicios/seguridad';
 import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
 import { diaCorto } from '@/ui/fechas';
@@ -91,7 +92,7 @@ export default function Reportar() {
     datosParaLlamar(reservaId).then(setDatos);
   }, [reservaId]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   // El epígrafe del campo dice de qué viaje hablamos; el día basta, la fecha
   // exacta sobra cuando ya se está dentro del viaje.

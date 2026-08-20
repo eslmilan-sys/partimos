@@ -28,6 +28,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { type Comprobante, comprobante } from '@/servicios/ayuda';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe, Pastilla } from '@/ui/controles';
@@ -57,7 +58,7 @@ export default function ComprobantePasajero() {
   }, [reservaId]);
 
   if (noEsta) return <NoEsta />;
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const cuando = new Date(datos.cuando);
   const desglose = datos.desglose.filter((d) => !d.fuerte);

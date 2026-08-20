@@ -25,6 +25,7 @@ import { type MetodoDePago, desglosar, metodosDePago } from '@/servicios/pagos';
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe, Pastilla } from '@/ui/controles';
 import { Dinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -66,7 +67,7 @@ export default function Metodos() {
     [viaje, canal],
   );
 
-  if (!viaje || !canal || !desglose) return <View style={estilos.pantalla} />;
+  if (!viaje || !canal || !desglose) return <Cargando />;
 
   const elegido = metodos.find((m) => m.canal === canal);
 

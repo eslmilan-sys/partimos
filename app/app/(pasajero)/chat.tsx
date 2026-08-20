@@ -15,6 +15,7 @@ import { useMiIdOEntrar } from '@/servicios/sesion';
 
 import { type HiloDelViaje, enviarMensaje, hiloDelViaje } from '@/servicios/mensajes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe, Insignia } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
@@ -45,7 +46,7 @@ export default function Chat() {
     recargar();
   }, [recargar]);
 
-  if (!hilo) return <View style={estilos.pantalla} />;
+  if (!hilo) return <Cargando />;
 
   const mandar = async () => {
     if (!texto.trim()) return;

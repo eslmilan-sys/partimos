@@ -26,6 +26,7 @@ import { type MetodoDePago, guardarMetodoPreferido, metodosDePago } from '@/serv
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Campo } from '@/ui/controles';
 import { formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -86,7 +87,7 @@ export default function MetodoNuevo() {
     [metodos],
   );
 
-  if (!datos || pestanas.length === 0) return <View style={estilos.pantalla} />;
+  if (!datos || pestanas.length === 0) return <Cargando />;
 
   const copia = FORMULARIO[canal];
   const aporte = datos.aporteCentavos;

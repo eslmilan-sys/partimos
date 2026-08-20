@@ -27,6 +27,7 @@ import {
 } from '@/servicios/viajes';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Amanecer, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -58,7 +59,7 @@ export default function Tope() {
     prepararPublicacion(yo, RUTA, SALIDA).then(setDatos);
   }, [yo]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const puestos = Math.min(
     datos.puestosMaximos,

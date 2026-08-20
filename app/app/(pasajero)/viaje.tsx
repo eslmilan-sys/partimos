@@ -26,6 +26,7 @@ import { useSesion } from '@/servicios/sesion';
 import { obtenerViaje, paradasDelViaje, slugDestinoDe } from '@/servicios/viajes';
 import type { TripStop, ViajeFila } from '@/tipos';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando, Hueso } from '@/ui/Cargando';
 import { Bandera, motivoDe } from '@/ui/CampoRojo';
 import { Avatar, Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -71,7 +72,13 @@ export default function DetalleDelViaje() {
 
   const [viaje, setViaje] = useState<ViajeFila | null>(null);
   const [paradas, setParadas] = useState<TripStop[]>([]);
-  const [conductor, setConductor] = useState<PerfilPublico | null>(null);
+  /**
+   * `undefined` es «todavía no lo he preguntado», `null` es «pregunté y no
+   * está». Tratarlos igual hacía que durante un instante —y en una red lenta,
+   * durante varios— la tarjeta dijera «Todavía sin calificaciones» y «Carro
+   * sin registrar» de un conductor que tiene las dos cosas.
+   */
+  const [conductor, setConductor] = useState<PerfilPublico | null | undefined>(undefined);
 
   useEffect(() => {
     obtenerViaje(viajeId).then(setViaje);
@@ -85,7 +92,7 @@ export default function DetalleDelViaje() {
       .catch(() => setConductor(null));
   }, [viaje]);
 
-  if (!viaje) return <View style={estilos.pantalla} />;
+  if (!viaje) return <Cargando />;
 
   const minutos = viaje.arrival_estimate_at
     ? Math.round(
@@ -199,17 +206,30 @@ export default function DetalleDelViaje() {
             style={({ pressed }) => [estilos.tarjeta, pressed && { backgroundColor: color.sand100 }]}
           >
             <View style={estilos.filaConductor}>
-              <Avatar nombre={nombre || '·'} tono="rojo" tamano={56} />
+              {conductor === undefined ? (
+                <Hueso ancho={56} alto={56} redondo={radio.cuadrado} />
+              ) : (
+                <Avatar nombre={nombre || '·'} tono="rojo" tamano={56} />
+              )}
               <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={estilos.nombre}>{nombre}</Text>
-                <View style={estilos.filaCalificacion}>
-                  {conductor?.calificacion != null ? <Estrella tamano={13} /> : null}
-                  <Text style={estilos.calificacion}>
-                    {conductor?.calificacion != null
-                      ? `${conductor.calificacion.toFixed(1)} (${conductor.viajes} ${conductor.viajes === 1 ? 'viaje' : 'viajes'})`
-                      : 'Todavía sin calificaciones'}
-                  </Text>
-                </View>
+                {conductor === undefined ? (
+                  <>
+                    <Hueso ancho="60%" alto={17} />
+                    <Hueso ancho="40%" alto={13} estilo={{ marginTop: 8 }} />
+                  </>
+                ) : (
+                  <>
+                    <Text style={estilos.nombre}>{nombre}</Text>
+                    <View style={estilos.filaCalificacion}>
+                      {conductor?.calificacion != null ? <Estrella tamano={13} /> : null}
+                      <Text style={estilos.calificacion}>
+                        {conductor?.calificacion != null
+                          ? `${conductor.calificacion.toFixed(1)} (${conductor.viajes} ${conductor.viajes === 1 ? 'viaje' : 'viajes'})`
+                          : 'Todavía sin calificaciones'}
+                      </Text>
+                    </View>
+                  </>
+                )}
                 {/* Las dos etiquetas en su propia fila y no a la derecha del
                     nombre: a 390 px la pastilla del equipaje dejaba ochenta
                     píxeles para la nota, y «4.9 (34 viajes)» partía en dos. */}
@@ -251,15 +271,24 @@ export default function DetalleDelViaje() {
                 <Carro tamano={26} tinta={color.ink500} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={estilos.textoCarro} numberOfLines={1}>
-                  {carro ? `${carro.modelo}${carro.color ? ` ${carro.color}` : ''}` : 'Carro sin registrar'}
-                </Text>
-                {/* La placa entera no se guarda: solo los tres últimos. Enseñar
-                    la de alguien a quien no has conocido es lo que el diseño
-                    evita, así que se dice lo que hay y no se inventa. */}
-                <Text style={estilos.detalleCarro}>
-                  {carro?.placa ? `Placa ${carro.placa}` : 'Lo reconoces por el modelo y el color'}
-                </Text>
+                {conductor === undefined ? (
+                  <>
+                    <Hueso ancho="65%" alto={16} />
+                    <Hueso ancho="45%" alto={12} estilo={{ marginTop: 7 }} />
+                  </>
+                ) : (
+                  <>
+                    <Text style={estilos.textoCarro} numberOfLines={1}>
+                      {carro ? `${carro.modelo}${carro.color ? ` ${carro.color}` : ''}` : 'Carro sin registrar'}
+                    </Text>
+                    {/* La placa entera no se guarda: solo los tres últimos.
+                        Enseñar la de alguien a quien no has conocido es lo que
+                        el diseño evita, así que se dice lo que hay. */}
+                    <Text style={estilos.detalleCarro}>
+                      {carro?.placa ? `Placa ${carro.placa}` : 'Lo reconoces por el modelo y el color'}
+                    </Text>
+                  </>
+                )}
               </View>
               <Avanza />
             </View>

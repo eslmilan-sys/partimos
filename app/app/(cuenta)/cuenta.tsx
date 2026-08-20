@@ -24,6 +24,7 @@ import { type Cuenta, cuenta } from '@/servicios/ajustes';
 import { salir } from '@/servicios/cuenta';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { NoEsta } from '@/ui/NoEsta';
 import { Pestanas } from '@/ui/Pestanas';
@@ -73,7 +74,7 @@ export default function TuCuenta() {
         explicacion="La cuenta pudo cerrarse, o el enlace es de otra persona."
       />
     );
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   /**
    * LAS NUEVE FILAS, Y TODAS LLEVAN A ALGUNA PARTE.
@@ -296,9 +297,7 @@ export default function TuCuenta() {
         </Pressable>
       </ScrollView>
 
-      <View style={estilos.pie}>
         <Pestanas valor="Perfil" />
-      </View>
     </View>
   );
 }

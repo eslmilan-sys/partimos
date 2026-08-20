@@ -27,6 +27,7 @@ import { guardarRutaBuscada } from '@/servicios/rutas';
 import { useMiId } from '@/servicios/sesion';
 import { NOMBRE_DE_FRANJA, type Franja, franjaDe } from '@/dominio/rutinas';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo, motivoDe } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
@@ -147,7 +148,7 @@ export default function Resultados() {
   const alternar = (clave: keyof Filtros) =>
     setFiltros((f) => ({ ...f, [clave]: f[clave] ? undefined : true }));
 
-  if (!ruta) return <View style={estilos.pantalla} />;
+  if (!ruta) return <Cargando />;
 
   return (
     <View style={estilos.pantalla}>
@@ -296,9 +297,7 @@ export default function Resultados() {
         cuantos={viajes.length}
       />
 
-      <View style={estilos.pie}>
         <Pestanas valor="Buscar" />
-      </View>
     </View>
   );
 }

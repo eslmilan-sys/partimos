@@ -104,6 +104,8 @@ export default function Inicio() {
   const [sinLeer, setSinLeer] = useState(0);
   const [rutas, setRutas] = useState<RutaPopular[]>([]);
   const [salen, setSalen] = useState<SalidaCercana[]>([]);
+  /** En qué tarjeta de la tira vas, para los puntos de abajo. */
+  const [enTira, setEnTira] = useState(0);
   const [gancho, setGancho] = useState<GanchoDeConductor | null>(null);
   const [desde, setDesde] = useState<Lugar>(DESDE_POR_DEFECTO);
   const [hacia, setHacia] = useState<Lugar | null>(null);
@@ -329,10 +331,25 @@ export default function Inicio() {
           <View style={estilos.seccionSalen}>
             <View style={estilos.filaSeccion}>
               <Epigrafe>Salen en la próxima hora</Epigrafe>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ver todas las salidas de hoy"
+                onPress={() => router.push('/(pasajero)/salidas')}
+              >
+                <Text style={estilos.verTodas}>Ver todas</Text>
+              </Pressable>
             </View>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
+              /* Se para en cada tarjeta: media tarjeta a la vista no es una
+                 posición, es un desliz a medio hacer. */
+              snapToInterval={218}
+              decelerationRate="fast"
+              scrollEventThrottle={16}
+              onScroll={(e) =>
+                setEnTira(Math.round(e.nativeEvent.contentOffset.x / 218))
+              }
               contentContainerStyle={estilos.tiraSalen}
             >
               {salen.map((v) => (
@@ -376,6 +393,19 @@ export default function Inicio() {
                 </Pressable>
               ))}
             </ScrollView>
+
+            {/* Los puntos: cuántas hay y en cuál vas. Sin ellos, una tira que
+                se corta en el borde parece una tarjeta mal cortada. */}
+            {salen.length > 1 ? (
+              <View style={estilos.puntos}>
+                {salen.map((v, i) => (
+                  <View
+                    key={v.viajeId}
+                    style={[estilos.punto, i === enTira && estilos.puntoActivo]}
+                  />
+                ))}
+              </View>
+            ) : null}
           </View>
         ) : null}
 
@@ -449,9 +479,7 @@ export default function Inicio() {
         ) : null}
       </ScrollView>
 
-      <View style={estilos.pie}>
         <Pestanas valor="Buscar" conPublicar />
-      </View>
 
       <BuscadorDeLugar
         abierto={buscando !== null}
@@ -562,6 +590,9 @@ const estilos = StyleSheet.create({
 
   seccionSalen: { marginTop: 24 },
   tiraSalen: { flexDirection: 'row', gap: 10, paddingHorizontal: 22, paddingTop: 12 },
+  puntos: { flexDirection: 'row', gap: 6, justifyContent: 'center', marginTop: 12 },
+  punto: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.ink300 },
+  puntoActivo: { width: 18, backgroundColor: color.rojo500 },
   tarjetaSale: {
     width: 208,
     borderRadius: radio.l,

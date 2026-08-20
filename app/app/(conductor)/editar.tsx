@@ -20,6 +20,7 @@ import Svg, { Path, Rect } from 'react-native-svg';
 
 import { type Edicion, equipajeEnConflicto, guardarEdicion, prepararEdicion } from '@/servicios/panel';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Interruptor, Stepper } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
@@ -49,7 +50,7 @@ export default function Editar() {
     });
   }, [viajeId]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const cerrados = datos.campos.filter((c) => c.cerrado);
   const vendidos = datos.campos.find((c) => c.clave === 'puestos')?.valor.split('· ')[1] ?? '';

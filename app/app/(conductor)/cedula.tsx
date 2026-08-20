@@ -29,6 +29,7 @@ import {
 } from '@/servicios/seguridad';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
@@ -79,7 +80,7 @@ export default function Cedula() {
     pedirVerificacion(yo).then(mirar);
   }, [yo, mirar]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const hasta = HASTA_DONDE[datos.estado];
   const insignia = TINTA_DEL_ESTADO[datos.estado];

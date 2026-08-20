@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { type Aportes, type Tramo, aportes } from '@/servicios/aportes';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo, Brillo } from '@/ui/CampoRojo';
 import { Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -37,7 +38,7 @@ export default function AportesPantalla() {
     aportes(yo, tramo).then(setDatos);
   }, [yo, tramo]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   return (
     <View style={estilos.pantalla}>

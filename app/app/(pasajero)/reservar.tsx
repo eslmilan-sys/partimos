@@ -17,6 +17,7 @@ import { etiquetaDeMaletero, notaDeEquipaje } from '@/dominio/equipaje';
 import { type ReservaPreparada, pedirPuesto, prepararReserva } from '@/servicios/reservas';
 import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Campo, Epigrafe, Pastilla, Stepper } from '@/ui/controles';
@@ -51,7 +52,7 @@ export default function Reservar() {
   }, [viajeId]);
 
   if (noEsta) return <NoEsta />;
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   // Si el conductor no lleva maletas, no hay maleta que contar.
   const maletasReales = datos.aceptaMaletas ? maletas : 0;

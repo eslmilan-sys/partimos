@@ -82,9 +82,7 @@ export default function Panel() {
         <Mas tamano={24} tinta="#fff" />
       </Pressable>
 
-      <View style={estilos.pie}>
         <Pestanas valor="Mis viajes" />
-      </View>
     </View>
   );
 }

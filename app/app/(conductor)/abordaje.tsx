@@ -25,6 +25,7 @@ import {
   verificarLlegada,
 } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Boton, Epigrafe } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
@@ -56,7 +57,7 @@ export default function Abordaje() {
     recargar();
   }, [recargar]);
 
-  if (!datos) return <View style={estilos.pantalla} />;
+  if (!datos) return <Cargando />;
 
   const teclear = (t: string) => {
     setError(null);

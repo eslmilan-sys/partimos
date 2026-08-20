@@ -26,6 +26,7 @@ import {
 } from '@/servicios/viajes';
 import { CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Cargando } from '@/ui/Cargando';
 import { Pestanas } from '@/ui/Pestanas';
 import { Insignia, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -53,7 +54,7 @@ export default function Destino() {
     })();
   }, []);
 
-  if (!ruta) return <View style={estilos.pantalla} />;
+  if (!ruta) return <Cargando />;
 
   const [primero, ...resto] = viajes;
 
@@ -135,9 +136,7 @@ export default function Destino() {
         </View>
       </ScrollView>
 
-      <View style={estilos.pie}>
         <Pestanas valor="Buscar" />
-      </View>
     </View>
   );
 }
