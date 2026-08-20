@@ -281,7 +281,7 @@ export function Campo({ valor, alEscribir, marcador, ayuda, etiquetaAccesible }:
 const TONOS_AVATAR = {
   azul: { fondo: color.azul100, tinta: color.azul700 },
   rojo: { fondo: color.rojo100, tinta: color.rojo700 },
-  arena: { fondo: color.arena100, tinta: '#A06F33' },
+  arena: { fondo: color.arena100, tinta: '#8A5A24' },
   arena2: { fondo: color.sand200, tinta: color.ink700 },
 } as const;
 
@@ -319,11 +319,13 @@ export function Avatar({
     >
       <Text
         style={{
-          fontSize: tamano * 0.4,
-          lineHeight: interlinea(tamano * 0.4),
+          /* Nunca por debajo de 10: a 20 px de avatar, el 40 % daba ocho
+             píxeles y las iniciales eran una mancha. */
+          fontSize: Math.max(10, tamano * 0.4),
+          lineHeight: interlinea(Math.max(10, tamano * 0.4)),
           fontWeight: '600',
           // `-.02em`, como el resto del traspaso: depende del tamaño.
-          letterSpacing: tamano * 0.4 * -0.02,
+          letterSpacing: Math.max(10, tamano * 0.4) * -0.02,
           color: paleta.tinta,
           fontFamily: familia,
         }}
@@ -372,7 +374,7 @@ export function Insignia({
 
 /* --------------------------------------------------------------- Epígrafe */
 
-export function Epigrafe({ children, tinta = color.azul500 }: { children: ReactNode; tinta?: string }) {
+export function Epigrafe({ children, tinta = color.azul700 }: { children: ReactNode; tinta?: string }) {
   return <Text style={[texto.epigrafe, { color: tinta }]}>{children}</Text>;
 }
 
@@ -468,6 +470,6 @@ const estilos = StyleSheet.create({
     // en web el input trae su propio contorno al enfocarse
     outlineStyle: 'none',
   } as never,
-  campoAyuda: { marginTop: 6, fontSize: 12.5, lineHeight: 18.12, color: color.ink400, fontFamily: familia },
+  campoAyuda: { marginTop: 6, fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
 });
 

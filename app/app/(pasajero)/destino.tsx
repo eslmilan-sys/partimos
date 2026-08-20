@@ -372,7 +372,7 @@ const estilos = StyleSheet.create({
   horaLlegada: {
     fontSize: 13,
     lineHeight: 18.85,
-    color: color.ink400,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },

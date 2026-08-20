@@ -207,7 +207,7 @@ const estilos = StyleSheet.create({
   titularFuerte: { fontWeight: '600' },
 
   hoja: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 22,
     backgroundColor: color.blanco,
     borderRadius: 28,
@@ -271,7 +271,7 @@ const estilos = StyleSheet.create({
   },
 
   tarjeta: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 11,
     backgroundColor: color.blanco,
     borderWidth: 1,
@@ -332,7 +332,7 @@ const estilos = StyleSheet.create({
   },
 
   promesa: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 11,
     fontSize: 12.5,
     lineHeight: 18.75,

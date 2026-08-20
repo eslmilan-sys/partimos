@@ -191,12 +191,12 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 28, paddingBottom: 12 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 28, paddingBottom: 12 },
   hoja: {
     backgroundColor: color.blanco,
     borderRadius: radio.hoja,
     paddingVertical: 24,
-    paddingHorizontal: 22,
+    paddingHorizontal: espacio.gutter,
     shadowColor: 'rgb(120,10,30)',
     shadowOpacity: 0.28,
     shadowRadius: 40,
@@ -264,5 +264,5 @@ const estilos = StyleSheet.create({
     outlineStyle: 'none',
   } as never,
 
-  pie: { paddingHorizontal: 22, paddingTop: 18, paddingBottom: 30, gap: 10 },
+  pie: { paddingHorizontal: espacio.gutter, paddingTop: 18, paddingBottom: 30, gap: 10 },
 });

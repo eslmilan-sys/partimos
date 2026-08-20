@@ -235,7 +235,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 22, paddingBottom: 12 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 22, paddingBottom: 12 },
   lista: {
     backgroundColor: color.blanco,
     borderRadius: 28,
@@ -258,13 +258,13 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  cuando: { fontSize: 12.5, lineHeight: 18.125, color: color.ink400, fontFamily: familia, ...tabular },
+  cuando: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia, ...tabular },
   ultimo: { fontSize: 13.5, lineHeight: 19.575, color: color.ink600, marginTop: 2, fontFamily: familia },
   // El viaje del que habla el hilo: sin esto, un chat viejo no se sitúa.
   contexto: {
     fontSize: 12,
     lineHeight: 17.4,
-    color: color.ink400,
+    color: color.ink500,
     marginTop: 4,
     fontFamily: familia,
     ...tabular,

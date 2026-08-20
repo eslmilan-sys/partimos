@@ -23,7 +23,7 @@ import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Boton, Epigrafe, Insignia } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { Atras, Maleta, Pin, Visto } from '@/ui/iconos';
+import { Atras, Avanza, Maleta, Pin, Visto } from '@/ui/iconos';
 import { cuando } from '@/ui/fechas';
 import { familia, color, espacio, radio, texto } from '@/ui/tokens';
 
@@ -150,6 +150,23 @@ export default function Solicitudes() {
               <Text style={estilos.aporte}>{formatearDineroRedondo(s.aporteCentavos)}</Text>
             </View>
 
+            {/* Ver a quién le estás abriendo el carro antes de decidir: la
+                pantalla existía y no se llegaba a ella desde ningún sitio. */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Ver el perfil de ${s.pasajero.nombre}`}
+              onPress={() =>
+                router.push({
+                  pathname: '/(conductor)/solicitante',
+                  params: { viaje: viajeId, solicitud: s.id },
+                })
+              }
+              style={({ pressed }) => [estilos.verQuien, pressed && { backgroundColor: color.sand200 }]}
+            >
+              <Text style={estilos.verQuienTexto}>{`Ver quién es ${s.pasajero.nombre.split(' ')[0]}`}</Text>
+              <Avanza tamano={15} />
+            </Pressable>
+
             <View style={estilos.acciones}>
               <Boton
                 tamano="md"
@@ -262,7 +279,7 @@ const estilos = StyleSheet.create({
   },
 
   tarjeta: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 14,
     backgroundColor: color.blanco,
     borderRadius: radio.l,
@@ -295,6 +312,25 @@ const estilos = StyleSheet.create({
   equipaje: { flex: 1, fontSize: 13.5, lineHeight: 19.57, color: color.ink700, fontFamily: familia },
   aporte: { fontSize: 19, lineHeight: 27.55, fontWeight: '700', letterSpacing: -0.67, color: color.ink900, fontFamily: familia, ...tabular },
 
+  verQuien: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    alignSelf: 'flex-start',
+    marginTop: 12,
+    marginBottom: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.sand100,
+  },
+  verQuienTexto: {
+    fontSize: 13.5,
+    lineHeight: 19.5,
+    fontWeight: '600',
+    color: color.ink700,
+    fontFamily: familia,
+  },
   acciones: { flexDirection: 'row', gap: 9, marginTop: 15 },
 
   recibo: {
@@ -319,7 +355,7 @@ const estilos = StyleSheet.create({
   escribir: { fontSize: 12.5, lineHeight: 18.12, fontWeight: '600', color: color.azul700, fontFamily: familia },
 
   vacio: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 14,
     backgroundColor: color.blanco,
     borderWidth: 1,
@@ -330,7 +366,7 @@ const estilos = StyleSheet.create({
   },
   vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink600, fontFamily: familia },
 
-  seccionConfirmados: { marginHorizontal: 22, marginTop: 16 },
+  seccionConfirmados: { marginHorizontal: espacio.gutter, marginTop: 16 },
   filaConfirmado: {
     backgroundColor: color.blanco,
     borderWidth: 1,

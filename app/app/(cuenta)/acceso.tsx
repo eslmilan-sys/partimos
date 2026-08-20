@@ -157,7 +157,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  cuerpo: { flex: 1, paddingHorizontal: 22, paddingTop: 26 },
+  cuerpo: { flex: 1, paddingHorizontal: espacio.gutter, paddingTop: 26 },
   hoja: {
     backgroundColor: color.blanco,
     borderRadius: 28,

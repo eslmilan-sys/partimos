@@ -322,7 +322,7 @@ const estilos = StyleSheet.create({
   },
   contenido: { paddingBottom: 190 },
 
-  chrome: { paddingHorizontal: 22, paddingTop: 10 },
+  chrome: { paddingHorizontal: espacio.gutter, paddingTop: 10 },
   circulo: {
     width: 40,
     height: 40,

@@ -102,11 +102,15 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : null),
   } as never,
+  /* `hitSlop` no existe en react-native-web, así que la zona de toque tiene
+     que ser relleno de verdad: 44 de alto, que es el mínimo del sistema. */
   ojo: {
     fontFamily: familia,
     fontSize: 13,
     lineHeight: interlinea(13),
     fontWeight: '600',
     color: color.ink600,
+    paddingVertical: 13,
+    paddingHorizontal: 10,
   },
 });

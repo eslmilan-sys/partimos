@@ -144,14 +144,16 @@ export default function RegistrarCarro() {
                     accessibilityLabel={c.nombre}
                     accessibilityState={{ selected: puesto }}
                     onPress={() => setBorrador((b) => ({ ...b, color: c.nombre }))}
-                    style={[estilos.muestra, { backgroundColor: c.muestra }]}
+                    style={estilos.tocaMuestra}
                   >
-                    {puesto ? (
-                      <>
-                        <View style={estilos.anilloAzul} pointerEvents="none" />
-                        <View style={estilos.anilloBlanco} pointerEvents="none" />
-                      </>
-                    ) : null}
+                    <View style={[estilos.muestra, { backgroundColor: c.muestra }]}>
+                      {puesto ? (
+                        <>
+                          <View style={estilos.anilloAzul} pointerEvents="none" />
+                          <View style={estilos.anilloBlanco} pointerEvents="none" />
+                        </>
+                      ) : null}
+                    </View>
                   </Pressable>
                 );
               })}
@@ -337,7 +339,7 @@ const estilos = StyleSheet.create({
   titular: { ...texto.titular, color: color.blanco, marginTop: 12 },
 
   hoja: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 20,
     backgroundColor: color.blanco,
     borderRadius: radio.hoja,
@@ -370,7 +372,10 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
 
-  muestras: { flexDirection: 'row', gap: 6, overflow: 'visible' },
+  muestras: { flexDirection: 'row', gap: 0, overflow: 'visible' },
+  /* El círculo sigue midiendo 26 —es una muestra de color, no un botón—,
+     pero lo que se toca mide 40: el dedo no acierta un cuadrado de 26. */
+  tocaMuestra: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   muestra: {
     width: 26,
     height: 26,
@@ -401,7 +406,7 @@ const estilos = StyleSheet.create({
   },
 
   tarjeta: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: espacio.entreTarjetas,
     backgroundColor: color.blanco,
     borderWidth: 1,

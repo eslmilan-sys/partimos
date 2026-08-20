@@ -206,7 +206,7 @@ const estilos = StyleSheet.create({
 
   // `--radius-sheet` son 28 px; `radio.hoja` se quedó en 26.
   hoja: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 22,
     backgroundColor: color.blanco,
     borderRadius: 28,
@@ -253,18 +253,20 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
+  /* ink800: esta línea cae sobre la fila elegida, que es más oscura que el
+     blanco, y con ink600 se quedaba en 4,43:1. */
   tarifa: {
     alignSelf: 'flex-start',
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink600,
+    color: color.ink800,
     marginTop: 1,
     fontFamily: familia,
     ...tabular,
   },
 
   anadir: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 11,
     height: 52,
     borderRadius: radio.pastilla,
@@ -286,7 +288,7 @@ const estilos = StyleSheet.create({
   },
 
   tarjeta: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 11,
     borderRadius: radio.l,
     borderWidth: 1,
@@ -322,7 +324,7 @@ const estilos = StyleSheet.create({
   },
 
   cierre: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 11,
     fontSize: 12.5,
     lineHeight: 18.75,

@@ -158,7 +158,7 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  arriba: { paddingTop: 6, paddingHorizontal: 22, alignItems: 'center' },
+  arriba: { paddingTop: 6, paddingHorizontal: espacio.gutter, alignItems: 'center' },
   pastillaLlegada: { alignSelf: 'center' },
   dentroPastilla: {
     flexDirection: 'row',

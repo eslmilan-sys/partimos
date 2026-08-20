@@ -24,6 +24,7 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaAbrev, hora } from '@/ui/fechas';
+import { Avanza, Carro } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
@@ -76,6 +77,35 @@ export default function MisViajesPantalla() {
               router.push({ pathname: '/(pasajero)/codigo', params: { reserva: hoy.reservaId } })
             }
           /> : null}
+
+        {/* El segundo código, el que cierra el viaje. Existía la pantalla y no
+            se llegaba a ella desde ningún sitio de la app. */}
+        {hoy ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ver mi código de llegada"
+            onPress={() =>
+              router.push({ pathname: '/(pasajero)/llegada', params: { reserva: hoy.reservaId } })
+            }
+            style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
+          >
+            <Text style={estilos.puertaTexto}>Código de llegada</Text>
+            <Avanza />
+          </Pressable>
+        ) : null}
+
+        {/* Y la puerta al otro lado: los viajes que TÚ llevas. Sin esto, el
+            panel del conductor solo se alcanzaba desde el catálogo. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Los viajes que yo llevo"
+          onPress={() => router.push('/(conductor)/panel')}
+          style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
+        >
+          <Carro tamano={19} tinta={color.ink600} />
+          <Text style={estilos.puertaTexto}>Los viajes que yo llevo</Text>
+          <Avanza />
+        </Pressable>
 
         <View style={estilos.selector}>
           {(['proximos', 'pasados'] as const).map((p) => (
@@ -218,7 +248,29 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 24, paddingBottom: 20 },
+  puerta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    height: 62,
+    paddingHorizontal: 15,
+    marginTop: 10,
+    borderRadius: radio.l,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+  },
+  puertaTexto: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 21.75,
+    fontWeight: '500',
+    letterSpacing: -0.23,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 24, paddingBottom: 20 },
   hoja: {
     backgroundColor: color.blanco,
     borderRadius: 28,

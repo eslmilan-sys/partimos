@@ -378,7 +378,7 @@ const estilos = StyleSheet.create({
   contenido: { paddingBottom: 190 },
 
   chrome: {
-    paddingHorizontal: 22,
+    paddingHorizontal: espacio.gutter,
     paddingTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -483,7 +483,7 @@ const estilos = StyleSheet.create({
     color: color.ink500,
     fontFamily: familia,
   },
-  aprox: { fontSize: 11.5, color: color.ink400 },
+  aprox: { fontSize: 11.5, color: color.ink500 },
   puntoLleno: {
     width: 10,
     height: 10,

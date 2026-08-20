@@ -255,7 +255,7 @@ const estilos = StyleSheet.create({
 
   hojaEmergencia: {
     marginTop: 18,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     backgroundColor: color.blanco,
     // `--radius-sheet` son 28; `radio.hoja` se quedó en 26.
     borderRadius: 28,
@@ -309,7 +309,7 @@ const estilos = StyleSheet.create({
 
   tarjetaMotivos: {
     marginTop: 9,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: color.bordeSutil,
@@ -360,7 +360,7 @@ const estilos = StyleSheet.create({
 
   tarjetaBloqueo: {
     marginTop: 9,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: color.bordeSutil,

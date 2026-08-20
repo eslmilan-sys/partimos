@@ -206,7 +206,7 @@ const estilos = StyleSheet.create({
   },
 
   hoja: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 30,
     backgroundColor: color.blanco,
     borderRadius: radio.hoja,
@@ -259,7 +259,7 @@ const estilos = StyleSheet.create({
   paradaHora: { fontSize: 13.5, lineHeight: 19.57, color: color.ink600, fontFamily: familia, ...tabular },
 
   avisoPago: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 12,
     backgroundColor: color.azul50,
     borderWidth: 1,

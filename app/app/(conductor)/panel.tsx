@@ -137,6 +137,20 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
           <Galon />
         </Pressable>
       ) : null}
+
+      {/* Subir a la gente: la pantalla de los dos códigos. Existía y no se
+          llegaba a ella desde ningún sitio de la app. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Abordar: teclear los códigos"
+        onPress={() =>
+          router.push({ pathname: '/(conductor)/abordaje', params: { viaje: viaje.id } })
+        }
+        style={estilos.abordar}
+      >
+        <Text style={estilos.abordarTexto}>Abordar · teclear los códigos</Text>
+        <Galon />
+      </Pressable>
     </View>
   );
 }
@@ -257,7 +271,7 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 22, paddingBottom: 8, gap: 10 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 22, paddingBottom: 8, gap: 10 },
 
   hoja: {
     backgroundColor: color.blanco,
@@ -331,7 +345,7 @@ const estilos = StyleSheet.create({
   horaParada: {
     fontSize: 13,
     lineHeight: 18.85,
-    color: color.ink400,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },
@@ -361,6 +375,26 @@ const estilos = StyleSheet.create({
   },
 
   // La única caja roja de la pantalla, y por eso es la que se mira primero.
+  abordar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    height: 54,
+    paddingHorizontal: 15,
+    marginTop: 12,
+    borderRadius: radio.l,
+    borderWidth: 1.5,
+    borderColor: color.azul200,
+    backgroundColor: color.azul50,
+  },
+  abordarTexto: {
+    flex: 1,
+    fontSize: 14.5,
+    lineHeight: 21,
+    fontWeight: '600',
+    color: color.azul700,
+    fontFamily: familia,
+  },
   solicitudes: {
     flexDirection: 'row',
     alignItems: 'center',

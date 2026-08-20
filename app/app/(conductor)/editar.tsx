@@ -132,6 +132,30 @@ export default function Editar() {
           </View>
         </View>
 
+        {/* Las dos pantallas que explican de dónde salen los números: el tope
+            de la ruta y el reparto por puestos. Existían y no se llegaba a
+            ellas desde ningún sitio de la app. */}
+        <View style={estilos.explican}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() =>
+              router.push({ pathname: '/(conductor)/puestos', params: { viaje: viajeId } })
+            }
+            style={({ pressed }) => [estilos.explica, pressed && { backgroundColor: color.sand200 }]}
+          >
+            <Text style={estilos.explicaTexto}>Cómo se reparte</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() =>
+              router.push({ pathname: '/(conductor)/tope', params: { puestos: String(puestos) } })
+            }
+            style={({ pressed }) => [estilos.explica, pressed && { backgroundColor: color.sand200 }]}
+          >
+            <Text style={estilos.explicaTexto}>El tope de la ruta</Text>
+          </Pressable>
+        </View>
+
         {/* Rojo, no gris: no es un ajuste, es dejar en tierra una maleta pagada. */}
         <View style={[estilos.nota, conflicto ? estilos.notaRoja : null]}>
           <Text style={[estilos.notaTexto, conflicto ? estilos.notaTextoRojo : null]}>
@@ -213,7 +237,7 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 20, paddingBottom: 8 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 20, paddingBottom: 8 },
   hoja: {
     backgroundColor: color.blanco,
     borderRadius: 28,
@@ -290,6 +314,25 @@ const estilos = StyleSheet.create({
     paddingTop: 9,
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
+  },
+
+  explican: { flexDirection: 'row', gap: 9, marginTop: 12 },
+  explica: {
+    flex: 1,
+    height: 48,
+    borderRadius: radio.control,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    backgroundColor: color.blanco,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  explicaTexto: {
+    fontSize: 13.5,
+    lineHeight: 19.5,
+    fontWeight: '600',
+    color: color.ink800,
+    fontFamily: familia,
   },
 
   nota: {

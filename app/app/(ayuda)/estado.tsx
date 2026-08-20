@@ -212,7 +212,7 @@ const estilos = StyleSheet.create({
 
   tarjetaImporte: {
     marginTop: 20,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     backgroundColor: color.blanco,
     // `--radius-sheet` del traspaso son 28; `radio.hoja` se quedó en 26.
     borderRadius: 28,
@@ -257,7 +257,7 @@ const estilos = StyleSheet.create({
 
   tarjetaPasos: {
     marginTop: espacio.entreTarjetas,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: color.bordeSutil,
@@ -305,7 +305,7 @@ const estilos = StyleSheet.create({
 
   tarjetaDestino: {
     marginTop: espacio.entreTarjetas,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: color.bordeSutil,
@@ -352,7 +352,7 @@ const estilos = StyleSheet.create({
 
   cierre: {
     marginTop: espacio.entreTarjetas,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     fontSize: 12.5,
     // El cierre respira más que el cuerpo: 1.5.
     lineHeight: 18.75,

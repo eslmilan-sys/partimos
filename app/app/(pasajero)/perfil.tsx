@@ -235,7 +235,7 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 26, paddingBottom: 26 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 26, paddingBottom: 26 },
   hoja: {
     backgroundColor: color.blanco,
     borderRadius: radio.hoja,
@@ -259,7 +259,7 @@ const estilos = StyleSheet.create({
     borderTopColor: color.bordeSutil,
   },
   carroModelo: { fontSize: 14, lineHeight: interlinea(14), fontWeight: '500', color: color.ink700, fontFamily: familia },
-  carroPunto: { fontSize: 14, lineHeight: interlinea(14), color: color.ink300, fontFamily: familia },
+  carroPunto: { fontSize: 14, lineHeight: interlinea(14), color: color.ink500, fontFamily: familia },
   carroColor: { fontSize: 14, lineHeight: interlinea(14), color: color.ink700, fontFamily: familia },
   placa: {
     marginLeft: 'auto',

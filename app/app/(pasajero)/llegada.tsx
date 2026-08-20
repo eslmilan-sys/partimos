@@ -155,7 +155,7 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 28, paddingBottom: 26 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 28, paddingBottom: 26 },
 
   hoja: {
     backgroundColor: color.blanco,

@@ -113,6 +113,11 @@ export default function TuCuenta() {
       alPulsar: () => router.push('/(conductor)/misviajes'),
     },
     {
+      etiqueta: 'Lo que recuperas',
+      icono: <Billete />,
+      alPulsar: () => router.push('/(conductor)/aportes'),
+    },
+    {
       etiqueta: 'Publicar un viaje',
       icono: <Mas tamano={20} tinta={color.ink600} />,
       alPulsar: () => router.push('/(conductor)/publicar'),
@@ -363,7 +368,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  contenido: { paddingHorizontal: 22, paddingTop: 20, paddingBottom: 26 },
+  contenido: { paddingHorizontal: espacio.gutter, paddingTop: 20, paddingBottom: 26 },
 
   solapas: {
     flexDirection: 'row',

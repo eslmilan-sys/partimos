@@ -186,7 +186,7 @@ const estilos = StyleSheet.create({
     borderColor: color.bordePorDefecto,
   },
   paradaTexto: { fontSize: 15.5, lineHeight: 22.47, fontWeight: '500', letterSpacing: -0.28, color: color.ink900, fontFamily: familia },
-  llegada: { marginLeft: 'auto', fontSize: 13, lineHeight: 18.85, color: color.ink400, fontFamily: familia, ...tabular },
+  llegada: { marginLeft: 'auto', fontSize: 13, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
 
   filaEquipaje: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7, marginTop: 9 },
   equipaje: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },

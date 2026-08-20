@@ -197,7 +197,7 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 14, paddingBottom: 20 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 20 },
   filaSeccion: {
     flexDirection: 'row',
     justifyContent: 'space-between',

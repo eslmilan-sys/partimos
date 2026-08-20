@@ -190,7 +190,7 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
 
-  detras: { paddingHorizontal: 22, paddingTop: 26 },
+  detras: { paddingHorizontal: espacio.gutter, paddingTop: 26 },
   tarjetaDetras: {
     backgroundColor: color.blanco,
     borderWidth: 1,

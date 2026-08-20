@@ -192,7 +192,7 @@ const estilos = StyleSheet.create({
   titularFuerte: texto.titularFuerte,
 
   cuerpo: { flex: 1, overflow: 'hidden' },
-  lista: { marginTop: 20, marginHorizontal: 22, gap: espacio.entreTarjetas },
+  lista: { marginTop: 20, marginHorizontal: espacio.gutter, gap: espacio.entreTarjetas },
 
   tarjeta: {
     backgroundColor: color.blanco,
@@ -249,7 +249,7 @@ const estilos = StyleSheet.create({
 
   guardarOtra: {
     marginTop: 14,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderStyle: 'dashed',
@@ -273,7 +273,7 @@ const estilos = StyleSheet.create({
 
   promesa: {
     marginTop: 14,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     fontSize: 12.5,
     // 1.5 aquí, no la interlínea del cuerpo: el diseño le da aire a la nota.
     lineHeight: 18.75,

@@ -45,7 +45,7 @@ const DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 
 /** `--arena-700` del traspaso: el ámbar de lo que está en curso. `@/ui/tokens`
  *  trae la arena clara pero no su tinta, y no se tocan los tokens desde aquí. */
-const ARENA_700 = '#A06F33';
+const ARENA_700 = '#8A5A24';
 
 /** Hasta dónde llegó la verificación, en pasos de `PASOS_DE_LA_CEDULA`. Que la
  *  respuesta sea «no» también es haberla recibido: ahí la línea está completa. */
@@ -267,7 +267,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  cuerpo: { flex: 1, overflow: 'hidden', paddingTop: 26, paddingHorizontal: 22, paddingBottom: 152 },
+  cuerpo: { flex: 1, overflow: 'hidden', paddingTop: 26, paddingHorizontal: espacio.gutter, paddingBottom: 152 },
 
   // `--radius-sheet` son 28 px; `radio.hoja` se quedó en 26.
   tarjeta: { backgroundColor: color.blanco, borderRadius: 28, padding: 20, ...sombra.hoja },

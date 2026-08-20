@@ -291,7 +291,7 @@ export function Bateria({ tinta = '#fff' }: Props) {
  * icono al lado**, que es lo que lo separa de una etiqueta cualquiera.
  */
 /** La punta que dice que una fila lleva a otro sitio. */
-export function Avanza({ tamano = 17, tinta = color.ink300 }: Props) {
+export function Avanza({ tamano = 17, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path

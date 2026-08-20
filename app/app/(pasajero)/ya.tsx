@@ -230,7 +230,7 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 30 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 30 },
   hoja: {
     backgroundColor: color.blanco,
     borderRadius: 28,

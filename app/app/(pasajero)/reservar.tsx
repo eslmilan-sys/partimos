@@ -257,7 +257,7 @@ const estilos = StyleSheet.create({
   titularFuerte: { fontWeight: '600' },
 
   hoja: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 24,
     backgroundColor: color.blanco,
     borderRadius: radio.hoja,
@@ -303,10 +303,10 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  paradaHora: { fontSize: 13, lineHeight: 18.85, color: color.ink400, fontFamily: familia, ...tabular },
+  paradaHora: { fontSize: 13, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
 
   tarjetaEquipaje: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 6,
     backgroundColor: color.blanco,
     borderWidth: 1,

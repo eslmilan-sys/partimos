@@ -129,7 +129,7 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 58 },
-  cuerpo: { paddingHorizontal: 22, paddingTop: 34, gap: 10 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 34, gap: 10 },
   tarjeta: {
     backgroundColor: color.blanco,
     borderWidth: 1,

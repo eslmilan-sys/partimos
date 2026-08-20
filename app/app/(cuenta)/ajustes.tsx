@@ -303,7 +303,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  cuerpo: { flex: 1, overflow: 'hidden', paddingTop: 20, paddingHorizontal: 22, gap: 11 },
+  cuerpo: { flex: 1, overflow: 'hidden', paddingTop: 20, paddingHorizontal: espacio.gutter, gap: 11 },
 
   hoja: {
     backgroundColor: color.blanco,

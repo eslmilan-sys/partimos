@@ -202,7 +202,7 @@ const estilos = StyleSheet.create({
   },
   contexto: { fontSize: 12.5, lineHeight: interlinea(12.5), color: color.campoTexto, fontFamily: familia, ...tabular },
 
-  cuerpo: { flex: 1, paddingHorizontal: 22 },
+  cuerpo: { flex: 1, paddingHorizontal: espacio.gutter },
   tarjetaPuesto: {
     backgroundColor: color.blanco,
     borderRadius: radio.l,
@@ -258,7 +258,7 @@ const estilos = StyleSheet.create({
     borderBottomLeftRadius: radio.l,
   },
   textoBurbuja: { fontSize: 14.5, lineHeight: 21.02, color: color.ink900, fontFamily: familia },
-  horaBurbuja: { fontSize: 11, lineHeight: interlinea(11), color: color.ink400, marginTop: 5, fontFamily: familia, ...tabular },
+  horaBurbuja: { fontSize: 11, lineHeight: interlinea(11), color: color.ink500, marginTop: 5, fontFamily: familia, ...tabular },
 
   barraEscribir: {
     flexDirection: 'row',

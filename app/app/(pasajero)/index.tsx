@@ -268,7 +268,7 @@ export default function Inicio() {
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={estilos.etiquetaLugar}>Hacia</Text>
               <Text
-                style={[estilos.valorLugar, !hacia && { color: color.ink400 }]}
+                style={[estilos.valorLugar, !hacia && { color: color.ink500 }]}
                 numberOfLines={1}
               >
                 {hacia?.nombre ?? 'Chitré, David, Santiago…'}
@@ -526,7 +526,8 @@ const estilos = StyleSheet.create({
 
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 8 },
   filaDerecha: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  campana: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
+  /* 44 y no 34: es el mínimo que el sistema fija para lo que se toca. */
+  campana: { width: espacio.tap, height: espacio.tap, alignItems: 'center', justifyContent: 'center' },
   /** El punto rojo dice que hay algo sin leer sin tener que abrir nada. */
   /** La cuenta, no un punto: saber que hay tres avisos evita abrir por nada. */
   cuentaAviso: {
@@ -570,7 +571,7 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 13,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 18,
     padding: 15,
     borderRadius: radio.l,
@@ -589,7 +590,7 @@ const estilos = StyleSheet.create({
   seguroTexto: { fontSize: 13, lineHeight: 19, color: color.ink600, marginTop: 2, fontFamily: familia },
 
   seccionSalen: { marginTop: 24 },
-  tiraSalen: { flexDirection: 'row', gap: 10, paddingHorizontal: 22, paddingTop: 12 },
+  tiraSalen: { flexDirection: 'row', gap: 10, paddingHorizontal: espacio.gutter, paddingTop: 12 },
   puntos: { flexDirection: 'row', gap: 6, justifyContent: 'center', marginTop: 12 },
   punto: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.ink300 },
   puntoActivo: { width: 18, backgroundColor: color.rojo500 },
@@ -661,7 +662,7 @@ const estilos = StyleSheet.create({
   titularFuerte: { fontWeight: '600' },
 
   hoja: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 22,
     backgroundColor: color.blanco,
     borderRadius: radio.hoja,
@@ -688,7 +689,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink400,
+    color: color.ink500,
     fontFamily: familia,
   },
   valorLugar: { fontSize: 16.5, lineHeight: 23.93, letterSpacing: -0.33, color: color.ink900, marginTop: 2, fontFamily: familia },
@@ -707,7 +708,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 10.5 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink400,
+    color: color.ink500,
     fontFamily: familia,
   },
   valorCaja: { fontSize: 15, lineHeight: 21.75, fontWeight: '500', color: color.ink900, marginTop: 2, fontFamily: familia },
@@ -719,7 +720,17 @@ const estilos = StyleSheet.create({
     alignItems: 'baseline',
     marginBottom: 2,
   },
-  verTodas: { fontSize: 13, lineHeight: 18.85, fontWeight: '500', color: color.rojo600, fontFamily: familia },
+  verTodas: {
+    fontSize: 13,
+    lineHeight: 18.85,
+    fontWeight: '600',
+    color: color.rojo600,
+    fontFamily: familia,
+    /* El relleno vertical es la zona de toque: un texto de 19 px de alto no
+       se acierta con el pulgar. */
+    paddingVertical: 12,
+    paddingLeft: 12,
+  },
   filaRuta: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 11 },
   filaRutaConLinea: { borderTopWidth: 1, borderTopColor: color.bordeSutil },
   miniaturaSinFoto: {
@@ -748,7 +759,7 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
 
-  seccionGancho: { paddingHorizontal: 22, paddingTop: 16 },
+  seccionGancho: { paddingHorizontal: espacio.gutter, paddingTop: 16 },
   tarjetaGancho: {
     borderRadius: radio.hoja,
     paddingVertical: 18,

@@ -71,7 +71,7 @@ const estilos = StyleSheet.create({
     color: '#fff',
     fontFamily: familia,
   },
-  cuerpo: { flex: 1, paddingHorizontal: 22, paddingTop: 40 },
+  cuerpo: { flex: 1, paddingHorizontal: espacio.gutter, paddingTop: 40 },
   tarjeta: {
     backgroundColor: color.blanco,
     borderWidth: 1,

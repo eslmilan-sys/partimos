@@ -600,14 +600,14 @@ const estilos = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: color.bordeSutil,
     paddingLeft: espacio.gutter,
-    height: 56,
+    height: 62,
   },
   barraTira: { flexDirection: 'row', gap: 8, alignItems: 'center', paddingRight: espacio.gutter },
   botonFiltros: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 7,
-    height: 34,
+    height: 40,
     paddingHorizontal: 12,
     borderRadius: radio.pastilla,
   },
@@ -696,7 +696,9 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
   },
   chip: {
-    height: 34,
+    /* 40 y no 34: por debajo de eso el pulgar falla, y son los controles que
+       más se tocan de la pantalla. */
+    height: 40,
     paddingHorizontal: 13,
     borderRadius: radio.pastilla,
     borderWidth: 1,

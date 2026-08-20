@@ -33,7 +33,21 @@ export const color = {
   ink800: '#332F39',
   ink700: '#4A4552',
   ink600: '#6B6672',
-  ink500: '#857F8C',
+  /**
+   * EL GRIS MÁS CLARO QUE PUEDE LLEVAR TEXTO.
+   *
+   * Era `#857F8C`, que sobre arena da 3,63:1 —por debajo del 4,5:1 que exige
+   * la norma para texto normal—, y es el color de casi todas las segundas
+   * líneas: las horas de llegada, «Desde», «Hacia», «por puesto». Medido en
+   * el navegador sobre las 51 pantallas, era el fallo de contraste más
+   * repetido de la app.
+   *
+   * `#706A76` es el mismo matiz, más oscuro: 4,90:1 sobre arena 100, 5,23:1
+   * sobre blanco y 4,57:1 sobre arena 200, que son los tres fondos donde
+   * aparece. Por debajo de este gris no va texto: `ink400` e `ink300` son
+   * para bordes, puntos y trazos, nunca para leer.
+   */
+  ink500: '#706A76',
   ink400: '#A19BA8',
   ink300: '#B7B2BC',
   ink200: '#D8D4DB',
@@ -51,8 +65,13 @@ export const color = {
   bordeSutil: '#EBE7EC',
   bordePorDefecto: '#D8D4DB',
 
-  /** El texto sobre el campo rojo: blanco al 78 %. */
-  campoTexto: 'rgba(255,255,255,.78)',
+  /**
+   * El texto sobre el campo rojo. Al 78 % daba 3,69:1 contra el rojo 500 —por
+   * debajo del 4,5:1 que la norma pide para texto normal—, y es el subtítulo
+   * de casi todas las pantallas. Al 92 % da 4,75:1 y sigue siendo claramente
+   * secundario respecto del blanco puro del titular.
+   */
+  campoTexto: 'rgba(255,255,255,.92)',
   /** Los controles que se sientan encima del campo. Nunca vidrio. */
   campoControl: 'rgba(255,255,255,.18)',
 } as const;
@@ -174,11 +193,24 @@ export const texto = {
   tituloTarjeta: { fontSize: 15.5, lineHeight: interlinea(15.5), letterSpacing: -0.28, fontWeight: '500' as const, ...conFuente },
   cuerpo: { fontSize: 14, lineHeight: interlinea(14), fontWeight: '400' as const, ...conFuente },
   fila: { fontSize: 14.5, lineHeight: interlinea(14.5), letterSpacing: -0.22, fontWeight: '500' as const, ...conFuente },
+  /**
+   * EL EPÍGRAFE, LEGIBLE.
+   *
+   * Era 11 px en versalitas con 0,1 em de crenado. El contraste del azul
+   * nunca fue el problema —azul 500 sobre arena da 7,5:1, muy por encima de
+   * lo que exige la norma—: el problema era el TAMAÑO con la caja alta y el
+   * crenado juntos. Once píxeles en mayúsculas separadas se descifran, no se
+   * leen, y el epígrafe dejó de ser una etiqueta suelta para titular
+   * secciones enteras —«RUTA DEL VIAJE», «SALEN POR LA NOCHE»—.
+   *
+   * Doce con 0,07 em y azul 700 (10,9:1). Sigue siendo micro y sigue siendo
+   * el mismo gesto; ahora se lee de un vistazo.
+   */
   epigrafe: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600' as const,
-    letterSpacing: 11 * TRACK_MICRO,
-    lineHeight: interlinea(11),
+    letterSpacing: 12 * 0.07,
+    lineHeight: interlinea(12),
     textTransform: 'uppercase' as const,
     ...conFuente,
   },

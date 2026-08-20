@@ -233,7 +233,9 @@ export default function Publicar() {
                   onPress={() => setParadas((n) => Math.max(0, n - 1))}
                   style={estilos.quitar}
                 >
-                  <Cerrar />
+                  <View style={estilos.quitarCirculo}>
+                    <Cerrar />
+                  </View>
                 </Pressable>
               </View>
             ))}
@@ -252,7 +254,7 @@ export default function Publicar() {
             style={estilos.anadir}
           >
             <Mas tinta={siguienteParada ? color.azul700 : color.ink400} />
-            <Text style={[estilos.anadirTexto, !siguienteParada && { color: color.ink400 }]}>
+            <Text style={[estilos.anadirTexto, !siguienteParada && { color: color.ink500 }]}>
               {siguienteParada ? `Añadir ${siguienteParada.nombre}` : 'No hay más paradas en esta ruta'}
             </Text>
           </Pressable>
@@ -428,7 +430,7 @@ const estilos = StyleSheet.create({
   titular: { ...texto.titular, color: '#fff', marginTop: 12 },
 
   hoja: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 18,
     backgroundColor: color.blanco,
     borderRadius: radio.hoja,
@@ -505,8 +507,16 @@ const estilos = StyleSheet.create({
   },
   paradaNombre: { flex: 1, fontSize: 14, lineHeight: 20.3, fontWeight: '500', letterSpacing: -0.21, color: color.ink900, fontFamily: familia },
   paradaIntermedia: { flex: 1, fontSize: 14, lineHeight: 20.3, letterSpacing: -0.21, color: color.ink900, fontFamily: familia },
-  paradaHora: { fontSize: 12.5, lineHeight: 18.12, color: color.ink400, ...tabular, fontFamily: familia },
+  paradaHora: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, ...tabular, fontFamily: familia },
+  /* 40 de toque con el círculo de 22 dentro: quitar una parada por error es
+     peor que fallar el toque, pero fallarlo tres veces también molesta. */
   quitar: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quitarCirculo: {
     width: 22,
     height: 22,
     borderRadius: radio.pastilla,
@@ -527,7 +537,7 @@ const estilos = StyleSheet.create({
   anadirTexto: { fontSize: 13.5, lineHeight: 19.57, fontWeight: '600', color: color.azul700, fontFamily: familia },
 
   tarjetaAporte: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 8,
     borderRadius: radio.l,
     borderWidth: 1,
@@ -552,7 +562,7 @@ const estilos = StyleSheet.create({
   cuenta: { fontSize: 12.5, lineHeight: 18.125, color: color.ink700, marginTop: 10, fontFamily: familia },
 
   tarjetaInterruptores: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 8,
     backgroundColor: color.blanco,
     borderWidth: 1,

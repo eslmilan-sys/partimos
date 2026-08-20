@@ -278,7 +278,7 @@ const estilos = StyleSheet.create({
   lienzo: { flex: 1, minHeight: 0, overflow: 'hidden' },
 
   hoja: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 20,
     backgroundColor: color.blanco,
     // `--radius-sheet` son 28; `radio.hoja` se quedó en 26 al portar los tokens.
@@ -314,7 +314,7 @@ const estilos = StyleSheet.create({
   },
 
   tarjetaTarifa: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 10,
     backgroundColor: color.blanco,
     borderRadius: radio.l,
@@ -359,7 +359,7 @@ const estilos = StyleSheet.create({
   porque: { fontSize: 12.5, lineHeight: 18.125, color: color.ink700, fontFamily: familia },
 
   filaCandado: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 10,
     flexDirection: 'row',
     alignItems: 'flex-start',

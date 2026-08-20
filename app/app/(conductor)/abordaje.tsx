@@ -290,7 +290,7 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 26, paddingBottom: 16 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 26, paddingBottom: 16 },
 
   hoja: {
     backgroundColor: color.blanco,
@@ -368,7 +368,7 @@ const estilos = StyleSheet.create({
   abordoTexto: { fontSize: 13, lineHeight: 18.85, fontWeight: '500', color: color.verde500, fontFamily: familia },
 
   pie: {
-    paddingHorizontal: 22,
+    paddingHorizontal: espacio.gutter,
     paddingTop: 14,
     paddingBottom: 26,
     gap: 10,

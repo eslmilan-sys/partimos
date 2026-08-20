@@ -226,7 +226,7 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  arriba: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 4, paddingHorizontal: 22 },
+  arriba: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 4, paddingHorizontal: espacio.gutter },
   dentroBarra: { flexDirection: 'row', alignItems: 'center', gap: 11, height: 52, paddingHorizontal: 16 },
   punto: { width: 9, height: 9, borderRadius: 999, backgroundColor: color.rojo500 },
   origen: {

@@ -268,7 +268,7 @@ const estilos = StyleSheet.create({
 
   hoja: {
     marginTop: 22,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     backgroundColor: color.blanco,
     // `--radius-sheet` del traspaso son 28; `radio.hoja` se quedó en 26.
     borderRadius: 28,
@@ -306,7 +306,7 @@ const estilos = StyleSheet.create({
 
   tarjeta: {
     marginTop: espacio.entreTarjetas,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     backgroundColor: color.azul100,
     borderRadius: radio.l,
     padding: 18,
@@ -374,7 +374,9 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  plazo: { fontWeight: '400', color: color.ink600 },
+  /* ink700 y no ink600: esta línea va sobre arena 300, donde el 600 se
+     queda en 4,43:1. */
+  plazo: { fontWeight: '400', color: color.ink700 },
   cambiar: {
     fontSize: 12.5,
     lineHeight: interlinea(12.5),

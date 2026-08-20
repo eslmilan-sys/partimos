@@ -187,7 +187,7 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
 
-  cuerpo: { flex: 1, paddingHorizontal: 22, paddingTop: 26 },
+  cuerpo: { flex: 1, paddingHorizontal: espacio.gutter, paddingTop: 26 },
   hoja: {
     backgroundColor: color.blanco,
     borderRadius: 28,
@@ -248,7 +248,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 12 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink400,
+    color: color.ink500,
     fontFamily: familia,
   },
 

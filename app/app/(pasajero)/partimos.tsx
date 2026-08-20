@@ -174,7 +174,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  cuerpo: { paddingHorizontal: 22, paddingTop: 22, paddingBottom: 30, gap: 10 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 22, paddingBottom: 30, gap: 10 },
 
   burbuja: {
     backgroundColor: color.blanco,

@@ -244,7 +244,7 @@ const estilos = StyleSheet.create({
 
   hoja: {
     marginTop: 20,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     backgroundColor: color.blanco,
     borderRadius: RADIO_HOJA,
     paddingTop: 6,
@@ -286,7 +286,7 @@ const estilos = StyleSheet.create({
 
   nota: {
     marginTop: 10,
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     paddingVertical: 15,
     paddingHorizontal: 18,
     borderRadius: radio.l,
@@ -303,14 +303,14 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  sistema: { marginTop: 16, marginHorizontal: 22 },
+  sistema: { marginTop: 16, marginHorizontal: espacio.gutter },
   epigrafeSistema: {
     fontSize: 10.5,
     lineHeight: 15.225,
     fontWeight: '600',
     letterSpacing: 10.5 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink400,
+    color: color.ink500,
     marginBottom: 9,
     fontFamily: familia,
   },

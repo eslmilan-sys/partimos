@@ -222,7 +222,7 @@ const estilos = StyleSheet.create({
   titularFuerte: { fontWeight: '600' },
 
   hoja: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 22,
     backgroundColor: color.blanco,
     borderRadius: radio.hoja,
@@ -259,7 +259,9 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  metodoDetalle: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, marginTop: 2, fontFamily: familia, ...tabular },
+  /* ink800: la fila del método elegido va sobre un fondo más oscuro que el
+     blanco, y con ink600 esta línea se quedaba en 4,43:1. */
+  metodoDetalle: { fontSize: 12.5, lineHeight: 18.12, color: color.ink800, marginTop: 2, fontFamily: familia, ...tabular },
   distintivo: {
     fontSize: 10.5, lineHeight: 15.22,
     fontWeight: '600',
@@ -270,7 +272,7 @@ const estilos = StyleSheet.create({
   },
 
   tarjetaCuenta: {
-    marginHorizontal: 22,
+    marginHorizontal: espacio.gutter,
     marginTop: 10,
     borderRadius: radio.l,
     borderWidth: 1,
@@ -280,8 +282,8 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
   },
   filaCuenta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  cuentaEtiqueta: { fontSize: 14.5, lineHeight: 21.02, color: color.ink700, fontFamily: familia },
-  cuentaMonto: { fontSize: 14.5, lineHeight: 21.02, fontWeight: '500', color: color.ink700, fontFamily: familia },
+  cuentaEtiqueta: { fontSize: 14.5, lineHeight: 21.02, color: color.ink800, fontFamily: familia },
+  cuentaMonto: { fontSize: 14.5, lineHeight: 21.02, fontWeight: '500', color: color.ink800, fontFamily: familia },
   separador: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 15 },
   filaTotal: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
   totalEtiqueta: {
