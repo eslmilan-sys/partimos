@@ -149,7 +149,7 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
   entrada: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     letterSpacing: -0.116,
     color: color.campoTexto,
@@ -181,7 +181,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
   },
   prefijoTexto: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: interlinea(15),
     fontWeight: '500',
     color: color.ink900,
@@ -209,7 +209,7 @@ const estilos = StyleSheet.create({
 
   ayuda: {
     textAlign: 'center',
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     color: color.ink500,
     marginTop: 12,
@@ -237,7 +237,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   salidaTitulo: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '500',
     letterSpacing: -0.2175,

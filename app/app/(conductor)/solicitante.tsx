@@ -210,7 +210,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -219,7 +219,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titular: {
-    fontSize: 31,
+    fontSize: 30,
     lineHeight: 32.55,
     letterSpacing: -1.24,
     fontWeight: '400',
@@ -265,7 +265,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  desde: { fontSize: 13, lineHeight: 18.85, color: color.ink600, marginTop: 3, fontFamily: familia },
+  desde: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, marginTop: 3, fontFamily: familia },
 
   distintivos: {
     flexDirection: 'row',
@@ -310,7 +310,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  cifraEtiqueta: { fontSize: 12, lineHeight: 17.4, color: color.ink500, marginTop: 2, fontFamily: familia },
+  cifraEtiqueta: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, marginTop: 2, fontFamily: familia },
 
   filaPide: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 11 },
   punto: {
@@ -353,7 +353,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   aceptarTexto: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 23.2,
     fontWeight: '600',
     letterSpacing: -0.16,
@@ -371,7 +371,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   rechazarTexto: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 23.2,
     fontWeight: '600',
     letterSpacing: -0.16,

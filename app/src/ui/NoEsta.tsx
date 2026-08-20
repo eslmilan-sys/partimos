@@ -67,7 +67,7 @@ const estilos = StyleSheet.create({
   },
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 46 },
   titular: {
-    fontSize: 29,
+    fontSize: 30,
     lineHeight: 30.74,
     letterSpacing: -1.3,
     fontWeight: '600',
@@ -83,7 +83,7 @@ const estilos = StyleSheet.create({
     padding: 22,
     gap: 18,
   },
-  explicacion: { fontSize: 15, lineHeight: 22.5, color: color.ink700, fontFamily: familia },
+  explicacion: { fontSize: 15.5, lineHeight: 22.5, color: color.ink700, fontFamily: familia },
   atras: {
     fontSize: 14,
     lineHeight: 20.3,

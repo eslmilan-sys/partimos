@@ -159,7 +159,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -169,7 +169,7 @@ const estilos = StyleSheet.create({
   },
   filaMarca: { flexDirection: 'row', alignItems: 'center', gap: 11, marginTop: 14 },
   titular: {
-    fontSize: 28,
+    fontSize: 27,
     lineHeight: 31,
     letterSpacing: -1.12,
     fontWeight: '600',
@@ -215,7 +215,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  tarjetaTexto: { fontSize: 13, lineHeight: 19.5, color: color.ink600, marginTop: 3, fontFamily: familia },
+  tarjetaTexto: { fontSize: 13.5, lineHeight: 19.5, color: color.ink600, marginTop: 3, fontFamily: familia },
 
   acciones: { flexDirection: 'row', gap: 9, marginTop: 8 },
 

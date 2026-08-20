@@ -272,7 +272,7 @@ const estilos = StyleSheet.create({
   epigrafeCampo: { ...texto.epigrafe, color: color.campoTexto, flex: 1 },
   titular: { fontSize: 33, lineHeight: 34.65, letterSpacing: -1.32, fontWeight: '400', color: '#fff', marginTop: 12, fontFamily: familia },
   subtitulo: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21,
     letterSpacing: -0.12,
     color: color.campoTexto,
@@ -294,10 +294,10 @@ const estilos = StyleSheet.create({
     elevation: 2,
   },
   filaPersona: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  nombre: { fontSize: 16, lineHeight: 23.2, fontWeight: '500', letterSpacing: -0.32, color: color.ink900, fontFamily: familia },
+  nombre: { fontSize: 15.5, lineHeight: 23.2, fontWeight: '500', letterSpacing: -0.32, color: color.ink900, fontFamily: familia },
   reputacion: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, marginTop: 1, fontFamily: familia, ...tabular },
   pastillaExpira: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: radio.pastilla },
-  pastillaExpiraTexto: { fontSize: 11, lineHeight: 15.95, fontWeight: '600', fontFamily: familia },
+  pastillaExpiraTexto: { fontSize: 11.5, lineHeight: 15.95, fontWeight: '600', fontFamily: familia },
 
   filaPunto: {
     flexDirection: 'row',
@@ -382,6 +382,6 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  nombreConfirmado: { fontSize: 14.5, lineHeight: 21.02, fontWeight: '500', letterSpacing: -0.22, color: color.ink900, fontFamily: familia },
+  nombreConfirmado: { fontSize: 14, lineHeight: 21.02, fontWeight: '500', letterSpacing: -0.22, color: color.ink900, fontFamily: familia },
   detalleConfirmado: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, marginTop: 1, fontFamily: familia },
 });

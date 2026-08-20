@@ -484,7 +484,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   textoZona: {
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: 16.2,
     color: color.ink600,
     marginTop: 2,

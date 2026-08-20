@@ -279,7 +279,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   titular: {
-    fontSize: 28,
+    fontSize: 27,
     lineHeight: 30.24,
     letterSpacing: -1.176,
     fontWeight: '400',
@@ -288,7 +288,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titularFuerte: {
-    fontSize: 28,
+    fontSize: 27,
     lineHeight: 30.24,
     letterSpacing: -1.176,
     fontWeight: '600',
@@ -311,7 +311,7 @@ const estilos = StyleSheet.create({
   },
   estado: {
     flex: 1,
-    fontSize: 16.5,
+    fontSize: 15.5,
     lineHeight: 23.925,
     letterSpacing: -0.33,
     fontWeight: '500',
@@ -378,7 +378,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  renglon: { fontSize: 15, lineHeight: 21.75, color: color.ink500, fontFamily: familia },
+  renglon: { fontSize: 15.5, lineHeight: 21.75, color: color.ink500, fontFamily: familia },
   pasoDetalle: { fontSize: 12.5, lineHeight: 18.125, fontWeight: '400', color: color.ink500, fontFamily: familia },
 
   nota: {
@@ -417,7 +417,7 @@ const estilos = StyleSheet.create({
   },
   beneficioTexto: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '400',
     color: color.ink900,

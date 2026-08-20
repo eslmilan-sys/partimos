@@ -252,7 +252,7 @@ const estilos = StyleSheet.create({
   },
   columnaViaje: { flex: 1, minWidth: 0 },
   destino: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: interlinea(14.5),
     fontWeight: '500',
     letterSpacing: -0.2175,
@@ -291,7 +291,7 @@ const estilos = StyleSheet.create({
      fila. */
   filaTituloCaja: { flex: 1, alignItems: 'flex-start' },
   filaTitulo: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: interlinea(14.5),
     fontWeight: '500',
     letterSpacing: -0.2175,
@@ -335,7 +335,7 @@ const estilos = StyleSheet.create({
   },
   preguntaTexto: {
     flex: 1,
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: interlinea(14.5),
     fontWeight: '400',
     letterSpacing: -0.2175,

@@ -269,7 +269,7 @@ const estilos = StyleSheet.create({
   },
   epigrafeCampo: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: 17.4,
     fontWeight: '600',
     letterSpacing: 12 * TRACK_MICRO,
@@ -279,14 +279,14 @@ const estilos = StyleSheet.create({
   },
   marcar: { paddingVertical: 12, paddingLeft: 12 },
   marcarTexto: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     fontWeight: '600',
     color: '#fff',
     fontFamily: familia,
   },
   titular: {
-    fontSize: 34,
+    fontSize: 33,
     lineHeight: 36,
     letterSpacing: -1.53,
     fontWeight: '400',
@@ -300,7 +300,7 @@ const estilos = StyleSheet.create({
 
   filaSeccion: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 },
   seccion: {
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: 17.4,
     fontWeight: '600',
     letterSpacing: 12 * TRACK_MICRO,
@@ -340,7 +340,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   detalle: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 19,
     color: color.ink600,
     marginTop: 2,
@@ -359,7 +359,7 @@ const estilos = StyleSheet.create({
     gap: 8,
   },
   botonTexto: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '600',
     letterSpacing: -0.15,
@@ -376,7 +376,7 @@ const estilos = StyleSheet.create({
     backgroundColor: color.sand200,
   },
   rotuloEjemploTexto: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15,
     fontWeight: '700',
     letterSpacing: 11 * TRACK_MICRO,

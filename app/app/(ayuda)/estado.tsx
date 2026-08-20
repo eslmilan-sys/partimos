@@ -200,7 +200,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   titular: {
-    fontSize: 31,
+    fontSize: 30,
     // 1.05 del titular grande, no la interlínea del cuerpo.
     lineHeight: 32.55,
     letterSpacing: -1.24,
@@ -288,7 +288,7 @@ const estilos = StyleSheet.create({
   // sueltos dentro de la línea.
   columnaDelPaso: { flex: 1, minWidth: 0, alignItems: 'flex-start' },
   pasoTitulo: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '600',
     letterSpacing: -0.2175,
@@ -328,7 +328,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   inicial: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '600',
     color: color.azul700,
@@ -336,7 +336,7 @@ const estilos = StyleSheet.create({
   },
   columnaDelDestino: { flex: 1, minWidth: 0 },
   donde: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '500',
     letterSpacing: -0.2175,

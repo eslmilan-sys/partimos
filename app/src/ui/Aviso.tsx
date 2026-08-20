@@ -36,7 +36,7 @@ const estilos = StyleSheet.create({
   texto: {
     flex: 1,
     fontFamily: familia,
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: interlinea(13),
     color: color.rojo700,
   },

@@ -206,7 +206,7 @@ const estilos = StyleSheet.create({
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 6 },
   filaEpigrafe: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   epigrafeVivo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -253,7 +253,7 @@ const estilos = StyleSheet.create({
     gap: 14,
   },
   saleEn: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -274,7 +274,7 @@ const estilos = StyleSheet.create({
 
   bloquePrecio: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
   precio: {
-    fontSize: 32,
+    fontSize: 33,
     lineHeight: 28.8,
     fontWeight: '700',
     letterSpacing: -1.44,
@@ -307,7 +307,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   nombre: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '500',
     letterSpacing: -0.2175,
@@ -315,7 +315,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   filaNota: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  nota: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  nota: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
 
   notaPie: {
     textAlign: 'center',
@@ -329,7 +329,7 @@ const estilos = StyleSheet.create({
   seccion: { paddingHorizontal: espacio.gutter, paddingTop: 26 },
   filaSeccion: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   epigrafeSeccion: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,

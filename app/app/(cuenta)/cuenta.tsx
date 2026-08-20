@@ -338,7 +338,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   nombre: {
-    fontSize: 26,
+    fontSize: 27,
     lineHeight: 30,
     letterSpacing: -1.04,
     fontWeight: '600',
@@ -381,7 +381,7 @@ const estilos = StyleSheet.create({
   solapa: { flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: radio.pastilla },
   solapaActiva: { backgroundColor: color.azul500 },
   solapaTexto: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '600',
     letterSpacing: -0.15,
@@ -400,7 +400,7 @@ const estilos = StyleSheet.create({
   },
   cifras: { flexDirection: 'row' },
   cifra: { flex: 1 },
-  cifraEtiqueta: { fontSize: 12, lineHeight: 17.4, color: color.ink500, fontFamily: familia },
+  cifraEtiqueta: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, fontFamily: familia },
   cifraValor: {
     fontSize: 22,
     lineHeight: 28,
@@ -464,7 +464,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  filaValor: { fontSize: 13, lineHeight: 19, color: color.ink500, fontFamily: familia },
+  filaValor: { fontSize: 13.5, lineHeight: 19, color: color.ink500, fontFamily: familia },
 
   aviso: {
     flexDirection: 'row',

@@ -170,7 +170,7 @@ const estilos = StyleSheet.create({
 
   cabecera: { paddingTop: 22, paddingHorizontal: espacio.gutter },
   fecha: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: interlinea(13),
     fontWeight: '500',
     letterSpacing: 13 * TRACK_MICRO,
@@ -205,7 +205,7 @@ const estilos = StyleSheet.create({
   filaMarca: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   marca: {
     flex: 1,
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -214,7 +214,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   sello: {
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: 17.4,
     color: 'rgba(255,255,255,.6)',
     fontFamily: familia,
@@ -222,7 +222,7 @@ const estilos = StyleSheet.create({
   },
 
   titulo: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 23.2,
     fontWeight: '600',
     letterSpacing: -0.32,

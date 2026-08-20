@@ -259,7 +259,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -268,7 +268,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titular: {
-    fontSize: 31,
+    fontSize: 30,
     lineHeight: 32.55,
     letterSpacing: -1.24,
     fontWeight: '400',
@@ -308,7 +308,7 @@ const estilos = StyleSheet.create({
 
   grupo: { marginTop: 15 },
   etiqueta: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 15.6,
     fontWeight: '500',
     color: color.ink600,
@@ -327,7 +327,7 @@ const estilos = StyleSheet.create({
     overflow: 'hidden',
   },
   epigrafeTarifa: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -337,7 +337,7 @@ const estilos = StyleSheet.create({
   },
   filaTarifa: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginTop: 8 },
   porcentaje: {
-    fontSize: 31,
+    fontSize: 30,
     lineHeight: 27.9,
     fontWeight: '700',
     letterSpacing: -1.395,

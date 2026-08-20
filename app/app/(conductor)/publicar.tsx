@@ -644,13 +644,13 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   faltaTitulo: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21,
     fontWeight: '700',
     letterSpacing: -0.22,
     color: color.rojo700,
     fontFamily: familia,
   },
-  faltaTexto: { fontSize: 13, lineHeight: 19.5, color: color.ink700, marginTop: 3, fontFamily: familia },
+  faltaTexto: { fontSize: 13.5, lineHeight: 19.5, color: color.ink700, marginTop: 3, fontFamily: familia },
   notaPie: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.125, color: color.ink500, marginTop: 10, fontFamily: familia },
 });

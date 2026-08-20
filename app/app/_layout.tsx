@@ -84,7 +84,7 @@ const estilos = StyleSheet.create({
   },
   motivo: {
     fontFamily: familia,
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: interlinea(13),
     color: 'rgba(255,255,255,.72)',
     textAlign: 'center',

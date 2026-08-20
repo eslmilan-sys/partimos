@@ -172,7 +172,7 @@ const estilos = StyleSheet.create({
 
   cabecera: { paddingHorizontal: espacio.gutter },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -181,7 +181,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titular: {
-    fontSize: 29,
+    fontSize: 30,
     lineHeight: 31.9,
     letterSpacing: -1.16,
     fontWeight: '400',
@@ -212,7 +212,7 @@ const estilos = StyleSheet.create({
     borderBottomColor: color.bordeSutil,
   },
   nombre: {
-    fontSize: 16.5,
+    fontSize: 15.5,
     lineHeight: interlinea(16.5),
     fontWeight: '500',
     letterSpacing: -0.33,
@@ -257,7 +257,7 @@ const estilos = StyleSheet.create({
     minHeight: 84,
   },
   entradaComentario: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.02,
     color: color.ink900,
     fontFamily: familia,

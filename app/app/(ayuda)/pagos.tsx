@@ -187,7 +187,7 @@ const estilos = StyleSheet.create({
   filaNumeros: { flexDirection: 'row', gap: 14 },
   numero: { flex: 1 },
   cifra: {
-    fontSize: 29,
+    fontSize: 30,
     // Interlineado 0,9: las tres cifras son una sola línea y el rótulo sube
     // a pegarse a ellas. Con el 1,45 del cuerpo la tarjeta crece 8 px.
     lineHeight: 26.1,
@@ -198,14 +198,14 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   rotulo: {
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: 16.2,
     color: color.ink600,
     marginTop: 5,
     fontFamily: familia,
   },
   porque: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 19.5,
     color: color.ink700,
     marginTop: 15,

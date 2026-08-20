@@ -342,14 +342,14 @@ const estilos = StyleSheet.create({
   },
   palancaTextos: { flexShrink: 1 },
   palancaEtiqueta: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '500',
     color: color.ink900,
     fontFamily: familia,
   },
   palancaDescripcion: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.2,
     color: color.ink600,
     marginTop: 2,
@@ -384,7 +384,7 @@ const estilos = StyleSheet.create({
   },
   filaDatoEtiqueta: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '500',
     letterSpacing: -0.225,
@@ -418,7 +418,7 @@ const estilos = StyleSheet.create({
   insigniaTexto: {
     paddingLeft: 20,
     paddingRight: 8,
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '500',
     letterSpacing: -0.055,

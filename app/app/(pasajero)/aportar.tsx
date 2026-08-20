@@ -211,7 +211,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: {
-    fontSize: 11, lineHeight: 15.95,
+    fontSize: 11.5, lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
@@ -291,12 +291,12 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
   },
   filaCuenta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  cuentaEtiqueta: { fontSize: 14.5, lineHeight: 21.02, color: color.ink800, fontFamily: familia },
-  cuentaMonto: { fontSize: 14.5, lineHeight: 21.02, fontWeight: '500', color: color.ink800, fontFamily: familia },
+  cuentaEtiqueta: { fontSize: 14, lineHeight: 21.02, color: color.ink800, fontFamily: familia },
+  cuentaMonto: { fontSize: 14, lineHeight: 21.02, fontWeight: '500', color: color.ink800, fontFamily: familia },
   separador: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 15 },
   filaTotal: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
   totalEtiqueta: {
-    fontSize: 11, lineHeight: 15.95,
+    fontSize: 11.5, lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
@@ -305,7 +305,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   total: {
-    fontSize: 34,
+    fontSize: 33,
     fontWeight: '700',
     letterSpacing: -1.53,
     lineHeight: 30.6,

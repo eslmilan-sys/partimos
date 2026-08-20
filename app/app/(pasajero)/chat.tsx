@@ -199,7 +199,7 @@ const estilos = StyleSheet.create({
   },
   retratoTexto: { fontSize: 13.5, lineHeight: interlinea(13.5), fontWeight: '600', color: '#fff', fontFamily: familia },
   nombre: {
-    fontSize: 16.5,
+    fontSize: 15.5,
     lineHeight: interlinea(16.5),
     fontWeight: '600',
     letterSpacing: -0.41,
@@ -224,7 +224,7 @@ const estilos = StyleSheet.create({
     elevation: 2,
   },
   resumenPuesto: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: interlinea(14.5),
     fontWeight: '500',
     color: color.ink900,
@@ -235,7 +235,7 @@ const estilos = StyleSheet.create({
 
   dia: {
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: interlinea(12),
     color: color.ink500,
     marginTop: 20,
@@ -263,8 +263,8 @@ const estilos = StyleSheet.create({
     borderBottomRightRadius: 6,
     borderBottomLeftRadius: radio.l,
   },
-  textoBurbuja: { fontSize: 14.5, lineHeight: 21.02, color: color.ink900, fontFamily: familia },
-  horaBurbuja: { fontSize: 11, lineHeight: interlinea(11), color: color.ink500, marginTop: 5, fontFamily: familia, ...tabular },
+  textoBurbuja: { fontSize: 14, lineHeight: 21.02, color: color.ink900, fontFamily: familia },
+  horaBurbuja: { fontSize: 11.5, lineHeight: interlinea(11), color: color.ink500, marginTop: 5, fontFamily: familia, ...tabular },
 
   barraEscribir: {
     flexDirection: 'row',
@@ -293,7 +293,7 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 18,
   },
   entradaMensaje: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: interlinea(15),
     color: color.ink900,
     fontFamily: familia,

@@ -170,7 +170,7 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 18,
   },
   epigrafeVidrio: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -217,7 +217,7 @@ const estilos = StyleSheet.create({
 
   filaEpigrafe: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   epigrafeVivo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -247,7 +247,7 @@ const estilos = StyleSheet.create({
     borderWidth: 2,
     borderColor: color.ink200,
   },
-  nombreParada: { flex: 1, fontSize: 16, lineHeight: 23.2, letterSpacing: -0.288, fontFamily: familia },
+  nombreParada: { flex: 1, fontSize: 15.5, lineHeight: 23.2, letterSpacing: -0.288, fontFamily: familia },
   pasada: { fontSize: 15.5, lineHeight: 22.475, letterSpacing: -0.279, color: color.ink600 },
   ahora: { fontWeight: '500', color: color.ink900 },
   falta: { color: color.ink900 },
@@ -285,14 +285,14 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   nombreConductor: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 23.2,
     fontWeight: '500',
     letterSpacing: -0.288,
     color: color.ink900,
     fontFamily: familia,
   },
-  carro: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  carro: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
 
   aporte: {
     flexDirection: 'row',
@@ -307,7 +307,7 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 18,
   },
   aporteCifra: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 23.2,
     fontWeight: '600',
     color: color.ink900,

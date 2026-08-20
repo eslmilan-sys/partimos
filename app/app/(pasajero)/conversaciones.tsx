@@ -299,7 +299,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: {
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: 17.4,
     fontWeight: '600',
     letterSpacing: 12 * TRACK_MICRO,
@@ -308,7 +308,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titular: {
-    fontSize: 29,
+    fontSize: 30,
     lineHeight: 30.74,
     letterSpacing: -1.305,
     fontWeight: '600',
@@ -336,7 +336,7 @@ const estilos = StyleSheet.create({
     flex: 1,
     fontFamily: familia,
     /* 16: por debajo de eso Safari acerca la página al enfocar el campo. */
-    fontSize: 16,
+    fontSize: 15.5,
     color: color.ink900,
     outlineStyle: 'none',
   } as never,
@@ -407,7 +407,7 @@ const estilos = StyleSheet.create({
   filaSuperior: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
   nombre: {
     flex: 1,
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21,
     fontWeight: '600',
     letterSpacing: -0.23,
@@ -417,7 +417,7 @@ const estilos = StyleSheet.create({
   cuando: { fontSize: 11.5, lineHeight: 17, color: color.ink500, fontFamily: familia, ...tabular },
 
   filaUltimo: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
-  ultimo: { flex: 1, fontSize: 13, lineHeight: 19, color: color.ink600, fontFamily: familia },
+  ultimo: { flex: 1, fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia },
   ultimoNuevo: { color: color.ink900, fontWeight: '500' },
 
   filaContexto: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 5 },
@@ -450,7 +450,7 @@ const estilos = StyleSheet.create({
     gap: 8,
   },
   vacioTitulo: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 23,
     fontWeight: '600',
     letterSpacing: -0.24,
@@ -467,7 +467,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   botonVacioTexto: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21,
     fontWeight: '600',
     color: '#fff',

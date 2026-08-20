@@ -187,7 +187,7 @@ const estilos = StyleSheet.create({
     backgroundColor: color.campoControl,
   },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -238,7 +238,7 @@ const estilos = StyleSheet.create({
     borderTopColor: color.bordeSutil,
   },
   etiqueta: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 23.2,
     fontWeight: '500',
     letterSpacing: -0.288,
@@ -267,7 +267,7 @@ const estilos = StyleSheet.create({
     marginTop: 10,
   },
   epigrafePrevia: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -289,7 +289,7 @@ const estilos = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 14,
   },
-  cuando: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  cuando: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
   bloquePrecio: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
   precio: {
     fontSize: 24,
@@ -306,7 +306,7 @@ const estilos = StyleSheet.create({
   puntoAzul: { width: 9, height: 9, borderRadius: 999, backgroundColor: color.azul700 },
   ruta: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: interlinea(15),
     letterSpacing: -0.27,
     fontWeight: '500',

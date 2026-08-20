@@ -376,7 +376,7 @@ const estilos = StyleSheet.create({
     gap: 28,
   },
   bloqueoTitulo: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: interlinea(14.5),
     fontWeight: '500',
     letterSpacing: -0.2175,

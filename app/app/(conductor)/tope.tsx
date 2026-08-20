@@ -217,9 +217,9 @@ const estilos = StyleSheet.create({
   filaPrimera: { marginTop: 6, paddingTop: 14 },
   filaConLinea: { borderTopWidth: 1, borderTopColor: color.bordeSutil },
   filaUltima: { paddingBottom: 0 },
-  etiqueta: { fontSize: 15, lineHeight: 21.75, color: color.ink700, fontFamily: familia },
+  etiqueta: { fontSize: 15.5, lineHeight: 21.75, color: color.ink700, fontFamily: familia },
   etiquetaFuerte: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '500',
     color: color.ink900,
@@ -227,7 +227,7 @@ const estilos = StyleSheet.create({
   },
   apunte: { fontSize: 13.5, lineHeight: 19.575, color: color.ink500, fontFamily: familia },
   monto: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 23.2,
     fontWeight: '600',
     color: color.ink900,
@@ -256,7 +256,7 @@ const estilos = StyleSheet.create({
   amanecer: { position: 'absolute', left: -70, top: -30, width: 486, height: 190, opacity: 0.95 },
   frase: {
     maxWidth: 250,
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21,
     color: color.ink900,
     fontFamily: familia,

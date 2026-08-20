@@ -265,7 +265,7 @@ const estilos = StyleSheet.create({
     gap: 11,
   },
   guardarOtraTexto: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '600',
     letterSpacing: -0.2175,

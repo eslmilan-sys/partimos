@@ -372,17 +372,17 @@ function BarraDeFiltros({
 
         <Chip
           activo={!!filtros.aceptaMaletas}
-          etiqueta="Acepta maletas"
+          etiqueta="Maletas"
           alPulsar={() => alAlternar('aceptaMaletas')}
         />
         <Chip
           activo={!!filtros.aceptaMascotas}
-          etiqueta="Con mascota"
+          etiqueta="Mascota"
           alPulsar={() => alAlternar('aceptaMascotas')}
         />
         <Chip
           activo={!!filtros.soloMujeres}
-          etiqueta="Solo mujeres"
+          etiqueta="Mujeres"
           alPulsar={() => alAlternar('soloMujeres')}
         />
         <Chip activo={!!filtros.yappy} etiqueta="Yappy" alPulsar={() => alAlternar('yappy')} />
@@ -394,14 +394,14 @@ function BarraDeFiltros({
           píxeles de blanco que se apaga bastan para que se lea «sigue» en vez
           de «se cortó». No responde al dedo, así que no se come el desliz. */}
       <View style={estilos.desvanecido} pointerEvents="none">
-        <Svg width={28} height={56}>
+        <Svg width={44} height={56}>
           <Defs>
             <LinearGradient id="tira" x1="0" y1="0" x2="1" y2="0">
               <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0" />
               <Stop offset="1" stopColor="#FFFFFF" stopOpacity="1" />
             </LinearGradient>
           </Defs>
-          <Rect x="0" y="0" width="28" height="56" fill="url(#tira)" />
+          <Rect x="0" y="0" width="44" height="56" fill="url(#tira)" />
         </Svg>
       </View>
     </View>
@@ -491,6 +491,8 @@ function HojaDeFiltros({
         <View style={estilos.asa} />
         <Text style={estilos.hojaTitulo}>Filtros</Text>
 
+        {/* En la hoja sí caben enteros: el rótulo corto es de la tira, donde
+            el sitio manda; aquí manda que se entienda. */}
         <View style={estilos.hojaGrupo}>
           <Chip
             activo={!!filtros.aceptaMaletas}
@@ -593,7 +595,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   titular: {
-    fontSize: 31,
+    fontSize: 30,
     lineHeight: 32.86,
     letterSpacing: -1.395,
     fontWeight: '400',
@@ -622,7 +624,7 @@ const estilos = StyleSheet.create({
     paddingLeft: espacio.gutter,
     height: 58,
   },
-  desvanecido: { position: 'absolute', right: 0, top: 1, bottom: 1, width: 28 },
+  desvanecido: { position: 'absolute', right: 0, top: 1, bottom: 1, width: 44 },
   barraTira: { flexDirection: 'row', gap: 8, alignItems: 'center', paddingRight: espacio.gutter },
   botonFiltros: {
     flexDirection: 'row',
@@ -650,7 +652,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   cuentaTexto: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '700',
     color: '#fff',
@@ -699,7 +701,7 @@ const estilos = StyleSheet.create({
   },
   hojaEpigrafe: {
     fontFamily: familia,
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: 17.4,
     fontWeight: '600',
     letterSpacing: 0.1 * 12,
@@ -719,15 +721,15 @@ const estilos = StyleSheet.create({
   chip: {
     /* 40 y no 34: por debajo de eso el pulgar falla, y son los controles que
        más se tocan de la pantalla. */
-    height: 40,
-    paddingHorizontal: 13,
+    height: espacio.tap,
+    paddingHorizontal: 14,
     borderRadius: radio.pastilla,
     borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 7,
   },
-  chipTexto: { fontSize: 13, lineHeight: 18.85, fontWeight: '500', fontFamily: familia },
+  chipTexto: { fontSize: 13.5, lineHeight: 18.85, fontWeight: '500', fontFamily: familia },
   chipQuitar: {
     width: 21,
     height: 21,
@@ -780,6 +782,6 @@ const estilos = StyleSheet.create({
     padding: 20,
     gap: 4,
   },
-  vacioTitulo: { fontSize: 15, lineHeight: 21.75, fontWeight: '500', color: color.ink900, fontFamily: familia },
+  vacioTitulo: { fontSize: 15.5, lineHeight: 21.75, fontWeight: '500', color: color.ink900, fontFamily: familia },
   vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink600, fontFamily: familia },
 });

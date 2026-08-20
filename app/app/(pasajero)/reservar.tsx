@@ -240,7 +240,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: {
-    fontSize: 11, lineHeight: 15.95,
+    fontSize: 11.5, lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
@@ -306,7 +306,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  paradaHora: { fontSize: 13, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
+  paradaHora: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
 
   tarjetaEquipaje: {
     marginHorizontal: espacio.gutter,
@@ -328,7 +328,7 @@ const estilos = StyleSheet.create({
   },
   etiquetaStepper: {
     flex: 1,
-    fontSize: 14.5, lineHeight: 21.02,
+    fontSize: 14, lineHeight: 21.02,
     fontWeight: '500',
     letterSpacing: -0.22,
     color: color.ink900,
@@ -356,7 +356,7 @@ const estilos = StyleSheet.create({
   },
   filaPrecio: { flexDirection: 'row', alignItems: 'flex-end', gap: 9, marginBottom: 12 },
   precio: {
-    fontSize: 32,
+    fontSize: 33,
     fontWeight: '700',
     letterSpacing: -1.44,
     lineHeight: 28.8,

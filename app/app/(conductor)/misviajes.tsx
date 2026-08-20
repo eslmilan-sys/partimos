@@ -507,7 +507,7 @@ const estilos = StyleSheet.create({
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 16, paddingBottom: 66 },
   filaSuperior: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   titular: {
-    fontSize: 29,
+    fontSize: 30,
     lineHeight: 30.74,
     letterSpacing: -1.16,
     fontWeight: '600',
@@ -515,7 +515,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   bajada: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     color: color.campoTexto,
     marginTop: 4,
@@ -675,7 +675,7 @@ const estilos = StyleSheet.create({
   },
   bloqueFecha: { alignItems: 'center' },
   diaSemana: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '600',
     color: color.ink500,
@@ -729,7 +729,7 @@ const estilos = StyleSheet.create({
   },
   filaNombre: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   nombre: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21,
     fontWeight: '600',
     letterSpacing: -0.22,
@@ -737,10 +737,10 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   filaNota: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  nota: { fontSize: 12, lineHeight: 17.4, fontWeight: '600', color: color.ink700, fontFamily: familia, ...tabular },
+  nota: { fontSize: 12.5, lineHeight: 17.4, fontWeight: '600', color: color.ink700, fontFamily: familia, ...tabular },
   /* `ink400` daba 2,59:1 sobre la banda: un punto es texto aunque separe. */
-  separa: { fontSize: 12, lineHeight: 17.4, color: color.ink500, fontFamily: familia },
-  cuantosViajes: { fontSize: 12, lineHeight: 17.4, color: color.ink500, fontFamily: familia, ...tabular },
+  separa: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, fontFamily: familia },
+  cuantosViajes: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, fontFamily: familia, ...tabular },
 
   carro: { flexDirection: 'row', alignItems: 'center', gap: 8, maxWidth: 148 },
   cuadroCarro: {
@@ -827,12 +827,12 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  sitioMini: { fontSize: 12, lineHeight: 17.4, color: color.ink500, marginTop: 3, marginLeft: 17, fontFamily: familia },
+  sitioMini: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, marginTop: 3, marginLeft: 17, fontFamily: familia },
 
   ladoFila: { alignItems: 'flex-end', gap: 4 },
-  cuandoFila: { fontSize: 12, lineHeight: 17.4, color: color.ink600, fontFamily: familia, ...tabular },
+  cuandoFila: { fontSize: 12.5, lineHeight: 17.4, color: color.ink600, fontFamily: familia, ...tabular },
   horaFila: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 20,
     fontWeight: '700',
     letterSpacing: -0.29,
@@ -856,7 +856,7 @@ const estilos = StyleSheet.create({
   },
   puertaTexto: {
     flex: 1,
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21,
     fontWeight: '500',
     letterSpacing: -0.22,

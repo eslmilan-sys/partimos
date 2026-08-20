@@ -336,7 +336,7 @@ const estilos = StyleSheet.create({
   },
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 58 },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -398,7 +398,7 @@ const estilos = StyleSheet.create({
   },
   paradaQue: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
   paradaNombre: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 22.5,
     fontWeight: '500',
     letterSpacing: -0.29,
@@ -424,7 +424,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  detalleCarro: { fontSize: 13, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
+  detalleCarro: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
   separador: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 15 },
 
   condiciones: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -441,7 +441,7 @@ const estilos = StyleSheet.create({
 
   filaAporte: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
   precio: {
-    fontSize: 34,
+    fontSize: 33,
     lineHeight: 36,
     fontWeight: '700',
     letterSpacing: -1.53,
@@ -457,11 +457,11 @@ const estilos = StyleSheet.create({
     backgroundColor: color.azul100,
     maxWidth: 150,
   },
-  topeTexto: { fontSize: 12, lineHeight: 17, fontWeight: '600', color: color.azul700, fontFamily: familia },
+  topeTexto: { fontSize: 12.5, lineHeight: 17, fontWeight: '600', color: color.azul700, fontFamily: familia },
 
   fila: { flexDirection: 'row', justifyContent: 'space-between', gap: 14, paddingVertical: 6 },
   filaEtiqueta: { flex: 1, fontSize: 14, lineHeight: 20.3, color: color.ink600, fontFamily: familia },
-  filaValor: { fontSize: 14.5, lineHeight: 20.3, fontWeight: '500', color: color.ink900, fontFamily: familia, ...tabular },
+  filaValor: { fontSize: 14, lineHeight: 20.3, fontWeight: '500', color: color.ink900, fontFamily: familia, ...tabular },
 
   aviso: {
     flexDirection: 'row',
@@ -472,7 +472,7 @@ const estilos = StyleSheet.create({
     borderRadius: radio.l,
     backgroundColor: color.azul50,
   },
-  avisoTexto: { flex: 1, fontSize: 13, lineHeight: 19.5, color: color.azul700, fontFamily: familia },
+  avisoTexto: { flex: 1, fontSize: 13.5, lineHeight: 19.5, color: color.azul700, fontFamily: familia },
 
   error: { fontSize: 13.5, lineHeight: 20, color: color.rojo700, fontFamily: familia, marginBottom: 12 },
 

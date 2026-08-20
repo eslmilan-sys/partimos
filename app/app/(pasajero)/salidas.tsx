@@ -181,7 +181,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -190,7 +190,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titular: {
-    fontSize: 31,
+    fontSize: 30,
     lineHeight: 32.86,
     letterSpacing: -1.395,
     fontWeight: '400',
@@ -237,10 +237,10 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  destino: { flex: 1, fontSize: 14.5, lineHeight: 21, color: color.ink700, fontFamily: familia },
+  destino: { flex: 1, fontSize: 14, lineHeight: 21, color: color.ink700, fontFamily: familia },
   filaQuien: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   quien: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
-  nota: { fontSize: 12, lineHeight: 18, color: color.ink600, fontFamily: familia, ...tabular },
+  nota: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia, ...tabular },
 
   precio: {
     fontSize: 21,
@@ -263,7 +263,7 @@ const estilos = StyleSheet.create({
     gap: 4,
   },
   vacioTitulo: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '500',
     color: color.ink900,

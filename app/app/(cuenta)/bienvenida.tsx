@@ -179,7 +179,7 @@ const estilos = StyleSheet.create({
     gap: 16,
   },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -198,7 +198,7 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
   entrada: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: interlinea(15),
     letterSpacing: -0.12,
     color: color.campoTexto,
@@ -241,7 +241,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   destinoPista: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     color: color.ink500,
     fontFamily: familia,
@@ -250,7 +250,7 @@ const estilos = StyleSheet.create({
   seccion: { paddingHorizontal: espacio.gutter, paddingTop: 26 },
   filaEpigrafe: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   epigrafeRojo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -282,7 +282,7 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   destinoSalida: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     marginTop: 3,
     color: color.ink600,

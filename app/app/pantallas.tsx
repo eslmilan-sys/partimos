@@ -136,14 +136,14 @@ const estilos = StyleSheet.create({
     marginBottom: 8,
   },
   enlaceId: {
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: interlinea(12),
     fontWeight: '600',
     color: color.rojo600,
     fontFamily: familia,
   },
   enlaceTitulo: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: interlinea(15),
     color: color.ink900,
     fontFamily: familia,

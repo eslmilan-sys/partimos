@@ -137,7 +137,7 @@ const estilos = StyleSheet.create({
 
   cabecera: { paddingHorizontal: espacio.gutter },
   epigrafeCampo: {
-    fontSize: 11, lineHeight: 15.95,
+    fontSize: 11.5, lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
@@ -145,7 +145,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titular: {
-    fontSize: 31,
+    fontSize: 30,
     lineHeight: 32.86,
     letterSpacing: -1.395,
     fontWeight: '400',
@@ -215,7 +215,7 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   frase: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21,
     marginTop: 14,
     maxWidth: 230,
@@ -239,15 +239,15 @@ const estilos = StyleSheet.create({
     paddingBottom: 11,
   },
   filaConLinea: { borderBottomWidth: 1, borderBottomColor: color.bordeSutil },
-  cuentaEtiqueta: { fontSize: 14.5, lineHeight: 21.02, color: color.ink700, fontFamily: familia },
-  cuentaMonto: { fontSize: 14.5, lineHeight: 21.02, fontWeight: '500', color: color.ink900, fontFamily: familia, ...tabular },
+  cuentaEtiqueta: { fontSize: 14, lineHeight: 21.02, color: color.ink700, fontFamily: familia },
+  cuentaMonto: { fontSize: 14, lineHeight: 21.02, fontWeight: '500', color: color.ink900, fontFamily: familia, ...tabular },
   filaTotal: {
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'space-between',
     paddingTop: 13,
   },
-  totalEtiqueta: { fontSize: 15, lineHeight: 21.75, fontWeight: '600', color: color.ink900, fontFamily: familia },
+  totalEtiqueta: { fontSize: 15.5, lineHeight: 21.75, fontWeight: '600', color: color.ink900, fontFamily: familia },
   totalMonto: {
     fontSize: 17, lineHeight: 24.65,
     fontWeight: '700',

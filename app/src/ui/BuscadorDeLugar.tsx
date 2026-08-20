@@ -276,7 +276,7 @@ const estilos = StyleSheet.create({
   epigrafe: {
     flex: 1,
     fontFamily: familia,
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '600',
     letterSpacing: TRACK_MICRO,
     textTransform: 'uppercase',
@@ -309,7 +309,7 @@ const estilos = StyleSheet.create({
     /* 16 y no 15: por debajo de 16 px, Safari en el iPhone acerca la página
        al enfocar el campo, y al salir no la devuelve. Es el «zoom» que se
        veía al tocar para escribir un lugar. */
-    fontSize: 16,
+    fontSize: 15.5,
     color: color.ink900,
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' as never } : null),
   },
@@ -331,17 +331,17 @@ const estilos = StyleSheet.create({
   lista: { flex: 1, marginTop: 10 },
   fila: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 12 },
   icono: { width: 22, alignItems: 'center' },
-  nombre: { fontFamily: familia, fontSize: 15, color: color.ink900 },
+  nombre: { fontFamily: familia, fontSize: 15.5, color: color.ink900 },
   contexto: {
     fontFamily: familia,
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: interlinea(12),
     color: color.ink500,
     marginTop: 1,
   },
   vamos: {
     fontFamily: familia,
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '600',
     letterSpacing: TRACK_MICRO,
     textTransform: 'uppercase',
@@ -349,7 +349,7 @@ const estilos = StyleSheet.create({
   },
   nada: {
     fontFamily: familia,
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: interlinea(13),
     color: color.ink500,
     paddingVertical: 16,

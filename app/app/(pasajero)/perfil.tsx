@@ -200,7 +200,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -222,7 +222,7 @@ const estilos = StyleSheet.create({
   },
   retratoTexto: { fontSize: 23, lineHeight: interlinea(23), fontWeight: '600', color: '#fff', fontFamily: familia },
   nombre: {
-    fontSize: 26,
+    fontSize: 27,
     lineHeight: interlinea(26),
     fontWeight: '600',
     letterSpacing: -1.04,
@@ -250,7 +250,7 @@ const estilos = StyleSheet.create({
     elevation: 6,
   },
   distintivos: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
-  bio: { fontSize: 14.5, lineHeight: 21.75, color: color.ink700, marginTop: 16, fontFamily: familia },
+  bio: { fontSize: 14, lineHeight: 21.75, color: color.ink700, marginTop: 16, fontFamily: familia },
 
   filaCarro: {
     flexDirection: 'row',
@@ -272,7 +272,7 @@ const estilos = StyleSheet.create({
     backgroundColor: color.sand200,
   },
   placaTexto: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: interlinea(13),
     fontWeight: '500',
     letterSpacing: 0.26,
@@ -284,7 +284,7 @@ const estilos = StyleSheet.create({
   seccionResenas: { paddingHorizontal: 4, paddingTop: 24 },
   resena: { flexDirection: 'row', gap: 13, paddingVertical: 16 },
   filaAutor: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  autor: { flex: 1, fontSize: 14.5, lineHeight: interlinea(14.5), fontWeight: '500', color: color.ink900, fontFamily: familia },
+  autor: { flex: 1, fontSize: 14, lineHeight: interlinea(14.5), fontWeight: '500', color: color.ink900, fontFamily: familia },
   filaEstrella: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   nota: { fontSize: 12.5, lineHeight: interlinea(12.5), color: color.ink600, fontFamily: familia, ...tabular },
   textoResena: { fontSize: 13.5, lineHeight: 19.57, color: color.ink700, marginTop: 5, fontFamily: familia },

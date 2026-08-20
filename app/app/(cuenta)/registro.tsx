@@ -315,7 +315,7 @@ const estilos = StyleSheet.create({
   },
   filaSuperior: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   epigrafeCampo: {
-    fontSize: 11, lineHeight: 15.95,
+    fontSize: 11.5, lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
@@ -355,7 +355,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  prefijoTexto: { fontSize: 16, lineHeight: 23.2, fontWeight: '500', color: color.ink700, fontFamily: familia },
+  prefijoTexto: { fontSize: 15.5, lineHeight: 23.2, fontWeight: '500', color: color.ink700, fontFamily: familia },
   campo: {
     flex: 1,
     height: 58,
@@ -388,7 +388,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   casillaTexto: {
-    fontSize: 34, lineHeight: 49.3,
+    fontSize: 33, lineHeight: 49.3,
     fontWeight: '600',
     letterSpacing: -1.02,
     color: color.ink900,
@@ -405,7 +405,7 @@ const estilos = StyleSheet.create({
 
   loQueSigue: { marginTop: 16, gap: 10 },
   loQueSigueTitulo: {
-    fontSize: 11, lineHeight: 15.95,
+    fontSize: 11.5, lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
@@ -421,6 +421,6 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  numeroPasoTexto: { fontSize: 12, lineHeight: 17.4, fontWeight: '600', color: color.azul700, fontFamily: familia },
+  numeroPasoTexto: { fontSize: 12.5, lineHeight: 17.4, fontWeight: '600', color: color.azul700, fontFamily: familia },
   textoPaso: { flex: 1, fontSize: 13.5, lineHeight: 19, color: color.ink700, fontFamily: familia },
 });

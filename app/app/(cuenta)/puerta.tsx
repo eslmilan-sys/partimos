@@ -172,7 +172,7 @@ const estilos = StyleSheet.create({
 
   cabecera: { paddingHorizontal: espacio.gutter },
   epigrafeCampo: {
-    fontSize: 11, lineHeight: 15.95,
+    fontSize: 11.5, lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
@@ -215,8 +215,8 @@ const estilos = StyleSheet.create({
     borderColor: color.ink200,
     marginTop: 5,
   },
-  paradaNombre: { fontSize: 16, lineHeight: 23.2, letterSpacing: -0.29, color: color.ink900, fontFamily: familia },
-  paradaDetalle: { fontSize: 13, lineHeight: 18.85, color: color.ink500, marginTop: 3, fontFamily: familia },
+  paradaNombre: { fontSize: 15.5, lineHeight: 23.2, letterSpacing: -0.29, color: color.ink900, fontFamily: familia },
+  paradaDetalle: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, marginTop: 3, fontFamily: familia },
   paradaHora: { fontSize: 13.5, lineHeight: 19.57, color: color.ink600, fontFamily: familia, ...tabular },
 
   velo: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(38,35,43,.48)' },
@@ -250,7 +250,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   tituloFuerte: { fontWeight: '600' },
-  explicacion: { fontSize: 14.5, lineHeight: 21, color: color.ink600, marginTop: 12, fontFamily: familia },
+  explicacion: { fontSize: 14, lineHeight: 21, color: color.ink600, marginTop: 12, fontFamily: familia },
 
   filaTelefono: { flexDirection: 'row', gap: 9 },
   prefijo: {
@@ -262,7 +262,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  prefijoTexto: { fontSize: 16, lineHeight: 23.2, fontWeight: '500', color: color.ink700, fontFamily: familia },
+  prefijoTexto: { fontSize: 15.5, lineHeight: 23.2, fontWeight: '500', color: color.ink700, fontFamily: familia },
   campoTelefono: {
     flex: 1,
     height: 56,

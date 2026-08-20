@@ -232,7 +232,7 @@ const estilos = StyleSheet.create({
   punto: { width: 9, height: 9, borderRadius: 999, backgroundColor: color.rojo500 },
   origen: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: interlinea(15),
     fontWeight: '500',
     letterSpacing: -0.225,
@@ -269,14 +269,14 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  chinchetaTextoVivo: { fontSize: 13, lineHeight: 18.85, color: '#fff' },
+  chinchetaTextoVivo: { fontSize: 13.5, lineHeight: 18.85, color: '#fff' },
 
   hoja: { position: 'absolute', left: 12, right: 12, bottom: 12 },
   dentroHoja: { padding: 20 },
 
   filaEpigrafe: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   epigrafeVivo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -311,7 +311,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  precioSimbolo: { fontSize: 16, lineHeight: 14.4, fontWeight: '500' },
+  precioSimbolo: { fontSize: 15.5, lineHeight: 14.4, fontWeight: '500' },
 
   filaConductor: { flexDirection: 'row', alignItems: 'center', gap: 11, marginTop: 16 },
   retrato: {
@@ -331,13 +331,13 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   nombre: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '500',
     color: color.ink900,
     fontFamily: familia,
   },
-  nota: { fontSize: 13, lineHeight: 18.85, color: color.ink700, fontFamily: familia, ...tabular },
+  nota: { fontSize: 13.5, lineHeight: 18.85, color: color.ink700, fontFamily: familia, ...tabular },
 
   otros: { flexDirection: 'row', gap: 8, marginTop: 12 },
   otro: {
@@ -355,5 +355,5 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  otroLugar: { fontSize: 12, lineHeight: 17.4, color: color.ink600, fontFamily: familia, ...tabular },
+  otroLugar: { fontSize: 12.5, lineHeight: 17.4, color: color.ink600, fontFamily: familia, ...tabular },
 });

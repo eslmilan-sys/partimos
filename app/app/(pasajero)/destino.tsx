@@ -296,7 +296,7 @@ const estilos = StyleSheet.create({
     elevation: 8,
   },
   epigrafeBanda: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -305,7 +305,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titular: {
-    fontSize: 31,
+    fontSize: 30,
     lineHeight: 32.55,
     letterSpacing: -1.395,
     fontWeight: '400',
@@ -315,7 +315,7 @@ const estilos = StyleSheet.create({
   },
   titularFuerte: { fontWeight: '600' },
   debajo: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     color: 'rgba(255,255,255,.82)',
     marginTop: 8,
@@ -341,10 +341,10 @@ const estilos = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 16,
   },
-  cuando: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  cuando: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
   precioBloque: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
   precio: {
-    fontSize: 26,
+    fontSize: 27,
     lineHeight: 24.7,
     fontWeight: '700',
     letterSpacing: -1.04,
@@ -373,7 +373,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   horaLlegada: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     color: color.ink500,
     fontFamily: familia,
@@ -403,7 +403,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   nombre: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '500',
     letterSpacing: -0.2175,
@@ -411,7 +411,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   filaNota: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  nota: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  nota: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
 
   compacta: {
     flexDirection: 'row',

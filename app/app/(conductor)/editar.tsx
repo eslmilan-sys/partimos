@@ -225,7 +225,7 @@ const estilos = StyleSheet.create({
   },
   epigrafeCampo: {
     flex: 1,
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -234,7 +234,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titular: {
-    fontSize: 31,
+    fontSize: 30,
     lineHeight: 32.55,
     letterSpacing: -1.24,
     fontWeight: '400',
@@ -264,7 +264,7 @@ const estilos = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
   },
-  avisoTexto: { flex: 1, fontSize: 13, lineHeight: 18.85, color: color.ink700, fontFamily: familia },
+  avisoTexto: { flex: 1, fontSize: 13.5, lineHeight: 18.85, color: color.ink700, fontFamily: familia },
 
   // Apagado y con candado, no escondido: si no se ve, no se entiende por qué.
   filaCerrada: {
@@ -278,7 +278,7 @@ const estilos = StyleSheet.create({
   },
   cerrados: { marginTop: 6 },
   etiqueta: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '500',
     letterSpacing: -0.2175,

@@ -656,14 +656,14 @@ const estilos = StyleSheet.create({
     borderColor: color.bordeSutil,
   },
   seguroTitulo: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '600',
     letterSpacing: -0.23,
     color: color.ink900,
     fontFamily: familia,
   },
-  seguroTexto: { fontSize: 13, lineHeight: 19, color: color.ink600, marginTop: 2, fontFamily: familia },
+  seguroTexto: { fontSize: 13.5, lineHeight: 19, color: color.ink600, marginTop: 2, fontFamily: familia },
 
   seccionSalen: { marginTop: 24 },
   tiraSalen: { flexDirection: 'row', gap: 10, paddingHorizontal: espacio.gutter, paddingTop: 12 },
@@ -706,12 +706,12 @@ const estilos = StyleSheet.create({
   },
   filaQuienSale: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   quienSale: { flex: 1, fontSize: 12.5, lineHeight: 18, color: color.ink700, fontFamily: familia },
-  notaSale: { fontSize: 12, lineHeight: 18, color: color.ink600, fontFamily: familia, ...tabular },
+  notaSale: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia, ...tabular },
 
   filaSaludo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
   epigrafeCampo: {
     flex: 1,
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -720,7 +720,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   explicacion: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21,
     color: color.campoTexto,
     marginTop: 12,
@@ -761,14 +761,14 @@ const estilos = StyleSheet.create({
     borderColor: color.ink200,
   },
   etiquetaLugar: {
-    fontSize: 11, lineHeight: 15.95,
+    fontSize: 11.5, lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
     color: color.ink500,
     fontFamily: familia,
   },
-  valorLugar: { fontSize: 16.5, lineHeight: 23.93, letterSpacing: -0.33, color: color.ink900, marginTop: 2, fontFamily: familia },
+  valorLugar: { fontSize: 15.5, lineHeight: 23.93, letterSpacing: -0.33, color: color.ink900, marginTop: 2, fontFamily: familia },
 
   filaCajas: { flexDirection: 'row', gap: 10, marginTop: 12 },
   caja: {
@@ -787,7 +787,7 @@ const estilos = StyleSheet.create({
     color: color.ink500,
     fontFamily: familia,
   },
-  valorCaja: { fontSize: 15, lineHeight: 21.75, fontWeight: '500', color: color.ink900, marginTop: 2, fontFamily: familia },
+  valorCaja: { fontSize: 15.5, lineHeight: 21.75, fontWeight: '500', color: color.ink900, marginTop: 2, fontFamily: familia },
 
   seccionRutas: { paddingHorizontal: espacio.gutter, paddingTop: 18 },
   filaSeccion: {
@@ -797,7 +797,7 @@ const estilos = StyleSheet.create({
     marginBottom: 2,
   },
   verTodas: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     fontWeight: '600',
     color: color.rojo600,
@@ -822,7 +822,7 @@ const estilos = StyleSheet.create({
     backgroundColor: color.sand200,
   },
   foto: { width: '100%', height: '100%' },
-  nombreRuta: { flex: 1, fontSize: 16.5, lineHeight: 23.93, letterSpacing: -0.36, color: color.ink900, fontFamily: familia },
+  nombreRuta: { flex: 1, fontSize: 15.5, lineHeight: 23.93, letterSpacing: -0.36, color: color.ink900, fontFamily: familia },
   nombreRutaFuerte: { fontWeight: '600' },
   desde: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
   precioRuta: {
@@ -859,7 +859,7 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   fraseGancho: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 20.25,
     marginTop: 8,
     maxWidth: 190,

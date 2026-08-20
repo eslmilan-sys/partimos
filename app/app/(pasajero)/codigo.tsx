@@ -173,7 +173,7 @@ const estilos = StyleSheet.create({
   puntoBlanco: { width: 6, height: 6, borderRadius: radio.pastilla, backgroundColor: '#fff' },
 
   epigrafe: {
-    fontSize: 11, lineHeight: 15.95,
+    fontSize: 11.5, lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
@@ -222,7 +222,7 @@ const estilos = StyleSheet.create({
   },
   filaConductor: { flexDirection: 'row', alignItems: 'center', gap: 13 },
   nombreConductor: {
-    fontSize: 16.5, lineHeight: 23.93,
+    fontSize: 15.5, lineHeight: 23.93,
     fontWeight: '500',
     letterSpacing: -0.33,
     color: color.ink900,
@@ -257,8 +257,8 @@ const estilos = StyleSheet.create({
     borderColor: color.ink200,
     marginTop: 4,
   },
-  paradaNombre: { fontSize: 16, lineHeight: 23.2, letterSpacing: -0.29, color: color.ink900, fontFamily: familia },
-  paradaDetalle: { fontSize: 13, lineHeight: 18.85, color: color.ink500, fontFamily: familia },
+  paradaNombre: { fontSize: 15.5, lineHeight: 23.2, letterSpacing: -0.29, color: color.ink900, fontFamily: familia },
+  paradaDetalle: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia },
   paradaHora: { fontSize: 13.5, lineHeight: 19.57, color: color.ink600, fontFamily: familia, ...tabular },
 
   avisoPago: {

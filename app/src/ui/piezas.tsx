@@ -299,7 +299,7 @@ export function Carril({
 const NORMAL = {
   punto: 12,
   bola: { width: 10, height: 10, borderRadius: 5 },
-  lugar: { fontSize: 15, lineHeight: 21 },
+  lugar: { fontSize: 15.5, lineHeight: 21 },
   pie: { fontSize: 12.5, lineHeight: 18 },
 } as const;
 
@@ -328,7 +328,7 @@ const estilos = StyleSheet.create({
   },
   seccionTexto: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: interlinea(12),
     fontWeight: '700',
     letterSpacing: 12 * 0.07,
@@ -339,7 +339,7 @@ const estilos = StyleSheet.create({
   seccionCuenta: { fontSize: 12.5, lineHeight: 18, color: color.ink500, fontFamily: familia },
   seccionEnlace: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 10 },
   seccionEnlaceTexto: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     fontWeight: '700',
     color: color.rojo600,
@@ -380,7 +380,7 @@ const estilos = StyleSheet.create({
   },
   chipCuentaActiva: { backgroundColor: 'rgba(255,255,255,.24)' },
   chipCuentaTexto: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15,
     fontWeight: '700',
     color: color.ink700,

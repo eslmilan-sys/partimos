@@ -272,7 +272,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   razonTitulo: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '500',
     letterSpacing: -0.27,

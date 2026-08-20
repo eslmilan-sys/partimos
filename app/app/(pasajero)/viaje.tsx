@@ -403,7 +403,7 @@ const estilos = StyleSheet.create({
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 66 },
   filaTitular: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14 },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -412,7 +412,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titular: {
-    fontSize: 31,
+    fontSize: 30,
     lineHeight: 32.86,
     letterSpacing: -1.395,
     fontWeight: '400',
@@ -445,7 +445,7 @@ const estilos = StyleSheet.create({
   },
 
   precio: {
-    fontSize: 32,
+    fontSize: 33,
     fontWeight: '700',
     letterSpacing: -1.44,
     lineHeight: 31,
@@ -455,7 +455,7 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   porPuesto: {
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: 17.4,
     textAlign: 'right',
     color: color.campoTexto,
@@ -516,7 +516,7 @@ const estilos = StyleSheet.create({
     marginTop: 6,
   },
   paradaNombre: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '500',
     letterSpacing: -0.27,
@@ -590,7 +590,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   nombre: {
-    fontSize: 16.5,
+    fontSize: 15.5,
     lineHeight: 23.93,
     fontWeight: '500',
     letterSpacing: -0.33,
@@ -599,7 +599,7 @@ const estilos = StyleSheet.create({
   },
   filaCalificacion: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   calificacion: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     color: color.ink600,
     fontFamily: familia,
@@ -616,7 +616,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   detalleCarro: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     color: color.ink500,
     fontFamily: familia,
@@ -653,7 +653,7 @@ const estilos = StyleSheet.create({
   },
   filaPrecioBarra: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 12 },
   filaDirecto: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto', marginTop: 4 },
-  directo: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia },
+  directo: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia },
 
   cta: {
     height: 60,

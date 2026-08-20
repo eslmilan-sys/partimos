@@ -245,10 +245,10 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  marcaGlifo: { fontSize: 14.5, lineHeight: 21.025, fontWeight: '600', fontFamily: familia },
+  marcaGlifo: { fontSize: 14, lineHeight: 21.025, fontWeight: '600', fontFamily: familia },
   metodo: {
     alignSelf: 'flex-start',
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: 21.75,
     fontWeight: '500',
     letterSpacing: -0.225,

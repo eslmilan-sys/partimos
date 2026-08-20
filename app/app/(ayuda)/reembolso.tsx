@@ -300,7 +300,7 @@ const estilos = StyleSheet.create({
   },
   punto: { width: 9, height: 9, borderRadius: radio.pastilla, backgroundColor: color.azul500 },
   motivoTexto: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: interlinea(15),
     fontWeight: '500',
     letterSpacing: -0.225,
@@ -348,7 +348,7 @@ const estilos = StyleSheet.create({
   },
   etiquetaImporte: { ...texto.epigrafe, color: color.azul700, paddingBottom: 5 },
   importe: {
-    fontSize: 32,
+    fontSize: 33,
     // La cifra grande va apretada contra su línea: 0.9.
     lineHeight: 28.8,
     fontWeight: '700',

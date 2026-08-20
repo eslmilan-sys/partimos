@@ -344,7 +344,7 @@ const estilos = StyleSheet.create({
   },
   lema: {
     textAlign: 'center',
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21,
     fontWeight: '500',
     color: 'rgba(255,255,255,.94)',
@@ -381,7 +381,7 @@ const estilos = StyleSheet.create({
 
   olvide: { alignSelf: 'flex-start', marginTop: 2 },
   olvideTexto: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     fontWeight: '600',
     color: color.azul500,
@@ -412,7 +412,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   otroTexto: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: interlinea(15),
     fontWeight: '600',
     letterSpacing: -0.15,
@@ -432,7 +432,7 @@ const estilos = StyleSheet.create({
 
   legal: {
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: 18,
     color: 'rgba(255,255,255,.86)',
     marginTop: 18,
@@ -448,7 +448,7 @@ const estilos = StyleSheet.create({
     marginTop: 12,
   },
   protegidoTexto: {
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: 18,
     fontWeight: '500',
     color: 'rgba(255,255,255,.86)',

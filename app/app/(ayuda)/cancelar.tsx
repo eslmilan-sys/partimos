@@ -264,7 +264,7 @@ const estilos = StyleSheet.create({
   },
   ruta: {
     flex: 1,
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: interlinea(14.5),
     fontWeight: '500',
     letterSpacing: -0.2175,
@@ -272,7 +272,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   cuando: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: interlinea(13),
     fontWeight: '500',
     letterSpacing: -0.2175,
@@ -351,7 +351,7 @@ const estilos = StyleSheet.create({
   },
   punta: { width: 9, height: 9, borderRadius: radio.pastilla },
   razonTexto: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: interlinea(14.5),
     fontWeight: '500',
     letterSpacing: -0.2175,
@@ -383,7 +383,7 @@ const estilos = StyleSheet.create({
   epigrafeDevolucion: { ...texto.epigrafe, color: color.azul700 },
   explicacion: {
     marginTop: 7,
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: interlinea(13),
     color: color.ink700,
     fontFamily: familia,
@@ -408,7 +408,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   destructivoTexto: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: interlinea(16),
     fontWeight: '600',
     letterSpacing: -0.24,

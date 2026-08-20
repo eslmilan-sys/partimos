@@ -253,7 +253,7 @@ const estilos = StyleSheet.create({
 
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 6 },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -295,7 +295,7 @@ const estilos = StyleSheet.create({
 
   filaEpigrafe: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   epigrafeVivo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -304,7 +304,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   epigrafeAzul: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -314,7 +314,7 @@ const estilos = StyleSheet.create({
   },
   puntoVivo: { width: 7, height: 7, borderRadius: 999, backgroundColor: color.rojo500 },
   enlace: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     fontWeight: '600',
     color: color.azul700,
@@ -336,7 +336,7 @@ const estilos = StyleSheet.create({
   },
   parada: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 23.2,
     fontWeight: '500',
     letterSpacing: -0.32,
@@ -344,7 +344,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   horaParada: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     color: color.ink500,
     fontFamily: familia,
@@ -390,7 +390,7 @@ const estilos = StyleSheet.create({
   },
   abordarTexto: {
     flex: 1,
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21,
     fontWeight: '600',
     color: color.azul700,
@@ -415,7 +415,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   contadorTexto: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: interlinea(15),
     fontWeight: '700',
     color: '#fff',
@@ -423,7 +423,7 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   solicitudesTitulo: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '600',
     letterSpacing: -0.2175,

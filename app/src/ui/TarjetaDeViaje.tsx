@@ -135,12 +135,12 @@ const estilos = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.bordeSutil,
     borderRadius: radio.l,
-    padding: 15,
+    padding: 14,
   },
   /** En rojo y en versalitas, como un sello: es la única de la lista. */
   marca: {
     alignSelf: 'flex-start',
-    marginBottom: 10,
+    marginBottom: 8,
     paddingHorizontal: 9,
     paddingVertical: 4,
     borderRadius: radio.pastilla,
@@ -157,7 +157,7 @@ const estilos = StyleSheet.create({
   },
   pulsada: { backgroundColor: color.sand100, borderColor: color.bordePorDefecto },
   filaSuperior: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 },
-  cuando: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  cuando: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
   filaPrecio: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
   /* 31 y no 26: el aporte es lo que decide, y en una lista de cuatro
      tarjetas era del mismo tamaño que la hora. */
@@ -174,9 +174,9 @@ const estilos = StyleSheet.create({
      Con una propia —16 contra 29,5— el navegador lo centraba en su caja y no
      en la base de la cifra: el `$` caía tres píxeles por debajo del número y
      el precio se leía roto. Misma `lineHeight`, mismo apoyo. */
-  precioSimbolo: { fontSize: 16, lineHeight: 30, fontWeight: '600', color: color.ink600 },
+  precioSimbolo: { fontSize: 15.5, lineHeight: 30, fontWeight: '600', color: color.ink600 },
 
-  recorrido: { gap: 8, marginTop: 11 },
+  recorrido: { gap: 6, marginTop: 9 },
   parada: { flexDirection: 'row', alignItems: 'center', gap: 11 },
   puntoLleno: { width: 9, height: 9, borderRadius: radio.pastilla, backgroundColor: color.azul700 },
   puntoVacio: {
@@ -188,15 +188,15 @@ const estilos = StyleSheet.create({
     borderColor: color.bordePorDefecto,
   },
   paradaTexto: { fontSize: 15.5, lineHeight: 22.47, fontWeight: '500', letterSpacing: -0.28, color: color.ink900, fontFamily: familia },
-  llegada: { marginLeft: 'auto', fontSize: 13, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
+  llegada: { marginLeft: 'auto', fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
 
-  filaEquipaje: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7, marginTop: 9 },
+  filaEquipaje: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7, marginTop: 8 },
   equipaje: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },
 
-  separador: { height: 1, backgroundColor: color.bordeSutil, marginTop: 13, marginBottom: 12 },
+  separador: { height: 1, backgroundColor: color.bordeSutil, marginTop: 11, marginBottom: 10 },
 
   filaConductor: { flexDirection: 'row', alignItems: 'center', gap: 11 },
-  nombre: { fontSize: 14.5, lineHeight: 21.02, fontWeight: '500', letterSpacing: -0.22, color: color.ink900, fontFamily: familia },
+  nombre: { fontSize: 14, lineHeight: 21.02, fontWeight: '500', letterSpacing: -0.22, color: color.ink900, fontFamily: familia },
   filaCalificacion: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 1 },
-  calificacion: { fontSize: 13, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  calificacion: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
 });

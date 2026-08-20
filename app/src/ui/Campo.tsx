@@ -83,7 +83,7 @@ const estilos = StyleSheet.create({
   grupo: { gap: 7 },
   etiqueta: {
     fontFamily: familia,
-    fontSize: 12,
+    fontSize: 12.5,
     lineHeight: interlinea(12),
     fontWeight: '600',
     letterSpacing: 0.1 * 12,
@@ -116,7 +116,7 @@ const estilos = StyleSheet.create({
      que ser relleno de verdad: 44 de alto, que es el mínimo del sistema. */
   ojo: {
     fontFamily: familia,
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: interlinea(13),
     fontWeight: '600',
     color: color.ink600,

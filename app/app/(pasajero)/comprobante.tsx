@@ -254,9 +254,9 @@ const estilos = StyleSheet.create({
     alignItems: 'baseline',
     gap: 12,
   },
-  concepto: { fontSize: 14.5, lineHeight: 21.025, color: color.ink700, fontFamily: familia },
+  concepto: { fontSize: 14, lineHeight: 21.025, color: color.ink700, fontFamily: familia },
   importe: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '500',
     color: color.ink700,
@@ -265,14 +265,14 @@ const estilos = StyleSheet.create({
   },
   raya: { height: 1, backgroundColor: color.bordeSutil, marginTop: 14, marginBottom: 13 },
   conceptoFuerte: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '600',
     color: color.ink900,
     fontFamily: familia,
   },
   importeFuerte: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '700',
     color: color.ink900,

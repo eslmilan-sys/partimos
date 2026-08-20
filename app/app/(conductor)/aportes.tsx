@@ -155,7 +155,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
@@ -241,7 +241,7 @@ const estilos = StyleSheet.create({
     borderTopColor: color.bordeSutil,
   },
   ruta: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '500',
     letterSpacing: -0.2175,
@@ -256,7 +256,7 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   aporte: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: 23.2,
     fontWeight: '700',
     letterSpacing: -0.48,
@@ -286,14 +286,14 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   marcaYappyTexto: {
-    fontSize: 15,
+    fontSize: 15.5,
     lineHeight: interlinea(15),
     fontWeight: '700',
     color: color.azul700,
     fontFamily: familia,
   },
   donde: {
-    fontSize: 14.5,
+    fontSize: 14,
     lineHeight: 21.025,
     fontWeight: '500',
     letterSpacing: -0.2175,
@@ -303,7 +303,7 @@ const estilos = StyleSheet.create({
   },
   cadaCuando: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
   cambiar: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18.85,
     fontWeight: '600',
     color: color.azul700,

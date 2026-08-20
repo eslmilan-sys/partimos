@@ -123,7 +123,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   contornoTexto: {
-    fontSize: 16,
+    fontSize: 15.5,
     lineHeight: interlinea(16),
     fontWeight: '600',
     color: '#fff',

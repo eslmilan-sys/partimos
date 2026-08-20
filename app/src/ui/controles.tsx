@@ -165,7 +165,7 @@ type BotonProps = {
 };
 
 const TAMANOS: Record<Tamano, { height: number; paddingHorizontal: number; fontSize: number }> = {
-  md: { height: 52, paddingHorizontal: 26, fontSize: 16 },
+  md: { height: 52, paddingHorizontal: 26, fontSize: 15.5 },
   lg: { height: 58, paddingHorizontal: 32, fontSize: 17 },
 };
 
@@ -357,7 +357,7 @@ export function Insignia({
       {punto ? <View style={[estilos.insigniaPunto, { backgroundColor: tinta }]} /> : null}
       <Text
         style={{
-          fontSize: 11,
+          fontSize: 11.5,
           lineHeight: interlinea(11),
           fontWeight: '500',
           letterSpacing: -0.055,
@@ -391,7 +391,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   stepperGlifo: { fontSize: 19, lineHeight: 19, fontWeight: '500', color: color.ink900, fontFamily: familia },
-  stepperSufijo: { fontSize: 13, lineHeight: 18.85, fontWeight: '600', color: color.ink600 },
+  stepperSufijo: { fontSize: 13.5, lineHeight: 18.85, fontWeight: '600', color: color.ink600 },
   stepperValor: {
     minWidth: 34,
     textAlign: 'center',
@@ -402,8 +402,8 @@ const estilos = StyleSheet.create({
     fontVariant: ['tabular-nums'], fontFamily: familia },
 
   interruptorFila: { flexDirection: 'row', gap: 16, minHeight: 30 },
-  interruptorEtiqueta: { fontSize: 15, lineHeight: 21.75, fontWeight: '500', color: color.ink900, fontFamily: familia },
-  interruptorDescripcion: { fontSize: 13, lineHeight: 18.2, color: color.ink600, marginTop: 2, fontFamily: familia },
+  interruptorEtiqueta: { fontSize: 15.5, lineHeight: 21.75, fontWeight: '500', color: color.ink900, fontFamily: familia },
+  interruptorDescripcion: { fontSize: 13.5, lineHeight: 18.2, color: color.ink600, marginTop: 2, fontFamily: familia },
   pista: { width: 48, height: 30, borderRadius: radio.pastilla, padding: 3, justifyContent: 'center' },
   pulgar: {
     width: 24,
@@ -462,7 +462,7 @@ const estilos = StyleSheet.create({
     borderColor: color.bordePorDefecto,
   },
   campoTexto: {
-    fontSize: 16, lineHeight: 23.2,
+    fontSize: 15.5, lineHeight: 23.2,
     fontWeight: '500',
     letterSpacing: -0.16,
     color: color.ink900,
