@@ -1652,6 +1652,8 @@ export type Database = {
       trips: {
         Row: {
           accepts_luggage: boolean
+          allows_pets: boolean
+          allows_smoking: boolean
           accepts_cash: boolean
           accepts_yappy_direct: boolean
           arrival_estimate_at: string | null
@@ -1690,6 +1692,8 @@ export type Database = {
         }
         Insert: {
           accepts_luggage?: boolean
+          allows_pets?: boolean
+          allows_smoking?: boolean
           accepts_cash?: boolean
           accepts_yappy_direct?: boolean
           arrival_estimate_at?: string | null
@@ -1728,6 +1732,8 @@ export type Database = {
         }
         Update: {
           accepts_luggage?: boolean
+          allows_pets?: boolean
+          allows_smoking?: boolean
           accepts_cash?: boolean
           accepts_yappy_direct?: boolean
           arrival_estimate_at?: string | null

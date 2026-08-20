@@ -123,6 +123,8 @@ export default function Resultados() {
             destino: (v.destination_label ?? '').replace(' Unión', ''),
             llegada: v.arrival_estimate_at ? hora(v.arrival_estimate_at) : '',
             equipaje: etiquetaDeMaletero(v.accepts_luggage),
+            aceptaMascotas: v.allows_pets,
+            sePuedeFumar: v.allows_smoking,
             conductor: {
               nombre: `${v.first_name ?? ''} ${v.last_initial ?? ''}`.trim(),
               calificacion: v.driver_rating ?? 0,
@@ -372,6 +374,11 @@ function BarraDeFiltros({
           alPulsar={() => alAlternar('aceptaMaletas')}
         />
         <Chip
+          activo={!!filtros.aceptaMascotas}
+          etiqueta="Con mascota"
+          alPulsar={() => alAlternar('aceptaMascotas')}
+        />
+        <Chip
           activo={!!filtros.soloMujeres}
           etiqueta="Solo mujeres"
           alPulsar={() => alAlternar('soloMujeres')}
@@ -433,7 +440,7 @@ function Chip({
 
 /** Cuántos filtros están puestos: es lo que enciende el punto del icono. */
 function cuantosFiltros(f: Filtros): number {
-  return [f.aceptaMaletas, f.soloMujeres, f.yappy].filter(Boolean).length;
+  return [f.aceptaMaletas, f.aceptaMascotas, f.soloMujeres, f.yappy].filter(Boolean).length;
 }
 
 /**
@@ -455,7 +462,7 @@ function HojaDeFiltros({
   alCerrar: () => void;
   cuantos: number;
 }) {
-  const alternar = (clave: 'aceptaMaletas' | 'soloMujeres' | 'yappy') =>
+  const alternar = (clave: 'aceptaMaletas' | 'aceptaMascotas' | 'soloMujeres' | 'yappy') =>
     alCambiar({ ...filtros, [clave]: filtros[clave] ? undefined : true });
 
   return (
@@ -470,6 +477,11 @@ function HojaDeFiltros({
             activo={!!filtros.aceptaMaletas}
             etiqueta="Acepta maletas"
             alPulsar={() => alternar('aceptaMaletas')}
+          />
+          <Chip
+            activo={!!filtros.aceptaMascotas}
+            etiqueta="Con mascota"
+            alPulsar={() => alternar('aceptaMascotas')}
           />
           <Chip
             activo={!!filtros.soloMujeres}

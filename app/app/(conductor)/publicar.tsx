@@ -15,23 +15,42 @@ import { useRouter } from 'expo-router';
 import { aporteCalculado, origenDelAporte } from '@/dominio/aporte';
 import {
   type PublicacionPreparada,
+  type RutaPublicable,
+  diaEnPanama,
   prepararPublicacion,
-  publicarViaje,
   repartoDelCosto,
+  rutasPublicables,
 } from '@/servicios/viajes';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
+import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
+import { NoEsta } from '@/ui/NoEsta';
 import { Boton, Epigrafe, Interruptor, Pastilla, Stepper } from '@/ui/controles';
 import { formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, hora, mas } from '@/ui/fechas';
-import { Atras, Carro, Cerrar, Mas } from '@/ui/iconos';
+import { Atras, Avanza, Carro, Cerrar, Mas } from '@/ui/iconos';
 import { familia, color, espacio, radio, texto } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
-const RUTA = 'panama-chitre';
-const SALIDA = '2026-11-14T14:50:00-05:00';
+/**
+ * LA RUTA Y LA HORA ERAN DOS CONSTANTES DE ESTE ARCHIVO.
+ *
+ * `const RUTA = 'panama-chitre'` y una fecha de noviembre de 2026: un
+ * conductor solo podía publicar Panamá → Chitré, ese día, a esa hora. Ahora
+ * las tres se eligen, y la lista de rutas es la de los corredores abiertos.
+ */
+const HORAS = Array.from({ length: 19 }, (_, i) => `${String(i + 5).padStart(2, '0')}:00`);
+
+/** Quince días, como en la búsqueda: los viajes se publican con dos o tres de antelación. */
+const LOS_PROXIMOS_DIAS = (): Opcion[] =>
+  Array.from({ length: 15 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const dia = diaEnPanama(d);
+    return { valor: dia, etiqueta: i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : diaCorto(d) };
+  });
 
 /** Lo que cuesta desviarse a recoger en cada parada. */
 const MINUTOS_POR_PARADA = 5;
@@ -39,18 +58,39 @@ const MINUTOS_POR_PARADA = 5;
 export default function Publicar() {
   const router = useRouter();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
+  const [rutas] = useState<RutaPublicable[]>(() => rutasPublicables());
+  const [ruta, setRuta] = useState('');
+  const [dia, setDia] = useState(() => diaEnPanama(new Date()));
+  const [horaSalida, setHoraSalida] = useState('06:00');
+  const [eligiendo, setEligiendo] = useState<'ruta' | 'dia' | 'hora' | null>(null);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
   const [paradas, setParadas] = useState(2);
   const [puestos, setPuestos] = useState(3);
   const [aporteElegido, setAporteElegido] = useState<number | null>(null);
   const [aceptaMaletas, setAceptaMaletas] = useState(true);
   const [soloMujeres, setSoloMujeres] = useState(false);
-  const [publicando, setPublicando] = useState(false);
+  const [aceptaMascotas, setAceptaMascotas] = useState(false);
+  const [sePuedeFumar, setSePuedeFumar] = useState(false);
+  const [sinCarro, setSinCarro] = useState(false);
+
+  /** La salida, ya montada: el día que elegiste a la hora que elegiste. */
+  const salidaISO = `${dia}T${horaSalida}:00-05:00`;
 
   useEffect(() => {
-    if (!yo) return;
-    prepararPublicacion(yo, RUTA, SALIDA).then(setDatos);
-  }, [yo]);
+    if (rutas.length > 0 && !ruta) setRuta(rutas[0].slug);
+  }, [rutas, ruta]);
+
+  useEffect(() => {
+    if (!yo || !ruta) return;
+    prepararPublicacion(yo, ruta, salidaISO)
+      .then((d) => {
+        setDatos(d);
+        setSinCarro(false);
+      })
+      /* Sin carro registrado no se puede publicar, y decirlo es más útil que
+         una pantalla en blanco: la pantalla del carro está a un toque. */
+      .catch(() => setSinCarro(true));
+  }, [yo, ruta, salidaISO]);
 
   const calculado = useMemo(
     () => (datos ? aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos) : 0),
@@ -59,7 +99,16 @@ export default function Publicar() {
   const aporte = aporteElegido ?? calculado;
   const cuenta = datos ? repartoDelCosto(datos.costoCentavos, aporte, puestos) : null;
 
+  if (sinCarro)
+    return (
+      <NoEsta
+        titulo="Primero, tu carro"
+        explicacion="Para publicar un viaje hace falta un carro registrado: la marca, el modelo y cuántos puestos tiene. Se hace una vez."
+      />
+    );
   if (!datos || !cuenta) return <View style={estilos.pantalla} />;
+
+  const laRuta = rutas.find((r) => r.slug === ruta);
 
   const origen = origenDelAporte(aporteElegido, aporte, datos.topeCentavos);
   const salida = new Date(datos.salida);
@@ -89,9 +138,9 @@ export default function Publicar() {
             {`Publicar · ${diaCorto(salida)}, ${hora(salida)} · ${datos.distanciaKm} km`}
           </Text>
         </View>
-        <Text style={estilos.titular}>
-          {'Albrook → '}
-          <Text style={texto.titularFuerte}>Chitré</Text>
+        <Text style={estilos.titular} numberOfLines={2}>
+          {`${laRuta?.origen ?? datos.origen} → `}
+          <Text style={texto.titularFuerte}>{laRuta?.destino ?? datos.destino}</Text>
         </Text>
       </View>
 
@@ -102,6 +151,53 @@ export default function Publicar() {
       >
         {/* La hoja blanca que monta sobre el borde del campo */}
         <View style={estilos.hoja}>
+          {/* Ruta, día y hora: las tres estaban escritas a mano en el archivo. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Ruta: ${laRuta?.origen} a ${laRuta?.destino}. Cambiar`}
+            onPress={() => setEligiendo('ruta')}
+            style={estilos.eleccion}
+          >
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={estilos.eleccionEtiqueta}>Ruta</Text>
+              <Text style={estilos.eleccionValor} numberOfLines={1}>
+                {`${laRuta?.origen ?? ''} → ${laRuta?.destino ?? ''}`}
+              </Text>
+            </View>
+            <Avanza />
+          </Pressable>
+
+          <View style={estilos.filaEleccion}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Día: ${diaCorto(salida)}. Cambiar`}
+              onPress={() => setEligiendo('dia')}
+              style={[estilos.eleccion, estilos.eleccionMitad]}
+            >
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.eleccionEtiqueta}>Día</Text>
+                <Text style={estilos.eleccionValor} numberOfLines={1}>
+                  {diaCorto(salida)}
+                </Text>
+              </View>
+              <Avanza />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Hora: ${horaSalida}. Cambiar`}
+              onPress={() => setEligiendo('hora')}
+              style={[estilos.eleccion, estilos.eleccionMitad]}
+            >
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.eleccionEtiqueta}>Hora</Text>
+                <Text style={[estilos.eleccionValor, tabular]}>{horaSalida}</Text>
+              </View>
+              <Avanza />
+            </Pressable>
+          </View>
+
+          <View style={estilos.separadorHoja} />
+
           <View style={estilos.filaCarro}>
             <Carro />
             <Text style={estilos.textoCarro} numberOfLines={1}>
@@ -220,41 +316,88 @@ export default function Publicar() {
           <View style={estilos.interruptorSeparado}>
             <Interruptor activo={soloMujeres} alCambiar={setSoloMujeres} etiqueta="Solo mujeres" />
           </View>
+          {/* Las dos condiciones del carro que todo el mundo pregunta antes de
+              subirse. Por defecto no se fuma y no van mascotas, que es lo que
+              se espera si nadie dijo nada. */}
+          <View style={estilos.interruptorSeparado}>
+            <Interruptor
+              activo={aceptaMascotas}
+              alCambiar={setAceptaMascotas}
+              etiqueta="Acepto mascotas"
+            />
+          </View>
+          <View style={estilos.interruptorSeparado}>
+            <Interruptor activo={sePuedeFumar} alCambiar={setSePuedeFumar} etiqueta="Se puede fumar" />
+          </View>
         </View>
       </ScrollView>
 
       <View style={estilos.pie}>
         <Boton
           tono="azul"
-          desactivado={publicando}
-          alPulsar={async () => {
-            if (!yo) return;
-            setPublicando(true);
-            try {
-              await publicarViaje({
-                conductorId: yo,
-                carroId: datos.carro.id,
-                corredorSlug: RUTA,
-                salida: datos.salida,
-                paradas,
-                puestos,
-                aporteCentavos: aporteElegido,
-                aceptaMaletas,
-                soloMujeres,
-              });
-            } finally {
-              setPublicando(false);
-            }
-          }}
+          alPulsar={() =>
+            router.push({
+              pathname: '/(conductor)/repaso',
+              params: {
+                ruta,
+                salida: salidaISO,
+                paradas: String(paradas),
+                puestos: String(puestos),
+                aporte: aporteElegido == null ? '' : String(aporteElegido),
+                maletas: aceptaMaletas ? '1' : '',
+                mujeres: soloMujeres ? '1' : '',
+                mascotas: aceptaMascotas ? '1' : '',
+                fumar: sePuedeFumar ? '1' : '',
+              },
+            })
+          }
         >
-          {`Publicar · ${puestos} ${puestos === 1 ? 'puesto a' : 'puestos a'} ${formatearDineroRedondo(aporte)}`}
+          Repasar y publicar
         </Boton>
         <Text style={estilos.notaPie}>
-          {soloMujeres
-            ? 'Se publica ahora, visible solo para pasajeras.'
-            : 'Se publica ahora. Puedes editarlo mientras nadie haya pagado.'}
+          Nada se publica todavía: lo lees entero antes, en una pantalla.
         </Text>
       </View>
+
+      <HojaDeEleccion
+        abierta={eligiendo === 'ruta'}
+        titulo="A dónde vas"
+        opciones={rutas.map((r) => ({
+          valor: r.slug,
+          etiqueta: `${r.origen} → ${r.destino}`,
+          debajo: `${r.distanciaKm} km`,
+        }))}
+        elegido={ruta}
+        alElegir={(v) => {
+          setRuta(v);
+          setAporteElegido(null);
+          setParadas(0);
+          setEligiendo(null);
+        }}
+        alCerrar={() => setEligiendo(null)}
+      />
+      <HojaDeEleccion
+        abierta={eligiendo === 'dia'}
+        titulo="Qué día sales"
+        opciones={LOS_PROXIMOS_DIAS()}
+        elegido={dia}
+        alElegir={(v) => {
+          setDia(v);
+          setEligiendo(null);
+        }}
+        alCerrar={() => setEligiendo(null)}
+      />
+      <HojaDeEleccion
+        abierta={eligiendo === 'hora'}
+        titulo="A qué hora sales"
+        opciones={HORAS.map((h) => ({ valor: h, etiqueta: h }))}
+        elegido={horaSalida}
+        alElegir={(v) => {
+          setHoraSalida(v);
+          setEligiendo(null);
+        }}
+        alCerrar={() => setEligiendo(null)}
+      />
     </View>
   );
 }
@@ -296,6 +439,29 @@ const estilos = StyleSheet.create({
     shadowOffset: { width: 0, height: 18 },
     elevation: 6,
   },
+
+  eleccion: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    height: 58,
+    paddingHorizontal: 14,
+    borderRadius: radio.control,
+    borderWidth: 1.5,
+    borderColor: color.bordePorDefecto,
+  },
+  eleccionMitad: { flex: 1, minWidth: 0 },
+  filaEleccion: { flexDirection: 'row', gap: 9, marginTop: 9 },
+  eleccionEtiqueta: { fontSize: 11.5, lineHeight: 16, color: color.ink500, fontFamily: familia },
+  eleccionValor: {
+    fontSize: 15.5,
+    lineHeight: 22,
+    fontWeight: '600',
+    letterSpacing: -0.23,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  separadorHoja: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 16 },
 
   filaCarro: {
     flexDirection: 'row',

@@ -333,6 +333,13 @@ async function insertar<T extends { id: string }>(nombre: string, fila: T, desti
 }
 
 export const guardarViaje = (v: ViajeFila) => insertar('trips', v, viajes);
+
+/**
+ * Las paradas de un viaje. Publicar escribía el viaje y **no** sus paradas,
+ * así que un viaje recién publicado enseñaba la tarjeta «ruta del viaje»
+ * vacía: sin `trip_stops` no hay ni de dónde sale ni dónde termina.
+ */
+export const guardarParada = (p: TripStop) => insertar('trip_stops', p, paradas);
 export const guardarReserva = async (r: ReservaFila) => {
   const guardada = await insertar('bookings', r, reservas);
   // el conductor tiene que enterarse de que le pidieron puesto

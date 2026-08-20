@@ -41,6 +41,9 @@ export function diaEnPanama(cuando: string | Date): string {
  */
 export type ViajeEnResultados = AvailableTrip & {
   accepts_luggage: boolean;
+  /** Las dos condiciones del carro. Migración 0029. */
+  allows_pets: boolean;
+  allows_smoking: boolean;
   origin_label: string | null;
   destination_label: string | null;
   /** De la vista `driver_ratings`. Nula si todavía no lo ha calificado nadie. */
@@ -49,6 +52,8 @@ export type ViajeEnResultados = AvailableTrip & {
 
 export type Filtros = {
   aceptaMaletas?: boolean;
+  /** Quien viaja con su perro no puede subirse a un carro que no los lleva. */
+  aceptaMascotas?: boolean;
   soloMujeres?: boolean;
   /** Quien paga con Yappy no quiere ver viajes que solo aceptan efectivo. */
   yappy?: boolean;
@@ -82,6 +87,7 @@ export async function buscarViajes(
     .filter((v) => v.status === 'published')
     .filter((v) => diaEnPanama(v.departure_at) === fecha)
     .filter((v) => (filtros.aceptaMaletas ? v.accepts_luggage : true))
+    .filter((v) => (filtros.aceptaMascotas ? v.allows_pets : true))
     .filter((v) => (filtros.soloMujeres ? v.gender_preference === 'women_only' : true))
     .filter((v) => (filtros.yappy ? v.accepts_yappy_direct : true))
     .map(comoResultado)
@@ -371,8 +377,11 @@ export async function prepararPublicacion(
     corredor,
     carro,
     placa: fuente.placasCompletas[carro.id] ?? '',
-    origen: 'Albrook · Terminal',
-    destino: 'Chitré · Parque Unión',
+    /* De las ciudades del corredor y no escrito a mano: aquí ponía siempre
+       «Albrook · Terminal» y «Chitré · Parque Unión», así que publicar
+       Panamá → David dejaba un viaje que decía ir a Chitré. */
+    origen: nombreDeCiudadDe(corredor.origin_city_id),
+    destino: nombreDeCiudadDe(corredor.destination_city_id),
     salida,
     distanciaKm: Number(corredor.distance_km),
     duracionMin: corredor.typical_duration_min ?? 0,
@@ -399,6 +408,9 @@ export type BorradorDePublicacion = {
   aporteCentavos: number | null;
   aceptaMaletas: boolean;
   soloMujeres: boolean;
+  /** Las dos condiciones del carro, no del pasajero. Ver migración 0029. */
+  aceptaMascotas: boolean;
+  sePuedeFumar: boolean;
 };
 
 export async function publicarViaje(borrador: BorradorDePublicacion): Promise<ViajeFila> {
@@ -422,7 +434,11 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
     vehicle_id: borrador.carroId,
     corridor_id: preparada.corredor.id,
     departure_at: borrador.salida,
-    arrival_estimate_at: null,
+    /* La llegada estimada se guarda: sin ella los resultados no pueden
+       decir cuánto dura el viaje ni a qué hora llegas. */
+    arrival_estimate_at: new Date(
+      new Date(borrador.salida).getTime() + (preparada.duracionMin ?? 0) * 60_000,
+    ).toISOString(),
     seats_offered: borrador.puestos,
     price_cents: aporte,
     gender_preference: borrador.soloMujeres ? 'women_only' : 'any',
@@ -453,9 +469,77 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
     destination_lat: null,
     destination_lng: null,
     accepts_luggage: borrador.aceptaMaletas,
+    allows_pets: borrador.aceptaMascotas,
+    allows_smoking: borrador.sePuedeFumar,
   };
 
-  return demora(await fuente.guardarViaje(viaje));
+  const guardado = await fuente.guardarViaje(viaje);
+
+  /**
+   * Y SUS PARADAS. Publicar escribía el viaje y no las paradas, así que un
+   * viaje recién publicado enseñaba la tarjeta «ruta del viaje» en blanco:
+   * sin `trip_stops` no hay ni de dónde sale ni dónde termina, y `7a` no
+   * tenía primera parada que proponerle al pasajero.
+   *
+   * La primera y la última son las ciudades del corredor; las de en medio,
+   * las que el conductor dejó puestas, en su orden. Máximo cuatro puntos de
+   * recogida por viaje, que es la regla del producto.
+   */
+  const intermedias = preparada.paradasOfrecidas.slice(0, Math.min(borrador.paradas, 2));
+  const salidaMs = new Date(borrador.salida).getTime();
+  const enPunto = (min: number) => new Date(salidaMs + min * 60_000).toISOString();
+
+  const deLaRuta: TripStop[] = [
+    { etiqueta: preparada.origen, minutos: 0, tipo: 'origin' as const },
+    ...intermedias.map((p) => ({ etiqueta: p.nombre, minutos: p.minutos, tipo: 'waypoint' as const })),
+    {
+      etiqueta: preparada.destino,
+      minutos: preparada.duracionMin + intermedias.length * 5,
+      tipo: 'destination' as const,
+    },
+  ].map((p, i) => ({
+    id: nuevoId(),
+    trip_id: viaje.id,
+    pickup_point_id: null,
+    custom_label: p.etiqueta,
+    sequence: i,
+    kind: p.tipo,
+    scheduled_at: enPunto(p.minutos),
+    lat: null,
+    lng: null,
+    place_id: null,
+    created_at: ahora,
+  }));
+
+  for (const parada of deLaRuta) await fuente.guardarParada(parada);
+
+  return demora(guardado);
+}
+
+/**
+ * Las rutas que un conductor puede publicar hoy: las que servimos, con su
+ * nombre ya escrito. `5c` tenía el corredor fijo en una constante del
+ * archivo, así que solo se podía publicar Panamá → Chitré.
+ */
+export type RutaPublicable = {
+  slug: string;
+  origen: string;
+  destino: string;
+  distanciaKm: number;
+  duracionMin: number;
+};
+
+export function rutasPublicables(): RutaPublicable[] {
+  return fuente.corredores
+    .filter((c) => c.is_active)
+    .map((c) => ({
+      slug: c.slug,
+      origen: nombreDeCiudadDe(c.origin_city_id),
+      destino: nombreDeCiudadDe(c.destination_city_id),
+      distanciaKm: Number(c.distance_km),
+      duracionMin: c.typical_duration_min ?? 0,
+    }))
+    .sort((a, b) => a.destino.localeCompare(b.destino));
 }
 
 /** El reparto que `5c` enseña bajo la cifra y `5d` desglosa. */
@@ -470,6 +554,11 @@ export function repartoDelCosto(costoCentavos: number, aporteCentavos: number, p
 }
 
 /* ------------------------------------------------------------------ */
+
+/** El nombre de una ciudad por su identificador, o cadena vacía. */
+function nombreDeCiudadDe(ciudadId: string): string {
+  return fuente.ciudades.find((c) => c.id === ciudadId)?.name ?? '';
+}
 
 function contarVendidos(viajeId: string): number {
   return fuente.reservas.filter(
@@ -498,6 +587,8 @@ function comoResultado(v: ViajeFila): ViajeEnResultados {
   ).length;
 
   return {
+    allows_pets: v.allows_pets,
+    allows_smoking: v.allows_smoking,
     id: v.id,
     driver_id: v.driver_id,
     corridor_id: v.corridor_id,

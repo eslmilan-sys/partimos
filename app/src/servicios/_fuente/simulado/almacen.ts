@@ -61,8 +61,9 @@ export const viajes: ViajeFila[] = [
     origin_lng: -79.5527,
     destination_lat: 7.9614,
     destination_lng: -80.4297,
-    // pendiente de migración
     accepts_luggage: true,
+    allows_pets: false,
+    allows_smoking: false,
   },
 ];
 
@@ -457,6 +458,12 @@ export const pagos: Payment[] = [];
 export async function guardarViaje(viaje: ViajeFila): Promise<ViajeFila> {
   viajes.unshift(viaje);
   return viaje;
+}
+
+/** Las paradas de un viaje recién publicado. */
+export async function guardarParada(parada: TripStop): Promise<TripStop> {
+  paradas.push(parada);
+  return parada;
 }
 
 export async function guardarReserva(reserva: ReservaFila): Promise<ReservaFila> {

@@ -30,7 +30,20 @@ import { Bandera, motivoDe } from '@/ui/CampoRojo';
 import { Avatar, Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaLargo, hora } from '@/ui/fechas';
-import { Asiento, Atras, Avanza, Ayuda, Carro, Chat, Compartir, Escudo, Estrella, Maleta } from '@/ui/iconos';
+import {
+  Asiento,
+  Atras,
+  Avanza,
+  Ayuda,
+  Carro,
+  Chat,
+  Compartir,
+  Escudo,
+  Estrella,
+  Maleta,
+  Mascota,
+  SinHumo,
+} from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 /** El verde de «verificado» es `--green-100/700` del traspaso; no está en tokens. */
@@ -211,6 +224,20 @@ export default function DetalleDelViaje() {
                     <Maleta tamano={13} tinta={color.azul700} />
                     <Text style={estilos.pastillaEquipajeTexto}>
                       {etiquetaDeMaletero(viaje.accepts_luggage)}
+                    </Text>
+                  </View>
+                  {/* Aquí sí se dicen las dos, digan que sí o que no: quien
+                      está a un toque de pedir el puesto necesita saberlo. */}
+                  <View style={estilos.pastillaLlana}>
+                    <Mascota tamano={13} tinta={color.ink600} />
+                    <Text style={estilos.pastillaLlanaTexto}>
+                      {viaje.allows_pets ? 'Acepta mascotas' : 'Sin mascotas'}
+                    </Text>
+                  </View>
+                  <View style={estilos.pastillaLlana}>
+                    <SinHumo tamano={13} tinta={color.ink600} />
+                    <Text style={estilos.pastillaLlanaTexto}>
+                      {viaje.allows_smoking ? 'Se puede fumar' : 'No se fuma'}
                     </Text>
                   </View>
                 </View>
@@ -501,6 +528,22 @@ const estilos = StyleSheet.create({
     lineHeight: 16,
     fontWeight: '600',
     color: color.azul700,
+    fontFamily: familia,
+  },
+  pastillaLlana: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.sand200,
+  },
+  pastillaLlanaTexto: {
+    fontSize: 12.5,
+    lineHeight: 16,
+    fontWeight: '500',
+    color: color.ink700,
     fontFamily: familia,
   },
   cuadroCarro: {

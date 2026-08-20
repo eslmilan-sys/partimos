@@ -11,7 +11,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Avatar, Insignia, Pastilla } from './controles';
 import { formatearDineroRedondo, tabular } from './dinero';
-import { Estrella, Maleta } from './iconos';
+import { Estrella, Maleta, Mascota, SinHumo } from './iconos';
 import { familia, color, radio } from './tokens';
 
 export type ViajeEnTarjeta = {
@@ -24,6 +24,9 @@ export type ViajeEnTarjeta = {
   destino: string;
   llegada: string;
   equipaje: 'Acepta maletas' | 'Solo mochila';
+  /** Las dos condiciones del carro: solo se dicen cuando cambian algo. */
+  aceptaMascotas: boolean;
+  sePuedeFumar: boolean;
   conductor: { nombre: string; calificacion: number | null; carro: string };
   canal: string;
 };
@@ -83,9 +86,24 @@ export function TarjetaDeViaje({
         </View>
       </View>
 
+      {/* Las condiciones del carro. La mascota solo se nombra cuando sí van
+          —es lo raro y lo que alguien busca—; el humo, cuando sí se fuma, por
+          la misma razón: lo normal no hace falta decirlo en una lista. */}
       <View style={estilos.filaEquipaje}>
         <Maleta tamano={13} />
         <Text style={estilos.equipaje}>{viaje.equipaje}</Text>
+        {viaje.aceptaMascotas ? (
+          <>
+            <Mascota tamano={13} />
+            <Text style={estilos.equipaje}>Mascotas</Text>
+          </>
+        ) : null}
+        {viaje.sePuedeFumar ? (
+          <>
+            <SinHumo tamano={13} />
+            <Text style={estilos.equipaje}>Se fuma</Text>
+          </>
+        ) : null}
       </View>
 
       <View style={estilos.separador} />
@@ -167,7 +185,7 @@ const estilos = StyleSheet.create({
   paradaTexto: { fontSize: 15.5, lineHeight: 22.47, fontWeight: '500', letterSpacing: -0.28, color: color.ink900, fontFamily: familia },
   llegada: { marginLeft: 'auto', fontSize: 13, lineHeight: 18.85, color: color.ink400, fontFamily: familia, ...tabular },
 
-  filaEquipaje: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 9 },
+  filaEquipaje: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7, marginTop: 9 },
   equipaje: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },
 
   separador: { height: 1, backgroundColor: color.bordeSutil, marginTop: 13, marginBottom: 12 },
