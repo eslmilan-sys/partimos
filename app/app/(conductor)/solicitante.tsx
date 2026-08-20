@@ -31,7 +31,7 @@ import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/to
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, el del traspaso. */
 const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
-const VERDE = { fondo: '#DFF1E8', tinta: '#0E5A3F' };
+const VERDE = { fondo: color.hechoFondo, tinta: color.hechoTinta };
 
 export default function Solicitante() {
   const router = useRouter();

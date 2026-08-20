@@ -236,8 +236,8 @@ export default function Solicitudes() {
                 </View>
                 <Insignia
                   punto
-                  fondo={c.pagado ? '#DFF1E8' : color.sand200}
-                  tinta={c.pagado ? '#0E5A3F' : color.ink700}
+                  fondo={c.pagado ? color.hechoFondo : color.sand200}
+                  tinta={c.pagado ? color.hechoTinta : color.ink700}
                 >
                   {c.pagado ? 'Aporte listo' : 'Aporta al subir'}
                 </Insignia>

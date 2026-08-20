@@ -62,8 +62,8 @@ type Pestana = 'proximos' | 'historial';
  *  verde es «hecho», así que «esperando» no puede ser ninguno de los dos. El
  *  oro de los tokens es el único tercer color que el sistema admite. */
 const ESTADO: Record<string, { texto: string; fondo: string; tinta: string }> = {
-  confirmed: { texto: 'Confirmado', fondo: '#E6F2EC', tinta: color.verde500 },
-  pending: { texto: 'Pendiente', fondo: '#FBF0D8', tinta: '#8A6413' },
+  confirmed: { texto: 'Confirmado', fondo: color.hechoFondo, tinta: color.hechoTinta },
+  pending: { texto: 'Pendiente', fondo: color.esperaFondo, tinta: color.esperaTinta },
   completed: { texto: 'Terminado', fondo: color.sand200, tinta: color.ink600 },
 };
 

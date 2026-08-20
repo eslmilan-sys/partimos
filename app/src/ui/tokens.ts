@@ -62,6 +62,23 @@ export const color = {
   oro500: '#E0A83C',
   verde500: '#157A57',
 
+  /**
+   * LOS TRES ESTADOS, Y POR QUÉ NO SON LOS COLORES DE LA MARCA.
+   *
+   * El rojo es la marca, así que no puede querer decir «mal» ni «esperando»;
+   * el azul es la superficie, así que tampoco puede querer decir nada. Quedan
+   * el verde y un ámbar, y son los únicos dos colores del producto que no
+   * salen de la bandera. No se usan en ningún otro sitio.
+   *
+   * El par verde ya estaba repetido a mano en ocho archivos. El ámbar lo
+   * escribí yo para «Pendiente» en `5b` y estaba suelto en una pantalla.
+   * Aquí los dos, una vez.
+   */
+  hechoFondo: '#DFF1E8',
+  hechoTinta: '#0E5A3F',
+  esperaFondo: '#FBF0D8',
+  esperaTinta: '#8A6413',
+
   bordeSutil: '#EBE7EC',
   bordePorDefecto: '#D8D4DB',
 

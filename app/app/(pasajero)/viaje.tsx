@@ -52,10 +52,6 @@ import {
 } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
-/** El verde de «verificado» es `--green-100/700` del traspaso; no está en tokens. */
-const VERDE_FONDO = '#DFF1E8';
-const VERDE_TINTA = '#0E5A3F';
-
 const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 /** Sin sesión que preguntar —solo en simulado—. En producción la pide `1c`. */
 const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
@@ -242,7 +238,7 @@ export default function DetalleDelViaje() {
                 <View style={estilos.filaChips}>
                   {conductor?.distintivos.some((d) => d.tono === 'verde') ? (
                     <View style={estilos.verificado}>
-                      <Escudo tamano={13} tinta={VERDE_TINTA} />
+                      <Escudo tamano={13} tinta={color.hechoTinta} />
                       <Text style={estilos.verificadoTexto}>Verificado</Text>
                     </View>
                   ) : null}
@@ -540,13 +536,13 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 4,
     borderRadius: radio.pastilla,
-    backgroundColor: VERDE_FONDO,
+    backgroundColor: color.hechoFondo,
   },
   verificadoTexto: {
     fontSize: 12.5,
     lineHeight: 16,
     fontWeight: '600',
-    color: VERDE_TINTA,
+    color: color.hechoTinta,
     fontFamily: familia,
   },
   pastillaEquipaje: {

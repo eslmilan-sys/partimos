@@ -47,10 +47,6 @@ import { TRACK_MICRO, color, espacio, familia, radio, sombra } from '@/ui/tokens
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
-/** El verde de «verificado» es `--green-100/700` del traspaso; no está en tokens. */
-const VERDE_FONDO = '#DFF1E8';
-const VERDE_TINTA = '#0E5A3F';
-
 type Solapa = 'ti' | 'cuenta';
 
 export default function TuCuenta() {
@@ -171,11 +167,11 @@ export default function TuCuenta() {
           onPress={() => router.push('/(conductor)/cedula')}
           style={[estilos.chipEstado, datos.verificado ? estilos.chipVerde : estilos.chipClaro]}
         >
-          <Cedula tamano={15} tinta={datos.verificado ? VERDE_TINTA : color.campoTexto} />
+          <Cedula tamano={15} tinta={datos.verificado ? color.hechoTinta : color.campoTexto} />
           <Text
             style={[
               estilos.chipEstadoTexto,
-              { color: datos.verificado ? VERDE_TINTA : color.campoTexto },
+              { color: datos.verificado ? color.hechoTinta : color.campoTexto },
             ]}
           >
             {datos.verificado ? 'Verificado' : 'Sin verificar'}
@@ -358,7 +354,7 @@ const estilos = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: radio.pastilla,
   },
-  chipVerde: { backgroundColor: VERDE_FONDO },
+  chipVerde: { backgroundColor: color.hechoFondo },
   chipClaro: { backgroundColor: 'rgba(255,255,255,.18)' },
   chipEstadoTexto: {
     fontSize: 12.5,

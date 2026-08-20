@@ -94,8 +94,8 @@ export default function Chat() {
             <Text style={estilos.resumenPuesto}>{hilo.puesto.resumen}</Text>
           </View>
           <Insignia
-            fondo={hilo.puesto.confirmado ? '#DFF1E8' : color.sand200}
-            tinta={hilo.puesto.confirmado ? '#0E5A3F' : color.ink700}
+            fondo={hilo.puesto.confirmado ? color.hechoFondo : color.sand200}
+            tinta={hilo.puesto.confirmado ? color.hechoTinta : color.ink700}
           >
             {hilo.puesto.estado}
           </Insignia>

@@ -28,7 +28,7 @@ import { hora } from '@/ui/fechas';
 import { Estrella, Maleta } from '@/ui/iconos';
 import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
-const VERDE = { fondo: '#DFF1E8', tinta: '#0E5A3F' };
+const VERDE = { fondo: color.hechoFondo, tinta: color.hechoTinta };
 
 export default function Ya() {
   const router = useRouter();

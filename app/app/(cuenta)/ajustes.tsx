@@ -43,10 +43,6 @@ const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 /** `--radius-sheet` son 28 px; `radio.hoja` se quedó en 26. Manda el traspaso. */
 const RADIO_HOJA = 28;
 
-/** `--green-100/700` del traspaso, que no están en tokens. */
-const VERDE_FONDO = '#DFF1E8';
-const VERDE_TINTA = '#0E5A3F';
-
 /**
  * Los cinco interruptores. Ni `profiles` ni ninguna otra tabla guarda todavía
  * estas preferencias —igual que los avisos, que tampoco tienen tabla—, así que
@@ -403,7 +399,7 @@ const estilos = StyleSheet.create({
     height: 22,
     borderRadius: radio.pastilla,
     justifyContent: 'center',
-    backgroundColor: VERDE_FONDO,
+    backgroundColor: color.hechoFondo,
   },
   punto: {
     position: 'absolute',
@@ -412,7 +408,7 @@ const estilos = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: radio.pastilla,
-    backgroundColor: VERDE_TINTA,
+    backgroundColor: color.hechoTinta,
     opacity: 0.85,
   },
   insigniaTexto: {
@@ -422,7 +418,7 @@ const estilos = StyleSheet.create({
     lineHeight: 15.95,
     fontWeight: '500',
     letterSpacing: -0.055,
-    color: VERDE_TINTA,
+    color: color.hechoTinta,
     fontFamily: familia,
   },
 

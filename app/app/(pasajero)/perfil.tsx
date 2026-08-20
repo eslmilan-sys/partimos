@@ -26,7 +26,7 @@ import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/to
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 const TONOS = {
-  verde: { fondo: '#DFF1E8', tinta: '#0E5A3F', punto: true },
+  verde: { fondo: color.hechoFondo, tinta: color.hechoTinta, punto: true },
   rojo: { fondo: color.rojo50, tinta: color.rojo700, punto: false },
   neutro: { fondo: color.sand200, tinta: color.ink700, punto: false },
 } as const;
