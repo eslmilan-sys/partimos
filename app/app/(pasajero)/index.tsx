@@ -61,7 +61,15 @@ const LOS_PROXIMOS_DIAS = (): Opcion[] =>
     const d = new Date();
     d.setDate(d.getDate() + i);
     const dia = diaEnPanama(d);
-    return { valor: dia, etiqueta: comoSeLlamaElDia(dia), debajo: i === 0 ? undefined : diaLargo(d.toISOString()) };
+    /* La fecha larga solo en «Hoy» y «Mañana», que son los dos rótulos que
+       no dicen qué día son. Del tercero en adelante la etiqueta ya es
+       «sábado 22» y debajo ponía «sábado 22 de agosto»: la misma frase dos
+       veces, una encima de otra. */
+    return {
+      valor: dia,
+      etiqueta: comoSeLlamaElDia(dia),
+      debajo: i <= 1 ? diaLargo(d.toISOString()) : undefined,
+    };
   });
 
 /** «Hoy» y «Mañana» tienen nombre; el resto se dice por su fecha. */

@@ -18,6 +18,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useRouter } from 'expo-router';
 
+import { useDecir } from '@/ui/Nota';
+
 import { useVolver } from '@/ui/salidas';
 import Svg, { Circle, Path } from 'react-native-svg';
 
@@ -58,6 +60,7 @@ export default function RegistrarCarro() {
   const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [borrador, setBorrador] = useState<BorradorDeCarro>(borradorInicial);
+  const decir = useDecir();
   const [faltaLaFoto, setFaltaLaFoto] = useState(false);
   const [guardando, setGuardando] = useState(false);
 
@@ -65,10 +68,30 @@ export default function RegistrarCarro() {
   const elegido = cat.colores.find((c) => c.nombre === borrador.color) ?? cat.colores[0];
   const resumido = resumen(borrador);
 
+  /**
+   * QUÉ FALTA, DICHO.
+   *
+   * Esto sólo ponía en rojo el borde de la zona de la foto. Si esa zona
+   * quedaba fuera de la pantalla —y queda, es la última de la página— pulsar
+   * «Guardar el carro» no hacía **nada visible**: el botón parecía roto.
+   * Medido pulsando los controles de las 51 pantallas. Ahora se dice cuál de
+   * los seis datos falta, y el borde rojo se queda para señalar dónde.
+   */
+  const queFalta = (): string | null => {
+    if (!borrador.marca) return 'Falta la marca del carro.';
+    if (!borrador.modelo) return 'Falta el modelo.';
+    if (!borrador.anio) return 'Falta el año.';
+    if (!borrador.color) return 'Falta el color.';
+    if (!borrador.placa) return 'Falta la placa.';
+    if (!borrador.foto) return 'Falta la foto del carro por detrás.';
+    return null;
+  };
+
   const guardar = async () => {
-    // El botón nunca se apaga: lo que falta se señala donde falta.
-    if (!sePuedeGuardar(borrador) || !yo) {
-      setFaltaLaFoto(true);
+    const falta = queFalta();
+    if (falta || !yo) {
+      setFaltaLaFoto(!borrador.foto);
+      decir(falta);
       return;
     }
     setGuardando(true);

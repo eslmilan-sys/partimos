@@ -19,6 +19,8 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
+import { useDecir } from '@/ui/Nota';
+
 import { useVolver } from '@/ui/salidas';
 import Svg, { Path } from 'react-native-svg';
 
@@ -71,9 +73,33 @@ export default function Cedula() {
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<EstadoDeCedula | null>(null);
 
+  const decir = useDecir();
+
+
   const mirar = useCallback(() => {
     if (yo) estadoDeCedula(yo).then(setDatos);
   }, [yo]);
+
+  /**
+   * Volver a mirar casi siempre devuelve lo mismo —la revisión tarda minutos—
+   * y la pantalla no cambiaba ni un píxel: el botón parecía muerto. Ahora
+   * dice qué encontró, aunque sea lo de antes.
+   */
+  const mirarYDecir = useCallback(() => {
+    if (!yo) return;
+    estadoDeCedula(yo).then((e) => {
+      setDatos(e);
+      decir(
+        e.estado === 'verificada'
+          ? 'Ya está verificada. Puedes publicar.'
+          : e.estado === 'en revisión'
+            ? 'Sigue en revisión. Te avisamos en cuanto pase.'
+            : e.estado === 'rechazada'
+              ? 'No pasó la verificación. Escríbenos desde Ayuda.'
+              : 'Todavía no hemos recibido el resultado.',
+      );
+    });
+  }, [yo, decir]);
 
   useEffect(() => {
     if (!yo) return;
@@ -200,7 +226,7 @@ export default function Cedula() {
       </View>
 
       <View style={estilos.pie}>
-        <Boton tono="rojo" alPulsar={mirar}>
+        <Boton tono="rojo" alPulsar={mirarYDecir}>
           Ver el estado otra vez
         </Boton>
         <Text style={estilos.notaPie}>Se hace una sola vez.</Text>

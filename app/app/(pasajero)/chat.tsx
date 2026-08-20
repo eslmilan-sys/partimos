@@ -146,11 +146,14 @@ export default function Chat() {
               style={estilos.entradaMensaje}
             />
           </View>
+          {/* Sin texto el botón devolvía en silencio: parecía roto. Apagado
+              dice lo mismo antes de que nadie lo pulse. */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Enviar"
+            disabled={!texto.trim()}
             onPress={mandar}
-            style={estilos.enviar}
+            style={[estilos.enviar, !texto.trim() && estilos.enviarApagado]}
           >
             <Avion />
           </Pressable>
@@ -296,6 +299,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     outlineStyle: 'none',
   } as never,
+  enviarApagado: { opacity: 0.4 },
   enviar: {
     width: 48,
     height: 48,

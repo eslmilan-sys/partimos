@@ -16,9 +16,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useDecir } from '@/ui/Nota';
+import { DIJO, compartir } from '@/ui/salidas';
 
 import { useVolver } from '@/ui/salidas';
 
@@ -60,6 +63,7 @@ const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 export default function DetalleDelViaje() {
   const router = useRouter();
   const volver = useVolver();
+  const decir = useDecir();
   const { viaje: viajeParam } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viajeParam ?? DEL_RECORRIDO;
 
@@ -132,10 +136,9 @@ export default function DetalleDelViaje() {
               accessibilityRole="button"
               accessibilityLabel="Compartir el viaje"
               onPress={() =>
-                Share.share({
-                  title: 'Partimos',
-                  message: `${viaje.origin_label ?? ''} → ${viaje.destination_label ?? ''} · ${diaLargo(viaje.departure_at)} ${hora(viaje.departure_at)} · ${formatearDineroRedondo(viaje.price_cents)} por puesto`,
-                })
+                compartir(
+                  `${viaje.origin_label ?? ''} → ${viaje.destination_label ?? ''} · ${diaLargo(viaje.departure_at)} ${hora(viaje.departure_at)} · ${formatearDineroRedondo(viaje.price_cents)} por puesto`,
+                ).then((c) => decir(DIJO[c]))
               }
               style={estilos.circulo}
             >

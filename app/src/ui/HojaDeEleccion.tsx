@@ -1,6 +1,6 @@
 /**
  * La hoja que sube desde abajo para elegir una cosa de una lista corta —
- * cuándo sales y cuántos van.
+ * cuándo sales, cuántos van, qué ruta.
  *
  * **Por qué una hoja y no un desplegable nativo.** El `<select>` del navegador
  * se pinta con el estilo del sistema, que no es el nuestro: rompe la única
@@ -8,14 +8,21 @@
  * la interacción, y el blanco los separa—. Y en el teléfono abre una rueda que
  * tapa la pantalla entera para elegir entre tres cosas.
  *
- * Es la misma pieza para las dos, porque son el mismo gesto: una lista corta,
- * una elección, se cierra. Lo que cambia es el contenido, no la mecánica.
+ * **Qué estaba mal.** Se abría, pero no se veía dónde empezaba: el fondo de la
+ * hoja era `sand100`, el mismo de la página de debajo, así que las dos
+ * superficies se fundían y la hoja parecía la propia página desplazada. No
+ * llevaba asa, así que no decía que se arrastra. El rótulo era un epígrafe
+ * gris de once píxeles, más pequeño que las opciones que titulaba. Y la última
+ * fila llevaba raya, que dibuja un renglón vacío contra el borde.
+ *
+ * Ahora: blanca sobre el velo, asa arriba, título del tamaño de un título, y
+ * la última fila sin raya.
  */
 
 import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Cerrar, Visto } from './iconos';
-import { TRACK_MICRO, color, espacio, familia, interlinea, radio } from './tokens';
+import { color, espacio, familia, interlinea, radio, zonaDeToque } from './tokens';
 
 export type Opcion = { valor: string; etiqueta: string; debajo?: string };
 
@@ -41,21 +48,26 @@ export function HojaDeEleccion({
       <Pressable accessibilityLabel="Cerrar" onPress={alCerrar} style={estilos.velo} />
 
       <View style={estilos.hoja}>
+        {/* El asa. No se toca —cerrar tiene su botón— pero dice de un vistazo
+            que esto es una hoja que sube, y no la página de debajo movida. */}
+        <View style={estilos.asa} pointerEvents="none" />
+
         <View style={estilos.cabecera}>
-          <Text style={estilos.epigrafe}>{titulo}</Text>
+          <Text style={estilos.titulo}>{titulo}</Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Cerrar"
             onPress={alCerrar}
             style={estilos.cerrar}
           >
-            <Cerrar tamano={12} tinta={color.ink600} />
+            <Cerrar tamano={12} tinta={color.ink700} />
           </Pressable>
         </View>
 
-        <ScrollView style={estilos.lista}>
-          {opciones.map((o) => {
+        <ScrollView style={estilos.lista} showsVerticalScrollIndicator={false}>
+          {opciones.map((o, i) => {
             const activo = o.valor === elegido;
+            const ultima = i === opciones.length - 1;
             return (
               <Pressable
                 key={o.valor}
@@ -68,7 +80,8 @@ export function HojaDeEleccion({
                 }}
                 style={({ pressed }) => [
                   estilos.fila,
-                  pressed && { backgroundColor: color.sand200 },
+                  !ultima && estilos.conRaya,
+                  pressed && { backgroundColor: color.sand100 },
                 ]}
               >
                 <View style={{ flex: 1, minWidth: 0 }}>
@@ -93,57 +106,68 @@ export function HojaDeEleccion({
 }
 
 const estilos = StyleSheet.create({
-  velo: { flex: 1, backgroundColor: 'rgba(26,20,32,.34)' },
+  velo: { flex: 1, backgroundColor: 'rgba(26,20,32,.42)' },
   hoja: {
-    backgroundColor: color.sand100,
+    backgroundColor: color.blanco,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: espacio.gutter,
-    paddingTop: 16,
-    paddingBottom: 26,
-    maxHeight: 460,
+    paddingTop: 10,
+    /* 30 abajo: el indicador del iPhone se come los últimos veinte y la
+       última fila quedaba pegada al canto. */
+    paddingBottom: 30,
+    maxHeight: 470,
     width: '100%',
     maxWidth: espacio.marco,
     alignSelf: 'center',
-    ...(Platform.OS === 'web' ? { boxShadow: '0 -18px 48px rgba(26,20,32,.18)' as never } : null),
+    ...(Platform.OS === 'web' ? { boxShadow: '0 -20px 56px rgba(26,20,32,.24)' as never } : null),
   },
 
-  cabecera: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
-  epigrafe: {
+  asa: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: color.ink200,
+    marginBottom: 12,
+  },
+
+  cabecera: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 4 },
+  titulo: {
     flex: 1,
     fontFamily: familia,
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: TRACK_MICRO,
-    textTransform: 'uppercase',
-    color: color.ink500,
+    fontSize: 17,
+    lineHeight: 23,
+    fontWeight: '700',
+    letterSpacing: -0.34,
+    color: color.ink900,
   },
   cerrar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 32,
+    height: 32,
+    borderRadius: radio.pastilla,
     alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: color.sand200,
+    ...zonaDeToque,
   },
 
-  lista: { marginTop: 4 },
+  lista: { marginTop: 6 },
   fila: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: color.bordeSutil,
+    minHeight: 56,
+    paddingVertical: 12,
   },
-  etiqueta: { fontFamily: familia, fontSize: 16, color: color.ink900 },
-  etiquetaActiva: { fontWeight: '600' },
+  conRaya: { borderBottomWidth: 1, borderBottomColor: color.bordeSutil },
+  etiqueta: { fontFamily: familia, fontSize: 15.5, lineHeight: 22, color: color.ink900 },
+  etiquetaActiva: { fontWeight: '700' },
   debajo: {
     fontFamily: familia,
-    fontSize: 12,
-    lineHeight: interlinea(12),
+    fontSize: 12.5,
+    lineHeight: interlinea(12.5),
     color: color.ink500,
-    marginTop: 2,
+    marginTop: 1,
   },
   marca: {
     width: 22,
