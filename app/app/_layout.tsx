@@ -14,6 +14,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import { MODO, cargar } from '@/servicios/_fuente';
+import { NotaProvider } from '@/ui/Nota';
 import { familia, color, espacio, interlinea } from '@/ui/tokens';
 
 export default function Layout() {
@@ -32,7 +33,7 @@ export default function Layout() {
   if (!listo) return <Cargando />;
 
   return (
-    <>
+    <NotaProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -40,7 +41,7 @@ export default function Layout() {
           contentStyle: { backgroundColor: color.sand100 },
         }}
       />
-    </>
+    </NotaProvider>
   );
 }
 

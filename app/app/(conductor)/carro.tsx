@@ -17,6 +17,8 @@ import { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import {
@@ -53,6 +55,7 @@ const siguiente = <T,>(lista: readonly T[], actual: T): T =>
 
 export default function RegistrarCarro() {
   const router = useRouter();
+  const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [borrador, setBorrador] = useState<BorradorDeCarro>(borradorInicial);
   const [faltaLaFoto, setFaltaLaFoto] = useState(false);
@@ -71,7 +74,7 @@ export default function RegistrarCarro() {
     setGuardando(true);
     try {
       await guardarCarro(yo, borrador);
-      router.back();
+      volver();
     } finally {
       setGuardando(false);
     }
@@ -88,7 +91,7 @@ export default function RegistrarCarro() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

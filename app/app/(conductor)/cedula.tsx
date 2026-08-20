@@ -18,6 +18,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 import Svg, { Path } from 'react-native-svg';
 
 import {
@@ -65,6 +67,7 @@ const TINTA_DEL_ESTADO: Record<EstadoDeCedula['estado'], { fondo: string; tinta:
 
 export default function Cedula() {
   const router = useRouter();
+  const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<EstadoDeCedula | null>(null);
 
@@ -96,7 +99,7 @@ export default function Cedula() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

@@ -30,6 +30,8 @@ import Svg, { Path } from 'react-native-svg';
 
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import {
   HORARIO,
   LO_QUE_SALE_MAL,
@@ -72,6 +74,7 @@ function Adelante() {
 
 export default function Ayuda() {
   const router = useRouter();
+  const volver = useVolver();
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const [viaje, setViaje] = useState<ViajeDeAyuda | null>(null);
@@ -92,7 +95,7 @@ export default function Ayuda() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

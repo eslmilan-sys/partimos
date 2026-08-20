@@ -18,6 +18,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { aporteCalculado } from '@/dominio/aporte';
 import {
   type PublicacionPreparada,
@@ -44,6 +46,7 @@ const MINUTOS_POR_PARADA = 5;
 
 export default function Repaso() {
   const router = useRouter();
+  const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const p = useLocalSearchParams<{
     ruta?: string;
@@ -122,7 +125,7 @@ export default function Repaso() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Atrás, corregir"
-              onPress={() => router.back()}
+              onPress={() => volver()}
               style={estilos.circulo}
             >
               <Atras />
@@ -258,7 +261,7 @@ export default function Repaso() {
           {`Publicar · ${puestos} ${puestos === 1 ? 'puesto a' : 'puestos a'} ${formatearDineroRedondo(aporte)}`}
         </Boton>
         <Text style={estilos.notaPie}>
-          Puedes editarlo mientras nadie haya pagado su puesto.
+          Puedes editarlo mientras nadie haya asegurado su puesto.
         </Text>
       </View>
     </View>

@@ -24,6 +24,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } fr
 
 import { type Href, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { type Aviso, type Bandeja, bandeja, marcarLeido, marcarTodo } from '@/servicios/avisos';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -50,6 +52,7 @@ function iconoDe(titulo: string) {
 
 export default function Avisos() {
   const router = useRouter();
+  const volver = useVolver();
   /* El campo mide lo que mide la ventana: así la silueta de la ciudad cae al
      pie de la pantalla y no a mil pixeles por debajo. */
   const { height: alto } = useWindowDimensions();
@@ -86,7 +89,7 @@ export default function Avisos() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

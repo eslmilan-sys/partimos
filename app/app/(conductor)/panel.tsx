@@ -12,9 +12,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
+
+import { useDecir } from '@/ui/Nota';
+import { DIJO, compartir } from '@/ui/salidas';
 import Svg, { Path } from 'react-native-svg';
 
 import { type ViajePublicado, viajesPublicados } from '@/servicios/panel';
@@ -70,7 +73,7 @@ export default function Panel() {
           <Proximo key={v.id} viaje={v} router={router} />
         ))}
 
-        <Text style={estilos.pieTexto}>Puedes editar un viaje mientras nadie haya pagado.</Text>
+        <Text style={estilos.pieTexto}>Puedes editar un viaje mientras nadie haya asegurado su puesto.</Text>
       </ScrollView>
 
       <Pressable
@@ -157,6 +160,7 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
 
 /** Los demás van en tarjeta normal, sobre la arena. */
 function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
+  const decir = useDecir();
   return (
     <View style={estilos.tarjeta}>
       <View style={estilos.filaEpigrafe}>
@@ -190,10 +194,7 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
           accessibilityRole="button"
           accessibilityLabel="Compartir el viaje"
           onPress={() =>
-            Share.share({
-              title: 'Partimos',
-              message: `${viaje.origen} → ${viaje.destino} · ${diaAbrev(viaje.cuando)} ${hora(viaje.cuando)} · ${formatearDineroRedondo(viaje.aporteCentavos)} por puesto · quedan ${viaje.puestosOfrecidos - viaje.puestosVendidos}`,
-            })
+            compartir(`${viaje.origen} → ${viaje.destino} · ${diaAbrev(viaje.cuando)} ${hora(viaje.cuando)} · ${formatearDineroRedondo(viaje.aporteCentavos)} por puesto · quedan ${viaje.puestosOfrecidos - viaje.puestosVendidos}`).then((c) => decir(DIJO[c]))
           }
           style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
         >

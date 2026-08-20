@@ -104,7 +104,7 @@ export async function ajustes(perfilId: string): Promise<GrupoDeAjustes[]> {
       titulo: 'Dinero y cuenta',
       filas: [
         {
-          etiqueta: 'Método de pago',
+          etiqueta: 'Cómo aportas',
           valor: `${NOMBRE_DEL_CANAL[p?.preferred_pay_channel ?? 'yappy_app']} · ${fuente.yappyDelConductor[perfilId as keyof typeof fuente.yappyDelConductor] ?? ''}`.trim(),
           ruta: '/(pasajero)/metodos',
         },

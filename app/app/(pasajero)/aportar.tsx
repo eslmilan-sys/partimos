@@ -1,9 +1,15 @@
 /**
- * `7b` Pago del aporte — Yappy, tarjeta o efectivo.
+ * `7b` Cómo aportas — Yappy, tarjeta o efectivo.
+ *
+ * **La pantalla no se llama «pagar», ni lo dice en ninguna línea.** Pagar es
+ * lo que se hace por un servicio, y Partimos no vende ninguno: el dinero es un
+ * aporte al gasto de alguien que iba a hacer el viaje de todas formas. La
+ * palabra no es un detalle de estilo — es la diferencia entre compartir gastos
+ * y transporte remunerado, que es la línea que `PRODUCT.md` no deja cruzar.
  *
  * Elegir método reescribe la línea de la tarifa, el total, la etiqueta del
- * total, el botón y la nota de retención. El efectivo cambia «Pagas ahora»
- * por «Pagas al subir» y el botón por «Confirmar el puesto».
+ * total, el botón y la nota de retención. El efectivo cambia «Aportas ahora»
+ * por «Aportas al subir» y el botón por «Confirmar el puesto».
  *
  * El conductor recibe el aporte completo con los tres. La tarifa es nuestra.
  */
@@ -11,6 +17,8 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CanalDePago } from '@/dominio/tarifas';
@@ -30,8 +38,9 @@ const VIAJE_DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
 const RESERVA_DEL_RECORRIDO = '77777777-7777-4777-8777-777777777700';
 
-export default function Pagar() {
+export default function Aportar() {
   const router = useRouter();
+  const volver = useVolver();
   const { viaje, reserva } = useLocalSearchParams<{ viaje?: string; reserva?: string }>();
   const viajeId = viaje ?? VIAJE_DEL_RECORRIDO;
   const reservaId = reserva ?? RESERVA_DEL_RECORRIDO;
@@ -67,7 +76,7 @@ export default function Pagar() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

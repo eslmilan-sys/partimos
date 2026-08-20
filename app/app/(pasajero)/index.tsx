@@ -506,7 +506,7 @@ export default function Inicio() {
         ) : null}
       </ScrollView>
 
-        <Pestanas valor="Buscar" conPublicar />
+        <Pestanas valor="Buscar" />
 
       <BuscadorDeLugar
         abierto={buscando !== null}
@@ -596,7 +596,18 @@ const estilos = StyleSheet.create({
     gap: 7,
     borderRadius: radio.pastilla,
   },
-  ladoActivo: { backgroundColor: color.blanco, ...sombra.hoja },
+  /* `sombra.hoja` —radio 40, desplazada 18, teñida de rojo— es la de la hoja
+     entera. Puesta en una pastilla de 40 px de alto la desbordaba por todos
+     lados y el lado activo parecía más ancho que el otro aunque los dos midan
+     lo mismo. La pastilla lleva su propia sombra, corta. */
+  ladoActivo: {
+    backgroundColor: color.blanco,
+    shadowColor: '#26232B',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
+  },
   ladoTexto: {
     fontSize: 13.5,
     lineHeight: 19.5,

@@ -30,6 +30,8 @@ import {
 } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 import Svg, { Path } from 'react-native-svg';
 
 import {
@@ -80,6 +82,7 @@ function Telefono({ tamano = 20, tinta = color.blanco }: { tamano?: number; tint
 
 export default function Reportar() {
   const router = useRouter();
+  const volver = useVolver('/(ayuda)');
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const yo = useMiId(YO_DEL_RECORRIDO);
@@ -118,7 +121,7 @@ export default function Reportar() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

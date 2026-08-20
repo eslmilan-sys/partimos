@@ -25,6 +25,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { HORAS_PARA_CANCELAR_ENTERO, type MotivoDeReembolso } from '@/dominio/reembolsos';
 import { type Previsualizacion, cancelar, previsualizar } from '@/servicios/cancelaciones';
 import { type PuestoMio, misViajes } from '@/servicios/panel';
@@ -60,6 +62,7 @@ const RAZONES: { etiqueta: string; motivo: MotivoDeReembolso }[] = [
 
 export default function Cancelar() {
   const router = useRouter();
+  const volver = useVolver('/(ayuda)');
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
@@ -103,7 +106,7 @@ export default function Cancelar() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -212,7 +215,7 @@ export default function Cancelar() {
           <Text style={estilos.destructivoTexto}>Cancelar mi puesto</Text>
         </Pressable>
 
-        <Boton tono="contorno" tamano="md" alPulsar={() => router.back()}>
+        <Boton tono="contorno" tamano="md" alPulsar={() => volver()}>
           Mejor no, lo dejo
         </Boton>
       </View>

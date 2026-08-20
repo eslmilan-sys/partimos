@@ -20,6 +20,8 @@ import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-nati
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { useSesion } from '@/servicios/sesion';
@@ -57,6 +59,7 @@ const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 
 export default function DetalleDelViaje() {
   const router = useRouter();
+  const volver = useVolver();
   const { viaje: viajeParam } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viajeParam ?? DEL_RECORRIDO;
 
@@ -120,7 +123,7 @@ export default function DetalleDelViaje() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Atrás"
-              onPress={() => router.back()}
+              onPress={() => volver()}
               style={estilos.circulo}
             >
               <Atras />

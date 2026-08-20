@@ -24,6 +24,8 @@ import Svg, { Path } from 'react-native-svg';
 
 import { type Href, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { type Cuenta, type GrupoDeAjustes, ajustes, cuenta } from '@/servicios/ajustes';
 import { salir } from '@/servicios/cuenta';
 import { type EstadoDeCedula, estadoDeCedula } from '@/servicios/seguridad';
@@ -66,6 +68,7 @@ const RELLENO_DINERO = [10, 11, 11];
 
 export default function Ajustes() {
   const router = useRouter();
+  const volver = useVolver('/(cuenta)/cuenta');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [grupos, setGrupos] = useState<GrupoDeAjustes[] | null>(null);
   const [quien, setQuien] = useState<Cuenta | null>(null);
@@ -103,7 +106,7 @@ export default function Ajustes() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Volver"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.volver}
           >
             <Atras tamano={20} />

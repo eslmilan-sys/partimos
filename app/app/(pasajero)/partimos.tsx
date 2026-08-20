@@ -19,6 +19,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { perfilResumido } from '@/servicios/perfiles';
 import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -32,6 +34,7 @@ const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 
 export default function MensajeDePartimos() {
   const router = useRouter();
+  const volver = useVolver();
   const yo = useMiId(YO_DEL_RECORRIDO);
   const [nombre, setNombre] = useState<string | null>(null);
 
@@ -72,7 +75,7 @@ export default function MensajeDePartimos() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

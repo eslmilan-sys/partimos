@@ -16,6 +16,8 @@ import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 import Svg, { Path, Rect } from 'react-native-svg';
 
 import { type Edicion, equipajeEnConflicto, guardarEdicion, prepararEdicion } from '@/servicios/panel';
@@ -33,6 +35,7 @@ const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 export default function Editar() {
   const router = useRouter();
+  const volver = useVolver('/(conductor)/panel');
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Edicion | null>(null);
@@ -66,7 +69,7 @@ export default function Editar() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -169,7 +172,7 @@ export default function Editar() {
           tono="azul"
           alPulsar={async () => {
             await guardarEdicion(viajeId, { puestos, maletas, mujeres });
-            router.back();
+            volver();
           }}
         >
           Guardar

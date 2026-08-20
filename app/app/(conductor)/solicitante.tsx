@@ -15,6 +15,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { type Solicitud, aceptarSolicitud, listarSolicitudes, rechazarSolicitud } from '@/servicios/solicitudes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -33,6 +35,7 @@ const VERDE = { fondo: '#DFF1E8', tinta: '#0E5A3F' };
 
 export default function Solicitante() {
   const router = useRouter();
+  const volver = useVolver('/(conductor)/panel');
   // `11a` manda el viaje y, si venías de una fila concreta, cuál. Sin la
   // segunda, la que espera respuesta: es la que abre quien llega desde el aviso.
   const { viaje, solicitud: solicitudParam } = useLocalSearchParams<{
@@ -71,7 +74,7 @@ export default function Solicitante() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -155,7 +158,7 @@ export default function Solicitante() {
           accessibilityRole="button"
           onPress={async () => {
             await aceptarSolicitud(solicitud.id);
-            router.back();
+            volver();
           }}
           style={estilos.aceptar}
         >
@@ -167,7 +170,7 @@ export default function Solicitante() {
           accessibilityRole="button"
           onPress={async () => {
             await rechazarSolicitud(solicitud.id);
-            router.back();
+            volver();
           }}
           style={estilos.rechazar}
         >

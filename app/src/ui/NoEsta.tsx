@@ -16,6 +16,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
+import { useVolver } from './salidas';
+
 import { BarraDeEstado } from './BarraDeEstado';
 import { CampoRojo } from './CampoRojo';
 import { Boton } from './controles';
@@ -29,6 +31,7 @@ export function NoEsta({
   explicacion?: string;
 }) {
   const router = useRouter();
+  const volver = useVolver();
 
   return (
     <View style={estilos.pantalla}>
@@ -45,7 +48,7 @@ export function NoEsta({
           <Boton tamano="md" alPulsar={() => router.replace('/(pasajero)')}>
             Buscar un viaje
           </Boton>
-          <Pressable accessibilityRole="button" onPress={() => router.back()} style={zonaDeToque}>
+          <Pressable accessibilityRole="button" onPress={() => volver()} style={zonaDeToque}>
             <Text style={estilos.atras}>Volver atrás</Text>
           </Pressable>
         </View>

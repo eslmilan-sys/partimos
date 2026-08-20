@@ -22,9 +22,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
+
+import { useDecir } from '@/ui/Nota';
+import { DIJO, compartir } from '@/ui/salidas';
 
 import { type MisViajes, type PuestoMio, misViajes } from '@/servicios/panel';
 import { bandeja } from '@/servicios/avisos';
@@ -226,7 +229,7 @@ export default function MisViajesPantalla() {
         </View>
       </ScrollView>
 
-      <Pestanas valor="Mis viajes" conPublicar />
+      <Pestanas valor="Mis viajes" />
     </View>
   );
 }
@@ -242,6 +245,7 @@ function FichaGrande({
   alChat: () => void;
   alDetalle: () => void;
 }) {
+  const decir = useDecir();
   const estado = ESTADO[puesto.estado] ?? ESTADO.confirmed;
 
   return (
@@ -373,10 +377,7 @@ function FichaGrande({
           accessibilityRole="button"
           accessibilityLabel="Compartir a dónde voy"
           onPress={() =>
-            Share.share({
-              title: 'Partimos',
-              message: `Voy a ${puesto.destino} con ${puesto.conductor}. Salgo de ${puesto.origenSitio || puesto.origen} a las ${hora(puesto.cuando)}.`,
-            })
+            compartir(`Voy a ${puesto.destino} con ${puesto.conductor}. Salgo de ${puesto.origenSitio || puesto.origen} a las ${hora(puesto.cuando)}.`).then((c) => decir(DIJO[c]))
           }
           style={({ pressed }) => [estilos.cuadrado, pressed && { backgroundColor: color.sand100 }]}
         >

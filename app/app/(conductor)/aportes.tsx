@@ -14,6 +14,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { type Aportes, type Tramo, aportes } from '@/servicios/aportes';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -29,6 +31,7 @@ const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 export default function AportesPantalla() {
   const router = useRouter();
+  const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [tramo, setTramo] = useState<Tramo>('mes');
   const [datos, setDatos] = useState<Aportes | null>(null);
@@ -50,7 +53,7 @@ export default function AportesPantalla() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

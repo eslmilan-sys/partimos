@@ -10,6 +10,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { type CodigoDeAbordaje, codigoDeAbordaje } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
@@ -26,6 +28,7 @@ const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777710';
 
 export default function Codigo() {
   const router = useRouter();
+  const volver = useVolver();
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<CodigoDeAbordaje | null>(null);
@@ -56,7 +59,7 @@ export default function Codigo() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Atrás"
-              onPress={() => router.back()}
+              onPress={() => volver()}
               style={estilos.circulo}
             >
               <Atras />

@@ -19,6 +19,8 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { MARGEN_DESVIO_PCT, OCUPACION_DE_REFERENCIA, aporteCalculado } from '@/dominio/aporte';
 import {
   type PublicacionPreparada,
@@ -48,6 +50,7 @@ const ciudad = (etiqueta: string) => etiqueta.split('·')[0].trim();
 
 export default function Tope() {
   const router = useRouter();
+  const volver = useVolver('/(conductor)/panel');
   // `5c` llega con los puestos que el conductor haya movido. Sin ellos, la
   // ocupación de referencia con la que el dominio calcula el tope de la ruta.
   const { puestos: puestosPedidos } = useLocalSearchParams<{ puestos?: string }>();
@@ -81,7 +84,7 @@ export default function Tope() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -148,7 +151,7 @@ export default function Tope() {
       <View style={estilos.pie}>
         {/* Entendido el tope, seguir adelante es volver a la publicación: los
             puestos y las maletas se dicen allí, no aquí. */}
-        <Boton alPulsar={() => router.back()}>Proponer este viaje</Boton>
+        <Boton alPulsar={() => volver()}>Proponer este viaje</Boton>
         <Text style={estilos.notaPie}>Puedes pedir menos, nunca más.</Text>
       </View>
     </View>

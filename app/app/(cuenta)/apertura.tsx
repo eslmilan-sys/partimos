@@ -41,7 +41,7 @@ export default function Apertura() {
         </Text>
 
         <Text style={estilos.entrada}>
-          Te recogen cerca y pagas como prefieras: Yappy, tarjeta o efectivo. El aporte le llega
+          Te recogen cerca y aportas como prefieras: Yappy, tarjeta o efectivo. El aporte le llega
           completo al conductor.
         </Text>
 

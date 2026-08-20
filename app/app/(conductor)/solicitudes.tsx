@@ -12,6 +12,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import {
   type ResumenDeSolicitudes,
   aceptarSolicitud,
@@ -35,6 +37,7 @@ type Recibo = { nombre: string; aporteCentavos: number };
 
 export default function Solicitudes() {
   const router = useRouter();
+  const volver = useVolver('/(conductor)/panel');
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<ResumenDeSolicitudes | null>(null);
@@ -88,7 +91,7 @@ export default function Solicitudes() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -236,7 +239,7 @@ export default function Solicitudes() {
                   fondo={c.pagado ? '#DFF1E8' : color.sand200}
                   tinta={c.pagado ? '#0E5A3F' : color.ink700}
                 >
-                  {c.pagado ? 'Pagado' : 'Paga al subir'}
+                  {c.pagado ? 'Aporte listo' : 'Aporta al subir'}
                 </Insignia>
               </View>
             ))}

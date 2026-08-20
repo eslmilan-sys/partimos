@@ -60,7 +60,28 @@ const MOTIVOS = {
    * recorta contra el borde del campo, que es lo que el sistema pide de un
    * motivo.
    */
-  ciudadDetras: { svg: SkylineTornillo, ancho: 258, alto: 79, sitio: { right: -10, top: 92 }, opacidad: 0.92 },
+  /**
+   * La ciudad como marca de agua del inicio, y no como objeto.
+   *
+   * Se probaron los dos sitios y los dos estaban mal. Al pie del campo la
+   * tapaba entera la hoja de búsqueda. Al lado del titular —258 de ancho,
+   * anclada a la derecha— se cortaba contra el borde del campo y chocaba con
+   * la segunda línea del titular: se leía como un manchón, no como una
+   * ciudad. El fallo no era el sitio: era la **opacidad**. A 0,92 es un
+   * dibujo, y un dibujo tiene que caber entero o no estar; a 0,2 es textura,
+   * y la textura se recorta contra el borde sin que nadie lo note, que es
+   * justo lo que el sistema pide de un motivo.
+   *
+   * Así que va de lado a lado, al pie, al 20 %: la línea de horizonte detrás
+   * de todo, con la hoja de búsqueda apoyada encima.
+   */
+  ciudadDetras: {
+    svg: SkylineTornillo,
+    ancho: espacio.marco,
+    alto: 132,
+    sitio: { left: 0, right: 0, bottom: 0 },
+    opacidad: 0.2,
+  },
 } as const;
 
 export type Motivo = keyof typeof MOTIVOS;

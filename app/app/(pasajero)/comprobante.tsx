@@ -22,9 +22,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useDecir } from '@/ui/Nota';
+import { DIJO, compartir, useVolver } from '@/ui/salidas';
 
 import { type Comprobante, comprobante } from '@/servicios/ayuda';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -46,6 +49,8 @@ const ALTO_HOJA = 104;
 
 export default function ComprobantePasajero() {
   const router = useRouter();
+  const volver = useVolver();
+  const decir = useDecir();
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Comprobante | null>(null);
@@ -70,16 +75,16 @@ export default function ComprobantePasajero() {
    * sistema: es donde viven tanto «Compartir» como «Imprimir» y «Guardar en
    * Archivos».
    */
-  const compartir = () =>
-    Share.share({
-      title: `Partimos · ${datos.referencia}`,
-      message: [
+  const mandar = () =>
+    compartir(
+      [
         `Comprobante ${datos.referencia}`,
         ...datos.desglose.map((d) => `${d.concepto}: ${formatearDinero(d.centavos)}`),
         ...datos.filas.map((f) => `${f.etiqueta}: ${f.valor}`),
         datos.queEsEsto,
       ].join('\n'),
-    });
+      `Partimos · ${datos.referencia}`,
+    ).then((c) => decir(DIJO[c]));
 
   return (
     <View style={estilos.pantalla}>
@@ -91,7 +96,7 @@ export default function ComprobantePasajero() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -118,11 +123,11 @@ export default function ComprobantePasajero() {
 
           <View style={estilos.filaTotal}>
             <Text style={estilos.cifra}>{formatearDinero(datos.totalCentavos)}</Text>
-            <Pastilla estilo={estilos.pastillaPagado}>pagado</Pastilla>
+            <Pastilla estilo={estilos.pastillaPagado}>aportado</Pastilla>
           </View>
 
           <Text style={estilos.comoSePago}>
-            {`${datos.pagadoCon} · ${datos.referencia} · ${diaCorto(cuando)}, ${hora(cuando)}`}
+            {`${datos.aportadoCon} · ${datos.referencia} · ${diaCorto(cuando)}, ${hora(cuando)}`}
           </Text>
         </View>
 
@@ -160,13 +165,19 @@ export default function ComprobantePasajero() {
         <Text style={estilos.queEsEsto}>{datos.queEsEsto}</Text>
       </ScrollView>
 
+      {/* **De aquí no se salía.** Las dos salidas eran «Compartir» y «Guardar
+          PDF», y las dos hacían lo mismo: abrir la hoja del sistema, que en el
+          navegador no existe. Quien llegaba al comprobante —que es el final de
+          un viaje, no un callejón— se quedaba sin puerta al menú. Ahora la
+          acción de verdad es volver a los viajes, y compartir queda al lado,
+          en contorno, que es el peso que le toca. */}
       <View style={estilos.pie}>
         <View style={estilos.filaBotones}>
-          <Boton tono="contorno" tamano="md" ancho alPulsar={compartir}>
+          <Boton tono="contorno" tamano="md" ancho alPulsar={mandar}>
             Compartir
           </Boton>
-          <Boton tono="contorno" tamano="md" ancho alPulsar={compartir}>
-            Guardar PDF
+          <Boton tono="azul" tamano="md" ancho alPulsar={() => router.replace('/(conductor)/misviajes')}>
+            Mis viajes
           </Boton>
         </View>
       </View>

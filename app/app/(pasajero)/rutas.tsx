@@ -21,6 +21,8 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { cambiarAviso, cuantasAvisando, rutasGuardadas, type RutaGuardada } from '@/servicios/rutas';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -38,6 +40,7 @@ const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 export default function Rutas() {
   const router = useRouter();
+  const volver = useVolver();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [rutas, setRutas] = useState<RutaGuardada[] | null>(null);
   const [avisando, setAvisando] = useState(0);
@@ -69,7 +72,7 @@ export default function Rutas() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Volver"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.volver}
           >
             <Atras tamano={20} />

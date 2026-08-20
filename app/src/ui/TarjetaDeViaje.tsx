@@ -162,17 +162,19 @@ const estilos = StyleSheet.create({
   /* 31 y no 26: el aporte es lo que decide, y en una lista de cuatro
      tarjetas era del mismo tamaño que la hora. */
   precio: {
-    fontSize: 31,
+    fontSize: 27,
     fontWeight: '700',
-    letterSpacing: -1.24,
-    lineHeight: 29.5,
+    letterSpacing: -1.08,
+    lineHeight: 30,
     color: color.ink900,
     fontFamily: familia,
     ...tabular,
   },
-  // El símbolo tiene su propia caja de línea, más apretada que la de la cifra:
-  // así se apoya en la misma base en vez de estirar la fila.
-  precioSimbolo: { fontSize: 17, lineHeight: 16, fontWeight: '500' },
+  /* El símbolo comparte la caja de línea de la cifra.
+     Con una propia —16 contra 29,5— el navegador lo centraba en su caja y no
+     en la base de la cifra: el `$` caía tres píxeles por debajo del número y
+     el precio se leía roto. Misma `lineHeight`, mismo apoyo. */
+  precioSimbolo: { fontSize: 16, lineHeight: 30, fontWeight: '600', color: color.ink600 },
 
   recorrido: { gap: 8, marginTop: 11 },
   parada: { flexDirection: 'row', alignItems: 'center', gap: 11 },

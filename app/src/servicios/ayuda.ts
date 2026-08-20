@@ -67,7 +67,7 @@ export const LO_QUE_SALE_MAL: CosaQueSaleMal[] = [
 ];
 
 export const PREGUNTAS: { titulo: string; ruta: string }[] = [
-  { titulo: 'Cómo se paga y qué es la tarifa', ruta: '/(ayuda)/pagos' },
+  { titulo: 'Cómo se aporta y qué es la tarifa', ruta: '/(ayuda)/pagos' },
   { titulo: 'Cuándo se libera el aporte', ruta: '/(ayuda)/pagos' },
   { titulo: 'Seguridad y verificación', ruta: '/(ayuda)/reportar' },
 ];
@@ -113,7 +113,7 @@ export type Comprobante = {
   cuando: string;
   destino: string;
   totalCentavos: number;
-  pagadoCon: string;
+  aportadoCon: string;
   desglose: { concepto: string; centavos: number; fuerte?: boolean }[];
   filas: { etiqueta: string; valor: string }[];
   /** Lo que esto es y lo que no es. Va en la pantalla, no en la letra chica. */
@@ -137,7 +137,7 @@ export async function comprobante(reservaId: string): Promise<Comprobante> {
     cuando: reserva.confirmed_at ?? reserva.created_at,
     destino: (viaje.destination_label ?? '').split(' · ')[0],
     totalCentavos: aporte + tarifa,
-    pagadoCon: NOMBRE_DEL_CANAL[reserva.payment_channel],
+    aportadoCon: NOMBRE_DEL_CANAL[reserva.payment_channel],
     desglose: [
       { concepto: `Aporte a ${conductor?.first_name ?? 'el conductor'}`, centavos: aporte },
       { concepto: `Tarifa Partimos · ${TARIFA_PCT[reserva.payment_channel]} %`, centavos: tarifa },

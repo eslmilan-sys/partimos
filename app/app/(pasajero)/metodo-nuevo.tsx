@@ -18,6 +18,8 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
 
@@ -68,6 +70,7 @@ const FORMULARIO: Record<
 
 export default function MetodoNuevo() {
   const router = useRouter();
+  const volver = useVolver();
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viaje ?? VIAJE_DEL_RECORRIDO;
   const [metodos, setMetodos] = useState<MetodoDePago[]>([]);
@@ -104,7 +107,7 @@ export default function MetodoNuevo() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Atrás"
-              onPress={() => router.back()}
+              onPress={() => volver()}
               style={estilos.circulo}
             >
               <Atras />
@@ -199,7 +202,7 @@ export default function MetodoNuevo() {
                 // para lo primero y no la tiene para lo segundo, y un número de
                 // tarjeta es justo lo que no queremos custodiar.
                 await guardarMetodoPreferido(yo, canal);
-                router.back();
+                volver();
               } finally {
                 setGuardando(false);
               }

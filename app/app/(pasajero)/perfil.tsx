@@ -11,6 +11,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
@@ -31,6 +33,7 @@ const TONOS = {
 
 export default function Perfil() {
   const router = useRouter();
+  const volver = useVolver();
   const { perfil: perfilParam } = useLocalSearchParams<{ perfil?: string }>();
   const [datos, setDatos] = useState<PerfilPublico | null>(null);
   const [noEsta, setNoEsta] = useState(false);
@@ -52,7 +55,7 @@ export default function Perfil() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

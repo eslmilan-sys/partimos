@@ -11,6 +11,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } fr
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { useMiIdOEntrar } from '@/servicios/sesion';
 
 import { type HiloDelViaje, enviarMensaje, hiloDelViaje } from '@/servicios/mensajes';
@@ -30,6 +32,7 @@ const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 export default function Chat() {
   const router = useRouter();
+  const volver = useVolver();
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
@@ -66,7 +69,7 @@ export default function Chat() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Atrás"
-          onPress={() => router.back()}
+          onPress={() => volver()}
           style={estilos.circulo}
         >
           <Atras />

@@ -16,9 +16,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
+
+import { useDecir } from '@/ui/Nota';
+import { DIJO, compartir } from '@/ui/salidas';
 
 import { type PuestoMio, misViajes } from '@/servicios/panel';
 import { useMiIdOEntrar } from '@/servicios/sesion';
@@ -37,6 +40,7 @@ const DEL_RECORRIDO = 'aaaaaaa1-0000-4000-8000-000000000001';
 type Parada = { nombre: string; cuando: string; estado: 'pasada' | 'ahora' | 'falta' };
 
 export default function EnRuta() {
+  const decir = useDecir();
   const router = useRouter();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [puesto, setPuesto] = useState<PuestoMio | null>(null);
@@ -78,10 +82,7 @@ export default function EnRuta() {
             accessibilityRole="button"
             accessibilityLabel="Compartir mi llegada"
             onPress={() =>
-              Share.share({
-                title: 'Partimos',
-                message: `Voy en camino a ${puesto.destino} con ${puesto.conductor}. Llego sobre las ${hora(llegada)}.`,
-              })
+              compartir(`Voy en camino a ${puesto.destino} con ${puesto.conductor}. Llego sobre las ${hora(llegada)}.`).then((c) => decir(DIJO[c]))
             }
             style={zonaDeToque}
           >

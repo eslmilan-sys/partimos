@@ -13,6 +13,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { etiquetaDeMaletero, notaDeEquipaje } from '@/dominio/equipaje';
 import { type ReservaPreparada, pedirPuesto, prepararReserva } from '@/servicios/reservas';
 import { useMiId } from '@/servicios/sesion';
@@ -32,6 +34,7 @@ const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 
 export default function Reservar() {
   const router = useRouter();
+  const volver = useVolver();
   // `/viaje/[id]` en cuanto exista el descubrimiento; hoy, el del simulado.
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viaje ?? VIAJE_DEL_RECORRIDO;
@@ -68,7 +71,7 @@ export default function Reservar() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -201,7 +204,7 @@ export default function Reservar() {
               // `7b` cobra sobre una reserva concreta: sin este identificador el
               // botón «Confirmar y pagar» no tenía nada que confirmar.
               router.push({
-                pathname: '/(pasajero)/pagar',
+                pathname: '/(pasajero)/aportar',
                 params: { viaje: viajeId, reserva: puesto.id },
               });
             } finally {

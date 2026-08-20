@@ -16,6 +16,8 @@ import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from '
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import {
   type ResumenDeRuta,
@@ -43,6 +45,7 @@ const FOTOS: Record<string, number> = {
 
 export default function Destino() {
   const router = useRouter();
+  const volver = useVolver();
   const [ruta, setRuta] = useState<ResumenDeRuta | null>(null);
   const [viajes, setViajes] = useState<ViajeEnResultados[]>([]);
 
@@ -84,7 +87,7 @@ export default function Destino() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Atrás"
-              onPress={() => router.back()}
+              onPress={() => volver()}
               style={estilos.circulo}
             >
               <Atras />

@@ -20,7 +20,7 @@ import { Carro, Chat, Lupa, Mas, Persona } from './iconos';
 import { color } from './tokens';
 
 /** El nombre de cada pestaña es su valor: no hay una clave aparte que mantener. */
-export type Pestana = 'Buscar' | 'Mis viajes' | 'Mensajes' | 'Perfil';
+export type Pestana = 'Buscar' | 'Mis viajes' | 'Publicar' | 'Mensajes' | 'Perfil';
 
 /**
  * A dónde va cada una. «Mis viajes» es la del pasajero —los puestos que has
@@ -29,11 +29,17 @@ export type Pestana = 'Buscar' | 'Mis viajes' | 'Mensajes' | 'Perfil';
 const A_DONDE: Record<Pestana, string> = {
   Buscar: '/(pasajero)',
   'Mis viajes': '/(conductor)/misviajes',
+  Publicar: '/(conductor)/publicar',
   Mensajes: '/(pasajero)/conversaciones',
   Perfil: '/(cuenta)/cuenta',
 };
 
-const tinta = (activo: boolean) => (activo ? color.rojo600 : color.ink700);
+/**
+ * La tinta de los iconos sobre la barra oscura. El activo se queda blanco: el
+ * rojo hace de indicador arriba, que es lo que se ve de un vistazo, y un
+ * dibujo rojo sobre azul profundo da 3,89:1 — justo, y sin margen.
+ */
+const tinta = (activo: boolean) => (activo ? '#fff' : 'rgba(255,255,255,.62)');
 
 const LAS_CUATRO = [
   { valor: 'Buscar', etiqueta: 'Buscar', icono: (a: boolean) => <Lupa tinta={tinta(a)} /> },
@@ -49,11 +55,19 @@ const LAS_CUATRO = [
 type Props = {
   /** En cuál estás. La pestaña en la que ya estás no navega. */
   valor: Pestana;
-  /** El cuadrado rojo de publicar. Solo lo llevan las pantallas de búsqueda. */
-  conPublicar?: boolean;
 };
 
-export function Pestanas({ valor, conPublicar = false }: Props) {
+/**
+ * **Publicar está siempre.**
+ *
+ * Antes era `conPublicar`, y solo lo llevaban las pantallas de búsqueda. Pero
+ * ofrecer un viaje es la mitad del producto, no un añadido de una pantalla: si
+ * el botón no está en la barra, quien entra a buscar puesto nunca descubre que
+ * también puede llevar a alguien. Y la pantalla de publicar ya calcula sin
+ * carro y sin cédula, así que no hay ningún caso en que llevar allí sea un
+ * callejón.
+ */
+export function Pestanas({ valor }: Props) {
   const router = useRouter();
 
   return (
@@ -75,15 +89,15 @@ export function Pestanas({ valor, conPublicar = false }: Props) {
         const destino = A_DONDE[v as Pestana];
         if (destino) router.push(destino as never);
       }}
-      fab={
-        conPublicar
-          ? {
-              etiqueta: 'Publicar un viaje',
-              icono: <Mas tamano={20} tinta="#fff" />,
-              alPulsar: () => router.push('/(conductor)/publicar'),
-            }
-          : undefined
-      }
+      fab={{
+        etiqueta: 'Publicar un viaje',
+        icono: <Mas tamano={19} tinta="#fff" />,
+        activo: valor === 'Publicar',
+        alPulsar: () => {
+          if (valor === 'Publicar') return;
+          router.push('/(conductor)/publicar');
+        },
+      }}
     />
     </View>
   );
@@ -91,6 +105,6 @@ export function Pestanas({ valor, conPublicar = false }: Props) {
 
 const estilos = StyleSheet.create({
   /* Separada del borde: es una pastilla que flota sobre la página, no una
-     barra pegada abajo. 22 debajo deja sitio al indicador del iPhone. */
-  marco: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 22 },
+     barra pegada abajo. 20 debajo deja sitio al indicador del iPhone. */
+  marco: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 20 },
 });

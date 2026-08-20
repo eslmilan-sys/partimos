@@ -17,6 +17,8 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { type CanalDePago, seCobraEnLaApp } from '@/dominio/tarifas';
@@ -39,6 +41,7 @@ const VIAJE_DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 
 export default function Metodos() {
   const router = useRouter();
+  const volver = useVolver();
   const { viaje: viajeParam } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viajeParam ?? VIAJE_DEL_RECORRIDO;
   const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
@@ -82,7 +85,7 @@ export default function Metodos() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -105,7 +108,7 @@ export default function Metodos() {
           <Text style={estilos.dondeSeCobra}>
             {seCobraEnLaApp(canal)
               ? `Se cobra en ${elegido?.nombre ?? ''}`
-              : 'No se cobra nada aquí: pagas al subir'}
+              : 'No se cobra nada aquí: aportas al subir'}
           </Text>
 
           {metodos.map((m) => {

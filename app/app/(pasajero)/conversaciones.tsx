@@ -19,6 +19,8 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 
 import { useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { type HiloDelViaje, hiloDelViaje } from '@/servicios/mensajes';
 import { type PuestoMio, misViajes } from '@/servicios/panel';
 import { useMiIdOEntrar } from '@/servicios/sesion';
@@ -27,6 +29,7 @@ import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Pestanas } from '@/ui/Pestanas';
 import { Avatar } from '@/ui/controles';
+import { Chip } from '@/ui/piezas';
 import { tabular } from '@/ui/dinero';
 import { diaAbrev, esHoy, hora } from '@/ui/fechas';
 import { Atras, Lupa, Marca, Visto } from '@/ui/iconos';
@@ -40,6 +43,7 @@ type Filtro = 'todos' | 'sinLeer';
 
 export default function Conversaciones() {
   const router = useRouter();
+  const volver = useVolver();
   const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
   const [filas, setFilas] = useState<Fila[] | null>(null);
   const [busca, setBusca] = useState('');
@@ -86,7 +90,7 @@ export default function Conversaciones() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -111,6 +115,29 @@ export default function Conversaciones() {
             style={estilos.entrada}
           />
         </View>
+
+        {/* **Los filtros van aquí, no en el cuerpo.** Estaban dentro del
+            `ScrollView`, que empieza donde acaba la cabecera: la mitad de
+            arriba de cada chip caía sobre el rojo y la de abajo sobre la
+            arena, partidos por el borde del campo. Puestos en la cabecera se
+            apoyan enteros sobre el rojo, que es lo que hace la fila de
+            filtros de cualquier bandeja. */}
+        <View style={estilos.filtros}>
+          <Chip
+            activo={filtro === 'todos'}
+            cuenta={filas.length}
+            alPulsar={() => setFiltro('todos')}
+          >
+            Todos
+          </Chip>
+          <Chip
+            activo={filtro === 'sinLeer'}
+            cuenta={sinLeer}
+            alPulsar={() => setFiltro('sinLeer')}
+          >
+            Sin leer
+          </Chip>
+        </View>
       </View>
 
       <ScrollView
@@ -118,35 +145,6 @@ export default function Conversaciones() {
         contentContainerStyle={estilos.cuerpo}
         showsVerticalScrollIndicator={false}
       >
-        {/* Los dos filtros con su cuenta: cuántos hay antes de tocarlos. */}
-        <View style={estilos.filtros}>
-          {(
-            [
-              ['todos', 'Todos', filas.length],
-              ['sinLeer', 'Sin leer', sinLeer],
-            ] as const
-          ).map(([clave, etiqueta, cuantos]) => (
-            <Pressable
-              key={clave}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: filtro === clave }}
-              onPress={() => setFiltro(clave)}
-              style={[estilos.filtro, filtro === clave && estilos.filtroActivo]}
-            >
-              <Text style={[estilos.filtroTexto, filtro === clave && estilos.filtroTextoActivo]}>
-                {etiqueta}
-              </Text>
-              <View style={[estilos.cuenta, filtro === clave && estilos.cuentaActiva]}>
-                <Text
-                  style={[estilos.cuentaTexto, filtro === clave && estilos.cuentaTextoActiva]}
-                >
-                  {String(cuantos)}
-                </Text>
-              </View>
-            </Pressable>
-          ))}
-        </View>
-
         {/* El hilo de Partimos va siempre y va primero: una bandeja vacía el
             primer día no dice nada, y quien acaba de entrar no sabe qué puede
             hacer. No se guarda en `messages` porque no es de nadie. */}
@@ -157,7 +155,7 @@ export default function Conversaciones() {
           style={({ pressed }) => [estilos.fila, pressed && estilos.pulsada]}
         >
           <View style={estilos.marcaCuadro}>
-            <Marca tamano={22} tinta={color.rojo600} />
+            <Marca tamano={20} tinta={color.rojo600} />
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
             <View style={estilos.filaSuperior}>
@@ -193,7 +191,7 @@ export default function Conversaciones() {
               }
               style={({ pressed }) => [estilos.fila, pressed && estilos.pulsada]}
             >
-              <Avatar nombre={hilo.otro.nombre} tono="rojo" tamano={48} />
+              <Avatar nombre={hilo.otro.nombre} tono="rojo" tamano={44} />
 
               <View style={{ flex: 1, minWidth: 0 }}>
                 <View style={estilos.filaSuperior}>
@@ -290,7 +288,7 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 4 },
+  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 4, paddingBottom: 18 },
   filaSuperiorCampo: { flexDirection: 'row', alignItems: 'center', gap: 13 },
   circulo: {
     width: 40,
@@ -310,9 +308,9 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   titular: {
-    fontSize: 31,
-    lineHeight: 32.86,
-    letterSpacing: -1.395,
+    fontSize: 29,
+    lineHeight: 30.74,
+    letterSpacing: -1.305,
     fontWeight: '600',
     color: '#fff',
     marginTop: 12,
@@ -345,7 +343,7 @@ const estilos = StyleSheet.create({
 
   cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 20, paddingBottom: 22, gap: 8 },
 
-  filtros: { flexDirection: 'row', gap: 8, marginBottom: 4 },
+  filtros: { flexDirection: 'row', gap: 8, marginTop: 14 },
   filtro: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -389,8 +387,8 @@ const estilos = StyleSheet.create({
   fila: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 13,
-    padding: 14,
+    gap: 12,
+    padding: 12,
     borderRadius: radio.l,
     backgroundColor: color.blanco,
     borderWidth: 1,
@@ -398,8 +396,8 @@ const estilos = StyleSheet.create({
   },
   pulsada: { backgroundColor: color.sand100, borderColor: color.bordePorDefecto },
   marcaCuadro: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: radio.cuadrado,
     backgroundColor: color.rojo50,
     alignItems: 'center',
@@ -409,21 +407,21 @@ const estilos = StyleSheet.create({
   filaSuperior: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
   nombre: {
     flex: 1,
-    fontSize: 15.5,
-    lineHeight: 22,
+    fontSize: 14.5,
+    lineHeight: 21,
     fontWeight: '600',
     letterSpacing: -0.23,
     color: color.ink900,
     fontFamily: familia,
   },
-  cuando: { fontSize: 12.5, lineHeight: 18, color: color.ink500, fontFamily: familia, ...tabular },
+  cuando: { fontSize: 11.5, lineHeight: 17, color: color.ink500, fontFamily: familia, ...tabular },
 
   filaUltimo: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
-  ultimo: { flex: 1, fontSize: 14, lineHeight: 20, color: color.ink600, fontFamily: familia },
+  ultimo: { flex: 1, fontSize: 13, lineHeight: 19, color: color.ink600, fontFamily: familia },
   ultimoNuevo: { color: color.ink900, fontWeight: '500' },
 
   filaContexto: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 5 },
-  contexto: { flex: 1, fontSize: 12.5, lineHeight: 18, color: color.ink500, fontFamily: familia },
+  contexto: { flex: 1, fontSize: 11.5, lineHeight: 17, color: color.ink500, fontFamily: familia },
   pastillaSinLeer: {
     minWidth: 20,
     height: 20,

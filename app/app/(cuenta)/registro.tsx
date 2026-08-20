@@ -14,6 +14,8 @@ import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import {
   QUE_PASO,
   contrasenaValida,
@@ -34,6 +36,7 @@ type Paso = 1 | 2 | 3;
 
 export default function Registro() {
   const router = useRouter();
+  const volver = useVolver('/(cuenta)/cuenta');
   const params = useLocalSearchParams<{ correo?: string; paso?: string; viaje?: string }>();
 
   const [paso, setPaso] = useState<Paso>((Number(params.paso) as Paso) || 1);
@@ -89,7 +92,7 @@ export default function Registro() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => (paso === 1 ? router.back() : setPaso((p) => (p - 1) as Paso))}
+            onPress={() => (paso === 1 ? volver() : setPaso((p) => (p - 1) as Paso))}
             style={estilos.circulo}
           >
             <Atras />

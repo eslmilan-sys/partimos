@@ -34,10 +34,10 @@ const TABLEROS: { nombre: string; pantallas: Pantalla[] }[] = [
     ],
   },
   {
-    nombre: 'B · Pasajero: pagar y viajar',
+    nombre: 'B · Pasajero: aportar y viajar',
     pantallas: [
       { id: '7a', titulo: 'Reserva', ruta: '/(pasajero)/reservar' },
-      { id: '7b', titulo: 'Pago del aporte', ruta: '/(pasajero)/pagar' },
+      { id: '7b', titulo: 'Cómo aportas', ruta: '/(pasajero)/aportar' },
       { id: '9a', titulo: 'Métodos de pago', ruta: '/(pasajero)/metodos' },
       { id: '14c', titulo: 'Añadir método', ruta: '/(pasajero)/metodo-nuevo' },
       { id: '12a', titulo: 'Pantalla bloqueada', ruta: '/(avisos)/bloqueada' },

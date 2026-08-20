@@ -51,7 +51,7 @@ export async function metodosDePago(viajeId: string): Promise<MetodoDePago[]> {
     {
       canal: 'external',
       nombre: NOMBRE_DEL_CANAL.external,
-      detalle: 'Sin tarifa · le pagas al subir',
+      detalle: 'Sin tarifa · le aportas al subir',
       distintivo: '',
     },
   ];
@@ -87,8 +87,8 @@ export function desglosar(
     totalCentavos: totalQuePagaElPasajero(aporteCentavos, canal),
     conductor,
     etiquetaTarifa: enLaApp ? `Tarifa Partimos · ${TARIFA_PCT[canal]} %` : 'Tarifa Partimos',
-    etiquetaTotal: enLaApp ? 'Pagas ahora' : 'Pagas al subir',
-    textoBoton: enLaApp ? 'Confirmar y pagar' : 'Confirmar el puesto',
+    etiquetaTotal: enLaApp ? 'Aportas ahora' : 'Aportas al subir',
+    textoBoton: enLaApp ? 'Confirmar el aporte' : 'Confirmar el puesto',
     nota: enLaApp
       ? 'Se retiene hasta la salida. Si el viaje se cancela, se devuelve entero.'
       : `No se cobra nada ahora. Le pagas ${dinero(aporteCentavos, true)} en efectivo al subir.`,

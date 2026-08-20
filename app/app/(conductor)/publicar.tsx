@@ -12,7 +12,10 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { aporteCalculado, origenDelAporte } from '@/dominio/aporte';
+import { LO_QUE_FALTA, quePuedeHacer } from '@/dominio/permiso';
 import {
   type PublicacionPreparada,
   type RutaPublicable,
@@ -21,16 +24,16 @@ import {
   repartoDelCosto,
   rutasPublicables,
 } from '@/servicios/viajes';
+import { type EstadoDeCedula, estadoDeCedula } from '@/servicios/seguridad';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
-import { NoEsta } from '@/ui/NoEsta';
 import { Boton, Epigrafe, Interruptor, Pastilla, Stepper } from '@/ui/controles';
 import { formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, hora, mas } from '@/ui/fechas';
-import { Atras, Avanza, Carro, Cerrar, Mas } from '@/ui/iconos';
+import { Atras, Avanza, Carro, Cerrar, Escudo, Mas } from '@/ui/iconos';
 import { familia, color, espacio, radio, texto } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
@@ -58,6 +61,7 @@ const MINUTOS_POR_PARADA = 5;
 
 export default function Publicar() {
   const router = useRouter();
+  const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [rutas] = useState<RutaPublicable[]>(() => rutasPublicables());
   const [ruta, setRuta] = useState('');
@@ -65,6 +69,7 @@ export default function Publicar() {
   const [horaSalida, setHoraSalida] = useState('06:00');
   const [eligiendo, setEligiendo] = useState<'ruta' | 'dia' | 'hora' | null>(null);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
+  const [cedula, setCedula] = useState<EstadoDeCedula | null>(null);
   const [paradas, setParadas] = useState(2);
   const [puestos, setPuestos] = useState(3);
   const [aporteElegido, setAporteElegido] = useState<number | null>(null);
@@ -72,10 +77,14 @@ export default function Publicar() {
   const [soloMujeres, setSoloMujeres] = useState(false);
   const [aceptaMascotas, setAceptaMascotas] = useState(false);
   const [sePuedeFumar, setSePuedeFumar] = useState(false);
-  const [sinCarro, setSinCarro] = useState(false);
 
   /** La salida, ya montada: el día que elegiste a la hora que elegiste. */
   const salidaISO = `${dia}T${horaSalida}:00-05:00`;
+  useEffect(() => {
+    if (!yo) return;
+    estadoDeCedula(yo).then(setCedula);
+  }, [yo]);
+
 
   useEffect(() => {
     if (rutas.length > 0 && !ruta) setRuta(rutas[0].slug);
@@ -84,13 +93,8 @@ export default function Publicar() {
   useEffect(() => {
     if (!yo || !ruta) return;
     prepararPublicacion(yo, ruta, salidaISO)
-      .then((d) => {
-        setDatos(d);
-        setSinCarro(false);
-      })
-      /* Sin carro registrado no se puede publicar, y decirlo es más útil que
-         una pantalla en blanco: la pantalla del carro está a un toque. */
-      .catch(() => setSinCarro(true));
+      .then(setDatos)
+      .catch(() => setDatos(null));
   }, [yo, ruta, salidaISO]);
 
   const calculado = useMemo(
@@ -100,14 +104,26 @@ export default function Publicar() {
   const aporte = aporteElegido ?? calculado;
   const cuenta = datos ? repartoDelCosto(datos.costoCentavos, aporte, puestos) : null;
 
-  if (sinCarro)
-    return (
-      <NoEsta
-        titulo="Primero, tu carro"
-        explicacion="Para publicar un viaje hace falta un carro registrado: la marca, el modelo y cuántos puestos tiene. Se hace una vez."
-      />
-    );
   if (!datos || !cuenta) return <Cargando />;
+
+  /**
+   * QUÉ FALTA PARA PODER PUBLICAR — y por qué se enseña al final y no antes.
+   *
+   * Antes, quien no tenía carro chocaba con una pared —«Primero, tu carro»— y
+   * quien no tenía la cédula verificada llegaba hasta el final para que se lo
+   * dijeran allí. Las dos son la misma equivocación: pedir los papeles antes
+   * de haber enseñado para qué sirven.
+   *
+   * Ahora la pantalla entera funciona sin nada de eso. Se elige la ruta, la
+   * hora, los puestos, y se ve **cuánto se recupera**, que es la única razón
+   * por la que alguien registraría un carro. El requisito aparece abajo,
+   * cuando ya sabe qué se está perdiendo, con la puerta al lado.
+   */
+  const { falta } = quePuedeHacer({
+    tieneCarroPropio: datos.carroPropio,
+    estadoDeCedula: cedula?.estado ?? 'pendiente',
+  });
+  const queFalta = falta ? LO_QUE_FALTA[falta] : null;
 
   const laRuta = rutas.find((r) => r.slug === ruta);
 
@@ -130,7 +146,7 @@ export default function Publicar() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -263,9 +279,12 @@ export default function Publicar() {
         {/* El aporte, con el degradado que cierra la tarjeta */}
         <View style={estilos.tarjetaAporte}>
           <Brillo />
+          {/* El epígrafe va en su propia línea, no al lado del stepper: en un
+              teléfono de 390 le quedaban 180 px y «APORTE POR PUESTO» se
+              partía en dos, chocando con los botones de al lado. */}
+          <Epigrafe>Aporte por puesto</Epigrafe>
           <View style={estilos.filaAporte}>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Epigrafe>Aporte por puesto</Epigrafe>
               <View style={estilos.cifraFila}>
                 <Text style={[texto.precio, tabular, { color: color.ink900 }]}>
                   {formatearDineroRedondo(aporte)}
@@ -336,8 +355,25 @@ export default function Publicar() {
       </ScrollView>
 
       <View style={estilos.pie}>
+        {queFalta ? (
+          <View style={estilos.falta}>
+            <View style={estilos.filaFalta}>
+              <View style={estilos.cuadroFalta}>
+                <Escudo tamano={17} tinta={color.rojo600} />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.faltaTitulo}>{queFalta.titulo}</Text>
+                <Text style={estilos.faltaTexto}>{queFalta.texto}</Text>
+              </View>
+            </View>
+            <Boton tono="azul" tamano="md" alPulsar={() => router.push(queFalta.ruta as never)}>
+              {queFalta.boton}
+            </Boton>
+          </View>
+        ) : null}
         <Boton
           tono="azul"
+          desactivado={!!queFalta}
           alPulsar={() =>
             router.push({
               pathname: '/(conductor)/repaso',
@@ -358,7 +394,9 @@ export default function Publicar() {
           Repasar y publicar
         </Boton>
         <Text style={estilos.notaPie}>
-          Nada se publica todavía: lo lees entero antes, en una pantalla.
+          {queFalta
+            ? 'Puedes seguir calculando: nada de esto se publica.'
+            : 'Nada se publica todavía: lo lees entero antes, en una pantalla.'}
         </Text>
       </View>
 
@@ -548,8 +586,8 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
     overflow: 'hidden',
   },
-  filaAporte: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  cifraFila: { flexDirection: 'row', alignItems: 'flex-end', gap: 7, marginTop: 6 },
+  filaAporte: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 },
+  cifraFila: { flexDirection: 'row', alignItems: 'flex-end', gap: 7 },
   filaPuestos: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -587,5 +625,32 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
   },
+  falta: {
+    gap: 14,
+    padding: 16,
+    marginBottom: 12,
+    borderRadius: radio.l,
+    backgroundColor: color.rojo50,
+    borderWidth: 1,
+    borderColor: color.rojo100,
+  },
+  filaFalta: { flexDirection: 'row', gap: 12 },
+  cuadroFalta: {
+    width: 34,
+    height: 34,
+    borderRadius: radio.control,
+    backgroundColor: color.blanco,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  faltaTitulo: {
+    fontSize: 14.5,
+    lineHeight: 21,
+    fontWeight: '700',
+    letterSpacing: -0.22,
+    color: color.rojo700,
+    fontFamily: familia,
+  },
+  faltaTexto: { fontSize: 13, lineHeight: 19.5, color: color.ink700, marginTop: 3, fontFamily: familia },
   notaPie: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.125, color: color.ink500, marginTop: 10, fontFamily: familia },
 });

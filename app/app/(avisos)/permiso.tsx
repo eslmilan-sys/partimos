@@ -21,6 +21,8 @@ import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
@@ -98,6 +100,7 @@ function Aspa() {
 
 export default function PermisoDeAvisos() {
   const router = useRouter();
+  const volver = useVolver('/(avisos)/avisos');
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<ReservaPreparada | null>(null);
@@ -141,7 +144,7 @@ export default function PermisoDeAvisos() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

@@ -15,6 +15,8 @@ import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 import Svg, { Path, Rect } from 'react-native-svg';
 
 import type { MotivoDeReembolso } from '@/dominio/reembolsos';
@@ -59,6 +61,7 @@ const POR_DEFECTO: MotivoDeReembolso = 'conductor';
 
 export default function Reembolso() {
   const router = useRouter();
+  const volver = useVolver('/(ayuda)');
   const parametros = useLocalSearchParams<{ motivo?: string; reserva?: string }>();
   const reservaId = parametros.reserva ?? DEL_RECORRIDO;
   const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
@@ -94,7 +97,7 @@ export default function Reembolso() {
     await cancelar(reservaId, motivo, yo);
     // `15c` — por dónde va el reembolso — todavía no está en el árbol de rutas.
     // Mientras no exista, el reembolso queda pedido y se vuelve por donde se vino.
-    router.back();
+    volver();
   };
 
   return (
@@ -107,7 +110,7 @@ export default function Reembolso() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -190,7 +193,7 @@ export default function Reembolso() {
               accessibilityRole="button"
               accessibilityLabel="Cambiar a dónde vuelve el dinero"
               onPress={() =>
-                router.push({ pathname: '/(pasajero)/pagar', params: { viaje: viaje.viajeId } })
+                router.push({ pathname: '/(pasajero)/aportar', params: { viaje: viaje.viajeId } })
               }
               style={zonaDeToque}
             >
@@ -205,7 +208,7 @@ export default function Reembolso() {
           Solicitar reembolso
         </Boton>
         {/* La conversación con soporte tampoco está todavía en el árbol de rutas. */}
-        <Boton tono="contorno" tamano="md" alPulsar={() => router.back()}>
+        <Boton tono="contorno" tamano="md" alPulsar={() => volver()}>
           Escribir a soporte
         </Boton>
       </View>

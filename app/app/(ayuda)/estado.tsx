@@ -16,6 +16,8 @@ import { Platform, Pressable, StyleSheet, Text, View, type TextStyle } from 'rea
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import {
   estadoDelReembolso,
   type EstadoDelReembolso,
@@ -50,6 +52,7 @@ const PUNTO = {
 
 export default function Estado() {
   const router = useRouter();
+  const volver = useVolver('/(ayuda)');
   const { reembolso } = useLocalSearchParams<{ reembolso?: string }>();
   const reembolsoId = reembolso ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<EstadoDelReembolso | null>(null);
@@ -70,7 +73,7 @@ export default function Estado() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

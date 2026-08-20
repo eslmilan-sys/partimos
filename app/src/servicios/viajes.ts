@@ -346,6 +346,10 @@ export type PublicacionPreparada = {
   topeCentavos: number;
   puestosMaximos: number;
   paradasOfrecidas: ParadaOfrecida[];
+  /** Falso cuando el cálculo va con el sedán de referencia porque esta
+   *  persona todavía no ha registrado su carro. La pantalla lo dice y no
+   *  deja publicar. */
+  carroPropio: boolean;
 };
 
 export async function prepararPublicacion(
@@ -356,8 +360,37 @@ export async function prepararPublicacion(
   const corredor = fuente.corredores.find((c) => c.slug === corredorSlug);
   if (!corredor) throw new Error(`No conocemos la ruta ${corredorSlug}`);
 
-  const carro = fuente.vehiculos.find((v) => v.owner_id === conductorId && v.is_active);
-  if (!carro) throw new Error('Este conductor no tiene carro registrado');
+  /**
+   * SIN CARRO TAMBIÉN SE CALCULA.
+   *
+   * Esto lanzaba «Este conductor no tiene carro registrado» y la pantalla de
+   * publicar enseñaba el «esto ya no está aquí». Quien acaba de registrarse
+   * ve por primera vez la mitad conductora del producto y lo que recibe es un
+   * error: nunca llega a saber cuánto recuperaría, que es justo lo que le
+   * haría registrar el carro.
+   *
+   * Sin carro se calcula con el sedán de referencia —el mismo con el que sale
+   * el tope de la ruta— y se dice que es una estimación. La pantalla se
+   * encarga de que ese caso no pueda publicar.
+   */
+  const suyo = fuente.vehiculos.find((v) => v.owner_id === conductorId && v.is_active) ?? null;
+  const carro: Vehicle =
+    suyo ?? {
+      id: 'referencia',
+      owner_id: conductorId,
+      category_code: 'standard',
+      make: 'Sedán',
+      model: 'de referencia',
+      color: null,
+      year: null,
+      seats_total: 5,
+      plate_last3: null,
+      photo_path: null,
+      is_active: true,
+      rate_per_km_cents: null,
+      consumption_l_100km: CONSUMO_L_100KM.standard,
+      created_at: new Date().toISOString(),
+    };
 
   const consumo = consumoDe(carro);
   const costo = costoDelViaje({
@@ -376,6 +409,7 @@ export async function prepararPublicacion(
   return demora({
     corredor,
     carro,
+    carroPropio: suyo != null,
     placa: fuente.placasCompletas[carro.id] ?? '',
     /* De las ciudades del corredor y no escrito a mano: aquí ponía siempre
        «Albrook · Terminal» y «Chitré · Parque Unión», así que publicar

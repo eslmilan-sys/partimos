@@ -16,6 +16,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { NOMBRE_DE_FRANJA, type Franja, franjaDe } from '@/dominio/rutinas';
 import { type SalidaCercana, proximasSalidas } from '@/servicios/viajes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -33,6 +35,7 @@ const VENTANA_MIN = 12 * 60;
 
 export default function SalenPronto() {
   const router = useRouter();
+  const volver = useVolver();
   const [salidas, setSalidas] = useState<SalidaCercana[] | null>(null);
 
   useEffect(() => {
@@ -61,7 +64,7 @@ export default function SalenPronto() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -151,7 +154,7 @@ export default function SalenPronto() {
         )}
       </ScrollView>
 
-      <Pestanas valor="Buscar" conPublicar />
+      <Pestanas valor="Buscar" />
     </View>
   );
 }

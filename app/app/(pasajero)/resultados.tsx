@@ -8,9 +8,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
@@ -45,6 +47,7 @@ const DESTINO_POR_DEFECTO = 'chitre';
 
 export default function Resultados() {
   const router = useRouter();
+  const volver = useVolver();
   // `3a` manda a dónde vas. Sin eso —solo abriendo la pantalla suelta— la ruta
   // del traspaso, que es la que tiene viajes sembrados.
   const params = useLocalSearchParams<{
@@ -164,7 +167,7 @@ export default function Resultados() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />
@@ -384,6 +387,23 @@ function BarraDeFiltros({
         />
         <Chip activo={!!filtros.yappy} etiqueta="Yappy" alPulsar={() => alAlternar('yappy')} />
       </ScrollView>
+
+      {/* **El desvanecido del borde.** La tira se desliza, pero sin nada que
+          lo diga el último chip se lee como un chip roto contra el canto de la
+          pantalla: el cliente lo señaló en «Acepta maletas». Veintiocho
+          píxeles de blanco que se apaga bastan para que se lea «sigue» en vez
+          de «se cortó». No responde al dedo, así que no se come el desliz. */}
+      <View style={estilos.desvanecido} pointerEvents="none">
+        <Svg width={28} height={56}>
+          <Defs>
+            <LinearGradient id="tira" x1="0" y1="0" x2="1" y2="0">
+              <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0" />
+              <Stop offset="1" stopColor="#FFFFFF" stopOpacity="1" />
+            </LinearGradient>
+          </Defs>
+          <Rect x="0" y="0" width="28" height="56" fill="url(#tira)" />
+        </Svg>
+      </View>
     </View>
   );
 }
@@ -600,8 +620,9 @@ const estilos = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: color.bordeSutil,
     paddingLeft: espacio.gutter,
-    height: 62,
+    height: 58,
   },
+  desvanecido: { position: 'absolute', right: 0, top: 1, bottom: 1, width: 28 },
   barraTira: { flexDirection: 'row', gap: 8, alignItems: 'center', paddingRight: espacio.gutter },
   botonFiltros: {
     flexDirection: 'row',

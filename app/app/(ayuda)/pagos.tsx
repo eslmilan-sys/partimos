@@ -26,6 +26,8 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useVolver } from '@/ui/salidas';
+
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import { type ComoSePaga, comoSePaga } from '@/servicios/ayuda';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -62,6 +64,7 @@ const DURO = ' ';
 
 export default function Pagos() {
   const router = useRouter();
+  const volver = useVolver('/(ayuda)');
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<ComoSePaga | null>(null);
@@ -90,7 +93,7 @@ export default function Pagos() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => router.back()}
+            onPress={() => volver()}
             style={estilos.circulo}
           >
             <Atras />

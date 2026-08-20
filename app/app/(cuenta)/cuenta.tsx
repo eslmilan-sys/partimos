@@ -102,7 +102,7 @@ export default function TuCuenta() {
       alPulsar: () => router.push('/(conductor)/carro'),
     },
     {
-      etiqueta: 'Cómo se paga',
+      etiqueta: 'Cómo se aporta',
       valor: datos.metodo,
       icono: <Billete />,
       alPulsar: () => router.push('/(pasajero)/metodos'),
