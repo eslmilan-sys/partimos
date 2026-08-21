@@ -4,6 +4,7 @@ node_modules/
 .next/
 out/
 dist/
+dist-demo/
 web-build/
 .expo/
 expo-env.d.ts
