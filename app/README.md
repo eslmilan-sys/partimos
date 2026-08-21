@@ -224,11 +224,15 @@ préréglées. Le site, lui, fusionne LocationIQ **et** Mapbox dans
 35 contrôles sur 38 répondent. Les trois qui ne répondent pas sont
 « Confirmar y pagar » (7b) et deux boutons de l'écran Publier.
 
-**4 · L'hébergement.** Ni Supabase ni claude.ai ne peuvent servir cette app :
-Supabase réécrit le `content-type` du HTML en `text/plain` (mesuré, sur les
-Edge Functions comme sur le stockage public) et claude.ai bloque les appels
-sortants. Il faut GitHub Pages ou équivalent, déployé par CI — jamais en
-commitant le build.
+**4 · L'hébergement — FAIT (21-08-2026).** GitHub Pages, déployé par CI à
+chaque push sur main (`.github/workflows/app.yml`), jamais en commitant le
+build. Trois adresses : la portada
+<https://eslmilan-sys.github.io/partimos/>, la vraie
+<https://eslmilan-sys.github.io/partimos/app/> et la demo simulée
+<https://eslmilan-sys.github.io/partimos/demo/> — la demo existe parce que le
+point 1 laisse encore des écrans vides contre la vraie base ; elle se retire
+quand il sera fermé. (Pour mémoire : ni Supabase ni claude.ai ne savent
+servir l'app — content-type réécrit en text/plain, appels sortants bloqués.)
 
 **5 · Supabase doit autoriser l'adresse de retour.** Le lien de confirmation
 du courriel ne revient à l'app que si son URL figure dans les « Redirect URLs »
