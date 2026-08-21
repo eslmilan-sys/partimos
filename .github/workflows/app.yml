@@ -2,10 +2,22 @@
 # se sube directo a Pages, que es lo que evita las tres copias sin etiqueta del
 # repositorio viejo.
 #
-# La dirección que sale de esto es
-#     https://eslmilan-sys.github.io/partimos/app/
-# y tiene que estar en «Redirect URLs» del proyecto Supabase, o el enlace de
-# confirmación del correo vuelve a la Site URL y cae en una página de error.
+# Salen DOS versiones de la misma app, y una portada que ofrece las dos:
+#
+#     https://eslmilan-sys.github.io/partimos/        la portada
+#     https://eslmilan-sys.github.io/partimos/app/    contra la base real
+#     https://eslmilan-sys.github.io/partimos/demo/   la fuente simulada
+#
+# La demo existe porque probar TODO contra la base real todavía no se puede:
+# treinta y siete pantallas llevan el identificador del recorrido de
+# demostración escrito a mano (app/README.md, «Ce qui manque», punto 1) y
+# contra Supabase salen vacías. Con la fuente simulada cada pantalla, cada
+# botón y cada cálculo se recorren enteros, sin cuenta y sin red. Cuando el
+# punto 1 esté cerrado, la demo se podrá retirar.
+#
+# La dirección real tiene que estar en «Redirect URLs» del proyecto Supabase,
+# o el enlace de confirmación del correo vuelve a la Site URL y cae en una
+# página de error.
 
 name: App
 
@@ -47,7 +59,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
 
-      - name: Exportar el sitio
+      - name: Exportar contra la base real
         env:
           # Estas llaves son públicas a propósito —lo que protege los datos son
           # las políticas RLS, no el secreto de una cadena compilada en el
@@ -65,10 +77,25 @@ jobs:
           PARTIMOS_BASE_URL: /partimos/app/
         run: npx expo export --platform web --output-dir dist
 
-      # Pages sirve lo que se le sube tal cual. La app cuelga de /app/ para
-      # dejar la raíz libre para el sitio de `web/`.
-      - name: Poner la app bajo /app/
-        run: mkdir -p ../publicar/app && cp -r dist/. ../publicar/app/
+      # La misma app, con la fuente simulada: cada pantalla se recorre entera
+      # sin cuenta, sin red y sin depender de lo que haya sembrado en la base.
+      - name: Exportar la demo
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://zcwueglgirqxwazhfidi.supabase.co
+          EXPO_PUBLIC_SUPABASE_LLAVE: sb_publishable_isfWgZ9aT6QTUDtubxr_Iw_xdPLvp9e
+          EXPO_PUBLIC_FUENTE: simulado
+          PARTIMOS_BASE_URL: /partimos/demo/
+        run: npx expo export --platform web --output-dir dist-demo
+
+      # Pages sirve lo que se le sube tal cual. La app cuelga de /app/, la demo
+      # de /demo/, y en la raíz va la portada que ofrece las dos — hasta que el
+      # sitio de `web/` reclame ese lugar.
+      - name: Componer lo que se publica
+        run: |
+          mkdir -p ../publicar/app ../publicar/demo
+          cp -r dist/. ../publicar/app/
+          cp -r dist-demo/. ../publicar/demo/
+          cp ../.github/pages/index.html ../publicar/index.html
 
       # Sin esto, GitHub Pages pasa la carpeta por Jekyll y se come todo lo que
       # empieza por guion bajo — que es donde Expo deja el paquete.
@@ -80,10 +107,12 @@ jobs:
       # sirve su propio 404, no el nuestro, y `app/+not-found.tsx` nunca llega a
       # ejecutarse porque el paquete no se ha cargado todavía. Con un 404.html
       # que es la propia app, ese caso entra por la puerta y el enrutador
-      # resuelve el camino del lado del navegador.
+      # resuelve el camino del lado del navegador. El 404 de la raíz manda a la
+      # versión real, que es la dirección que se comparte.
       - name: El 404 tambien es la app
         run: |
           cp dist/index.html ../publicar/app/404.html
+          cp dist-demo/index.html ../publicar/demo/404.html
           cp dist/index.html ../publicar/404.html
 
       # Pages tiene que estar encendido a mano una vez: Settings -> Pages ->
@@ -95,7 +124,12 @@ jobs:
         with:
           path: publicar
 
+  # Solo main despliega: el entorno github-pages rechaza a las demás ramas
+  # —«Branch is not allowed to deploy», medido en los runs 42-45—. En una rama
+  # el flujo se queda en construir, que ya vale como comprobación: si el export
+  # rompe, se sabe antes de fusionar.
   publicar:
+    if: github.ref == 'refs/heads/main'
     needs: construir
     runs-on: ubuntu-latest
     environment:
