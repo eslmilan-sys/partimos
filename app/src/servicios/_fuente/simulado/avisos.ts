@@ -57,7 +57,7 @@ export const avisos: AvisoPendiente[] = [
     id: 'av000000-0000-4000-8000-000000000004',
     profile_id: DANIELA_ID,
     kind: 'aporte_recibido',
-    title: 'Te aportaron 6 $',
+    title: 'Te aportaron B/6',
     body: 'Ayer · Yappy · 7788',
     action_label: null,
     action_route: null,

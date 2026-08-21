@@ -13,7 +13,7 @@ les règles métier, et `DESIGN.md` pour ce qui a été constaté dans le code.
 | `web/` | Le site public. Next.js, export statique. |
 | `app/` | L'application. Expo — un seul code pour le navigateur et le téléphone. |
 | `supabase/` | Les 21 migrations, les politiques RLS, les fonctions Edge, la semence. |
-| `diseno/` | Le traspaso de design : 58 écrans en HTML. **Référence, pas du code à copier.** |
+| `diseno/` | Le design : `Partimos App v6.dc.html` est LA base, le canevas et les 58 écrans Hi-Fi l'entourent. **Référence, pas du code à copier.** |
 
 Chaque intégration a son fichier dans `supabase/` : `DIDIT.md` (vérification
 d'identité), `LUGARES.md` (géocodage), `PAGOS.md`, `LINKEDIN.md`. Ils disent ce
@@ -80,39 +80,61 @@ Deux contraintes qui s'oublient facilement : un détour ne se facture jamais en
 supplément — il change la distance, donc le coût, donc le plafond, par la même
 formule ; et **maximum 4 points de prise en charge par trajet**.
 
-## Un seul langage visuel : celui de `diseno/`
+## Un seul langage visuel : le Sistema v6
 
-**Décidé par l'utilisateur.** Le traspaso de `diseno/` est le langage de
-**l'app ET du site**. Son système est dans `diseno/design_system/` — c'est la
-référence, pas une inspiration.
+**Décidé par l'utilisateur le 21-08-2026.** La référence est
+**`diseno/Partimos App v6.dc.html`** : deux écrans dessinés en entier (Inicio,
+Resultados), une spécification en dix sections — « chaque valeur est celle du
+fichier, sans approximation » — et neuf invariants. Sa structure est
+l'archétype de **tous** les écrans, de l'app ET du site. Le canevas
+`diseno/Partimos Main Screen.dc.html` reste la référence des écrans que v6 ne
+dessine pas (connexion en 10c, onboarding, publicar) ; là où les deux parlent
+du même élément, **v6 fait foi**. Le portage vivant est
+`app/src/ui/tokens.ts` — les valeurs y sont commentées avec leur raison.
 
-Ce qu'il pose, et qui n'est pas négociable dans une surface :
+Ce que v6 pose, et qui n'est pas négociable dans une surface :
 
-- **Azul `#005293` possède les surfaces** : en-têtes, champs héros, barres,
-  chrome sombre. **Rojo `#D21034` possède l'interaction** : boutons, liens,
-  états actifs. **Le blanc les sépare — ils ne se touchent jamais.** Ce sont
-  les deux couleurs du drapeau, réparties par métier.
-- **Les neutres sont chauds**, jamais gris-bleu : `ink-*` tire sur le violet,
-  les fonds sont `sand-*`.
-- **L'erreur ne peut pas être « rouge »**, puisque le rouge est la marque :
-  elle est `rojo-700` **avec une icône et un libellé**, et un bouton destructif
-  est en contour, jamais plein.
-- **Une seule famille typographique** pour tout — `"Helvetica Neue", Helvetica,
-  "Inter Tight", Arial`. Pas de monospace : les heures, les prix et les plaques
-  utilisent la police d'interface avec des chiffres tabulaires.
-- Une échelle de tailles fixe, avec son interlignage et son crénage par
-  palier : `--lh-body:1.45`, `--track-micro:0.1em`.
+- **Le champ rouge héros n'existe plus.** L'utilisateur l'a rejeté
+  explicitement. Toute pantalla ouvre sur le lienzo `#F4F7F8`, avec deux
+  halos radiaux ténus (sarcelle et rubor) comme seule atmosphère.
+- **L'encre est bleu-sarcelle** : `#0A2731` et sa rampe en six pas au métier
+  fixe (`#2A4B55` corps secondaire et lieux, `#5A757E` rótulos de section et
+  meta, `#7C959D` unités et cejas, `#93A8AE` agotado, `#B0C1C6` traits —
+  jamais du texte). L'encre est aussi la surface sombre : le chip Filtros, le
+  bouton Publicar, le bisel.
+- **Le rouge a exactement quatre sens** — destination, action primaire, faible
+  disponibilité, « en vivo » — **et aucun décoratif** (invariant 4). Trois
+  profondeurs : `#E1213B` agit, `#C11730` est le texte-accent sur blanc,
+  `#B01128` l'accent dans un chip teinté. Un prix n'est pas rouge : un prix
+  ne se presse pas.
+- **La direction s'écrit deux fois, toujours** : le couple de cejas
+  SALE / LLEGA et le raíl aro-creux → punta-de-flecha-roja. Un séparateur
+  neutre entre deux noms de lieux n'est jamais acceptable (invariant 1). Un
+  lieu vit sous SA propre heure (2). Une arrivée après minuit porte « +1 día »,
+  sans exception (3).
+- **La grotesque est Switzer**, auto-hébergée (`app/public/fuentes/`), avec
+  Helvetica Neue et Inter Tight derrière. Pas de monospace : tout nombre
+  comparable — heures, aportes, durées, notes — prend des **chiffres
+  tabulaires** (invariant 9).
+- **L'argent s'écrit `B/18`** — le préfixe balboa dans son propre corps
+  (12/500) sur la ligne de base de la cifra (22/600). Un seul endroit formate :
+  `app/src/ui/dinero.tsx`.
+- Rayons à assignation fixe (8 imbriqué · 11/13 chips · 14 celda d'icône ·
+  16 contrôle en carte · 18 bouton pleine largeur · 24 carte), hauteurs de
+  contrôle 32/38/44/48/52/54, espacement 4/8/10/12/16/20 — **20 est le plus
+  grand vide à l'écran**. États pulsés : boutons `.97`, cartes `.985`, celdas
+  au lavado d'encre 6 %, 120 ms ease-out.
+- **Les rótulos de champ sont des verbes à la première personne** — « Salgo
+  de », « Voy a » (invariant 8). Une liste dit sa cuenta et son sujet, lue de
+  la recherche même (5) ; les filtres appliqués se voient et se retirent où
+  qu'ils agissent (6) ; une affirmation porte sa raison (7).
 
-**La spécification complète est dans `diseno/SISTEMA.md`** : l'archétype
-d'écran « Bandera », les neuf mécaniques signature, les règles du verre, la
-typographie, l'espace, et les règles de langue — tutoiement, casse de phrase,
-boutons verbe-en-tête de deux ou trois mots, pas d'emoji, **aucun point
-d'exclamation dans le produit**. Lis-le avant de toucher à une surface.
-
-**`DESIGN.md` décrit l'ancien système du site** — les planches d'ingénieur du
-Canal, vert `#0a2b25`, refus des coins arrondis. Il est **remplacé**. On le
-garde parce qu'il documente ce qui est encore en ligne dans `web/`, mais il ne
-guide plus rien. Le site est à reprendre dans le langage de `diseno/`.
+**Les règles de langue de `diseno/SISTEMA.md` restent en vigueur** —
+tutoiement, casse de phrase, boutons verbe-en-tête, pas d'emoji, **aucun
+point d'exclamation dans le produit** — mais son système visuel (azul/rojo du
+drapeau, neutres chauds, champ héros) est **remplacé par v6**, comme
+`DESIGN.md` (vert Canal) l'avait été avant lui. On garde les deux parce
+qu'ils documentent ce qui a existé ; ils ne guident plus rien.
 
 ## Conflits ouverts, à trancher — ne pas « corriger » seul
 

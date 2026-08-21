@@ -1,5 +1,16 @@
 # Partimos — the design system
 
+> **SUPERSEDED (2026-08-21).** The user adopted `Partimos App v6.dc.html` as
+> the base structure for every screen — light ground `#F4F7F8`, blue-teal ink
+> `#0A2731`, accent `#E1213B` reserved for four meanings, Switzer, `B/`
+> prices, **no red hero field**. This file's visual system (flag azul/rojo,
+> warm neutrals, the «Bandera» archetype) no longer guides anything, the same
+> way `../DESIGN.md` had been superseded before it. **Its language rules
+> remain in force** — tuteo, sentence case, verb-first buttons, no emoji, no
+> exclamation marks — and it documents the five Hi-Fi screens that still sit
+> in this folder. The living spec is the v6 file and `app/src/ui/tokens.ts`;
+> the index of what superseded what is in `MAIN_SCREEN.md`.
+
 > Chosen by the user for **both surfaces**: the app and the site. The tokens in
 > `design_system/tokens/` are the reference, not an inspiration. `../DESIGN.md`
 > describes the site's previous system and is superseded.
