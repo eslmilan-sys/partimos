@@ -315,7 +315,7 @@ const estilos = StyleSheet.create({
     borderRadius: radio.l,
     padding: 16,
     /* Sombra propia: la tarjeta flota sobre el campo, no se apoya en él. */
-    shadowColor: '#5E0717',
+    shadowColor: '#8F1024',
     shadowOpacity: 0.28,
     shadowRadius: 24,
     shadowOffset: { width: 0, height: 10 },

@@ -154,7 +154,7 @@ function restante(llegadaISO: string): string {
 const estilos = StyleSheet.create({
   pantalla: {
     flex: 1,
-    backgroundColor: '#17151A',
+    backgroundColor: '#17171A',
     maxWidth: espacio.marco,
     width: '100%',
     alignSelf: 'center',
@@ -208,7 +208,7 @@ const estilos = StyleSheet.create({
     paddingTop: 22,
     paddingHorizontal: espacio.gutter,
     paddingBottom: 30,
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.14,
     shadowRadius: 40,
     shadowOffset: { width: 0, height: -12 },
@@ -299,7 +299,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     marginTop: 16,
-    backgroundColor: '#EEF3F8',
+    backgroundColor: '#F5F5F7',
     borderRadius: radio.l,
     borderWidth: 1,
     borderColor: color.azul100,

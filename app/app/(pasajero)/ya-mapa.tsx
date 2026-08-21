@@ -252,7 +252,7 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.16,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },

@@ -1,120 +1,187 @@
 import { Platform } from 'react-native';
 
 /**
- * Los tokens del traspaso, portados desde design_system/tokens/*.css.
+ * PARTIMOS · DESIGN SYSTEM V1
+ *
+ * Portado de `diseno/Partimos Main Screen.dc.html`, turno 10a («Foundation —
+ * tokens and components») con las correcciones del turno 14. **Este sistema
+ * sustituye al del traspaso anterior**, decidido por el usuario.
+ *
+ * Lo que cambia respecto de lo que había, y que conviene saber antes de tocar
+ * una pantalla:
+ *
+ * - **Ya no hay azul.** El sistema anterior repartía la bandera por oficios
+ *   —azul `#005293` dueño de las superficies, rojo `#D21034` dueño de la
+ *   interacción—. El nuevo no tiene azul en ninguna parte: las superficies son
+ *   blanco y gris de lienzo, y el rojo `#E1213B` es lo único que actúa.
+ * - **Los neutros son fríos**, no cálidos. La rampa `ink` tira a violeta-gris
+ *   y los fondos son gris de lienzo, no arena.
+ * - **La escala de radios es fija y de cuatro pasos**: 10 fichas, 15 campos y
+ *   botones, 20 tarjetas, 25 hojas. Nada de valores intermedios.
+ * - **La rejilla es de 5 pt** y el gutter mide 20.
+ *
+ * Los nombres de la rampa anterior (`azul*`, `arena*`, `sand*`) se conservan
+ * como alias sobre el sistema nuevo para que las pantallas sigan compilando
+ * mientras se recorren una a una. **No los uses en código nuevo**: están
+ * marcados abajo con su equivalente real.
+ *
  * Valores exactos: no se ajustan «a ojo» en las pantallas.
  */
 
 export const color = {
-  rojo50: '#FDF2F3',
-  rojo100: '#F9DEE2',
-  rojo200: '#F2BBC3',
-  rojo300: '#E68A98',
-  rojo400: '#DC4E64',
-  rojo500: '#D21034',
-  rojo600: '#B00C2A',
-  rojo700: '#8C0A22',
-  rojo800: '#5E0717',
-
-  azul50: '#EEF3F8',
-  azul100: '#DBE7F0',
-  azul200: '#B4CCE0',
-  azul300: '#7AA6C7',
-  azul400: '#2E76A8',
-  azul500: '#005293',
-  azul600: '#00436F',
-  azul700: '#003A69',
-  azul800: '#002741',
-
-  arena100: '#FBEDDF',
-  arena200: '#F6DCC2',
-
-  ink900: '#26232B',
-  ink800: '#332F39',
-  ink700: '#4A4552',
-  ink600: '#6B6672',
   /**
-   * EL GRIS MÁS CLARO QUE PUEDE LLEVAR TEXTO.
-   *
-   * Era `#857F8C`, que sobre arena da 3,63:1 —por debajo del 4,5:1 que exige
-   * la norma para texto normal—, y es el color de casi todas las segundas
-   * líneas: las horas de llegada, «Desde», «Hacia», «por puesto». Medido en
-   * el navegador sobre las 51 pantallas, era el fallo de contraste más
-   * repetido de la app.
-   *
-   * `#706A76` es el mismo matiz, más oscuro: 4,90:1 sobre arena 100, 5,23:1
-   * sobre blanco y 4,57:1 sobre arena 200, que son los tres fondos donde
-   * aparece. Por debajo de este gris no va texto: `ink400` e `ink300` son
-   * para bordes, puntos y trazos, nunca para leer.
+   * LA ACCIÓN. El único color que actúa: botones primarios, enlaces, estados
+   * activos. Sobre blanco, nunca sobre otro relleno.
    */
-  ink500: '#706A76',
-  ink400: '#A19BA8',
-  ink300: '#B7B2BC',
-  ink200: '#D8D4DB',
-  ink100: '#EBE7EC',
+  rojo500: '#E1213B',
+  /** Pressed, y el texto de acento cuando el rojo puro no daría contraste. */
+  rojo600: '#A6122A',
+  rojo700: '#A6122A',
+  rojo800: '#8F1024',
+  /** El tinte: fondo de pastillas y avisos de acento. Lleva `rojo700` encima. */
+  rojo50: '#FDE7EA',
+  rojo100: '#FCE9EC',
+  rojo200: '#F7C9D1',
+  rojo300: '#EE8D9C',
+  rojo400: '#E85A70',
 
-  sand50: '#FCFAF7',
-  sand100: '#FAF7F3',
-  sand200: '#F3EFE9',
-  sand300: '#E9E4DC',
+  /**
+   * LA TINTA. `#14141A` es el negro del sistema: titulares, cifras, cuerpo.
+   *
+   * `ink500` y `ink600` son los dos únicos grises que pueden llevar texto, y
+   * el sistema los da medidos: secundario `#5A5A63` = 6,8:1, terciario
+   * `#6B6B75` = 5,1:1. Los dos pasan AA en todos los tamaños en uso. Por
+   * debajo de `ink600` no va texto: `ink400`, `ink300`, `ink200` e `ink100`
+   * son para bordes, puntos y rellenos, nunca para leer.
+   */
+  ink900: '#14141A',
+  ink800: '#17171A',
+  ink700: '#2A2A31',
+  /** Secundario · 6,8:1. Segundas líneas, horas de llegada, «por puesto». */
+  ink500: '#5A5A63',
+  /** Terciario · 5,1:1. Metadatos, epígrafes, el gris más claro con texto. */
+  ink600: '#6B6B75',
+  ink400: '#A6A6AF',
+  ink300: '#C9C9D1',
+  ink200: '#E6E6EA',
+  ink100: '#F1F1F4',
+
+  /**
+   * LAS SUPERFICIES. `sand100` es el lienzo `#F5F5F7`, `sand200` el campo
+   * `#F1F1F4`. Los nombres quedaron de la rampa cálida anterior; los valores
+   * ya son los fríos del sistema nuevo.
+   */
+  sand50: '#FCFCFE',
+  sand100: '#F5F5F7',
+  sand200: '#F1F1F4',
+  sand300: '#E6E6EA',
+
+  /** Alias cálidos del sistema anterior. Equivalen al lienzo y al campo. */
+  arena100: '#F5F5F7',
+  arena200: '#F1F1F4',
+
+  /**
+   * ALIAS DEL AZUL RETIRADO.
+   *
+   * El sistema nuevo no tiene azul. Donde el azul vestía una superficie o un
+   * epígrafe, ahora va tinta o gris; donde marcaba un relleno suave, va
+   * lienzo. Se conservan para que las nueve pantallas que aún los nombran
+   * compilen: al recorrerlas, sustitúyelos por `ink*` o `sand*`.
+   */
+  azul50: '#F5F5F7',
+  azul100: '#F1F1F4',
+  azul200: '#E6E6EA',
+  azul300: '#C9C9D1',
+  azul400: '#6B6B75',
+  azul500: '#14141A',
+  azul600: '#17171A',
+  azul700: '#14141A',
+  azul800: '#0E0E10',
 
   blanco: '#FFFFFF',
   oro500: '#E0A83C',
-  verde500: '#157A57',
+  verde500: '#0F7B4F',
 
   /**
-   * LOS TRES ESTADOS, Y POR QUÉ NO SON LOS COLORES DE LA MARCA.
+   * LOS DOS ESTADOS QUE NO SON LA MARCA.
    *
-   * El rojo es la marca, así que no puede querer decir «mal» ni «esperando»;
-   * el azul es la superficie, así que tampoco puede querer decir nada. Quedan
-   * el verde y un ámbar, y son los únicos dos colores del producto que no
-   * salen de la bandera. No se usan en ningún otro sitio.
-   *
-   * El par verde ya estaba repetido a mano en ocho archivos. El ámbar lo
-   * escribí yo para «Pendiente» en `5b` y estaba suelto en una pantalla.
-   * Aquí los dos, una vez.
+   * El rojo es la marca, así que no puede querer decir «mal» ni «esperando».
+   * El verde del sistema nuevo es `#0B5C3B` sobre `#E7F4EE`. El ámbar se
+   * queda como estaba: el sistema no lo redefine y sigue siendo el único
+   * color de espera.
    */
-  hechoFondo: '#DFF1E8',
-  hechoTinta: '#0E5A3F',
+  hechoFondo: '#E7F4EE',
+  hechoTinta: '#0B5C3B',
   esperaFondo: '#FBF0D8',
   esperaTinta: '#8A6413',
 
-  bordeSutil: '#EBE7EC',
-  bordePorDefecto: '#D8D4DB',
+  /** El borde de tarjeta del sistema: 1 px `#E6E6EA`. */
+  bordeSutil: '#E6E6EA',
+  bordePorDefecto: '#C9C9D1',
+
+  /** Disabled: relleno `#EDEDF0`, letra `#A6A6AF`. */
+  inerteFondo: '#EDEDF0',
+  inerteTinta: '#A6A6AF',
 
   /**
-   * El texto sobre el campo rojo. Al 78 % daba 3,69:1 contra el rojo 500 —por
-   * debajo del 4,5:1 que la norma pide para texto normal—, y es el subtítulo
-   * de casi todas las pantallas. Al 92 % da 4,75:1 y sigue siendo claramente
-   * secundario respecto del blanco puro del titular.
+   * Restos del campo rojo héroe del sistema anterior. El sistema nuevo no
+   * tiene superficie roja —el rojo sólo actúa, sobre blanco—, así que estos
+   * dos desaparecen cuando se rehaga `CampoRojo.tsx`. Ver la nota de
+   * `campoRojo` más abajo.
    */
   campoTexto: 'rgba(255,255,255,.92)',
-  /** Los controles que se sientan encima del campo. Nunca vidrio. */
   campoControl: 'rgba(255,255,255,.18)',
 } as const;
 
-/** El campo rojo. Tres capas: luz cálida arriba a la derecha, sombra abajo a la
- *  izquierda, y el degradado de bandera. Se compone con SVG en CampoRojo.tsx. */
+/**
+ * EL CAMPO ROJO — SUPERSEDIDO, PENDIENTE DE RETIRAR.
+ *
+ * El sistema anterior abría casi todas las pantallas con una superficie roja
+ * a sangre de 326 px. **El sistema v1 no tiene superficie roja**: el rojo sólo
+ * actúa —botones, enlaces, activos— y siempre sobre blanco. La pantalla de
+ * inicio del turno 10d es lienzo con un H1 «Buscar viajes» en tinta.
+ *
+ * Se conserva para que `CampoRojo.tsx` y las siete pantallas que lo montan
+ * sigan compilando. Los tonos se han llevado al rojo nuevo para que, mientras
+ * dure la transición, no convivan dos rojos distintos en la misma app.
+ */
 export const campoRojo = {
   luz: 'rgba(255,216,188,.34)',
-  sombra: 'rgba(94,7,23,.62)',
-  de: '#DD1D3F',
-  medio: '#D21034',
-  a: '#AF0B29',
+  sombra: 'rgba(143,16,36,.62)',
+  de: '#E83950',
+  medio: '#E1213B',
+  a: '#A6122A',
   alturaInicio: 326,
   alturaSecundaria: 206,
 } as const;
 
+/**
+ * LOS RADIOS, CON ASIGNACIÓN FIJA.
+ *
+ * Cuatro pasos y un círculo, y cada uno tiene su sitio. No se elige el radio
+ * «que quede bien»: se elige por lo que es la pieza.
+ *
+ *   10 · fichas, pastillas, insignias
+ *   15 · campos y botones
+ *   20 · tarjetas
+ *   25 · hojas y modales
+ *   círculo · avatares
+ */
 export const radio = {
-  xs: 6,
+  /** Fichas e insignias. */
+  ficha: 10,
+  xs: 10,
   s: 10,
-  m: 14,
-  l: 20,
-  xl: 24,
-  hoja: 26,
   cuadrado: 10,
-  ficha: 12,
-  control: 14,
+  /** Campos y botones. */
+  control: 15,
+  m: 15,
+  /** Tarjetas. */
+  l: 20,
+  /** Hojas y modales. */
+  xl: 25,
+  hoja: 25,
+  /** Avatares y pastillas a media altura. */
   pastilla: 999,
 } as const;
 
@@ -135,27 +202,53 @@ export const espacio = {
    * todo mide en porcentaje o en flex.
    */
   marco: 440,
-  gutter: 26,
-  seccion: 32,
+  /**
+   * LA REJILLA DE 5 PT.
+   *
+   * El sistema v1 mide todo en múltiplos de cinco: 5 compacto, 10 de icono a
+   * texto, 15 relleno interno, 20 gutter y separación entre componentes, 30
+   * entre secciones, 40 entre bloques mayores. El gutter pasa de 26 a 20 —el
+   * lienzo del diseño mide 393 con 20 a cada lado, o sea 353 de contenido—.
+   */
+  compacto: 5,
+  iconoATexto: 10,
+  relleno: 15,
+  gutter: 20,
+  seccion: 30,
+  bloque: 40,
+
   entreTarjetas: 10,
-  tarjeta: 22,
-  hoja: 26,
+  tarjeta: 20,
+  hoja: 25,
   fila: 60,
   filaY: 15,
   control: 52,
   controlS: 40,
+  /**
+   * El área mínima de algo que se toca. Es también la corrección 5 del turno
+   * 14: «Ver todo» y «Editar» medían 17 px de alto y no tenían zona de toque.
+   */
   tap: 44,
 } as const;
 
 /**
- * Una sola grotesca neutra: Helvetica Neue de verdad en Apple, Inter Tight en
- * el resto. Nunca peso 300. No hay monoespaciada: los números usan cifras
- * tabulares de la misma fuente.
+ * UNA SOLA GROTESCA NEUTRA.
+ *
+ * El diseño v1 está dibujado en **Neue Montreal**, que es una tipografía de
+ * pago y **no está en el repositorio**: no hay ningún fichero suyo en
+ * `app/public/fuentes/`, donde sí está Inter Tight en cuatro pesos. La pila la
+ * pide primero, de modo que si algún día se licencia y se añade, el diseño se
+ * ve tal cual fue dibujado sin tocar una línea; mientras tanto cae en la misma
+ * grotesca de siempre, que es la sustituta que el propio diseño declara.
+ *
+ * Nunca peso 300. No hay monoespaciada: los números usan cifras tabulares de
+ * la misma fuente.
  */
 export const familia = Platform.select({
-  // En web, la misma pila del traspaso: Inter Tight se carga en app/+html.tsx.
-  web: '"Helvetica Neue", Helvetica, "Inter Tight", Arial, sans-serif',
-  // En Apple la grotesca del diseño existe de verdad.
+  // Inter Tight se carga en app/+html.tsx; «Neue Montreal» sólo resuelve si se
+  // instala. El orden es el del propio diseño.
+  web: '"Neue Montreal", "Helvetica Neue", Helvetica, "Inter Tight", Arial, sans-serif',
+  // En Apple la grotesca sustituta del diseño existe de verdad.
   ios: 'Helvetica Neue',
   // En Android hace falta registrar Inter Tight por peso, que pide una
   // compilación propia: en Expo Go se ve con la grotesca del sistema.
@@ -176,14 +269,14 @@ const conFuente = { fontFamily: familia };
 
 export const sombra = {
   s: {
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
   l: {
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.12,
     shadowRadius: 48,
     shadowOffset: { width: 0, height: 18 },
@@ -203,36 +296,77 @@ export const sombra = {
 export const TRACK_MICRO = 0.1;
 export const trackMicro = (tamano: number) => tamano * TRACK_MICRO;
 
+/**
+ * LA ESCALA, TAL COMO LA ESPECIFICA EL TURNO 10a.
+ *
+ * Seis pasos, con su interlineado en píxeles y su crenado por escalón. El
+ * interlineado del sistema v1 es **absoluto**, no una razón: 28/34, 20/26,
+ * 18/23, 14/20, 12/17, 10/14. `interlinea()` sigue exportada porque veintitrés
+ * sitios la llaman, pero en código nuevo se escribe el número del sistema.
+ */
 export const texto = {
-  titular: { fontSize: 31, lineHeight: 32.55, letterSpacing: -1.24, fontWeight: '400' as const, ...conFuente },
-  titularFuerte: { fontWeight: '600' as const },
-  titularSecundario: { fontSize: 27, lineHeight: 28.35, letterSpacing: -1.13, fontWeight: '400' as const, ...conFuente },
-  tituloTarjeta: { fontSize: 15.5, lineHeight: interlinea(15.5), letterSpacing: -0.28, fontWeight: '500' as const, ...conFuente },
-  cuerpo: { fontSize: 14, lineHeight: interlinea(14), fontWeight: '400' as const, ...conFuente },
-  fila: { fontSize: 14.5, lineHeight: interlinea(14.5), letterSpacing: -0.22, fontWeight: '500' as const, ...conFuente },
+  /** H1 · 28/34 · -0,03 em. Titulares de pantalla: «Buscar viajes». */
+  h1: { fontSize: 28, lineHeight: 34, letterSpacing: -0.84, fontWeight: '700' as const, ...conFuente },
+  /** H2 · 20/26 · -0,02 em. Títulos de sección, y **el precio**. */
+  h2: { fontSize: 20, lineHeight: 26, letterSpacing: -0.4, fontWeight: '700' as const, ...conFuente },
+  /** H3 · 18/23 · -0,015 em. Horas: «14:30 → 20:15». */
+  h3: { fontSize: 18, lineHeight: 23, letterSpacing: -0.27, fontWeight: '600' as const, ...conFuente },
+  /** Body · 14/20. */
+  cuerpo: { fontSize: 14, lineHeight: 20, fontWeight: '400' as const, ...conFuente },
+  /** Small · 12/17 · peso 500. Segundas líneas, en `ink500`. */
+  pequeno: { fontSize: 12, lineHeight: 17, fontWeight: '500' as const, ...conFuente },
   /**
-   * EL EPÍGRAFE, LEGIBLE.
-   *
-   * Era 11 px en versalitas con 0,1 em de crenado. El contraste del azul
-   * nunca fue el problema —azul 500 sobre arena da 7,5:1, muy por encima de
-   * lo que exige la norma—: el problema era el TAMAÑO con la caja alta y el
-   * crenado juntos. Once píxeles en mayúsculas separadas se descifran, no se
-   * leen, y el epígrafe dejó de ser una etiqueta suelta para titular
-   * secciones enteras —«RUTA DEL VIAJE», «SALEN POR LA NOCHE»—.
-   *
-   * Doce con 0,07 em y azul 700 (10,9:1). Sigue siendo micro y sigue siendo
-   * el mismo gesto; ahora se lee de un vistazo.
+   * XS · 10/14 · 0,09 em, versalitas. **Sólo metadatos no esenciales**, que es
+   * literalmente como los rotula el sistema: «DESDE · METADATA NO ESENCIAL».
+   * Un epígrafe que titula una sección entera no es metadato: ese usa
+   * `epigrafe`, abajo.
    */
-  epigrafe: {
-    fontSize: 12,
-    fontWeight: '600' as const,
-    letterSpacing: 12 * 0.07,
-    lineHeight: interlinea(12),
+  micro: {
+    fontSize: 10,
+    lineHeight: 14,
+    fontWeight: '500' as const,
+    letterSpacing: 10 * 0.09,
     textTransform: 'uppercase' as const,
     ...conFuente,
   },
-  precio: { fontSize: 31, lineHeight: 27.9, fontWeight: '700' as const, letterSpacing: -1.4, ...conFuente },
-  pastilla: { fontSize: 10.5, lineHeight: interlinea(10.5), fontWeight: '600' as const, ...conFuente },
+
+  /**
+   * EL EPÍGRAFE QUE TITULA UNA SECCIÓN — «RUTA DEL VIAJE», «SALEN POR LA
+   * NOCHE».
+   *
+   * Se queda en el paso Small, 12/17, y no baja al XS de 10. La razón está
+   * medida y sigue valiendo en el sistema nuevo: once píxeles en versalitas
+   * con el crenado abierto se descifran, no se leen, y fue el fallo más
+   * repetido de la app. El sistema v1 reserva el XS para «metadata no
+   * esencial»; estos epígrafes titulan secciones, así que no le corresponden.
+   *
+   * Con `ink600` sobre lienzo da 5,1:1, que pasa AA.
+   */
+  epigrafe: {
+    fontSize: 12,
+    fontWeight: '500' as const,
+    letterSpacing: 12 * 0.09,
+    lineHeight: 17,
+    textTransform: 'uppercase' as const,
+    ...conFuente,
+  },
+
+  /**
+   * EL PRECIO ES UN H2, NO UN CARTEL.
+   *
+   * Era 31 px en peso 700 y en rojo, más grande que el titular de la propia
+   * pantalla. En el sistema v1 el precio se dibuja en H2 —20/26, peso 700— y
+   * **en tinta, no en rojo**: el rojo es la acción, y un precio no se pulsa.
+   */
+  precio: { fontSize: 20, lineHeight: 26, letterSpacing: -0.4, fontWeight: '700' as const, ...conFuente },
+  pastilla: { fontSize: 10, lineHeight: 14, fontWeight: '500' as const, ...conFuente },
+
+  /** Alias del sistema anterior, para que las pantallas sigan compilando. */
+  titular: { fontSize: 28, lineHeight: 34, letterSpacing: -0.84, fontWeight: '700' as const, ...conFuente },
+  titularFuerte: { fontWeight: '700' as const },
+  titularSecundario: { fontSize: 20, lineHeight: 26, letterSpacing: -0.4, fontWeight: '700' as const, ...conFuente },
+  tituloTarjeta: { fontSize: 18, lineHeight: 23, letterSpacing: -0.27, fontWeight: '600' as const, ...conFuente },
+  fila: { fontSize: 14, lineHeight: 20, fontWeight: '400' as const, ...conFuente },
 } as const;
 
 /**

@@ -71,7 +71,7 @@ ${pesos
  */
 html, body { height: 100%; margin: 0; width: 100%; }
 body {
-  background-color: #FAF7F3;
+  background-color: #F5F5F7;
   /* Nada de rebote elástico: la app no es una página. */
   overscroll-behavior: none;
 

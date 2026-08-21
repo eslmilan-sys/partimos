@@ -198,7 +198,7 @@ const estilos = StyleSheet.create({
     padding: 22,
     overflow: 'hidden',
     backgroundColor: color.blanco,
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },

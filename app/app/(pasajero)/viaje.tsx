@@ -433,7 +433,7 @@ const estilos = StyleSheet.create({
     borderTopRightRadius: radio.hoja,
     paddingHorizontal: espacio.gutter,
     paddingTop: 22,
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.14,
     shadowRadius: 40,
     shadowOffset: { width: 0, height: -12 },

@@ -53,7 +53,7 @@ export function Tarjeta({
 const PESO = StyleSheet.create({
   plana: {},
   apoyada: {
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.05,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 4 },
@@ -408,7 +408,7 @@ const estilos = StyleSheet.create({
   },
   segmentoActivo: {
     backgroundColor: color.blanco,
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.1,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },

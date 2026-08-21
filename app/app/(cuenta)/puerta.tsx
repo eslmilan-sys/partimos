@@ -233,7 +233,7 @@ const estilos = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 30,
     gap: 18,
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.18,
     shadowRadius: 48,
     shadowOffset: { width: 0, height: -16 },

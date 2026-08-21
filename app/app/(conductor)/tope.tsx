@@ -284,7 +284,7 @@ const estilos = StyleSheet.create({
     paddingHorizontal: espacio.gutter,
     paddingBottom: 28,
     gap: 9,
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.18,
     shadowRadius: 30,
     shadowOffset: { width: 0, height: -10 },

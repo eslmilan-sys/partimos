@@ -207,7 +207,7 @@ export function CampoRojo({
     >
       <Svg width={ancho} height={altura} style={StyleSheet.absoluteFill}>
         <Defs>
-          {/* linear-gradient(166deg, #DD1D3F 0%, #D21034 44%, #AF0B29 100%) */}
+          {/* linear-gradient(166deg, #E83950 0%, #E1213B 44%, #A6122A 100%) */}
           <LinearGradient id={`bandera-${id}`} x1="0.434" y1="0" x2="0.566" y2="1">
             <Stop offset="0" stopColor={campoRojo.de} />
             <Stop offset="0.44" stopColor={campoRojo.medio} />
@@ -222,8 +222,8 @@ export function CampoRojo({
 
           {/* radial 96% 76% at 2% 100% — la sombra */}
           <RadialGradient id={`sombra-${id}`} cx="0.5" cy="0.5" r="0.5">
-            <Stop offset="0" stopColor="#5E0717" stopOpacity="0.62" />
-            <Stop offset="0.7" stopColor="#5E0717" stopOpacity="0" />
+            <Stop offset="0" stopColor="#8F1024" stopOpacity="0.62" />
+            <Stop offset="0.7" stopColor="#8F1024" stopOpacity="0" />
           </RadialGradient>
         </Defs>
 
@@ -302,7 +302,7 @@ export function Brillo({ ancho = 346, alto = 190 }: { ancho?: number; alto?: num
     <Svg width={ancho} height={alto} style={StyleSheet.absoluteFill}>
       <Defs>
         <RadialGradient id={`brillo-${id}`} cx="0.5" cy="0.5" r="0.5">
-          <Stop offset="0" stopColor="#D21034" stopOpacity="0.30" />
+          <Stop offset="0" stopColor="#E1213B" stopOpacity="0.30" />
           <Stop offset="0.4" stopColor="#E0A83C" stopOpacity="0.24" />
           <Stop offset="0.74" stopColor="#FFFFFF" stopOpacity="0" />
         </RadialGradient>

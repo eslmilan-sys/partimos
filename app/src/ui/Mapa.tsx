@@ -29,7 +29,7 @@ const RECORRIDO = 'M-10 235 C 80 220, 130 150, 230 132';
  * porque es lo único que tiene que verse desde un carro en movimiento.
  */
 const NOCHE = {
-  fondo: '#17151A',
+  fondo: '#17171A',
   calles: 'rgba(255,255,255,.06)',
   ruta: 'rgba(255,255,255,.14)',
   porDelante: 'rgba(255,255,255,.30)',

@@ -575,7 +575,7 @@ const estilos = StyleSheet.create({
   },
   opcionActiva: {
     backgroundColor: color.blanco,
-    shadowColor: '#5E0717',
+    shadowColor: '#8F1024',
     shadowOpacity: 0.18,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
@@ -606,7 +606,7 @@ const estilos = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     borderColor: color.bordeSutil,
-    shadowColor: '#5E0717',
+    shadowColor: '#8F1024',
     shadowOpacity: 0.1,
     shadowRadius: 24,
     shadowOffset: { width: 0, height: 10 },

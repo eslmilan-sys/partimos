@@ -610,7 +610,7 @@ const estilos = StyleSheet.create({
      lo mismo. La pastilla lleva su propia sombra, corta. */
   ladoActivo: {
     backgroundColor: color.blanco,
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.1,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
@@ -842,7 +842,7 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 20,
     overflow: 'hidden',
     backgroundColor: color.blanco,
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },

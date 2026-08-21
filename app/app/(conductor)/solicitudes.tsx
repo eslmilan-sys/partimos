@@ -287,7 +287,7 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
     borderRadius: radio.l,
     padding: 18,
-    shadowColor: '#26232B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },

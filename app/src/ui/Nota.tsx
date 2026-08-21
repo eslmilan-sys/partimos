@@ -117,7 +117,7 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: radio.l,
     backgroundColor: 'rgba(0,39,65,.96)',
-    shadowColor: '#001A2B',
+    shadowColor: '#14141A',
     shadowOpacity: 0.3,
     shadowRadius: 24,
     shadowOffset: { width: 0, height: 10 },
