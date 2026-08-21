@@ -1,86 +1,46 @@
 /**
- * La barra de abajo.
+ * La barra de abajo, tal como la dibuja el v6.
  *
- * **Por qué es oscura.** `diseno/SISTEMA.md` reparte los dos colores de la
- * bandera por oficio: el azul manda en las superficies —«en-têtes, champs
- * héros, **barres**, chrome sombre»— y el rojo manda en la interacción. Una
- * barra blanca con las pestañas en rojo tenía las dos cosas al revés: la
- * superficie no era azul y el rojo se gastaba en cuatro rótulos que están ahí
- * siempre. Ahora la superficie es azul profundo y el rojo aparece **solo donde
- * estás**, que es lo único de la barra que cambia.
+ * **Ya no es una pastilla oscura flotante.** El v6 la asienta de lado a lado:
+ * blanco al 94 % con un borde superior de tinta al 8 %, cinco casillas de
+ * 64 × 52, y debajo la banda del indicador de inicio (34 px con la píldora de
+ * 139 × 5). La pestaña activa se distingue por tres cosas a la vez — icono en
+ * rojo con trazo 2.2, rótulo en `#C11730`, peso 500 contra 400 — y las
+ * inactivas van en el gris de icono `#6C8A93`.
  *
- * **Las tres capas de lo activo**, y ninguna es adorno:
+ * **Publicar es la casilla del centro, levantada.** Un cuadrado de 48 con
+ * radio 17, degradado 160° `#123F4D → #0A2731`, subido 20 px sobre el borde,
+ * con su rótulo debajo como una casilla más. Es la única superficie oscura de
+ * la pantalla, y por eso se ve antes que nada.
  *
- *   · el **remate rojo** de tres píxeles en el borde de arriba dice cuál es,
- *     desde lejos y sin leer;
- *   · el **cono de luz** que cae de él ata el remate con el icono, para que no
- *     se lean como dos cosas sueltas;
- *   · el **halo** detrás del icono lo despega del fondo.
- *
- * Se apoyan las tres en lo mismo y por eso se puede quitar cualquiera sin que
- * la barra deje de funcionar; juntas es lo que le da cara.
- *
- * **El icono activo se queda blanco, no rojo.** Medido: `rojo400` sobre
- * `azul800` da 3,89:1 — suficiente para un dibujo, corto para un rótulo de
- * diez píxeles. El rojo hace de indicador, que es lo que no tiene que leerse
- * letra a letra; el rótulo se queda en blanco, que da 15,4:1.
- *
- * **Publicar está siempre.** Antes solo salía en las pantallas de búsqueda, y
- * ofrecer un viaje es la mitad del producto: si no está en la barra, no
- * existe.
+ * Una casilla puede llevar **insignia**: el círculo rojo con borde blanco y
+ * la cuenta en 10/600 — «Viajes · 2» en el dibujo.
  */
 
 import { type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { color, familia, radio, vidrio } from './tokens';
+import { color, familia, pulsado, sombra, vidrio } from './tokens';
 
-export type Pestana = { valor: string; etiqueta: string; icono: (activo: boolean) => ReactNode };
+export type Pestana = {
+  valor: string;
+  etiqueta: string;
+  icono: (activo: boolean) => ReactNode;
+  /** La cuenta de la insignia roja; nada si es 0 o no viene. */
+  insignia?: number;
+};
 
 type Props = {
   pestanas: Pestana[];
   valor: string;
   alCambiar?: (v: string) => void;
-  /** El círculo rojo de publicar, en medio. */
+  /** El cuadrado oscuro de publicar, en medio, levantado sobre el borde. */
   fab?: { etiqueta: string; icono: ReactNode; activo?: boolean; alPulsar?: () => void };
 };
 
-/** El ancho de una ranura. Cinco caben en 358 —390 menos los dos 16 del marco—. */
-const RANURA = 64;
-const ALTO = 66;
-
-/* --------------------------------------------------------------- El cono */
-
-/**
- * El haz que baja del remate. Un trapecio que se abre y se apaga: arriba mide
- * lo que el remate y llega al 22 %, abajo mide el doble y no queda nada.
- */
-function Cono() {
-  return (
-    <Svg width={RANURA} height={ALTO} style={StyleSheet.absoluteFill} pointerEvents="none">
-      <Defs>
-        <LinearGradient id="haz" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor={color.rojo400} stopOpacity="0.26" />
-          <Stop offset="0.55" stopColor={color.rojo400} stopOpacity="0.09" />
-          <Stop offset="1" stopColor={color.rojo400} stopOpacity="0" />
-        </LinearGradient>
-        <RadialGradient id="halo" cx="50%" cy="42%" r="52%">
-          <Stop offset="0" stopColor={color.rojo400} stopOpacity="0.4" />
-          <Stop offset="0.55" stopColor={color.rojo400} stopOpacity="0.13" />
-          <Stop offset="1" stopColor={color.rojo400} stopOpacity="0" />
-        </RadialGradient>
-      </Defs>
-      <Path
-        d={`M${RANURA / 2 - 15} 0 H${RANURA / 2 + 15} L${RANURA - 4} ${ALTO} H4 Z`}
-        fill="url(#haz)"
-      />
-      <Rect x="0" y="0" width={RANURA} height={ALTO} fill="url(#halo)" />
-    </Svg>
-  );
-}
-
-/* ------------------------------------------------------------- La barra */
+/** El ancho de una casilla y el alto de la fila de casillas, del v6. */
+const CASILLA = 64;
+const ALTO = 52;
 
 export function BarraDePestanas({ pestanas, valor, alCambiar, fab }: Props) {
   const medio = Math.ceil(pestanas.length / 2);
@@ -92,17 +52,18 @@ export function BarraDePestanas({ pestanas, valor, alCambiar, fab }: Props) {
         key={p.valor}
         accessibilityRole="tab"
         accessibilityState={{ selected: activo }}
-        accessibilityLabel={p.etiqueta}
+        accessibilityLabel={p.insignia ? `${p.etiqueta}, ${p.insignia} sin ver` : p.etiqueta}
         onPress={() => alCambiar?.(p.valor)}
-        style={estilos.ranura}
+        style={estilos.casilla}
       >
-        {activo ? (
-          <>
-            <Cono />
-            <View style={estilos.remate} />
-          </>
-        ) : null}
-        <View style={estilos.icono}>{p.icono(activo)}</View>
+        <View style={estilos.icono}>
+          {p.icono(activo)}
+          {p.insignia ? (
+            <View style={estilos.insignia} pointerEvents="none">
+              <Text style={estilos.insigniaTexto}>{p.insignia > 9 ? '9+' : p.insignia}</Text>
+            </View>
+          ) : null}
+        </View>
         <Text style={[estilos.etiqueta, activo && estilos.etiquetaActiva]} numberOfLines={1}>
           {p.etiqueta}
         </Text>
@@ -111,34 +72,40 @@ export function BarraDePestanas({ pestanas, valor, alCambiar, fab }: Props) {
   };
 
   return (
-    <View style={estilos.barra}>
-      {/* El brillo del borde de arriba: una sola línea clara que separa la
-          pastilla del fondo sin dibujarle un marco. */}
-      <View style={estilos.filoSuperior} pointerEvents="none" />
+    <View>
+      <View style={estilos.barra}>
+        {pestanas.slice(0, medio).map(pestana)}
 
-      {pestanas.slice(0, medio).map(pestana)}
+        {fab ? (
+          <Pressable
+            key="fab"
+            accessibilityRole="button"
+            accessibilityLabel={fab.etiqueta}
+            accessibilityState={{ selected: !!fab.activo }}
+            onPress={fab.alPulsar}
+            style={estilos.casillaPublicar}
+          >
+            {({ pressed }) => (
+              <>
+                <View style={[estilos.cuadrado, pressed && pulsado.boton]}>{fab.icono}</View>
+                <Text style={estilos.etiquetaPublicar} numberOfLines={1}>
+                  Publicar
+                </Text>
+              </>
+            )}
+          </Pressable>
+        ) : null}
 
-      {fab ? (
-        <Pressable
-          key="fab"
-          accessibilityRole="button"
-          accessibilityLabel={fab.etiqueta}
-          accessibilityState={{ selected: !!fab.activo }}
-          onPress={fab.alPulsar}
-          style={estilos.ranura}
-        >
-          {fab.activo ? (
-            <>
-              <Cono />
-              <View style={estilos.remate} />
-            </>
-          ) : null}
-          <View style={[estilos.circulo, fab.activo && estilos.circuloActivo]}>{fab.icono}</View>
-          <Text style={[estilos.etiqueta, fab.activo && estilos.etiquetaActiva]}>Publicar</Text>
-        </Pressable>
+        {pestanas.slice(medio).map(pestana)}
+      </View>
+
+      {/* La banda del indicador de inicio: solo tiene sentido en el marco de
+          escritorio; en el teléfono el sistema pone la suya. */}
+      {Platform.OS === 'web' ? (
+        <View style={estilos.bandaIndicador} pointerEvents="none">
+          <View style={estilos.indicador} />
+        </View>
       ) : null}
-
-      {pestanas.slice(medio).map(pestana)}
     </View>
   );
 }
@@ -146,72 +113,96 @@ export function BarraDePestanas({ pestanas, valor, alCambiar, fab }: Props) {
 const estilos = StyleSheet.create({
   barra: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
-    height: ALTO,
-    paddingHorizontal: 4,
-    borderRadius: 26,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(0,39,65,.94)',
-    shadowColor: '#14141A',
-    shadowOpacity: 0.34,
-    shadowRadius: 28,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 10,
+    paddingTop: 8,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(255,255,255,.94)',
+    borderTopWidth: 1,
+    borderTopColor: color.bordeSutil,
     ...(vidrio ?? {}),
   },
-  filoSuperior: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,.14)',
-  },
 
-  ranura: {
-    width: RANURA,
+  casilla: {
+    width: CASILLA,
     height: ALTO,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 5,
-    overflow: 'hidden',
   },
-  /* Tres píxeles pegados al filo, del ancho de un pulgar. Es la única cosa
-     roja de la barra y por eso se ve antes que nada. */
-  remate: {
-    position: 'absolute',
-    top: 0,
-    width: 30,
-    height: 3,
-    borderBottomLeftRadius: 2,
-    borderBottomRightRadius: 2,
-    backgroundColor: color.rojo400,
-  },
-  icono: { width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
+  icono: { width: 23, height: 23, alignItems: 'center', justifyContent: 'center' },
+
   etiqueta: {
     fontSize: 10,
     lineHeight: 13,
-    fontWeight: '500',
-    letterSpacing: -0.05,
-    color: 'rgba(255,255,255,.62)',
+    fontWeight: '400',
+    color: color.inkIcono,
     fontFamily: familia,
   },
-  etiquetaActiva: { fontWeight: '700', color: '#fff' },
+  etiquetaActiva: { fontWeight: '500', color: color.rojo700 },
 
-  circulo: {
-    width: 34,
-    height: 34,
-    marginTop: -4,
-    borderRadius: radio.pastilla,
+  /** El círculo rojo con aro blanco, arriba a la derecha del icono. */
+  insignia: {
+    position: 'absolute',
+    top: -7,
+    right: -9,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 4,
+    borderRadius: 8,
     backgroundColor: color.rojo500,
+    borderWidth: 2,
+    borderColor: color.blanco,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: 'rgb(210,16,52)',
-    shadowOpacity: 0.55,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 8,
   },
-  circuloActivo: { backgroundColor: color.rojo400 },
+  insigniaTexto: {
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '600',
+    color: color.blanco,
+    fontFamily: familia,
+  },
+
+  casillaPublicar: {
+    width: CASILLA,
+    height: ALTO,
+    alignItems: 'center',
+    gap: 4,
+  },
+  /** 48 × 48, radio 17, degradado de tinta, subido 20 sobre el borde. */
+  cuadrado: {
+    width: 48,
+    height: 48,
+    marginTop: -20,
+    borderRadius: 17,
+    // RN no degrada un fondo sin SVG; el paso claro del degradado 160° queda
+    // como color base y la profundidad la pone la sombra.
+    backgroundColor: color.ink900,
+    borderWidth: 1,
+    borderColor: 'rgba(10,39,49,.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...sombra.publicar,
+  },
+  etiquetaPublicar: {
+    fontSize: 10,
+    lineHeight: 13,
+    fontWeight: '500',
+    color: color.ink700,
+    fontFamily: familia,
+  },
+
+  bandaIndicador: {
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,.94)',
+  },
+  indicador: {
+    width: 139,
+    height: 5,
+    borderRadius: 100,
+    backgroundColor: 'rgba(10,39,49,.28)',
+  },
 });

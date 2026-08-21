@@ -28,7 +28,7 @@ import { color } from './tokens';
  */
 export const trazo = (tamano: number) => (1.6 * 24) / tamano;
 
-type Props = { tamano?: number; tinta?: string };
+type Props = { tamano?: number; tinta?: string; grueso?: number };
 
 /** Sobre el lienzo claro del v6 la flecha es tinta; nadie vuelve sobre rojo. */
 export function Atras({ tamano = 23, tinta = color.ink900 }: Props) {
@@ -45,19 +45,25 @@ export function Atras({ tamano = 23, tinta = color.ink900 }: Props) {
   );
 }
 
-export function Carro({ tamano = 19, tinta = color.ink600 }: Props) {
+/** El carro del v6: cabina, chasis y las dos ruedas rellenas. */
+export function Carro({ tamano = 19, tinta = color.ink600, grueso }: Props) {
+  const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path
-        d="M3 13.5l1.6-4.4A2.4 2.4 0 0 1 6.9 7.5h10.2a2.4 2.4 0 0 1 2.3 1.6l1.6 4.4"
+        d="M9 7.2h6a1.4 1.4 0 0 1 1.2.7l1.9 3.3H5.9l1.9-3.3A1.4 1.4 0 0 1 9 7.2Z"
         stroke={tinta}
-        strokeWidth={trazo(tamano)}
-        strokeLinecap="round"
+        strokeWidth={t}
         strokeLinejoin="round"
       />
-      <Path d="M3 13.5h18v4.2H3z" stroke={tinta} strokeWidth={trazo(tamano)} strokeLinejoin="round" />
-      <Circle cx={7} cy={17.7} r={1.4} stroke={tinta} strokeWidth={trazo(tamano)} />
-      <Circle cx={17} cy={17.7} r={1.4} stroke={tinta} strokeWidth={trazo(tamano)} />
+      <Path
+        d="M4.7 11.2h14.6a1.3 1.3 0 0 1 1.3 1.3v1.6a1.3 1.3 0 0 1-1.3 1.3H4.7a1.3 1.3 0 0 1-1.3-1.3v-1.6a1.3 1.3 0 0 1 1.3-1.3Z"
+        stroke={tinta}
+        strokeWidth={t}
+        strokeLinejoin="round"
+      />
+      <Circle cx={7.9} cy={15.4} r={1.3} fill={tinta} />
+      <Circle cx={16.1} cy={15.4} r={1.3} fill={tinta} />
     </Svg>
   );
 }
@@ -184,24 +190,12 @@ export function Escudo({ tamano = 18, tinta = color.azul500 }: Props) {
  */
 type PropsPestana = Props & { lleno?: boolean };
 
-export function Lupa({ tamano = 21, tinta = color.ink700, lleno }: PropsPestana) {
+export function Lupa({ tamano = 21, tinta = color.ink700, grueso, lleno }: PropsPestana) {
+  const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
-      <Circle
-        cx={11}
-        cy={11}
-        r={8}
-        fill={lleno ? tinta : 'none'}
-        stroke={tinta}
-        strokeWidth={trazo(tamano)}
-      />
-      <Path
-        d="M21 21l-4.3-4.3"
-        stroke={tinta}
-        strokeWidth={trazo(tamano)}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <Circle cx={11} cy={11} r={6.4} fill={lleno ? tinta : 'none'} stroke={tinta} strokeWidth={t} />
+      <Path d="m15.9 15.9 4.3 4.3" stroke={tinta} strokeWidth={t} strokeLinecap="round" />
     </Svg>
   );
 }
@@ -236,39 +230,33 @@ export function Boleto({ tamano = 21, tinta = color.ink700, lleno }: PropsPestan
   );
 }
 
-export function Chat({ tamano = 21, tinta = color.ink700, lleno }: PropsPestana) {
+/** El globo de diálogo del v6 — la burbuja redonda con la cola a la izquierda. */
+export function Chat({ tamano = 21, tinta = color.ink700, grueso, lleno }: PropsPestana) {
+  const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path
-        d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9.5L5 19.5V16a2 2 0 0 1-1-1.7z"
+        d="M12 4.8c4.2 0 7.6 2.9 7.6 6.5s-3.4 6.5-7.6 6.5c-.9 0-1.7-.1-2.5-.4l-4.1 1.6 1.2-3.4a6.2 6.2 0 0 1-1.8-4.3c0-3.6 3.4-6.5 7.2-6.5Z"
         fill={lleno ? tinta : 'none'}
         stroke={tinta}
-        strokeWidth={trazo(tamano)}
-        strokeLinecap="round"
+        strokeWidth={t}
         strokeLinejoin="round"
       />
     </Svg>
   );
 }
 
-export function Persona({ tamano = 21, tinta = color.ink700, lleno }: PropsPestana) {
+export function Persona({ tamano = 21, tinta = color.ink700, grueso, lleno }: PropsPestana) {
+  const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
-      <Circle
-        cx={12}
-        cy={8}
-        r={4}
-        fill={lleno ? tinta : 'none'}
-        stroke={tinta}
-        strokeWidth={trazo(tamano)}
-      />
+      <Circle cx={12} cy={8.4} r={3.8} fill={lleno ? tinta : 'none'} stroke={tinta} strokeWidth={t} />
       <Path
-        d="M5 21a7 7 0 0 1 14 0"
-        fill={lleno ? tinta : 'none'}
+        d="M4.8 19.6c1.2-3.7 3.9-5.6 7.2-5.6s6 1.9 7.2 5.6"
+        fill="none"
         stroke={tinta}
-        strokeWidth={trazo(tamano)}
+        strokeWidth={t}
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </Svg>
   );

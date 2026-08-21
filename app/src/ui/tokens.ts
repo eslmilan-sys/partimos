@@ -48,6 +48,14 @@ export const color = {
   ink400: '#93A8AE',
   /** Ink 6 · guiones, chevrones, raíl deshabilitado. Nunca para leer. */
   ink300: '#B0C1C6',
+  /**
+   * Los dos grises DE ICONO del dibujo v6, que la tabla de color no lista
+   * pero el archivo usa en cada pantalla: `#6C8A93` para iconos en reposo
+   * (pestañas inactivas, aro del raíl, campana del agotado) y `#3E5D67`
+   * para los iconos de cabecera (campana, lápiz).
+   */
+  inkIcono: '#6C8A93',
+  inkIconoFuerte: '#3E5D67',
   ink200: '#D5E2E5',
   ink100: '#EAF1F2',
 

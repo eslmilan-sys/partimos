@@ -7,7 +7,7 @@
 import { type ReactNode, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View, type ViewStyle } from 'react-native';
 
-import { familia, color, interlinea, radio, texto } from './tokens';
+import { familia, color, interlinea, radio, sombra, texto } from './tokens';
 
 /* ---------------------------------------------------------------- Stepper */
 
@@ -164,9 +164,13 @@ type BotonProps = {
   ancho?: boolean;
 };
 
-const TAMANOS: Record<Tamano, { height: number; paddingHorizontal: number; fontSize: number }> = {
-  md: { height: 52, paddingHorizontal: 26, fontSize: 15.5 },
-  lg: { height: 58, paddingHorizontal: 32, fontSize: 17 },
+/**
+ * Las dos alturas del v6: 48 el primario dentro de una tarjeta (radio 16),
+ * 54 el botón a todo lo ancho (radio 18). Rótulo 15/600 en las dos.
+ */
+const TAMANOS: Record<Tamano, { height: number; paddingHorizontal: number; fontSize: number; radio: number }> = {
+  md: { height: 48, paddingHorizontal: 20, fontSize: 15, radio: 16 },
+  lg: { height: 54, paddingHorizontal: 24, fontSize: 15, radio: 18 },
 };
 
 export function Boton({
@@ -179,27 +183,28 @@ export function Boton({
 }: BotonProps) {
   const medida = TAMANOS[tamano];
   const paleta = {
+    /** El CTA del v6: rojo pleno, pulsado a `#A6122A`, sombra del acento. */
     rojo: { fondo: color.rojo500, pulsado: color.rojo600, tinta: color.blanco, borde: 'transparent' },
-    azul: { fondo: color.azul500, pulsado: color.azul600, tinta: color.blanco, borde: 'transparent' },
+    /** La superficie oscura de tinta — el chip Filtros, el Publicar. */
+    azul: { fondo: color.ink900, pulsado: color.ink800, tinta: color.blanco, borde: 'transparent' },
     contorno: {
-      fondo: 'transparent',
-      pulsado: color.sand200,
+      fondo: color.blanco,
+      pulsado: color.lavadoChip,
       tinta: color.ink900,
-      borde: color.ink900,
+      borde: color.bordePorDefecto,
     },
     texto: {
       fondo: 'transparent',
-      pulsado: color.sand200,
-      tinta: color.ink600,
+      pulsado: color.lavadoChip,
+      tinta: color.rojo700,
       borde: 'transparent',
     },
-    // Sobre el campo rojo la acción no puede ser roja: ahí el blanco es lo que
-    // se toca para seguir adelante.
+    /** El secundario del v6: blanco con borde de pelo, tinta primaria. */
     blanco: {
       fondo: color.blanco,
-      pulsado: color.sand200,
+      pulsado: color.lavadoChip,
       tinta: color.ink900,
-      borde: 'transparent',
+      borde: color.bordePorDefecto,
     },
   }[tono];
 
@@ -212,11 +217,14 @@ export function Boton({
         estilos.boton,
         {
           height: medida.height,
+          borderRadius: medida.radio,
           paddingHorizontal: medida.paddingHorizontal,
           backgroundColor: pressed ? paleta.pulsado : paleta.fondo,
           borderColor: paleta.borde,
           opacity: desactivado ? 0.5 : 1,
         },
+        tono === 'rojo' && !desactivado ? sombra.cta : null,
+        pressed && { transform: [{ scale: 0.97 }] },
         ancho && { flex: 1 },
       ]}
     >
@@ -277,20 +285,21 @@ export function Campo({ valor, alEscribir, marcador, ayuda, etiquetaAccesible }:
 
 /* ---------------------------------------------------------------- Avatar */
 
-/** Un tono por persona, estable por el nombre, para que no cambie de pantalla en pantalla. */
+/**
+ * EN EL v6 EL AVATAR ES UNO SOLO: claro, con borde de pelo y las iniciales
+ * en Ink 2 — `linear-gradient(160deg,#EAF1F2,#D5E2E5)` en el dibujo, aquí el
+ * extremo claro con el borde de tinta al 10 %. Los tonos por persona del
+ * sistema anterior se conservan como opción explícita, pero nadie los
+ * reparte ya por defecto: en una lista de conductores, el que destaca es el
+ * verificado, no el que le tocó el color más vivo.
+ */
 const TONOS_AVATAR = {
-  azul: { fondo: color.azul100, tinta: color.azul700 },
+  claro: { fondo: color.ink100, tinta: color.ink700 },
+  azul: { fondo: color.ink100, tinta: color.ink700 },
   rojo: { fondo: color.rojo100, tinta: color.rojo700 },
-  arena: { fondo: color.arena100, tinta: '#8A5A24' },
-  arena2: { fondo: color.sand200, tinta: color.ink700 },
+  arena: { fondo: color.ink100, tinta: color.ink700 },
+  arena2: { fondo: color.ink100, tinta: color.ink700 },
 } as const;
-
-function tonoDe(nombre: string): keyof typeof TONOS_AVATAR {
-  const claves = ['azul', 'arena', 'arena2'] as const;
-  let n = 0;
-  for (let i = 0; i < nombre.length; i++) n = (n + nombre.charCodeAt(i)) % 997;
-  return claves[n % claves.length];
-}
 
 export function Avatar({
   nombre,
@@ -301,7 +310,7 @@ export function Avatar({
   tono?: keyof typeof TONOS_AVATAR;
   tamano?: number;
 }) {
-  const paleta = TONOS_AVATAR[tono ?? tonoDe(nombre)];
+  const paleta = TONOS_AVATAR[tono ?? 'claro'];
   const iniciales = nombre
     .split(' ')
     .filter(Boolean)
@@ -420,7 +429,6 @@ const estilos = StyleSheet.create({
   pastilla: { borderRadius: radio.pastilla },
 
   boton: {
-    borderRadius: radio.pastilla,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -428,8 +436,11 @@ const estilos = StyleSheet.create({
   },
   botonTexto: { fontWeight: '600', fontFamily: familia },
 
+  /** Círculo, con borde de pelo: el avatar del v6 nunca es un cuadrado. */
   avatar: {
-    borderRadius: radio.cuadrado,
+    borderRadius: radio.pastilla,
+    borderWidth: 1,
+    borderColor: 'rgba(10,39,49,.10)',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',

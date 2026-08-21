@@ -1,18 +1,32 @@
 /**
- * La tarjeta de un viaje en los resultados (`1b`, `3b`, `3c`).
+ * La tarjeta de un viaje — la anatomía de la sección 08 del v6, sin
+ * aproximaciones.
  *
- * Enseña todo antes de pedir cuenta: hora, duración, aporte, puestos, dónde
- * arranca y dónde termina, el equipaje en una de sus dos cadenas, y quién
- * maneja. La verificación de cédula no se enseña como distintivo: todos los
- * conductores la tienen.
+ * Tres columnas — `auto · minmax(48,1fr) · auto`, hueco 8 — y dos invariantes
+ * del propio archivo dentro de ellas:
+ *
+ * - **La dirección se codifica dos veces, siempre**: el par de cejas
+ *   SALE / LLEGA y el raíl que corre de aro hueco a punta de flecha roja.
+ *   Un separador neutro entre dos nombres de lugar no es aceptable nunca.
+ * - **Cada lugar va debajo de SU hora**, jamás en una línea compartida con
+ *   el otro extremo.
+ * - **Una llegada pasada la medianoche lleva «+1 día». Sin excepciones.**
+ *
+ * Debajo del divisor, la fila del conductor: avatar de 34 con la marca de
+ * verificado encima (aquí todos los conductores la tienen — sin cédula
+ * verificada no se publica), nombre 13/500 sobre calificación 11/400, y el
+ * aporte a la derecha — «B/» en 12/500 gris de unidad y la cifra en 22/600
+ * tinta, sobre la misma línea de base. Los cupos van en acento profundo
+ * `#B01128` cuando quedan 1–2, y en gris de icono si no: nunca una pastilla
+ * de color en una tarjeta normal.
  */
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
-import { Avatar, Insignia, Pastilla } from './controles';
-import { formatearDineroRedondo, tabular } from './dinero';
-import { Estrella, Maleta, Mascota, SinHumo } from './iconos';
-import { familia, color, radio } from './tokens';
+import { Avatar } from './controles';
+import { cifraRedonda, formatearDineroRedondo, tabular } from './dinero';
+import { familia, color, pulsado, radio } from './tokens';
 
 export type ViajeEnTarjeta = {
   id: string;
@@ -24,12 +38,40 @@ export type ViajeEnTarjeta = {
   destino: string;
   llegada: string;
   equipaje: 'Acepta maletas' | 'Solo mochila';
-  /** Las dos condiciones del carro: solo se dicen cuando cambian algo. */
   aceptaMascotas: boolean;
   sePuedeFumar: boolean;
   conductor: { nombre: string; calificacion: number | null; carro: string };
   canal: string;
+  /** «directo», «1 parada»… Si no viene, la fila del raíl lo omite. */
+  paradas?: string;
+  /** Cuántos viajes lleva hechos, para la línea de meta del conductor. */
+  viajesHechos?: number;
 };
+
+/** La punta de flecha roja: «hacia», el mismo dibujo en todas partes. */
+export function PuntaDeFlecha({ tamano = 9, tinta = color.rojo500 }: { tamano?: number; tinta?: string }) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 10 10" fill="none">
+      <Path d="M1 1.4 7.4 5 1 8.6V1.4Z" fill={tinta} />
+    </Svg>
+  );
+}
+
+/** El aro hueco del origen: ø7 con borde de 2. */
+export function AroDeOrigen({ tinta = color.inkIcono }: { tinta?: string }) {
+  return <View style={[estilos.aro, { borderColor: tinta }]} />;
+}
+
+/**
+ * ¿La llegada cruza la medianoche? Se deduce de las dos horas «HH:MM»: si la
+ * llegada es menor que la salida, el viaje terminó al día siguiente.
+ */
+function cruzaMedianoche(salida: string, llegada: string): boolean {
+  const [hs, ms] = salida.split(':').map(Number);
+  const [hl, ml] = llegada.split(':').map(Number);
+  if ([hs, ms, hl, ml].some((n) => Number.isNaN(n))) return false;
+  return hl * 60 + ml < hs * 60 + ms;
+}
 
 export function TarjetaDeViaje({
   viaje,
@@ -37,21 +79,20 @@ export function TarjetaDeViaje({
   alPulsar,
 }: {
   viaje: ViajeEnTarjeta;
-  /** «Más temprano», y solo en una tarjeta: dos marcas no marcan nada. */
+  /** «Mejor opción», y solo en una tarjeta: dos marcas no marcan nada. */
   marca?: string;
   alPulsar?: () => void;
 }) {
-  // Un solo puesto libre se marca en rojo: es lo que queda por decidir rápido.
-  const ultimo = viaje.puestosLibres === 1;
+  // 1–2 cupos van en acento profundo: es lo que queda por decidir rápido.
+  const pocos = viaje.puestosLibres <= 2;
+  const masUnDia = cruzaMedianoche(viaje.salida, viaje.llegada);
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Salida ${viaje.salida}, ${formatearDineroRedondo(viaje.aporteCentavos)} por puesto, con ${viaje.conductor.nombre}`}
+      accessibilityLabel={`Sale ${viaje.salida} de ${viaje.origen}, llega ${viaje.llegada} a ${viaje.destino}, ${formatearDineroRedondo(viaje.aporteCentavos)} por puesto, con ${viaje.conductor.nombre}`}
       onPress={alPulsar}
-      /* Se hunde un poco al tocarla: sin respuesta al dedo, una tarjeta
-         entera que navega no parece que se pueda tocar. */
-      style={({ pressed }) => [estilos.tarjeta, pressed && estilos.pulsada]}
+      style={({ pressed }) => [estilos.tarjeta, pressed && pulsado.tarjeta]}
     >
       {marca ? (
         <View style={estilos.marca}>
@@ -59,71 +100,81 @@ export function TarjetaDeViaje({
         </View>
       ) : null}
 
-      <View style={estilos.filaSuperior}>
-        <Text style={estilos.cuando}>{`${viaje.salida} · ${viaje.duracion}`}</Text>
-        <View style={estilos.filaPrecio}>
-          <Text style={estilos.precio}>
-            {String(Math.round(viaje.aporteCentavos / 100))}
-            <Text style={estilos.precioSimbolo}> $</Text>
+      {/* Las tres columnas: SALE · raíl · LLEGA */}
+      <View style={estilos.rejilla}>
+        <View style={estilos.columna}>
+          <Text style={estilos.ceja}>Sale</Text>
+          <Text style={estilos.hora}>{viaje.salida}</Text>
+          <Text style={estilos.lugar} numberOfLines={1}>
+            {viaje.origen}
           </Text>
-          <Pastilla
-            fondo={ultimo ? color.rojo100 : color.azul100}
-            tinta={ultimo ? color.rojo700 : color.azul700}
-            estilo={{ marginTop: 2 }}
-          >
-            {viaje.puestosLibres === 1 ? '1 puesto' : `${viaje.puestosLibres} puestos`}
-          </Pastilla>
         </View>
-      </View>
 
-      <View style={estilos.recorrido}>
-        <View style={estilos.parada}>
-          <View style={estilos.puntoLleno} />
-          <Text style={estilos.paradaTexto}>{viaje.origen}</Text>
-        </View>
-        <View style={estilos.parada}>
-          <View style={estilos.puntoVacio} />
-          <Text style={estilos.paradaTexto}>{viaje.destino}</Text>
-          <Text style={estilos.llegada}>{viaje.llegada}</Text>
-        </View>
-      </View>
-
-      {/* Las condiciones del carro. La mascota solo se nombra cuando sí van
-          —es lo raro y lo que alguien busca—; el humo, cuando sí se fuma, por
-          la misma razón: lo normal no hace falta decirlo en una lista. */}
-      <View style={estilos.filaEquipaje}>
-        <Maleta tamano={13} />
-        <Text style={estilos.equipaje}>{viaje.equipaje}</Text>
-        {viaje.aceptaMascotas ? (
-          <>
-            <Mascota tamano={13} />
-            <Text style={estilos.equipaje}>Mascotas</Text>
-          </>
-        ) : null}
-        {viaje.sePuedeFumar ? (
-          <>
-            <SinHumo tamano={13} />
-            <Text style={estilos.equipaje}>Se fuma</Text>
-          </>
-        ) : null}
-      </View>
-
-      <View style={estilos.separador} />
-
-      <View style={estilos.filaConductor}>
-        <Avatar nombre={viaje.conductor.nombre} tamano={36} tono="rojo" />
-        <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={estilos.nombre}>{viaje.conductor.nombre}</Text>
-          <View style={estilos.filaCalificacion}>
-            <Estrella />
-            <Text style={estilos.calificacion}>
-              {`${viaje.conductor.calificacion?.toFixed(1) ?? 'Nuevo'} · ${viaje.conductor.carro}`}
-            </Text>
+        <View style={estilos.columnaRail}>
+          <View style={estilos.rail}>
+            <AroDeOrigen />
+            <View style={estilos.railLinea} />
+            <PuntaDeFlecha />
           </View>
+          <Text style={estilos.duracion}>{viaje.duracion}</Text>
+          {viaje.paradas ? <Text style={estilos.paradas}>{viaje.paradas}</Text> : null}
         </View>
-        <Insignia fondo={color.rojo50} tinta={color.rojo700}>
-          {viaje.canal}
-        </Insignia>
+
+        <View style={[estilos.columna, estilos.columnaDerecha]}>
+          <Text style={[estilos.ceja, estilos.cejaLlega]}>Llega</Text>
+          <Text style={estilos.hora}>{viaje.llegada}</Text>
+          {masUnDia ? (
+            <View style={estilos.masUnDia}>
+              <Text style={estilos.masUnDiaTexto}>+1 día</Text>
+            </View>
+          ) : null}
+          <Text style={estilos.lugar} numberOfLines={1}>
+            {viaje.destino}
+          </Text>
+        </View>
+      </View>
+
+      <View style={estilos.divisor} />
+
+      {/* La fila del conductor y el aporte */}
+      <View style={estilos.filaConductor}>
+        <View style={estilos.avatarConMarca}>
+          <Avatar nombre={viaje.conductor.nombre} tamano={34} />
+          <Svg width={14} height={14} viewBox="0 0 16 16" fill="none" style={estilos.verificado}>
+            <Path
+              d="M8 14.6a6.6 6.6 0 1 0 0-13.2 6.6 6.6 0 0 0 0 13.2Z"
+              fill={color.rojo500}
+              stroke={color.blanco}
+              strokeWidth={2.2}
+            />
+            <Path
+              d="m5.2 8.2 2 2 3.6-4"
+              stroke="#fff"
+              strokeWidth={1.9}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        </View>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={estilos.nombre} numberOfLines={1}>
+            {viaje.conductor.nombre}
+          </Text>
+          <Text style={estilos.meta} numberOfLines={1}>
+            {`★ ${viaje.conductor.calificacion?.toFixed(1) ?? 'Nuevo'}${
+              viaje.viajesHechos ? ` · ${viaje.viajesHechos} viajes` : ` · ${viaje.conductor.carro}`
+            }`}
+          </Text>
+        </View>
+        <View style={estilos.pilaPrecio}>
+          <View style={estilos.filaPrecio}>
+            <Text style={estilos.precioUnidad}>B/</Text>
+            <Text style={estilos.precio}>{cifraRedonda(viaje.aporteCentavos)}</Text>
+          </View>
+          <Text style={[estilos.cupos, { color: pocos ? color.rojo800 : color.inkIcono }]}>
+            {viaje.puestosLibres === 1 ? '1 cupo' : `${viaje.puestosLibres} cupos`}
+          </Text>
+        </View>
       </View>
     </Pressable>
   );
@@ -135,68 +186,123 @@ const estilos = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.bordeSutil,
     borderRadius: radio.l,
-    padding: 14,
+    padding: 16,
+    gap: 12,
   },
-  /** En rojo y en versalitas, como un sello: es la única de la lista. */
+
+  /** «Mejor opción»: chip teñido del acento, texto en acento profundo. */
   marca: {
     alignSelf: 'flex-start',
-    marginBottom: 8,
-    paddingHorizontal: 9,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.rojo50,
+    borderRadius: 9,
+    backgroundColor: 'rgba(225,33,59,.10)',
   },
   marcaTexto: {
-    fontSize: 10.5,
+    fontSize: 10,
     lineHeight: 14,
-    fontWeight: '700',
-    letterSpacing: 1.05,
+    fontWeight: '600',
+    letterSpacing: 1.1,
     textTransform: 'uppercase',
-    color: color.rojo700,
+    color: color.rojo800,
     fontFamily: familia,
   },
-  pulsada: { backgroundColor: color.sand100, borderColor: color.bordePorDefecto },
-  filaSuperior: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 },
-  cuando: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
-  filaPrecio: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
-  /* 31 y no 26: el aporte es lo que decide, y en una lista de cuatro
-     tarjetas era del mismo tamaño que la hora. */
-  precio: {
-    fontSize: 27,
-    fontWeight: '700',
-    letterSpacing: -1.08,
-    lineHeight: 30,
+
+  rejilla: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  columna: { gap: 1 },
+  columnaDerecha: { alignItems: 'flex-end' },
+  columnaRail: {
+    flex: 1,
+    minWidth: 48,
+    alignItems: 'center',
+    gap: 3,
+    /* 21 para que el raíl se centre sobre el glifo de la hora. */
+    paddingTop: 21,
+  },
+
+  ceja: {
+    fontSize: 10,
+    lineHeight: 13,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: color.ink600,
+    fontFamily: familia,
+  },
+  /** LLEGA va en el acento de texto: la dirección se marca dos veces. */
+  cejaLlega: { color: color.rojo700 },
+  hora: {
+    fontSize: 19,
+    lineHeight: 23,
+    fontWeight: '600',
+    letterSpacing: -0.57,
     color: color.ink900,
     fontFamily: familia,
     ...tabular,
   },
-  /* El símbolo comparte la caja de línea de la cifra.
-     Con una propia —16 contra 29,5— el navegador lo centraba en su caja y no
-     en la base de la cifra: el `$` caía tres píxeles por debajo del número y
-     el precio se leía roto. Misma `lineHeight`, mismo apoyo. */
-  precioSimbolo: { fontSize: 15.5, lineHeight: 30, fontWeight: '600', color: color.ink600 },
-
-  recorrido: { gap: 6, marginTop: 9 },
-  parada: { flexDirection: 'row', alignItems: 'center', gap: 11 },
-  puntoLleno: { width: 9, height: 9, borderRadius: radio.pastilla, backgroundColor: color.azul700 },
-  puntoVacio: {
-    width: 9,
-    height: 9,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
-    borderWidth: 1.5,
-    borderColor: color.bordePorDefecto,
+  lugar: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '500',
+    letterSpacing: -0.12,
+    color: color.ink700,
+    fontFamily: familia,
   },
-  paradaTexto: { fontSize: 15.5, lineHeight: 22.47, fontWeight: '500', letterSpacing: -0.28, color: color.ink900, fontFamily: familia },
-  llegada: { marginLeft: 'auto', fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
 
-  filaEquipaje: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 7, marginTop: 8 },
-  equipaje: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },
+  rail: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 3 },
+  aro: { width: 7, height: 7, borderRadius: 4, borderWidth: 2, borderColor: color.inkIcono },
+  railLinea: {
+    flex: 1,
+    height: 0,
+    borderBottomWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(10,39,49,.22)',
+  },
+  duracion: { fontSize: 10, lineHeight: 13, fontWeight: '500', color: color.ink600, fontFamily: familia, ...tabular },
+  paradas: { fontSize: 10, lineHeight: 13, fontWeight: '400', color: color.ink400, fontFamily: familia },
 
-  separador: { height: 1, backgroundColor: color.bordeSutil, marginTop: 11, marginBottom: 10 },
+  masUnDia: {
+    marginTop: 2,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 7,
+    backgroundColor: color.lavado,
+  },
+  masUnDiaTexto: {
+    fontSize: 10,
+    lineHeight: 13,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+    color: color.ink500,
+    fontFamily: familia,
+  },
 
-  filaConductor: { flexDirection: 'row', alignItems: 'center', gap: 11 },
-  nombre: { fontSize: 14, lineHeight: 21.02, fontWeight: '500', letterSpacing: -0.22, color: color.ink900, fontFamily: familia },
-  filaCalificacion: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 1 },
-  calificacion: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  divisor: { height: 1, backgroundColor: color.divisor },
+
+  filaConductor: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  avatarConMarca: { position: 'relative' },
+  verificado: { position: 'absolute', right: -3, bottom: -3 },
+  nombre: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    letterSpacing: -0.13,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  meta: { fontSize: 11, lineHeight: 15, fontWeight: '400', color: color.ink600, fontFamily: familia, ...tabular },
+
+  pilaPrecio: { alignItems: 'flex-end', gap: 2 },
+  filaPrecio: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
+  precioUnidad: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink600, fontFamily: familia },
+  precio: {
+    fontSize: 22,
+    lineHeight: 24,
+    fontWeight: '600',
+    letterSpacing: -0.77,
+    color: color.ink900,
+    fontFamily: familia,
+    ...tabular,
+  },
+  cupos: { fontSize: 11, lineHeight: 15, fontWeight: '500', fontFamily: familia },
 });
