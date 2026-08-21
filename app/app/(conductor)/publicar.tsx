@@ -34,7 +34,7 @@ import { Boton, Epigrafe, Interruptor, Pastilla, Stepper } from '@/ui/controles'
 import { formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, hora, mas } from '@/ui/fechas';
 import { Atras, Avanza, Carro, Cerrar, Escudo, Mas } from '@/ui/iconos';
-import { familia, color, espacio, radio, texto } from '@/ui/tokens';
+import { familia, color, espacio, radio, texto, zonaDeToque } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
@@ -222,7 +222,21 @@ export default function Publicar() {
               <Text style={tabular}>{datos.placa}</Text>
               <Text style={estilos.carroApagado}>{` · ${datos.puestosMaximos} puestos`}</Text>
             </Text>
-            <Text style={estilos.cambiar}>Cambiar</Text>
+            {/**
+             * «Cambiar» era un `Text` suelto: no era pulsable en absoluto, ni
+             * con el dedo ni con lector de pantalla. Es uno de los tres
+             * controles muertos que apunta `app/README.md`, y a la vez el caso
+             * exacto de la corrección 5 del turno 14 — una acción de texto sin
+             * área táctil. Ahora es un control de verdad, con sus 44 px.
+             */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cambiar de carro"
+              onPress={() => router.push('/(conductor)/carro')}
+              style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
+            >
+              <Text style={estilos.cambiar}>Cambiar</Text>
+            </Pressable>
           </View>
 
           <View style={{ marginTop: 12 }}>
@@ -514,7 +528,8 @@ const estilos = StyleSheet.create({
   },
   textoCarro: { flex: 1, ...texto.fila, color: color.ink900 },
   carroApagado: { fontWeight: '400', color: color.ink500, fontFamily: familia },
-  cambiar: { fontSize: 12.5, lineHeight: 18.12, fontWeight: '600', color: color.azul700, fontFamily: familia },
+  /** Small 12/17 en el acento de texto: en el v1 lo que actúa es rojo. */
+  cambiar: { fontSize: 12, lineHeight: 17, fontWeight: '500', color: color.rojo700, fontFamily: familia },
 
   recorrido: { marginTop: 10, position: 'relative' },
   lineaRecorrido: {

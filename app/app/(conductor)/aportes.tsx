@@ -303,10 +303,10 @@ const estilos = StyleSheet.create({
   },
   cadaCuando: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
   cambiar: {
-    fontSize: 13.5,
-    lineHeight: 18.85,
-    fontWeight: '600',
-    color: color.azul700,
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '500',
+    color: color.rojo700,
     fontFamily: familia,
   },
 });

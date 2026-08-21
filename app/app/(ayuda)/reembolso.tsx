@@ -382,10 +382,10 @@ const estilos = StyleSheet.create({
      queda en 4,43:1. */
   plazo: { fontWeight: '400', color: color.ink700 },
   cambiar: {
-    fontSize: 12.5,
-    lineHeight: interlinea(12.5),
-    fontWeight: '600',
-    color: color.azul700,
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '500',
+    color: color.rojo700,
     fontFamily: familia,
   },
 

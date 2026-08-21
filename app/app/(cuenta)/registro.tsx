@@ -400,7 +400,7 @@ const estilos = StyleSheet.create({
   error: { marginTop: 12, fontSize: 12.5, lineHeight: 18.125, color: color.rojo700, fontFamily: familia },
 
   filaReenvio: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 16 },
-  enlace: { fontSize: 13.5, lineHeight: 19.57, fontWeight: '600', color: color.azul700, fontFamily: familia },
+  enlace: { fontSize: 12, lineHeight: 17, fontWeight: '500', color: color.rojo700, fontFamily: familia },
   reenviar: { fontSize: 13.5, lineHeight: 19.57, color: color.ink500, marginTop: 10, fontFamily: familia, ...tabular },
 
   loQueSigue: { marginTop: 16, gap: 10 },

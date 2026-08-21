@@ -16,7 +16,7 @@ import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { BarraDePestanas } from './BarraDePestanas';
-import { Carro, Chat, Lupa, Mas, Persona } from './iconos';
+import { Boleto, Chat, Lupa, Mas, Persona } from './iconos';
 import { color } from './tokens';
 
 /** El nombre de cada pestaña es su valor: no hay una clave aparte que mantener. */
@@ -41,15 +41,41 @@ const A_DONDE: Record<Pestana, string> = {
  */
 const tinta = (activo: boolean) => (activo ? '#fff' : 'rgba(255,255,255,.62)');
 
+/**
+ * LOS CUATRO DESTINOS, CON EL ICONO QUE LES CORRESPONDE.
+ *
+ * Dos correcciones del turno 14 viven aquí:
+ *
+ * **El boleto, no el carro.** «Mis viajes» llevaba un icono de carro, y el
+ * carro es el vehículo, no la lista de puestos que has reservado. El sistema
+ * corrige el mismo error en su propia barra —allí era un formulario— y lo
+ * resuelve con un boleto. Detrás de esta pestaña hay reservas: un boleto.
+ *
+ * **Relleno cuando estás, contorno cuando no.** Antes la pestaña activa se
+ * distinguía sólo por ser más blanca, y una diferencia de color es justo lo
+ * que no llega a quien no distingue ese color. Ahora cambia la forma.
+ */
 const LAS_CUATRO = [
-  { valor: 'Buscar', etiqueta: 'Buscar', icono: (a: boolean) => <Lupa tinta={tinta(a)} /> },
+  {
+    valor: 'Buscar',
+    etiqueta: 'Buscar',
+    icono: (a: boolean) => <Lupa tinta={tinta(a)} lleno={a} />,
+  },
   {
     valor: 'Mis viajes',
     etiqueta: 'Mis viajes',
-    icono: (a: boolean) => <Carro tamano={21} tinta={tinta(a)} />,
+    icono: (a: boolean) => <Boleto tamano={21} tinta={tinta(a)} lleno={a} />,
   },
-  { valor: 'Mensajes', etiqueta: 'Mensajes', icono: (a: boolean) => <Chat tinta={tinta(a)} /> },
-  { valor: 'Perfil', etiqueta: 'Perfil', icono: (a: boolean) => <Persona tinta={tinta(a)} /> },
+  {
+    valor: 'Mensajes',
+    etiqueta: 'Mensajes',
+    icono: (a: boolean) => <Chat tinta={tinta(a)} lleno={a} />,
+  },
+  {
+    valor: 'Perfil',
+    etiqueta: 'Perfil',
+    icono: (a: boolean) => <Persona tinta={tinta(a)} lleno={a} />,
+  },
 ];
 
 type Props = {

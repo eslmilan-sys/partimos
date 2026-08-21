@@ -314,10 +314,10 @@ const estilos = StyleSheet.create({
   },
   puntoVivo: { width: 7, height: 7, borderRadius: 999, backgroundColor: color.rojo500 },
   enlace: {
-    fontSize: 13.5,
-    lineHeight: 18.85,
-    fontWeight: '600',
-    color: color.azul700,
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '500',
+    color: color.rojo700,
     fontFamily: familia,
   },
 
