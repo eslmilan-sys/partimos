@@ -18,7 +18,7 @@
  */
 
 import { type ReactNode } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { color, familia, pulsado, sombra, vidrio } from './tokens';
 
@@ -44,6 +44,10 @@ const ALTO = 52;
 
 export function BarraDePestanas({ pestanas, valor, alCambiar, fab }: Props) {
   const medio = Math.ceil(pestanas.length / 2);
+  const { width } = useWindowDimensions();
+  /* La banda del indicador solo tiene sentido en el marco de escritorio: en
+     el teléfono el sistema ya pone la suya y salían dos, una sobre otra. */
+  const conIndicador = Platform.OS === 'web' && width >= 480;
 
   const pestana = (p: Pestana) => {
     const activo = p.valor === valor;
@@ -99,9 +103,7 @@ export function BarraDePestanas({ pestanas, valor, alCambiar, fab }: Props) {
         {pestanas.slice(medio).map(pestana)}
       </View>
 
-      {/* La banda del indicador de inicio: solo tiene sentido en el marco de
-          escritorio; en el teléfono el sistema pone la suya. */}
-      {Platform.OS === 'web' ? (
+      {conIndicador ? (
         <View style={estilos.bandaIndicador} pointerEvents="none">
           <View style={estilos.indicador} />
         </View>

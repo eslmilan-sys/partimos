@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import { useVolver } from '@/ui/salidas';
 
 import { aporteCalculado, origenDelAporte } from '@/dominio/aporte';
+import type { Lugar } from '@/dominio/lugar';
 import { LO_QUE_FALTA, quePuedeHacer } from '@/dominio/permiso';
 import {
   type PublicacionPreparada,
@@ -22,16 +23,20 @@ import {
   diaEnPanama,
   prepararPublicacion,
   repartoDelCosto,
+  estimarRuta,
   rutasPublicables,
 } from '@/servicios/viajes';
+import { aDondeSeVaDesde, ciudadesDeSalida } from '@/servicios/lugares';
+import { guardarRutaBuscada } from '@/servicios/rutas';
 import { type EstadoDeCedula, estadoDeCedula } from '@/servicios/seguridad';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { Cargando } from '@/ui/Cargando';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { Boton, Epigrafe, Interruptor, Pastilla, Stepper } from '@/ui/controles';
-import { formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
+import { cifraRedonda, formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, hora, mas } from '@/ui/fechas';
 import { Atras, Avanza, Carro, Cerrar, Escudo, Mas } from '@/ui/iconos';
 import { familia, color, espacio, radio, texto, zonaDeToque } from '@/ui/tokens';
@@ -59,15 +64,39 @@ const LOS_PROXIMOS_DIAS = (): Opcion[] =>
 /** Lo que cuesta desviarse a recoger en cada parada. */
 const MINUTOS_POR_PARADA = 5;
 
+/** Una ciudad del catálogo, con la forma que esperan los campos de lugar. */
+function lugarDeCiudad(nombre: string, slug: string): Lugar {
+  return {
+    nombre,
+    citySlug: slug || null,
+    tipo: 'ciudad',
+    fuente: 'catalogo',
+    contexto: 'Panamá',
+    lat: null,
+    lng: null,
+  };
+}
+
 export default function Publicar() {
   const router = useRouter();
   const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [rutas] = useState<RutaPublicable[]>(() => rutasPublicables());
   const [ruta, setRuta] = useState('');
+  /**
+   * LA RUTA EN DOS CAMPOS — de dónde sales y a dónde vas — porque alguien
+   * irá a un punto que la lista no trae y merece saber su aporte exacto.
+   * Cuando el par casa con un corredor abierto, todo sigue igual que
+   * siempre; cuando no, la pantalla calcula con la misma fórmula y ofrece
+   * guardar la ruta.
+   */
+  const [desde, setDesde] = useState<Lugar | null>(null);
+  const [hacia, setHacia] = useState<Lugar | null>(null);
+  const [buscandoLugar, setBuscandoLugar] = useState<'desde' | 'hacia' | null>(null);
+  const [rutaGuardada, setRutaGuardada] = useState(false);
   const [dia, setDia] = useState(() => diaEnPanama(new Date()));
   const [horaSalida, setHoraSalida] = useState('06:00');
-  const [eligiendo, setEligiendo] = useState<'ruta' | 'dia' | 'hora' | null>(null);
+  const [eligiendo, setEligiendo] = useState<'dia' | 'hora' | null>(null);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
   const [cedula, setCedula] = useState<EstadoDeCedula | null>(null);
   const [paradas, setParadas] = useState(2);
@@ -87,8 +116,24 @@ export default function Publicar() {
 
 
   useEffect(() => {
-    if (rutas.length > 0 && !ruta) setRuta(rutas[0].slug);
-  }, [rutas, ruta]);
+    if (rutas.length === 0 || desde || hacia) return;
+    const primera = rutas[0];
+    setRuta(primera.slug);
+    setDesde(lugarDeCiudad(primera.origen, primera.origenSlug));
+    setHacia(lugarDeCiudad(primera.destino, primera.destinoSlug));
+  }, [rutas, desde, hacia]);
+
+  /** El par elegido manda: corredor abierto si casa, ruta libre si no. */
+  const estimacion = desde && hacia ? estimarRuta(desde, hacia, puestos) : null;
+  useEffect(() => {
+    if (!desde || !hacia) return;
+    const slug = estimarRuta(desde, hacia)?.corredorSlug ?? '';
+    setRuta(slug);
+    if (!slug) setDatos(null);
+    setAporteElegido(null);
+    setParadas(0);
+    setRutaGuardada(false);
+  }, [desde, hacia]);
 
   useEffect(() => {
     if (!yo || !ruta) return;
@@ -103,6 +148,172 @@ export default function Publicar() {
   );
   const aporte = aporteElegido ?? calculado;
   const cuenta = datos ? repartoDelCosto(datos.costoCentavos, aporte, puestos) : null;
+
+  /** El buscador de los dos campos, común a los dos modos de la pantalla. */
+  const buscador = (
+    <BuscadorDeLugar
+      abierto={buscandoLugar !== null}
+      titulo={buscandoLugar === 'desde' ? 'Desde dónde sales' : 'A dónde vas'}
+      sugerencias={
+        buscandoLugar === 'hacia'
+          ? aDondeSeVaDesde(desde?.citySlug ?? '')
+          : ciudadesDeSalida()
+      }
+      alElegir={(l) => {
+        if (buscandoLugar === 'desde') setDesde(l);
+        else setHacia(l);
+        setBuscandoLugar(null);
+      }}
+      alCerrar={() => setBuscandoLugar(null)}
+    />
+  );
+
+  /**
+   * LA RUTA QUE LA LISTA NO TRAE. El par elegido no casa con ningún corredor
+   * abierto: se calcula igual —misma fórmula, distancia por carretera desde
+   * las coordenadas, sin peajes— y se ofrece guardar la ruta. No se publica
+   * lo que no está abierto: abrir un corredor es una decisión del producto,
+   * no de esta pantalla.
+   */
+  if (desde && hacia && !ruta) {
+    return (
+      <View style={estilos.pantalla}>
+        <CampoRojo altura={206} />
+        <BarraDeEstado />
+
+        <View style={estilos.cabecera}>
+          <View style={estilos.filaEpigrafe}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Atrás"
+              onPress={() => volver()}
+              style={estilos.circulo}
+            >
+              <Atras />
+            </Pressable>
+            <Text style={estilos.epigrafeCampo}>Publicar · ruta nueva</Text>
+          </View>
+          <Text style={estilos.titular} numberOfLines={2}>
+            {`${desde.nombre} → `}
+            <Text style={texto.titularFuerte}>{hacia.nombre}</Text>
+          </Text>
+        </View>
+
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 18 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={estilos.hoja}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Salgo de ${desde.nombre}. Cambiar`}
+              onPress={() => setBuscandoLugar('desde')}
+              style={estilos.eleccion}
+            >
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.eleccionEtiqueta}>Salgo de</Text>
+                <Text style={estilos.eleccionValor} numberOfLines={1}>
+                  {desde.nombre}
+                </Text>
+              </View>
+              <Avanza />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Voy a ${hacia.nombre}. Cambiar`}
+              onPress={() => setBuscandoLugar('hacia')}
+              style={estilos.eleccion}
+            >
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.eleccionEtiqueta}>Voy a</Text>
+                <Text style={estilos.eleccionValor} numberOfLines={1}>
+                  {hacia.nombre}
+                </Text>
+              </View>
+              <Avanza />
+            </Pressable>
+
+            <View style={estilos.separadorHoja} />
+
+            {estimacion ? (
+              <>
+                <Epigrafe>Lo que saldría, con la misma fórmula</Epigrafe>
+                <View style={estilos.filaLibre}>
+                  <Text style={estilos.libreEtiqueta}>Distancia</Text>
+                  <Text style={[estilos.libreValor, tabular]}>
+                    {`${estimacion.esAproximada ? '≈ ' : ''}${estimacion.distanciaKm} km`}
+                  </Text>
+                </View>
+                <View style={estilos.filaLibre}>
+                  <Text style={estilos.libreEtiqueta}>Costo del viaje</Text>
+                  <Text style={[estilos.libreValor, tabular]}>
+                    {formatearDinero(estimacion.costoCentavos)}
+                  </Text>
+                </View>
+                <View style={estilos.filaLibre}>
+                  <Text style={estilos.libreEtiqueta}>Tope por puesto</Text>
+                  <Text style={[estilos.libreValor, tabular]}>
+                    {formatearDineroRedondo(estimacion.topeCentavos)}
+                  </Text>
+                </View>
+                <View style={estilos.filaLibre}>
+                  <Text style={estilos.libreEtiqueta}>{`Aporte con ${puestos} puestos`}</Text>
+                  <View style={estilos.filaPrecioLibre}>
+                    <Text style={estilos.unidadLibre}>B/</Text>
+                    <Text style={[estilos.precioLibre, tabular]}>
+                      {cifraRedonda(estimacion.aporteCentavos)}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={estilos.notaLibre}>
+                  {estimacion.esAproximada
+                    ? 'Aproximado: sale de la distancia por carretera y sin contar peajes. La fórmula es la misma de todas las rutas — nunca depende de la demanda.'
+                    : 'Con los kilómetros medidos del corredor.'}
+                </Text>
+              </>
+            ) : (
+              <Text style={estilos.notaLibre}>
+                A este par le faltan coordenadas para estimar la distancia. Elige los
+                sitios desde las sugerencias del buscador.
+              </Text>
+            )}
+          </View>
+
+          <View style={estilos.pieLibre}>
+            <Text style={estilos.notaPie}>
+              Esta ruta todavía no está abierta para publicar. Guárdala y te
+              avisamos en cuanto se abra.
+            </Text>
+            {rutaGuardada ? (
+              <Boton tono="blanco" desactivado>
+                Guardada. Te avisamos
+              </Boton>
+            ) : (
+              <Boton
+                desactivado={!yo || !desde.citySlug || !hacia.citySlug}
+                alPulsar={async () => {
+                  if (!yo || !desde.citySlug || !hacia.citySlug) return;
+                  await guardarRutaBuscada(yo, desde.citySlug, hacia.citySlug, dia);
+                  setRutaGuardada(true);
+                }}
+              >
+                Guardar esta ruta
+              </Boton>
+            )}
+            {!desde.citySlug || !hacia.citySlug ? (
+              <Text style={estilos.notaPie}>
+                Para avisarte hace falta que los dos extremos sean ciudades que
+                servimos; el cálculo de arriba vale igual.
+              </Text>
+            ) : null}
+          </View>
+        </ScrollView>
+
+        {buscador}
+      </View>
+    );
+  }
 
   if (!datos || !cuenta) return <Cargando />;
 
@@ -168,17 +379,33 @@ export default function Publicar() {
       >
         {/* La hoja blanca que monta sobre el borde del campo */}
         <View style={estilos.hoja}>
-          {/* Ruta, día y hora: las tres estaban escritas a mano en el archivo. */}
+          {/* De dónde sales y a dónde vas, en dos campos de verdad: la lista
+              de corredores sigue debajo de las sugerencias, pero un punto que
+              la lista no trae también se puede elegir — y calcular. */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Ruta: ${laRuta?.origen} a ${laRuta?.destino}. Cambiar`}
-            onPress={() => setEligiendo('ruta')}
+            accessibilityLabel={`Salgo de ${desde?.nombre ?? ''}. Cambiar`}
+            onPress={() => setBuscandoLugar('desde')}
             style={estilos.eleccion}
           >
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={estilos.eleccionEtiqueta}>Ruta</Text>
+              <Text style={estilos.eleccionEtiqueta}>Salgo de</Text>
               <Text style={estilos.eleccionValor} numberOfLines={1}>
-                {`${laRuta?.origen ?? ''} → ${laRuta?.destino ?? ''}`}
+                {desde?.nombre ?? ''}
+              </Text>
+            </View>
+            <Avanza />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Voy a ${hacia?.nombre ?? ''}. Cambiar`}
+            onPress={() => setBuscandoLugar('hacia')}
+            style={estilos.eleccion}
+          >
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={estilos.eleccionEtiqueta}>Voy a</Text>
+              <Text style={estilos.eleccionValor} numberOfLines={1}>
+                {hacia?.nombre ?? ''}
               </Text>
             </View>
             <Avanza />
@@ -414,23 +641,8 @@ export default function Publicar() {
         </Text>
       </View>
 
-      <HojaDeEleccion
-        abierta={eligiendo === 'ruta'}
-        titulo="A dónde vas"
-        opciones={rutas.map((r) => ({
-          valor: r.slug,
-          etiqueta: `${r.origen} → ${r.destino}`,
-          debajo: `${r.distanciaKm} km`,
-        }))}
-        elegido={ruta}
-        alElegir={(v) => {
-          setRuta(v);
-          setAporteElegido(null);
-          setParadas(0);
-          setEligiendo(null);
-        }}
-        alCerrar={() => setEligiendo(null)}
-      />
+      {buscador}
+
       <HojaDeEleccion
         abierta={eligiendo === 'dia'}
         titulo="Qué día sales"
@@ -667,5 +879,21 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   faltaTexto: { fontSize: 13.5, lineHeight: 19.5, color: color.ink700, marginTop: 3, fontFamily: familia },
+  /* ── la ruta libre ── */
+  filaLibre: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingVertical: 8,
+  },
+  libreEtiqueta: { fontSize: 13, lineHeight: 18, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  libreValor: { fontSize: 15, lineHeight: 20, fontWeight: '600', letterSpacing: -0.22, color: color.ink900, fontFamily: familia },
+  filaPrecioLibre: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
+  unidadLibre: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink600, fontFamily: familia },
+  precioLibre: { fontSize: 22, lineHeight: 24, fontWeight: '600', letterSpacing: -0.77, color: color.ink900, fontFamily: familia },
+  notaLibre: { fontSize: 12, lineHeight: 17, fontWeight: '400', color: color.ink500, marginTop: 10, fontFamily: familia },
+  pieLibre: { paddingHorizontal: espacio.gutter, paddingTop: 16, gap: 12 },
+
   notaPie: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.125, color: color.ink500, marginTop: 10, fontFamily: familia },
 });

@@ -34,6 +34,8 @@ import {
   resumen,
   sePuedeGuardar,
 } from '@/servicios/carros';
+import { type CanalDePago, NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
+import { guardarMetodoPreferido } from '@/servicios/pagos';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -63,6 +65,14 @@ export default function RegistrarCarro() {
   const decir = useDecir();
   const [faltaLaFoto, setFaltaLaFoto] = useState(false);
   const [guardando, setGuardando] = useState(false);
+  /**
+   * CÓMO PREFIERE QUE LE APORTEN. Es una preferencia y solo eso: el pasajero
+   * elige su canal al pagar, y el conductor recibe su aporte COMPLETO por
+   * cualquiera de ellos — la tarifa de servicio es del pasajero, jamás se
+   * descuenta (R2). Se guarda en el perfil (`preferred_pay_channel`), que es
+   * donde Ajustes ya la lee.
+   */
+  const [canal, setCanal] = useState<CanalDePago>('yappy_app');
 
   const cat = catalogo(borrador.marca);
   const elegido = cat.colores.find((c) => c.nombre === borrador.color) ?? cat.colores[0];
@@ -97,6 +107,7 @@ export default function RegistrarCarro() {
     setGuardando(true);
     try {
       await guardarCarro(yo, borrador);
+      await guardarMetodoPreferido(yo, canal);
       volver();
     } finally {
       setGuardando(false);
@@ -201,6 +212,35 @@ export default function RegistrarCarro() {
               max={puestosDe(borrador.modelo)}
               etiquetaAccesible="Puestos que ofreces"
             />
+          </View>
+
+          <View style={estilos.filaCanal}>
+            <View style={estilos.bloque}>
+              <Epigrafe>Cómo prefieres que te aporten</Epigrafe>
+              <Text style={estilos.notaCanal}>
+                El pasajero elige al pagar; esto es lo que le sugerimos. El
+                aporte te llega completo con cualquiera.
+              </Text>
+            </View>
+            <View style={estilos.canales}>
+              {(['yappy_app', 'external'] as CanalDePago[]).map((c) => {
+                const puesto = canal === c;
+                return (
+                  <Pressable
+                    key={c}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: puesto }}
+                    accessibilityLabel={NOMBRE_DEL_CANAL[c]}
+                    onPress={() => setCanal(c)}
+                    style={[estilos.canal, puesto && estilos.canalPuesto]}
+                  >
+                    <Text style={[estilos.canalTexto, puesto && estilos.canalTextoPuesto]}>
+                      {NOMBRE_DEL_CANAL[c]}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
         </View>
 
@@ -385,6 +425,23 @@ const estilos = StyleSheet.create({
     borderTopColor: color.bordeSutil,
   },
   filaColor: { paddingVertical: 13 },
+  filaCanal: { marginTop: 14, gap: 10 },
+  notaCanal: { fontSize: 12, lineHeight: 17, fontWeight: '400', color: color.ink500, marginTop: 4, fontFamily: familia },
+  canales: { flexDirection: 'row', gap: 8 },
+  canal: {
+    height: 38,
+    paddingHorizontal: 13,
+    borderRadius: 13,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  canalPuesto: { backgroundColor: color.ink900, borderColor: color.ink900 },
+  canalTexto: { fontSize: 13, lineHeight: 18, fontWeight: '500', letterSpacing: -0.13, color: color.ink700, fontFamily: familia },
+  canalTextoPuesto: { color: color.blanco },
+
   filaPlaca: { paddingTop: 13, paddingBottom: 0 },
   bloque: { flex: 1 },
   // El valor va en su propia fila para que ocupe lo que mide, no la columna.

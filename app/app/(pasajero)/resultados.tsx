@@ -367,7 +367,9 @@ export default function Resultados() {
                   <Text style={estilos.metaDestacada}>{`Sale a las ${mejor.salida}`}</Text>
                 </View>
                 <Text style={estilos.razon}>{razonDeMejor}</Text>
+                <View style={estilos.divisorDestacada} />
                 <TarjetaDeViaje
+                  plano
                   viaje={mejor}
                   alPulsar={() =>
                     router.push({ pathname: '/(pasajero)/viaje', params: { viaje: mejor.id } })
@@ -886,6 +888,7 @@ const estilos = StyleSheet.create({
   },
   metaDestacada: { fontSize: 11, lineHeight: 15, fontWeight: '400', color: color.ink600, fontFamily: familia },
   razon: { fontSize: 12, lineHeight: 17, fontWeight: '400', letterSpacing: -0.12, color: color.ink500, fontFamily: familia },
+  divisorDestacada: { height: 1, backgroundColor: color.divisor },
 
   agotada: {
     backgroundColor: 'rgba(10,39,49,.035)',

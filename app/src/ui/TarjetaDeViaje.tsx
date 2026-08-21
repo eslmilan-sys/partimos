@@ -77,11 +77,18 @@ export function TarjetaDeViaje({
   viaje,
   marca,
   alPulsar,
+  plano = false,
 }: {
   viaje: ViajeEnTarjeta;
   /** «Mejor opción», y solo en una tarjeta: dos marcas no marcan nada. */
   marca?: string;
   alPulsar?: () => void;
+  /**
+   * Sin superficie propia — ni borde, ni fondo, ni relleno — para vivir
+   * DENTRO de otra tarjeta: la destacada de Resultados la envuelve, y dos
+   * marcos anidados se leían como una tarjeta dentro de una caja.
+   */
+  plano?: boolean;
 }) {
   // 1–2 cupos van en acento profundo: es lo que queda por decidir rápido.
   const pocos = viaje.puestosLibres <= 2;
@@ -92,7 +99,10 @@ export function TarjetaDeViaje({
       accessibilityRole="button"
       accessibilityLabel={`Sale ${viaje.salida} de ${viaje.origen}, llega ${viaje.llegada} a ${viaje.destino}, ${formatearDineroRedondo(viaje.aporteCentavos)} por puesto, con ${viaje.conductor.nombre}`}
       onPress={alPulsar}
-      style={({ pressed }) => [estilos.tarjeta, pressed && pulsado.tarjeta]}
+      style={({ pressed }) => [
+        plano ? estilos.tarjetaPlana : estilos.tarjeta,
+        pressed && pulsado.tarjeta,
+      ]}
     >
       {marca ? (
         <View style={estilos.marca}>
@@ -189,6 +199,7 @@ const estilos = StyleSheet.create({
     padding: 16,
     gap: 12,
   },
+  tarjetaPlana: { gap: 12 },
 
   /** «Mejor opción»: chip teñido del acento, texto en acento profundo. */
   marca: {

@@ -177,10 +177,19 @@ export default function Inicio() {
 
   return (
     <View style={estilos.pantalla}>
-      {/* La atmósfera del v6: los dos halos, detrás de todo. */}
-      <CampoRojo altura={400} />
-
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo las secciones de abajo: en el
+          teléfono se siente como una app, no como una cabecera clavada con
+          una franja que se mueve. Solo la barra de pestañas queda fija. La
+          atmósfera va dentro, así los halos se van con el contenido. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 16 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+      <CampoRojo altura={400} />
 
       {/* La fila de marca: el logo a la izquierda, campana y retrato a la derecha. */}
       <View style={estilos.filaMarca}>
@@ -284,10 +293,12 @@ export default function Inicio() {
               style={({ pressed }) => [
                 estilos.invertir,
                 pressed && { transform: [{ translateY: -20 }, { scale: 0.94 }] },
-                !hacia && { opacity: 0.35 },
               ]}
             >
-              <Intercambio tamano={17} tinta={color.ink700} />
+              {/* Apagado, el botón sigue OPACO: bajarle la opacidad entera
+                  dejaba ver la línea del divisor a través — se vio en el
+                  teléfono. Lo que se apaga es el dibujo, no la superficie. */}
+              <Intercambio tamano={17} tinta={hacia ? color.ink700 : color.ink300} />
             </Pressable>
           </View>
 
@@ -345,12 +356,6 @@ export default function Inicio() {
         </Pressable>
       </View>
 
-      {/* La columna que se desplaza: rutas populares y salidas próximas. */}
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 16 }}
-        showsVerticalScrollIndicator={false}
-      >
         {rutas.length > 0 ? (
           <View style={estilos.seccion}>
             <View style={estilos.cabeceraSeccion}>

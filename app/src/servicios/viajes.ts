@@ -14,6 +14,7 @@ import {
   loQueRecuperas,
   topeDeRuta,
 } from '@/dominio/aporte';
+import { type Lugar, distanciaKm as kmEntrePuntos } from '@/dominio/lugar';
 import type { AvailableTrip, Corridor, TripStop, Vehicle, ViajeFila } from '@/tipos';
 
 import { nuevoId } from './_id';
@@ -559,21 +560,117 @@ export type RutaPublicable = {
   slug: string;
   origen: string;
   destino: string;
+  /** Los slugs de ciudad, para casar con lo que eligen los campos de lugar. */
+  origenSlug: string;
+  destinoSlug: string;
   distanciaKm: number;
   duracionMin: number;
 };
 
 export function rutasPublicables(): RutaPublicable[] {
+  const slugDe = (id: string) => fuente.ciudades.find((c) => c.id === id)?.slug ?? '';
   return fuente.corredores
     .filter((c) => c.is_active)
     .map((c) => ({
       slug: c.slug,
       origen: nombreDeCiudadDe(c.origin_city_id),
       destino: nombreDeCiudadDe(c.destination_city_id),
+      origenSlug: slugDe(c.origin_city_id),
+      destinoSlug: slugDe(c.destination_city_id),
       distanciaKm: Number(c.distance_km),
       duracionMin: c.typical_duration_min ?? 0,
     }))
     .sort((a, b) => a.destino.localeCompare(b.destino));
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LA RUTA LIBRE — el aporte exacto de un camino que la lista no trae.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Del camino entre dos LADOS de la carretera a la cifra en kilómetros: la
+ * distancia en línea recta por el factor de carretera. 1,3 es el factor
+ * clásico para vías interurbanas — la Interamericana es bastante directa —
+ * y se dice «aproximado» en pantalla precisamente porque lo es.
+ */
+const FACTOR_DE_CARRETERA = 1.3;
+/** A cuánto se avanza de media entre ciudades, para estimar la duración. */
+const KM_POR_HORA = 65;
+
+export type EstimacionDeRuta = {
+  /** El corredor abierto que casa con ese par, si existe. */
+  corredorSlug: string | null;
+  distanciaKm: number;
+  duracionMin: number;
+  costoCentavos: number;
+  topeCentavos: number;
+  aporteCentavos: number;
+  /** true cuando sale de coordenadas y no de un corredor medido. */
+  esAproximada: boolean;
+};
+
+/**
+ * El cálculo de un camino cualquiera, con la MISMA fórmula de siempre —
+ * `(km × tarifa × 1,10 + peajes) ÷ (puestos + 1)` — para que elegir un punto
+ * fuera de la lista nunca cambie las reglas del precio (R1 y R3: la fórmula
+ * no mira ni la demanda ni la fecha, solo la distancia).
+ *
+ * Si el par casa con un corredor abierto, mandan los kilómetros y peajes
+ * medidos del corredor. Si no, la distancia sale de las coordenadas por el
+ * factor de carretera, los peajes se quedan en cero —desconocidos no se
+ * cobran— y todo se marca aproximado. Sin coordenadas no hay estimación.
+ */
+export function estimarRuta(desde: Lugar, hacia: Lugar, puestos = 3): EstimacionDeRuta | null {
+  if (desde.citySlug && hacia.citySlug) {
+    const corredor = corredorDe(desde.citySlug, hacia.citySlug);
+    if (corredor) {
+      const costo = costoDelViaje({
+        distanciaKm: Number(corredor.distance_km),
+        peajeCentavos: Number(corredor.toll_cents),
+        consumoL100km: CONSUMO_L_100KM.standard,
+      });
+      const tope = topeDeRuta(costo);
+      return {
+        corredorSlug: corredor.slug,
+        distanciaKm: Number(corredor.distance_km),
+        duracionMin: corredor.typical_duration_min ?? 0,
+        costoCentavos: costo,
+        topeCentavos: tope,
+        aporteCentavos: aporteCalculado(costo, puestos, tope),
+        esAproximada: false,
+      };
+    }
+  }
+
+  /* Un lugar del catálogo puede llegar sin coordenadas —una fila de ciudad
+     convertida a mano—: las 32 ciudades del almacén las tienen, así que se
+     completan desde ahí antes de rendirse. */
+  const conCoordenadas = (l: Lugar): { lat: number; lng: number } | null => {
+    if (l.lat != null && l.lng != null) return { lat: l.lat, lng: l.lng };
+    const ciudad = l.citySlug ? fuente.ciudades.find((c) => c.slug === l.citySlug) : null;
+    if (ciudad?.lat != null && ciudad?.lng != null) return { lat: ciudad.lat, lng: ciudad.lng };
+    return null;
+  };
+  const a = conCoordenadas(desde);
+  const b = conCoordenadas(hacia);
+  if (!a || !b) return null;
+
+  const km = Math.max(1, Math.round(kmEntrePuntos(a, b) * FACTOR_DE_CARRETERA));
+  const costo = costoDelViaje({
+    distanciaKm: km,
+    peajeCentavos: 0,
+    consumoL100km: CONSUMO_L_100KM.standard,
+  });
+  const tope = topeDeRuta(costo);
+  return {
+    corredorSlug: null,
+    distanciaKm: km,
+    duracionMin: Math.round(((km / KM_POR_HORA) * 60) / 5) * 5,
+    costoCentavos: costo,
+    topeCentavos: tope,
+    aporteCentavos: aporteCalculado(costo, puestos, tope),
+    esAproximada: true,
+  };
 }
 
 /** El reparto que `5c` enseña bajo la cifra y `5d` desglosa. */
