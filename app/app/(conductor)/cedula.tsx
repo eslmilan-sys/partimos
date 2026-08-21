@@ -226,7 +226,7 @@ export default function Cedula() {
       </View>
 
       <View style={estilos.pie}>
-        <Boton tono="rojo" alPulsar={mirarYDecir}>
+        <Boton alPulsar={mirarYDecir}>
           Ver el estado otra vez
         </Boton>
         <Text style={estilos.notaPie}>Se hace una sola vez.</Text>

@@ -89,7 +89,7 @@ export default function Codigo() {
 
         <View style={estilos.hoja}>
           <View style={estilos.filaConductor}>
-            <Avatar nombre={datos.conductor.nombre} tono="rojo" />
+            <Avatar nombre={datos.conductor.nombre} />
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={estilos.nombreConductor}>{datos.conductor.nombre}</Text>
               <Text style={estilos.carro}>
@@ -119,7 +119,7 @@ export default function Codigo() {
           </View>
 
           <View style={{ marginTop: 20 }}>
-            <Boton tono="azul" alPulsar={() => router.push('/(pasajero)/ya-mapa')}>
+            <Boton alPulsar={() => router.push('/(pasajero)/ya-mapa')}>
               Ver el punto de recogida
             </Boton>
           </View>

@@ -120,7 +120,7 @@ export default function MisViajesPantalla() {
             onPress={() => router.push('/(cuenta)/cuenta')}
             style={estilos.zonaAvatar}
           >
-            <Avatar nombre={nombre ?? 'Tú'} tamano={38} tono="azul" />
+            <Avatar nombre={nombre ?? 'Tú'} tamano={38} />
           </Pressable>
         </View>
 
@@ -318,7 +318,7 @@ function FichaGrande({
       {/* Quién maneja y en qué. Va en su propia banda, separada por una raya:
           es información de persona, no de itinerario. */}
       <View style={estilos.banda}>
-        <Avatar nombre={puesto.conductor || '·'} tamano={40} tono="rojo" />
+        <Avatar nombre={puesto.conductor || '·'} tamano={40} />
         <View style={{ flex: 1, minWidth: 0 }}>
           <View style={estilos.filaNombre}>
             <Text style={estilos.nombre} numberOfLines={1}>

@@ -186,7 +186,7 @@ export default function Reservar() {
         </View>
 
         <Boton
-          tono="azul"
+         
           desactivado={pidiendo}
           alPulsar={async () => {
             if (!yo) {

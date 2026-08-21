@@ -169,7 +169,7 @@ export default function Editar() {
 
       <View style={estilos.pie}>
         <Boton
-          tono="azul"
+         
           alPulsar={async () => {
             await guardarEdicion(viajeId, { puestos, maletas, mujeres });
             volver();

@@ -191,7 +191,7 @@ export default function Conversaciones() {
               }
               style={({ pressed }) => [estilos.fila, pressed && estilos.pulsada]}
             >
-              <Avatar nombre={hilo.otro.nombre} tono="rojo" tamano={44} />
+              <Avatar nombre={hilo.otro.nombre} tamano={44} />
 
               <View style={{ flex: 1, minWidth: 0 }}>
                 <View style={estilos.filaSuperior}>

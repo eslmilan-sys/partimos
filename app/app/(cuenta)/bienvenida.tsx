@@ -102,7 +102,7 @@ export default function Bienvenida() {
 
             <View style={{ marginTop: 18 }}>
               {/* Dentro de la hoja la acción es azul: rojo sobre rojo no se lee. */}
-              <Boton tono="azul" alPulsar={() => router.push('/(pasajero)/resultados')}>
+              <Boton alPulsar={() => router.push('/(pasajero)/resultados')}>
                 Buscar un viaje
               </Boton>
             </View>

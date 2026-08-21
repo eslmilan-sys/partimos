@@ -165,7 +165,7 @@ export default function Aportar() {
 
       <View style={estilos.pie}>
         <Boton
-          tono="azul"
+         
           desactivado={confirmando}
           alPulsar={async () => {
             setConfirmando(true);

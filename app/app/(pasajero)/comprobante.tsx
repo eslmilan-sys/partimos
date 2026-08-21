@@ -176,7 +176,7 @@ export default function ComprobantePasajero() {
           <Boton tono="contorno" tamano="md" ancho alPulsar={mandar}>
             Compartir
           </Boton>
-          <Boton tono="azul" tamano="md" ancho alPulsar={() => router.replace('/(conductor)/misviajes')}>
+          <Boton tamano="md" ancho alPulsar={() => router.replace('/(conductor)/misviajes')}>
             Mis viajes
           </Boton>
         </View>

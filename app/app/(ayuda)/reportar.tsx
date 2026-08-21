@@ -223,7 +223,7 @@ export default function Reportar() {
       </ScrollView>
 
       <View style={estilos.pie}>
-        <Boton tono="azul" alPulsar={enviar} desactivado={enviando}>
+        <Boton alPulsar={enviar} desactivado={enviando}>
           Enviar el reporte
         </Boton>
         <Text style={estilos.callado}>

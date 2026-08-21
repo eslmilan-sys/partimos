@@ -204,7 +204,7 @@ export default function Reembolso() {
       </ScrollView>
 
       <View style={estilos.pie}>
-        <Boton tono="azul" alPulsar={pedir} desactivado={pidiendo}>
+        <Boton alPulsar={pedir} desactivado={pidiendo}>
           Solicitar reembolso
         </Boton>
         {/* La conversación con soporte tampoco está todavía en el árbol de rutas. */}

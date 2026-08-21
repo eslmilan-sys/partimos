@@ -211,7 +211,7 @@ export default function DetalleDelViaje() {
               {conductor === undefined ? (
                 <Hueso ancho={56} alto={56} redondo={radio.cuadrado} />
               ) : (
-                <Avatar nombre={nombre || '·'} tono="rojo" tamano={56} />
+                <Avatar nombre={nombre || '·'} tamano={56} />
               )}
               <View style={{ flex: 1, minWidth: 0 }}>
                 {conductor === undefined ? (

@@ -117,7 +117,7 @@ export default function MensajeDePartimos() {
         ))}
 
         <View style={estilos.acciones}>
-          <Boton tono="azul" tamano="md" ancho alPulsar={() => router.push('/(pasajero)')}>
+          <Boton tamano="md" ancho alPulsar={() => router.push('/(pasajero)')}>
             Buscar un viaje
           </Boton>
           <Boton

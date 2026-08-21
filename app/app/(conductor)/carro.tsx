@@ -253,7 +253,7 @@ export default function RegistrarCarro() {
       </ScrollView>
 
       <View style={estilos.pie}>
-        <Boton tono="azul" desactivado={guardando} alPulsar={guardar}>
+        <Boton desactivado={guardando} alPulsar={guardar}>
           Guardar el carro
         </Boton>
         <Text style={estilos.notaPie}>Puedes tener más de uno y elegir al publicar.</Text>

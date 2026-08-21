@@ -128,7 +128,13 @@ type Props = {
   /** Hasta dónde baja la atmósfera. Ya no es una banda de color: solo aire. */
   altura?: number;
   ancho?: number;
-  /** Marca de agua del sitio, en tinta sarcelle al 10 %. */
+  /**
+   * ACEPTADA Y SIN EFECTO. La marca de agua del sitio era el último resto
+   * del arquetipo anterior — el usuario la señaló («a design svg») y el v6
+   * no dibuja nada sobre el lienzo salvo los dos halos. La prop se queda
+   * para que las cuarenta pantallas que la pasan compilen; el dibujo del
+   * sitio sigue existiendo como retrato de casilla en `DibujoDelSitio`.
+   */
   motivo?: Motivo;
   children?: ReactNode;
 };
@@ -144,7 +150,6 @@ export function CampoRojo({
   motivo,
   children,
 }: Props) {
-  const m = motivo ? MOTIVOS[motivo] : null;
   // Los ids de degradado son globales en el DOM: uno por instancia.
   const id = useId().replace(/:/g, '');
 
@@ -176,22 +181,21 @@ export function CampoRojo({
         <Ellipse cx={ancho + 130 - 160} cy={-70 + 160} rx={160} ry={160} fill={`url(#halo-rubor-${id})`} />
       </Svg>
 
-      {m ? (
-        <View style={[{ position: 'absolute', opacity: m.opacidad }, m.sitio]} pointerEvents="none">
-          <m.svg width={m.ancho} height={m.alto} color="#0A2731" />
-        </View>
-      ) : null}
-
       {children}
     </View>
   );
 }
 
 /**
- * `--grad-sunrise`: azul frío en una esquina, rosa cálido en la contraria y
- * luz de arena en medio. Lo usan las tarjetas de destino sin fotografía.
+ * RETIRADO — decoración del sistema anterior. En el v6 una tarjeta es blanca
+ * con su borde de pelo y nada más. Se conserva la firma para las pantallas
+ * que aún lo montan; no dibuja nada.
  */
-export function Amanecer({ ancho = 346, alto = 260 }: { ancho?: number; alto?: number }) {
+export function Amanecer(_props: { ancho?: number; alto?: number }) {
+  return null;
+}
+
+function _AmanecerRetirado({ ancho = 346, alto = 260 }: { ancho?: number; alto?: number }) {
   const id = useId().replace(/:/g, '');
   return (
     <Svg width={ancho} height={alto} style={StyleSheet.absoluteFill}>
@@ -222,10 +226,14 @@ export function Amanecer({ ancho = 346, alto = 260 }: { ancho?: number; alto?: n
 }
 
 /**
- * El brillo cálido que cierra la tarjeta del aporte en `5c` y `7b`. Sobre
- * blanco sigue funcionando: sube desde debajo del borde, la tarjeta recorta.
+ * RETIRADO — el rojo tiene cuatro sentidos y «adorno» no es ninguno
+ * (invariante 4 del v6). Firma conservada; no dibuja nada.
  */
-export function Brillo({ ancho = 346, alto = 190 }: { ancho?: number; alto?: number }) {
+export function Brillo(_props: { ancho?: number; alto?: number }) {
+  return null;
+}
+
+function _BrilloRetirado({ ancho = 346, alto = 190 }: { ancho?: number; alto?: number }) {
   const id = useId().replace(/:/g, '');
   return (
     <Svg width={ancho} height={alto} style={StyleSheet.absoluteFill}>

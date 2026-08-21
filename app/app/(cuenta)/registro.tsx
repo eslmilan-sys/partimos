@@ -175,7 +175,7 @@ function PasoCorreo({
       {error ? <Aviso>{error}</Aviso> : null}
       <Text style={estilos.ayuda}>Aquí te llega la confirmación y nada más.</Text>
       <View style={{ marginTop: 18 }}>
-        <Boton tono="azul" desactivado={!correoValido(correo)} alPulsar={alSeguir}>
+        <Boton desactivado={!correoValido(correo)} alPulsar={alSeguir}>
           Seguir
         </Boton>
       </View>
@@ -208,7 +208,7 @@ function PasoContrasena({
       {error ? <Aviso>{error}</Aviso> : null}
       <Text style={estilos.ayuda}>Seis caracteres o más. No hace falta que sea rara.</Text>
       <View style={{ marginTop: 18 }}>
-        <Boton tono="azul" desactivado={!contrasenaValida(clave)} alPulsar={alSeguir}>
+        <Boton desactivado={!contrasenaValida(clave)} alPulsar={alSeguir}>
           Seguir
         </Boton>
       </View>
@@ -269,7 +269,7 @@ function PasoNombre({
 
       <View style={{ marginTop: 18 }}>
         <Boton
-          tono="azul"
+         
           desactivado={!nombre.trim() || !apellido.trim() || creando}
           alPulsar={alCrear}
         >

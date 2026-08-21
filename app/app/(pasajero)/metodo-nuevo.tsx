@@ -192,7 +192,7 @@ export default function MetodoNuevo() {
 
         <View style={estilos.pie}>
           <Boton
-            tono="azul"
+           
             desactivado={guardando || !yo}
             alPulsar={async () => {
               if (!yo) return;

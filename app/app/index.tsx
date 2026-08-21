@@ -29,7 +29,7 @@ export default function Puerta() {
   if (preguntando) {
     return (
       <View style={estilos.espera}>
-        <ActivityIndicator color="#fff" />
+        <ActivityIndicator color={color.ink900} />
       </View>
     );
   }
@@ -42,6 +42,6 @@ const estilos = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: color.rojo500,
+    backgroundColor: color.sand100,
   },
 });

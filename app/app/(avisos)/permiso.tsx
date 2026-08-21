@@ -200,7 +200,7 @@ export default function PermisoDeAvisos() {
       </View>
 
       <View style={estilos.pie}>
-        <Boton tono="azul" alPulsar={seguir}>
+        <Boton alPulsar={seguir}>
           Activar los avisos
         </Boton>
         <Pressable

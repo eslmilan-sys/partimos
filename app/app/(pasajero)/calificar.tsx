@@ -80,7 +80,7 @@ export default function Calificar() {
       >
         <View style={estilos.hoja}>
           <View style={estilos.filaPersona}>
-            <Avatar nombre={datos.otro} tono="rojo" />
+            <Avatar nombre={datos.otro} />
             <View style={{ flex: 1 }}>
               <Text style={estilos.nombre}>{datos.otro}</Text>
               <Text style={estilos.contexto}>{`${datos.ruta} · ${datos.duracion}`}</Text>

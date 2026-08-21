@@ -114,7 +114,7 @@ export default function Ayuda() {
           <Text style={estilos.epigrafeViaje}>Sobre un viaje</Text>
 
           <View style={estilos.filaViaje}>
-            <Avatar nombre={viaje.conductor} tono="rojo" tamano={36} />
+            <Avatar nombre={viaje.conductor} tamano={36} />
             <View style={estilos.columnaViaje}>
               <Text style={estilos.destino} numberOfLines={1}>
                 {`${viaje.destino} · ${diaCorto(viaje.cuando)}`}
@@ -194,7 +194,7 @@ export default function Ayuda() {
         {/* Azul, no rojo: el pie es blanco y esto no es «sigue adelante», es la
             salida de quien no se reconoce en ninguna fila. */}
         <Boton
-          tono="azul"
+         
           alPulsar={() =>
             router.push({ pathname: '/(pasajero)/chat', params: { reserva: viaje.reservaId } })
           }

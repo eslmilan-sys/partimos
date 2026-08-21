@@ -230,7 +230,7 @@ export default function Repaso() {
 
       <View style={estilos.pie}>
         <Boton
-          tono="azul"
+         
           desactivado={publicando}
           alPulsar={async () => {
             if (!yo || !p.ruta || !p.salida) return;

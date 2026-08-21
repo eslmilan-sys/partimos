@@ -380,13 +380,13 @@ export default function Publicar() {
                 <Text style={estilos.faltaTexto}>{queFalta.texto}</Text>
               </View>
             </View>
-            <Boton tono="azul" tamano="md" alPulsar={() => router.push(queFalta.ruta as never)}>
+            <Boton tamano="md" alPulsar={() => router.push(queFalta.ruta as never)}>
               {queFalta.boton}
             </Boton>
           </View>
         ) : null}
         <Boton
-          tono="azul"
+         
           desactivado={!!queFalta}
           alPulsar={() =>
             router.push({
