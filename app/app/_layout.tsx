@@ -73,20 +73,20 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
     gap: espacio.entreTarjetas,
     paddingHorizontal: espacio.gutter,
-    backgroundColor: color.rojo500,
+    backgroundColor: color.sand100,
   },
   titulo: {
     fontFamily: familia,
     fontSize: 22,
     lineHeight: interlinea(22),
     fontWeight: '600',
-    color: '#fff',
+    color: color.ink900,
   },
   motivo: {
     fontFamily: familia,
     fontSize: 13.5,
     lineHeight: interlinea(13),
-    color: 'rgba(255,255,255,.72)',
+    color: color.ink500,
     textAlign: 'center',
   },
 });

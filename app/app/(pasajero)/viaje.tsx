@@ -407,16 +407,7 @@ const estilos = StyleSheet.create({
     color: color.campoTexto,
     fontFamily: familia,
   },
-  titular: {
-    fontSize: 30,
-    lineHeight: 32.86,
-    letterSpacing: -1.395,
-    fontWeight: '400',
-    color: '#fff',
-    marginTop: 12,
-    fontFamily: familia,
-    ...tabular,
-  },
+  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 12, },
   titularFuerte: { fontWeight: '600' },
   subtitulo: {
     fontSize: 14,
@@ -440,13 +431,14 @@ const estilos = StyleSheet.create({
     elevation: 8,
   },
 
+  /** El aporte en la cabecera: H2 del v6, en tinta — el rojo no es precio. */
   precio: {
-    fontSize: 33,
-    fontWeight: '700',
-    letterSpacing: -1.44,
-    lineHeight: 31,
+    fontSize: 22,
+    fontWeight: '600',
+    letterSpacing: -0.77,
+    lineHeight: 26,
     textAlign: 'right',
-    color: '#fff',
+    color: color.ink900,
     fontFamily: familia,
     ...tabular,
   },

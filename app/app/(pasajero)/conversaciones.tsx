@@ -307,15 +307,7 @@ const estilos = StyleSheet.create({
     color: color.campoTexto,
     fontFamily: familia,
   },
-  titular: {
-    fontSize: 30,
-    lineHeight: 30.74,
-    letterSpacing: -1.305,
-    fontWeight: '600',
-    color: '#fff',
-    marginTop: 12,
-    fontFamily: familia,
-  },
+  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 12, },
 
   buscador: {
     flexDirection: 'row',

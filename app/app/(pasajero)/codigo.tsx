@@ -166,7 +166,7 @@ const estilos = StyleSheet.create({
   pastillaSalidaTexto: {
     fontSize: 12.5, lineHeight: 18.12,
     fontWeight: '600',
-    color: '#fff',
+    color: color.ink700,
     fontFamily: familia,
     ...tabular,
   },
@@ -195,7 +195,7 @@ const estilos = StyleSheet.create({
     fontSize: 52, lineHeight: 75.4,
     fontWeight: '600',
     letterSpacing: -2.08,
-    color: '#fff',
+    color: color.ink900,
     fontFamily: familia,
     ...tabular,
   },

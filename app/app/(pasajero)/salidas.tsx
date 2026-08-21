@@ -189,15 +189,7 @@ const estilos = StyleSheet.create({
     color: color.campoTexto,
     fontFamily: familia,
   },
-  titular: {
-    fontSize: 30,
-    lineHeight: 32.86,
-    letterSpacing: -1.395,
-    fontWeight: '400',
-    color: '#fff',
-    marginTop: 14,
-    fontFamily: familia,
-  },
+  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 14, },
   titularFuerte: { fontWeight: '600' },
 
   cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 20 },

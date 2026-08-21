@@ -138,15 +138,7 @@ const estilos = StyleSheet.create({
   },
 
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 12 },
-  titular: {
-    fontSize: 33,
-    lineHeight: 34.65,
-    letterSpacing: -1.32,
-    fontWeight: '400',
-    color: '#fff',
-    marginTop: 20,
-    fontFamily: familia,
-  },
+  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 20, },
   titularFuerte: { fontWeight: '600' },
   entrada: {
     fontSize: 14,

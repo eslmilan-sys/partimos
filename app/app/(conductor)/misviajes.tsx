@@ -506,14 +506,7 @@ const estilos = StyleSheet.create({
      epígrafe «Tu próximo viaje» quedaba escrito en azul sobre el rojo. */
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 16, paddingBottom: 66 },
   filaSuperior: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  titular: {
-    fontSize: 30,
-    lineHeight: 30.74,
-    letterSpacing: -1.16,
-    fontWeight: '600',
-    color: '#fff',
-    fontFamily: familia,
-  },
+  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, },
   bajada: {
     fontSize: 13.5,
     lineHeight: 18.85,
@@ -562,7 +555,7 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     gap: 4,
     marginTop: 18,
-    backgroundColor: 'rgba(255,255,255,.16)',
+    backgroundColor: color.lavado,
     borderRadius: radio.pastilla,
     padding: 4,
   },

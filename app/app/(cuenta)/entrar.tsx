@@ -1,47 +1,29 @@
 /**
- * `4e` `14e` Entrar — para quien ya tiene cuenta.
+ * Entrar — la estructura del `10c` del canevas, con la paleta v6.
  *
- * **La estructura que pidió el cliente**, traída a nuestro lenguaje: la foto de
- * la bahía al atardecer ocupa la pantalla entera, la marca respira arriba, y
- * la hoja blanca con el formulario se apoya abajo.
+ * **La foto del atardecer se fue con el sistema anterior.** El usuario pidió
+ * las pantallas de entrada tal como las dibuja el archivo de diseño: fondo
+ * claro, la teja roja con la marca, «Bienvenido a Partimos», lo social
+ * primero — porque es el camino sin fricción —, el correo después, y abajo
+ * lo legal con la puerta a crear cuenta.
  *
- * **Por qué la foto puede estar aquí y en ningún otro sitio.** El sistema dice
- * que el azul manda en las superficies y el rojo en lo que se toca, y que
- * nunca se tocan. Una foto de atardecer es roja de arriba abajo, así que
- * cualquier control encima tendría que ser rojo sobre rojo. La solución es la
- * misma que usa el campo rojo con su hoja: **el blanco los separa**. Todo lo
- * que se toca vive dentro de la hoja blanca, y ahí la acción es azul. Sobre la
- * foto solo hay marca y una frase, que no se tocan.
+ * **Google y Apple, no Facebook.** El canevas dibuja Facebook, pero el único
+ * OAuth cableado en `servicios/cuenta.ts` es `entrarCon('google' | 'apple')`.
+ * Un botón que no lleva a ningún sitio es un control muerto — la clase de
+ * defecto que `app/README.md` cuenta uno a uno — así que se dibujan los dos
+ * que funcionan.
  *
- * **El velo no es decoración.** Sin él, «Comparte el camino» cae sobre nubes
- * naranjas a 2,4:1. Con el degradado a negro al 62 % abajo y 34 % arriba, el
- * blanco lee por encima de 4,5:1 en toda la franja donde hay texto.
- *
- * **La entrada.** Al abrir, la marca sube y aparece sola durante un segundo;
- * después la hoja se levanta desde abajo. No es un adorno: el nombre de la app
- * es lo primero que hay que reconocer, y una hoja que aparece con el resto se
- * lleva la mirada antes de tiempo. Quien vuelve a entrar por décima vez no la
- * sufre — dura 900 ms de punta a punta.
- *
- * **Correo y contraseña**, no el celular que dibuja el traspaso: no hay
- * proveedor de SMS contratado y las cuentas que existen son de correo. El
- * motivo entero está en `servicios/cuenta.ts`.
+ * **Correo y contraseña**, no el código que dibuja el canevas: no hay
+ * proveedor de SMS contratado y las cuentas que existen son de correo. Es la
+ * divergencia asumida de `CLAUDE.md`; el motivo entero está en
+ * `servicios/cuenta.ts`.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Easing,
-  ImageBackground,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
-import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 import {
   QUE_PASO,
@@ -54,54 +36,17 @@ import {
 import { Aviso } from '@/ui/Aviso';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
+import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
-import { Escudo, MarcaColor } from '@/ui/iconos';
-import { TRACK_MICRO, color, espacio, familia, interlinea, radio, zonaDeToque } from '@/ui/tokens';
+import { Marca } from '@/ui/iconos';
+import { color, espacio, familia, pulsado, radio, zonaDeToque } from '@/ui/tokens';
 
-const FOTO = require('../../assets/entrada.jpg');
-
-/** Los dos que dibuja el traspaso. El nombre se escribe una vez, no dos. */
-const OTROS = [
-  { quien: 'google', nombre: 'Google' },
-  { quien: 'apple', nombre: 'Apple' },
-] as const;
-
-/* --------------------------------------------------------------- El velo */
-
-/**
- * El degradado que hace legible el blanco sobre la foto.
- *
- * Tres paradas, no dos: arriba hace falta poco —la marca cae sobre cielo
- * oscuro—, en medio casi nada, y abajo mucho, porque ahí está el mar
- * encendido y encima se apoya la hoja.
- */
-function Velo() {
-  return (
-    <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-      <Defs>
-        <LinearGradient id="velo" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor="#1C0A10" stopOpacity="0.34" />
-          <Stop offset="0.34" stopColor="#1C0A10" stopOpacity="0.16" />
-          <Stop offset="0.72" stopColor="#1C0A10" stopOpacity="0.46" />
-          <Stop offset="1" stopColor="#1C0A10" stopOpacity="0.62" />
-        </LinearGradient>
-      </Defs>
-      <Rect x="0" y="0" width="100%" height="100%" fill="url(#velo)" />
-    </Svg>
-  );
-}
-
-/* -------------------------------------------------------------- Glifos */
+/* ---------------------------------------------------------------- Glifos */
 
 function Sobre({ tinta = color.ink400 }: { tinta?: string }) {
   return (
     <Svg viewBox="0 0 24 24" width={18} height={18} fill="none">
-      <Path
-        d="M3.5 6.5h17v11h-17z"
-        stroke={tinta}
-        strokeWidth={1.6}
-        strokeLinejoin="round"
-      />
+      <Path d="M3.5 6.5h17v11h-17z" stroke={tinta} strokeWidth={1.6} strokeLinejoin="round" />
       <Path d="M3.5 7l8.5 6 8.5-6" stroke={tinta} strokeWidth={1.6} strokeLinejoin="round" />
     </Svg>
   );
@@ -111,17 +56,45 @@ function Candado({ tinta = color.ink400 }: { tinta?: string }) {
   return (
     <Svg viewBox="0 0 24 24" width={18} height={18} fill="none">
       <Path d="M5.5 10.5h13v9h-13z" stroke={tinta} strokeWidth={1.6} strokeLinejoin="round" />
+      <Path d="M8.5 10.5V7.8a3.5 3.5 0 017 0v2.7" stroke={tinta} strokeWidth={1.6} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** La G de Google, en sus cuatro colores oficiales. */
+function LogoGoogle() {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 20 20">
       <Path
-        d="M8.5 10.5V7.8a3.5 3.5 0 017 0v2.7"
-        stroke={tinta}
-        strokeWidth={1.6}
-        strokeLinecap="round"
+        d="M19.6 10.23c0-.68-.06-1.36-.18-2.03H10v3.85h5.38a4.6 4.6 0 0 1-2 3.02v2.5h3.24c1.89-1.74 2.98-4.3 2.98-7.34Z"
+        fill="#4285F4"
+      />
+      <Path
+        d="M10 20c2.7 0 4.96-.89 6.62-2.42l-3.24-2.51c-.9.61-2.05.96-3.38.96-2.6 0-4.8-1.75-5.59-4.1H1.07v2.59A10 10 0 0 0 10 20Z"
+        fill="#34A853"
+      />
+      <Path d="M4.41 11.93a5.99 5.99 0 0 1 0-3.83V5.5H1.07a10 10 0 0 0 0 9l3.34-2.57Z" fill="#FBBC05" />
+      <Path
+        d="M10 3.98c1.47 0 2.79.5 3.82 1.5l2.87-2.87A10 10 0 0 0 1.07 5.5l3.34 2.6C5.2 5.73 7.4 3.98 10 3.98Z"
+        fill="#EA4335"
       />
     </Svg>
   );
 }
 
-/* ------------------------------------------------------------- Pantalla */
+/** La manzana, blanca, para el botón negro. */
+function LogoApple() {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
+      <Path
+        d="M13.9 10.6c0-2 1.6-3 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7-.6 0-1.6-.7-2.6-.7-1.3 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.5 2.1 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0 0-2.1-.8-2.1-3.1ZM11.9 4.4c.5-.7.9-1.6.8-2.6-.8 0-1.7.6-2.3 1.2-.5.6-.9 1.6-.8 2.5.9.1 1.8-.4 2.3-1.1Z"
+        fill="#FFF"
+      />
+    </Svg>
+  );
+}
+
+/* -------------------------------------------------------------- Pantalla */
 
 export default function Entrar() {
   const router = useRouter();
@@ -129,28 +102,6 @@ export default function Entrar() {
   const [clave, setClave] = useState('');
   const [quePaso, setQuePaso] = useState<string | null>(null);
   const [entrando, setEntrando] = useState(false);
-
-  /* La entrada. `marca` sube y aparece; `hoja` se levanta 380 ms después, que
-     es lo que tarda el ojo en leer un nombre de ocho letras. */
-  const marca = useRef(new Animated.Value(0)).current;
-  const hoja = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.sequence([
-      Animated.timing(marca, {
-        toValue: 1,
-        duration: 520,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.timing(hoja, {
-        toValue: 1,
-        duration: 380,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [marca, hoja]);
 
   const listo = correoValido(correo) && contrasenaValida(clave);
 
@@ -166,15 +117,7 @@ export default function Entrar() {
 
   return (
     <View style={estilos.pantalla}>
-      {/* El recorte lo hace este envoltorio, no la imagen: `cover` la escala
-          hasta 690 px de ancho para cubrir 390 de alto entero, y sin
-          `overflow: hidden` esos 300 px de más se pintan fuera del marco de
-          440 en una ventana ancha. Medido. */}
-      <View style={[StyleSheet.absoluteFill, { overflow: 'hidden' }]}>
-        <ImageBackground source={FOTO} resizeMode="cover" style={StyleSheet.absoluteFill}>
-          <Velo />
-        </ImageBackground>
-      </View>
+      <CampoRojo altura={320} />
 
       <BarraDeEstado />
 
@@ -184,132 +127,108 @@ export default function Entrar() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View
-          style={[
-            estilos.marca,
-            {
-              opacity: marca,
-              transform: [
-                { translateY: marca.interpolate({ inputRange: [0, 1], outputRange: [22, 0] }) },
-              ],
-            },
-          ]}
-        >
-          <MarcaColor tamano={48} />
-          <Text style={estilos.nombre}>Partimos</Text>
-          <Text style={estilos.lema}>
-            {'Comparte el camino.'}
-            {'\n'}
-            {'Llega más lejos.'}
-          </Text>
-        </Animated.View>
-
-        <Animated.View
-          style={{
-            opacity: hoja,
-            transform: [
-              { translateY: hoja.interpolate({ inputRange: [0, 1], outputRange: [34, 0] }) },
-            ],
-          }}
-        >
-          <View style={estilos.hoja}>
-            <Text style={estilos.titulo}>Bienvenido a Partimos</Text>
-            <Text style={estilos.bajada}>
-              Entra para ver tus viajes, tus reservas y tus mensajes.
-            </Text>
-
-            <View style={estilos.campos}>
-              <Campo
-                etiqueta="Correo electrónico"
-                valor={correo}
-                alEscribir={setCorreo}
-                marcador="nombre@correo.com"
-                correo
-                mal={!!quePaso}
-                glifo={<Sobre />}
-              />
-              <Campo
-                etiqueta="Contraseña"
-                valor={clave}
-                alEscribir={setClave}
-                marcador="Al menos 6 caracteres"
-                secreto
-                mal={!!quePaso}
-                alTerminar={enviar}
-                glifo={<Candado />}
-              />
-            </View>
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Olvidé mi contraseña"
-              onPress={() => router.push('/(ayuda)')}
-              style={[estilos.olvide, zonaDeToque]}
-            >
-              <Text style={estilos.olvideTexto}>¿Olvidaste tu contraseña?</Text>
-            </Pressable>
-
-            {quePaso ? <Aviso>{quePaso}</Aviso> : null}
-
-            <View style={{ marginTop: 14 }}>
-              {/* Dentro de la hoja blanca la acción es azul: rojo sobre rojo no
-                  se lee, y la foto de detrás es roja entera. */}
-              <Boton tono="azul" desactivado={!listo || entrando} alPulsar={enviar}>
-                {entrando ? 'Entrando…' : 'Iniciar sesión'}
-              </Boton>
-            </View>
-
-            <View style={estilos.separador}>
-              <View style={estilos.raya} />
-              <Text style={estilos.oTexto}>o continúa con</Text>
-              <View style={estilos.raya} />
-            </View>
-
-            <View style={estilos.otros}>
-              {OTROS.map(({ quien, nombre }) => (
-                <Pressable
-                  key={quien}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Continuar con ${nombre}`}
-                  onPress={async () => {
-                    if (!(await entrarCon(quien))) setQuePaso(SIN_PROVEEDOR(nombre));
-                  }}
-                  style={({ pressed }) => [
-                    estilos.otro,
-                    pressed && { backgroundColor: color.sand100 },
-                  ]}
-                >
-                  <Text style={estilos.otroTexto}>{nombre}</Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Crear una cuenta"
-              onPress={() => router.push('/(cuenta)/registro')}
-              style={[estilos.zonaCrear, zonaDeToque]}
-            >
-              <Text style={estilos.crear}>
-                {'¿Primera vez en Partimos? '}
-                <Text style={estilos.crearFuerte}>Crear cuenta</Text>
-              </Text>
-            </Pressable>
+        {/* La teja de la marca, el saludo y su bajada — el bloque del 10c. */}
+        <View style={estilos.cabecera}>
+          <View style={estilos.teja}>
+            <Marca tamano={27} tinta="#fff" />
           </View>
+          <Text style={estilos.titulo}>
+            {'Bienvenido a'}
+            {'\n'}
+            {'Partimos'}
+          </Text>
+          <Text style={estilos.bajada}>Entra para reservar tu puesto o publicar tu viaje.</Text>
+        </View>
 
+        {/* Lo social primero: los dos proveedores que de verdad funcionan. */}
+        <View style={estilos.sociales}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Continuar con Google"
+            onPress={async () => {
+              if (!(await entrarCon('google'))) setQuePaso(SIN_PROVEEDOR('Google'));
+            }}
+            style={({ pressed }) => [estilos.social, pressed && pulsado.boton]}
+          >
+            <LogoGoogle />
+            <Text style={estilos.socialTexto}>Continuar con Google</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Continuar con Apple"
+            onPress={async () => {
+              if (!(await entrarCon('apple'))) setQuePaso(SIN_PROVEEDOR('Apple'));
+            }}
+            style={({ pressed }) => [estilos.social, estilos.socialOscuro, pressed && pulsado.boton]}
+          >
+            <LogoApple />
+            <Text style={[estilos.socialTexto, { color: color.blanco }]}>Continuar con Apple</Text>
+          </Pressable>
+        </View>
+
+        <View style={estilos.separador}>
+          <View style={estilos.raya} />
+          <Text style={estilos.oTexto}>O con correo</Text>
+          <View style={estilos.raya} />
+        </View>
+
+        <View style={estilos.campos}>
+          <Campo
+            etiqueta="Correo"
+            valor={correo}
+            alEscribir={setCorreo}
+            marcador="nombre@correo.com"
+            correo
+            mal={!!quePaso}
+            glifo={<Sobre />}
+          />
+          <Campo
+            etiqueta="Contraseña"
+            valor={clave}
+            alEscribir={setClave}
+            marcador="Al menos 6 caracteres"
+            secreto
+            mal={!!quePaso}
+            alTerminar={enviar}
+            glifo={<Candado />}
+          />
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Olvidé mi contraseña"
+            onPress={() => router.push('/(ayuda)')}
+            style={[estilos.olvide, zonaDeToque]}
+          >
+            <Text style={estilos.olvideTexto}>¿Olvidaste tu contraseña?</Text>
+          </Pressable>
+
+          {quePaso ? <Aviso>{quePaso}</Aviso> : null}
+
+          <Boton desactivado={!listo || entrando} alPulsar={enviar}>
+            {entrando ? 'Entrando…' : 'Iniciar sesión'}
+          </Boton>
+        </View>
+
+        <View style={estilos.pie}>
           <Text style={estilos.legal}>
-            {'Al continuar aceptas nuestros '}
-            <Text style={estilos.legalEnlace}>términos de uso</Text>
+            {'Al continuar aceptas los '}
+            <Text style={estilos.legalFuerte}>Términos</Text>
             {' y la '}
-            <Text style={estilos.legalEnlace}>política de privacidad</Text>
+            <Text style={estilos.legalFuerte}>Política de privacidad</Text>
             {'.'}
           </Text>
-
-          <View style={estilos.protegido}>
-            <Escudo tamano={14} tinta="rgba(255,255,255,.86)" />
-            <Text style={estilos.protegidoTexto}>Tus datos están protegidos</Text>
-          </View>
-        </Animated.View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Crear una cuenta"
+            onPress={() => router.push('/(cuenta)/registro')}
+            style={zonaDeToque}
+          >
+            <Text style={estilos.crear}>
+              {'¿No tienes cuenta? '}
+              <Text style={estilos.crearFuerte}>Regístrate</Text>
+            </Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </View>
   );
@@ -318,140 +237,93 @@ export default function Entrar() {
 const estilos = StyleSheet.create({
   pantalla: {
     flex: 1,
-    backgroundColor: '#2A0A12',
+    backgroundColor: color.blanco,
     maxWidth: espacio.marco,
     width: '100%',
     alignSelf: 'center',
   },
+  desplazable: { paddingBottom: 24 },
 
-  desplazable: {
-    flexGrow: 1,
-    justifyContent: 'flex-end',
-    paddingHorizontal: espacio.gutter,
-    paddingTop: 30,
-    paddingBottom: 26,
-  },
-
-  marca: { alignItems: 'center', gap: 9, paddingBottom: 24 },
-  nombre: {
-    fontSize: 27,
-    lineHeight: 29,
-    fontWeight: '700',
-    letterSpacing: 27 * 0.06,
-    textTransform: 'uppercase',
-    color: '#fff',
-    fontFamily: familia,
-  },
-  lema: {
-    textAlign: 'center',
-    fontSize: 14,
-    lineHeight: 21,
-    fontWeight: '500',
-    color: 'rgba(255,255,255,.94)',
-    fontFamily: familia,
-  },
-
-  hoja: {
-    backgroundColor: color.blanco,
-    borderRadius: 26,
-    padding: 20,
-    shadowColor: '#1C0A10',
-    shadowOpacity: 0.34,
-    shadowRadius: 40,
-    shadowOffset: { width: 0, height: 18 },
-    elevation: 8,
-  },
-  titulo: {
-    fontSize: 21,
-    lineHeight: 26,
-    fontWeight: '600',
-    letterSpacing: -0.63,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  bajada: {
-    fontSize: 13.5,
-    lineHeight: 19.575,
-    color: color.ink600,
-    marginTop: 5,
-    fontFamily: familia,
-  },
-
-  campos: { gap: 13, marginTop: 18 },
-
-  olvide: { alignSelf: 'flex-start', marginTop: 2 },
-  olvideTexto: {
-    fontSize: 13.5,
-    lineHeight: 18.85,
-    fontWeight: '600',
-    color: color.azul500,
-    fontFamily: familia,
-  },
-
-  separador: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 20 },
-  raya: { flex: 1, height: 1, backgroundColor: color.bordeSutil },
-  oTexto: {
-    fontSize: 11.5,
-    lineHeight: interlinea(11.5),
-    fontWeight: '600',
-    letterSpacing: 11.5 * TRACK_MICRO,
-    textTransform: 'uppercase',
-    color: color.ink500,
-    fontFamily: familia,
-  },
-
-  otros: { flexDirection: 'row', gap: 10, marginTop: 16 },
-  otro: {
-    flex: 1,
-    height: espacio.control,
-    borderRadius: radio.control,
-    borderWidth: 1,
-    borderColor: color.bordePorDefecto,
-    backgroundColor: color.blanco,
+  cabecera: { paddingTop: 40, paddingHorizontal: espacio.gutter, gap: 15 },
+  /** La teja de 52 al radio 15, roja, con la marca en blanco. */
+  teja: {
+    width: 52,
+    height: 52,
+    borderRadius: 15,
+    backgroundColor: color.rojo500,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  otroTexto: {
-    fontSize: 15.5,
-    lineHeight: interlinea(15),
-    fontWeight: '600',
-    letterSpacing: -0.15,
+  titulo: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: '700',
+    letterSpacing: -0.84,
     color: color.ink900,
     fontFamily: familia,
   },
+  bajada: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
 
-  zonaCrear: { alignItems: 'center', marginTop: 16 },
-  crear: {
-    textAlign: 'center',
-    fontSize: 13.5,
-    lineHeight: 19.575,
-    color: color.ink600,
-    fontFamily: familia,
-  },
-  crearFuerte: { fontWeight: '700', color: color.rojo600 },
-
-  legal: {
-    textAlign: 'center',
-    fontSize: 12.5,
-    lineHeight: 18,
-    color: 'rgba(255,255,255,.86)',
-    marginTop: 18,
-    fontFamily: familia,
-  },
-  legalEnlace: { fontWeight: '600', color: '#fff', textDecorationLine: 'underline' },
-
-  protegido: {
+  sociales: { paddingTop: 40, paddingHorizontal: espacio.gutter, gap: 10 },
+  social: {
+    height: 52,
+    borderRadius: 15,
+    backgroundColor: color.blanco,
+    borderWidth: 1.5,
+    borderColor: color.ink200,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 7,
-    marginTop: 12,
+    gap: 10,
   },
-  protegidoTexto: {
-    fontSize: 12.5,
-    lineHeight: 18,
-    fontWeight: '500',
-    color: 'rgba(255,255,255,.86)',
+  socialOscuro: { backgroundColor: color.ink900, borderColor: color.ink900 },
+  socialTexto: {
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: '600',
+    letterSpacing: -0.16,
+    color: color.ink900,
     fontFamily: familia,
   },
+
+  separador: {
+    paddingTop: 25,
+    paddingHorizontal: espacio.gutter,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+  },
+  raya: { flex: 1, height: 1, backgroundColor: color.ink200 },
+  oTexto: {
+    fontSize: 10,
+    lineHeight: 14,
+    fontWeight: '500',
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
+    color: color.ink600,
+    fontFamily: familia,
+  },
+
+  campos: { paddingTop: 25, paddingHorizontal: espacio.gutter, gap: 15 },
+  olvide: { alignSelf: 'flex-start' },
+  olvideTexto: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    color: color.rojo700,
+    fontFamily: familia,
+  },
+
+  pie: { paddingTop: 30, paddingHorizontal: espacio.gutter, gap: 8, alignItems: 'center' },
+  legal: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '400',
+    color: color.ink600,
+    textAlign: 'center',
+    fontFamily: familia,
+  },
+  legalFuerte: { color: color.ink900, fontWeight: '500' },
+  crear: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  crearFuerte: { color: color.rojo600, fontWeight: '600' },
 });

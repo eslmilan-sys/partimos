@@ -168,14 +168,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   filaMarca: { flexDirection: 'row', alignItems: 'center', gap: 11, marginTop: 14 },
-  titular: {
-    fontSize: 27,
-    lineHeight: 31,
-    letterSpacing: -1.12,
-    fontWeight: '600',
-    color: '#fff',
-    fontFamily: familia,
-  },
+  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, },
 
   cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 22, paddingBottom: 30, gap: 10 },
 
