@@ -266,14 +266,23 @@ export function Persona({ tamano = 21, tinta = color.ink700, grueso, lleno }: Pr
  * La marca: cuatro cuadrados en rejilla, la geometría de la bandera. No hay
  * archivo de logo en el traspaso; se dibuja.
  */
-export function Marca({ tamano = 26, tinta = '#fff' }: Props) {
-  const c = tamano / 2 - 1;
+/**
+ * LA MARCA DEL v6: dos caminos que se separan del mismo punto — el de la
+ * izquierda en acento, el de la derecha en tinta — y el punto de partida en
+ * rojo. Es el dibujo del propio producto: dos que parten juntos.
+ *
+ * `tinta` viste el camino derecho (tinta por defecto; blanco sobre oscuro).
+ * El camino izquierdo y el punto se quedan en el acento salvo que la marca
+ * entera vaya monocroma sobre oscuro.
+ */
+export function Marca({ tamano = 21, tinta = color.ink900 }: Props) {
+  const monocroma = tinta === '#fff' || tinta === color.blanco;
+  const acento = monocroma ? tinta : color.rojo500;
   return (
-    <Svg viewBox={`0 0 ${tamano} ${tamano}`} width={tamano} height={tamano}>
-      <Rect x={0} y={0} width={c} height={c} rx={2} fill={tinta} />
-      <Rect x={c + 2} y={0} width={c} height={c} rx={2} fill={tinta} opacity={0.5} />
-      <Rect x={0} y={c + 2} width={c} height={c} rx={2} fill={tinta} opacity={0.5} />
-      <Rect x={c + 2} y={c + 2} width={c} height={c} rx={2} fill={tinta} />
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path d="M5 19c0-6.5 3.8-8.6 6.5-12" stroke={acento} strokeWidth={2.4} strokeLinecap="round" />
+      <Path d="M19 19c0-6.5-3.8-8.6-6.5-12" stroke={tinta} strokeWidth={2.4} strokeLinecap="round" />
+      <Circle cx={12} cy={5.4} r={2.1} fill={acento} />
     </Svg>
   );
 }
@@ -470,16 +479,41 @@ export function Salir({ tamano = 20, tinta = color.rojo600 }: Props) {
 }
 
 /** Las dos flechas de intercambiar: origen por destino, orden por orden. */
-export function Intercambio({ tamano = 18, tinta = color.ink600 }: Props) {
+/** Las dos flechas verticales del v6, la baja y la sube. */
+export function Intercambio({ tamano = 17, tinta = color.ink700, grueso }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path
-        d="M7 4v13m0 0l-3-3m3 3l3-3M17 20V7m0 0l-3 3m3-3l3 3"
+        d="M7.4 4v16M7.4 20 4 16.6M16.6 20V4M16.6 4 20 7.4"
         stroke={tinta}
-        strokeWidth={trazo(tamano)}
+        strokeWidth={grueso ?? 2.1}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </Svg>
+  );
+}
+
+/** El calendario del v6: la caja, la línea del mes y los dos postes. */
+export function Calendario({ tamano = 17, tinta = color.inkIcono, grueso }: Props) {
+  const t = grueso ?? 2.1;
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Rect x={3.6} y={5.4} width={16.8} height={14.6} rx={3} stroke={tinta} strokeWidth={t} />
+      <Path d="M3.6 9.8h16.8M8.2 3.4v3.4M15.8 3.4v3.4" stroke={tinta} strokeWidth={t} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** El pin relleno del destino: rojo con el punto blanco. «Hacia», siempre. */
+export function PinLleno({ tamano = 13, tinta = color.rojo500 }: Props) {
+  return (
+    <Svg viewBox="0 0 16 16" width={tamano} height={tamano} fill="none">
+      <Path
+        d="M8 1.6c2.6 0 4.7 2 4.7 4.5 0 3.4-4.7 8.3-4.7 8.3S3.3 9.5 3.3 6.1C3.3 3.6 5.4 1.6 8 1.6Z"
+        fill={tinta}
+      />
+      <Circle cx={8} cy={6.1} r={1.7} fill="#FFF" />
     </Svg>
   );
 }

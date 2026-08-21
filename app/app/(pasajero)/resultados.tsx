@@ -1,14 +1,28 @@
 /**
- * `1b` / `3b` Resultados — los viajes completos y sin cuenta.
+ * Resultados — la estructura del v6, pantalla «Resultados» de
+ * `diseno/Partimos App v6.dc.html`.
  *
- * El pasajero ve precio, puestos, equipaje y quién maneja antes de registrarse.
- * La puerta está más adelante, al pedir puesto. Los filtros son los tres del
- * traspaso: acepta maletas, solo mujeres y método de pago.
+ * Lo fijo, de arriba a abajo: la fila de navegación (volver y editar la
+ * búsqueda, en celdas de 44), la cabecera de ruta — DESDE sobre el origen,
+ * HASTA en acento sobre el destino, la flecha punteada entre los dos — con
+ * su línea de meta («Hoy · 1 pasajero · 4 viajes»), la barra de chips
+ * (Filtros en tinta con su cuenta, el orden, el día) y la fila de filtros
+ * aplicados, retirables uno a uno con su «Limpiar». Lo que se desplaza: la
+ * mejor opción con la frase que se la gana, los resultados, y los agotados
+ * en gris con su lista de espera. Abajo, fijo, el botón de avisarme.
+ *
+ * **Sin barra de pestañas**: es una vista empujada, dice la sección 09.
+ *
+ * Tres invariantes del archivo viven aquí: la línea de meta dice su cuenta y
+ * su sujeto y se lee de la búsqueda, así que no puede contradecirla (5); los
+ * filtros aplicados se ven y se quitan donde estén en vigor, incluido el
+ * vacío que ellos causaron (6); y «Mejor opción» lleva la frase que la
+ * justifica — calculada de los datos, no escrita a mano (7).
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -17,7 +31,6 @@ import { useVolver } from '@/ui/salidas';
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import {
-  COMO_SE_ORDENA,
   type Filtros,
   type Orden,
   buscarViajes,
@@ -27,29 +40,27 @@ import {
 import { hayCorredor, nombreDeCiudad, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { guardarRutaBuscada } from '@/servicios/rutas';
 import { useMiId } from '@/servicios/sesion';
-import { NOMBRE_DE_FRANJA, type Franja, franjaDe } from '@/dominio/rutinas';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
-import { Pestanas } from '@/ui/Pestanas';
-import { CampoRojo, motivoDe } from '@/ui/CampoRojo';
-import { Boton, Epigrafe } from '@/ui/controles';
-import { tabular } from '@/ui/dinero';
-import { hora } from '@/ui/fechas';
-import { Atras, Cerrar, Filtros as IconoFiltros } from '@/ui/iconos';
-import { TarjetaDeViaje, type ViajeEnTarjeta } from '@/ui/TarjetaDeViaje';
-import { familia, color, espacio, radio } from '@/ui/tokens';
-
-
+import { CampoRojo } from '@/ui/CampoRojo';
+import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
+import { Boton } from '@/ui/controles';
+import { cifraRedonda, tabular } from '@/ui/dinero';
+import { diaCorto, diaLargo, hora } from '@/ui/fechas';
+import { Atras, Campana, Cerrar, Filtros as IconoFiltros } from '@/ui/iconos';
+import { AroDeOrigen, PuntaDeFlecha, TarjetaDeViaje, type ViajeEnTarjeta } from '@/ui/TarjetaDeViaje';
+import { familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
 /** La ruta del traspaso, cuando la pantalla se abre suelta desde el índice. */
 const ORIGEN_POR_DEFECTO = CIUDAD_POR_DEFECTO;
 const DESTINO_POR_DEFECTO = 'chitre';
 
+/** Un viaje al que no le caben tus pasajeros: se enseña agotado, no se borra. */
+type ViajeAgotado = ViajeEnTarjeta;
+
 export default function Resultados() {
   const router = useRouter();
   const volver = useVolver();
-  // `3a` manda a dónde vas. Sin eso —solo abriendo la pantalla suelta— la ruta
-  // del traspaso, que es la que tiene viajes sembrados.
   const params = useLocalSearchParams<{
     origen?: string;
     destino?: string;
@@ -58,20 +69,13 @@ export default function Resultados() {
     pasajeros?: string;
   }>();
 
-  /**
-   * La ruta se lee del parámetro **después** del primer render, y no durante.
-   *
-   * El sitio sale prerenderizado sin parámetros, así que el HTML que llega ya
-   * dice «→ Chitré»; pintar «→ Colón» en el primer render del navegador es una
-   * discordancia de hidratación —React 418, medido— y React tira el árbol y lo
-   * rehace. Es el mismo patrón que usan las otras pantallas con parámetro:
-   * pantalla vacía hasta que se sabe qué enseñar.
-   */
+  /* La ruta se lee del parámetro DESPUÉS del primer render: el sitio sale
+     prerenderizado sin parámetros y pintar otra cosa en el primer render del
+     navegador es una discordancia de hidratación (React 418, medido). */
   const [ruta, setRuta] = useState<{
     origen: string;
     destino: string;
     etiqueta: string;
-    /** El día que `3a` eligió. `null` = el primero con salidas. */
     dia: string | null;
     pasajeros: number;
   } | null>(null);
@@ -88,211 +92,371 @@ export default function Resultados() {
 
   const origen = ruta?.origen ?? ORIGEN_POR_DEFECTO;
   const destino = ruta?.destino ?? DESTINO_POR_DEFECTO;
-  // Un sitio de Mapbox no es una ciudad que servimos: se busca, no se encuentra,
-  // y la pantalla tiene que decir eso y no «nadie sale con esos filtros».
   const servimosLaRuta = hayCorredor(origen, destino);
-  /** Sin sesión que preguntar —solo en simulado—: la persona del recorrido. */
   const yo = useMiId('22222222-2222-4222-8222-222222222222');
   const [guardada, setGuardada] = useState(false);
   const [filtros, setFiltros] = useState<Filtros>({});
   const [hojaAbierta, setHojaAbierta] = useState(false);
+  const [eligiendoDia, setEligiendoDia] = useState(false);
   const [viajes, setViajes] = useState<ViajeEnTarjeta[]>([]);
+  const [agotados, setAgotados] = useState<ViajeAgotado[]>([]);
   const [dia, setDia] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(true);
 
   const buscar = useCallback(async () => {
     if (!ruta) return;
+    setCargando(true);
     if (!servimosLaRuta) {
-      /* El día elegido sigue siendo el día elegido aunque no haya ruta:
-         poner `null` hacía que la cabecera dijera «Hoy» después de haber
-         elegido «Mañana». */
       setDia(ruta.dia);
       setViajes([]);
+      setAgotados([]);
+      setCargando(false);
       return;
     }
-    /* El día elegido manda. Sin él —al abrir la pantalla suelta— el primero
-       con salidas, que es más útil que un «hoy» vacío. */
     const fecha = ruta.dia ?? (await proximoDiaConViajes(origen, destino));
     setDia(fecha);
     const encontrados = await buscarViajes(origen, destino, fecha, filtros);
-    setViajes(
-      encontrados
-        .map(
-          (v): ViajeEnTarjeta => ({
-            id: v.id!,
-            salida: hora(v.departure_at!),
-            duracion: duracion(v.departure_at!, v.arrival_estimate_at),
-            aporteCentavos: Number(v.price_cents ?? 0),
-            puestosLibres: v.seats_available ?? 0,
-            origen: v.origin_label ?? '',
-            destino: (v.destination_label ?? '').replace(' Unión', ''),
-            llegada: v.arrival_estimate_at ? hora(v.arrival_estimate_at) : '',
-            equipaje: etiquetaDeMaletero(v.accepts_luggage),
-            aceptaMascotas: v.allows_pets,
-            sePuedeFumar: v.allows_smoking,
-            conductor: {
-              nombre: `${v.first_name ?? ''} ${v.last_initial ?? ''}`.trim(),
-              calificacion: v.driver_rating ?? 0,
-              carro: `${v.model ?? ''} ${v.color ?? ''}`.trim(),
-            },
-            canal: NOMBRE_DEL_CANAL.yappy_app,
-          }),
-        )
-        /* Un viaje con dos puestos no sirve a tres personas: no es un
-           resultado, es una decepción a un toque de distancia. */
-        .filter((v) => v.puestosLibres >= (ruta.pasajeros ?? 1))
-        .sort((a, b) => a.salida.localeCompare(b.salida)),
-    );
+    const todos = encontrados
+      .map(
+        (v): ViajeEnTarjeta => ({
+          id: v.id!,
+          salida: hora(v.departure_at!),
+          duracion: duracion(v.departure_at!, v.arrival_estimate_at),
+          aporteCentavos: Number(v.price_cents ?? 0),
+          puestosLibres: v.seats_available ?? 0,
+          origen: v.origin_label ?? '',
+          destino: (v.destination_label ?? '').replace(' Unión', ''),
+          llegada: v.arrival_estimate_at ? hora(v.arrival_estimate_at) : '',
+          equipaje: etiquetaDeMaletero(v.accepts_luggage),
+          aceptaMascotas: v.allows_pets,
+          sePuedeFumar: v.allows_smoking,
+          conductor: {
+            nombre: `${v.first_name ?? ''} ${v.last_initial ?? ''}`.trim(),
+            calificacion: v.driver_rating ?? 0,
+            carro: `${v.model ?? ''} ${v.color ?? ''}`.trim(),
+          },
+          canal: NOMBRE_DEL_CANAL.yappy_app,
+        }),
+      )
+      .sort((a, b) => a.salida.localeCompare(b.salida));
+
+    /* Un viaje sin sitio para tus pasajeros no se borra: se enseña agotado,
+       en gris, con su lista de espera. Borrado parece que no existió. */
+    setViajes(todos.filter((v) => v.puestosLibres >= (ruta.pasajeros ?? 1)));
+    setAgotados(todos.filter((v) => v.puestosLibres < (ruta.pasajeros ?? 1)));
+    setCargando(false);
   }, [filtros, ruta, origen, destino, servimosLaRuta]);
 
   useEffect(() => {
     buscar();
   }, [buscar]);
 
-  const alternar = (clave: keyof Filtros) =>
+  const alternar = (clave: ClaveDeFiltro) =>
     setFiltros((f) => ({ ...f, [clave]: f[clave] ? undefined : true }));
 
   if (!ruta) return <Cargando />;
 
+  const orden: Orden = filtros.orden ?? 'temprano';
+  const ordenados =
+    orden === 'barato' ? [...viajes].sort((a, b) => a.aporteCentavos - b.aporteCentavos) : viajes;
+
+  /**
+   * LA MEJOR OPCIÓN Y SU RAZÓN — calculadas, no escritas a mano. Con el
+   * orden en hora es la salida más temprana; con el orden en aporte, la más
+   * barata. La frase dice exactamente eso, así que nunca puede mentir.
+   */
+  const mejor = ordenados.length > 1 ? ordenados[0] : null;
+  const resto = mejor ? ordenados.slice(1) : ordenados;
+  const razonDeMejor = mejor
+    ? orden === 'barato'
+      ? `El aporte más bajo del día para esta ruta: B/${cifraRedonda(mejor.aporteCentavos)}.`
+      : `La salida más temprana del día con cupo para ${ruta.pasajeros === 1 ? 'tu puesto' : 'tus puestos'}.`
+    : null;
+
+  const etiquetaDestino = ruta.etiqueta || nombreDeCiudad(destino);
+  const cuantosFiltrosPuestos = cuantosFiltros(filtros);
+  const activos = filtrosActivos(filtros);
+
+  const guardarAlerta = async () => {
+    if (!yo) {
+      router.push('/(cuenta)/entrar');
+      return;
+    }
+    await guardarRutaBuscada(yo, origen, destino, dia ?? diaEnPanama(new Date()));
+    setGuardada(true);
+  };
+
   return (
     <View style={estilos.pantalla}>
-      {/* El dibujo del destino detrás del campo: la torre para la capital, la
-          palmera para la costa, el hibisco para Azuero. El campo liso no
-          decía a dónde vas. */}
-      <CampoRojo altura={214} motivo={motivoDe(destino)} />
+      <CampoRojo altura={340} />
 
       <BarraDeEstado />
 
-      <View style={estilos.cabecera}>
-        <View style={estilos.filaSuperior}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Atrás"
-            onPress={() => volver()}
-            style={estilos.circulo}
-          >
-            <Atras />
-          </Pressable>
-        </View>
+      {/* La fila de navegación: dos celdas de 44 en los extremos. */}
+      <View style={estilos.filaNav}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Atrás"
+          onPress={() => volver()}
+          style={({ pressed }) => [estilos.celdaIcono, pressed && pulsado.celda]}
+        >
+          <Atras tamano={23} tinta={color.ink900} />
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Editar la búsqueda"
+          onPress={() => volver()}
+          style={({ pressed }) => [estilos.celdaIcono, pressed && pulsado.celda]}
+        >
+          <Lapiz />
+        </Pressable>
+      </View>
 
-        <Text style={estilos.titular}>
-          {nombreDeCiudad(origen)}
-          {'\n'}
-          <Text style={estilos.titularFuerte}>
-            {`→ ${ruta.etiqueta || nombreDeCiudad(destino)}`}
-          </Text>
-        </Text>
-        <Text style={estilos.subtitulo}>
-          {`${cuandoTexto(dia)} · ${ruta.pasajeros} ${ruta.pasajeros === 1 ? 'puesto' : 'puestos'} · ${viajes.length} ${viajes.length === 1 ? 'viaje' : 'viajes'}`}
+      {/* La cabecera de ruta: DESDE → HASTA, y la línea de meta que se lee
+          de la propia búsqueda — no puede contradecirla. */}
+      <View style={estilos.cabecera}>
+        <View style={estilos.filaRuta}>
+          <View>
+            <Text style={estilos.cejaRuta}>Desde</Text>
+            <Text style={estilos.ciudad} numberOfLines={1}>
+              {nombreDeCiudad(origen)}
+            </Text>
+          </View>
+          <FlechaDeRuta />
+          <View>
+            <Text style={[estilos.cejaRuta, estilos.cejaHasta]}>Hasta</Text>
+            <Text style={estilos.ciudad} numberOfLines={1}>
+              {etiquetaDestino}
+            </Text>
+          </View>
+        </View>
+        <Text style={[estilos.meta, tabular]}>
+          {`${cuandoTexto(dia)} · ${ruta.pasajeros} ${ruta.pasajeros === 1 ? 'pasajero' : 'pasajeros'} · ${
+            cargando
+              ? 'buscando…'
+              : viajes.length === 0
+                ? 'sin viajes'
+                : `${viajes.length} ${viajes.length === 1 ? 'viaje' : 'viajes'}`
+          }`}
         </Text>
       </View>
 
-      <BarraDeFiltros
-        filtros={filtros}
-        alAlternar={alternar}
-        alOrdenar={(o) => setFiltros((f) => ({ ...f, orden: o }))}
-        alAbrir={() => setHojaAbierta(true)}
-      />
+      {/* La barra: Filtros en tinta con su cuenta, el orden, el día. */}
+      <View style={estilos.barraChips}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            cuantosFiltrosPuestos === 0 ? 'Filtros' : `Filtros, ${cuantosFiltrosPuestos} puestos`
+          }
+          onPress={() => setHojaAbierta(true)}
+          style={({ pressed }) => [estilos.chipOscuro, pressed && pulsado.boton]}
+        >
+          <IconoFiltros tamano={15} tinta={color.blanco} />
+          <Text style={estilos.chipOscuroTexto}>Filtros</Text>
+          {cuantosFiltrosPuestos > 0 ? (
+            <View style={estilos.cuenta}>
+              <Text style={estilos.cuentaTexto}>{String(cuantosFiltrosPuestos)}</Text>
+            </View>
+          ) : null}
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Ordenar: ${orden === 'temprano' ? 'salida más temprana' : 'aporte más bajo'}. Cambiar`}
+          onPress={() =>
+            setFiltros((f) => ({ ...f, orden: orden === 'temprano' ? 'barato' : 'temprano' }))
+          }
+          style={({ pressed }) => [estilos.chipClaro, pressed && { backgroundColor: color.lavadoChip }]}
+        >
+          <Text style={estilos.chipClaroTexto}>
+            {orden === 'temprano' ? 'Más temprano' : 'Aporte más bajo'}
+          </Text>
+          <Chevron />
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Día: ${cuandoTexto(dia)}. Cambiar`}
+          onPress={() => setEligiendoDia(true)}
+          style={({ pressed }) => [estilos.chipClaro, pressed && { backgroundColor: color.lavadoChip }]}
+        >
+          <Text style={estilos.chipClaroTexto}>{cuandoTexto(dia)}</Text>
+        </Pressable>
+      </View>
+
+      {/* Los filtros aplicados, retirables uno a uno — también cuando son
+          ellos los que dejaron la lista vacía. */}
+      {activos.length > 0 ? (
+        <View style={estilos.filaAplicados}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={estilos.tiraAplicados}
+          >
+            {activos.map((f) => (
+              <Pressable
+                key={f.clave}
+                accessibilityRole="button"
+                accessibilityLabel={`Quitar el filtro ${f.etiqueta}`}
+                onPress={() => alternar(f.clave)}
+                style={({ pressed }) => [estilos.chipAplicado, pressed && { backgroundColor: color.lavado }]}
+              >
+                <Text style={estilos.chipAplicadoTexto}>{f.etiqueta}</Text>
+                <Cerrar tamano={13} tinta={color.inkIcono} />
+              </Pressable>
+            ))}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Quitar todos los filtros"
+              onPress={() => setFiltros((f) => ({ orden: f.orden }))}
+              style={estilos.limpiar}
+            >
+              <Text style={estilos.limpiarTexto}>Limpiar</Text>
+            </Pressable>
+          </ScrollView>
+        </View>
+      ) : null}
 
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={estilos.lista}
         showsVerticalScrollIndicator={false}
       >
-        {viajes.length === 0 ? (
+        {cargando ? (
+          <View style={{ gap: 16 }}>
+            {[0, 1, 2].map((i) => (
+              <Esqueleto key={i} />
+            ))}
+          </View>
+        ) : viajes.length === 0 && agotados.length === 0 ? (
           <View style={estilos.vacio}>
+            <View style={estilos.vacioDibujo}>
+              <AroDeOrigen tinta={color.ink300} />
+              <View style={estilos.vacioLinea} />
+              <PuntaDeFlecha tamano={10} tinta={color.ink300} />
+            </View>
             {servimosLaRuta ? (
               <>
-                <Text style={estilos.vacioTitulo}>
-                  {ruta.pasajeros > 1
-                    ? `Nadie lleva ${ruta.pasajeros} puestos juntos ese día.`
-                    : 'Nadie sale ese día con esos filtros.'}
-                </Text>
+                <Text style={estilos.vacioTitulo}>{`Sin viajes a ${etiquetaDestino}`}</Text>
                 <Text style={estilos.vacioTexto}>
-                  {ruta.pasajeros > 1
-                    ? 'Prueba con menos puestos o con otro día.'
-                    : 'Quita alguno o mira otro día.'}
+                  {activos.length > 0
+                    ? 'Nadie ha publicado esta ruta con los filtros aplicados. Quita alguno o mira otro día.'
+                    : ruta.pasajeros > 1
+                      ? `Nadie lleva ${ruta.pasajeros} puestos juntos ese día. Prueba con menos puestos o con otro día.`
+                      : 'Nadie sale ese día. Mira otro día, o guarda la ruta y te avisamos.'}
                 </Text>
               </>
             ) : (
               <>
-                {/* Una búsqueda sin resultados no es un fallo: es un aviso a los
-                    conductores. PRODUCT.md lo dice, y por eso se nombra la ruta
-                    en vez de decir «no hay nada». */}
                 <Text style={estilos.vacioTitulo}>Todavía no hay esa ruta.</Text>
                 <Text style={estilos.vacioTexto}>
-                  {`Nadie ha publicado ${nombreDeCiudad(origen)} → ${ruta.etiqueta || nombreDeCiudad(destino)}. Guárdala y te avisamos cuando alguien la abra.`}
+                  {`Nadie ha publicado ${nombreDeCiudad(origen)} → ${etiquetaDestino}. Guárdala y te avisamos cuando alguien la abra.`}
                 </Text>
               </>
             )}
           </View>
         ) : (
-          /* Partido por franjas: siete horas seguidas en una lista se leen
-             peor que «las de la mañana» y «las de la tarde», que es como se
-             piensa un viaje. Cuando todas caen en la misma franja, sale una
-             sección y ya. */
-          porFranjas(viajes).map(([franja, deLaFranja], seccion) => (
-            <View key={franja} style={seccion > 0 ? { marginTop: 22 } : undefined}>
-              <View style={estilos.filaSeccion}>
-                <Epigrafe>{`Salidas de ${NOMBRE_DE_FRANJA[franja]}`}</Epigrafe>
-                <Text style={estilos.orden}>
-                  {deLaFranja.length === 1 ? '1 viaje' : `${deLaFranja.length} viajes`}
-                </Text>
+          <View style={{ gap: 16 }}>
+            {/* La mejor opción, con la frase que se la gana y su acción. */}
+            {mejor ? (
+              <View style={[estilos.destacada, sombra.l]}>
+                <View style={estilos.filaDestacada}>
+                  <View style={estilos.selloMejor}>
+                    <Text style={estilos.selloMejorTexto}>Mejor opción</Text>
+                  </View>
+                  <Text style={estilos.metaDestacada}>{`Sale a las ${mejor.salida}`}</Text>
+                </View>
+                <Text style={estilos.razon}>{razonDeMejor}</Text>
+                <TarjetaDeViaje
+                  viaje={mejor}
+                  alPulsar={() =>
+                    router.push({ pathname: '/(pasajero)/viaje', params: { viaje: mejor.id } })
+                  }
+                />
+                <Boton
+                  tamano="md"
+                  alPulsar={() =>
+                    router.push({ pathname: '/(pasajero)/viaje', params: { viaje: mejor.id } })
+                  }
+                >
+                  Reservar puesto
+                </Boton>
               </View>
-              <View style={{ gap: 8 }}>
-                {deLaFranja.map((v, i) => (
-                  <TarjetaDeViaje
-                    key={v.id}
-                    viaje={v}
-                    /* La más temprana del día, marcada una sola vez. */
-                    marca={seccion === 0 && i === 0 && (filtros.orden ?? 'temprano') === 'temprano'
-                      ? 'Más temprano'
-                      : undefined}
-                    alPulsar={() =>
-                      router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })
-                    }
-                  />
-                ))}
-              </View>
-            </View>
-          ))
-        )}
+            ) : null}
 
-        {/* Una búsqueda que no llena el día no es un fallo: es lo que un
-            conductor necesita saber. `PRODUCT.md` lo dice, y guardar la ruta
-            es la única forma que hay de decírselo. */}
-        {servimosLaRuta && viajes.length > 0 && viajes.length < 4 ? (
-          <View style={estilos.avisarme}>
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={estilos.avisarmeTexto}>
-                {guardada
-                  ? 'Guardada. Te avisamos en cuanto alguien publique.'
-                  : '¿Nada a tu hora? Te avisamos cuando alguien publique esta ruta.'}
+            {resto.map((v) => (
+              <TarjetaDeViaje
+                key={v.id}
+                viaje={v}
+                alPulsar={() =>
+                  router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })
+                }
+              />
+            ))}
+
+            {/* Los agotados, en gris, con su lista de espera: que no quepa
+                no significa que no exista. */}
+            {agotados.map((v) => (
+              <View key={v.id} style={estilos.agotada}>
+                <View style={estilos.filaAgotada}>
+                  <Text style={[estilos.horaAgotada, tabular]}>
+                    {`${v.salida} → ${v.llegada}`}
+                  </Text>
+                  <View style={estilos.selloAgotado}>
+                    <Text style={estilos.selloAgotadoTexto}>Agotado</Text>
+                  </View>
+                </View>
+                <Text style={estilos.metaAgotada} numberOfLines={1}>
+                  {`${v.conductor.nombre} · B/${cifraRedonda(v.aporteCentavos)}${
+                    v.puestosLibres > 0
+                      ? ` · ${v.puestosLibres === 1 ? 'queda 1 cupo' : `quedan ${v.puestosLibres} cupos`} y van ${ruta.pasajeros}`
+                      : ''
+                  }`}
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Avísame si se libera un cupo"
+                  onPress={guardarAlerta}
+                  style={({ pressed }) => [estilos.botonEspera, pressed && { backgroundColor: color.lavadoChip }]}
+                >
+                  <Campana tamano={15} tinta={color.inkIcono} />
+                  <Text style={estilos.botonEsperaTexto}>Avísame si se libera un cupo</Text>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Fijo abajo: la alerta de ruta. Blanca cuando está por poner, teñida
+          del acento cuando ya quedó puesta. */}
+      {servimosLaRuta ? (
+        <View style={estilos.pieAlerta}>
+          {guardada ? (
+            <View style={[estilos.alerta, estilos.alertaPuesta]}>
+              <Visto />
+              <Text style={[estilos.alertaTexto, { color: color.rojo800 }]}>
+                Te avisamos cuando alguien publique esta ruta
               </Text>
             </View>
-            {!guardada ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Avisarme de esta ruta"
-                onPress={async () => {
-                  if (!yo) {
-                    router.push('/(cuenta)/entrar');
-                    return;
-                  }
-                  await guardarRutaBuscada(yo, origen, destino, dia ?? diaEnPanama(new Date()));
-                  setGuardada(true);
-                }}
-                style={({ pressed }) => [
-                  estilos.botonAvisarme,
-                  pressed && { backgroundColor: color.rojo600 },
-                ]}
-              >
-                <Text style={estilos.botonAvisarmeTexto}>Avisarme</Text>
-              </Pressable>
-            ) : null}
-          </View>
-        ) : null}
-      </ScrollView>
-    <HojaDeFiltros
+          ) : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Avísame cuando alguien publique esta ruta"
+              onPress={guardarAlerta}
+              style={({ pressed }) => [
+                estilos.alerta,
+                pressed && { backgroundColor: color.lavadoChip, transform: [{ scale: 0.98 }] },
+              ]}
+            >
+              <Campana tamano={19} tinta={color.ink900} />
+              <Text style={estilos.alertaTexto}>Avísame si alguien publica</Text>
+            </Pressable>
+          )}
+        </View>
+      ) : null}
+
+      <HojaDeFiltros
         abierta={hojaAbierta}
         filtros={filtros}
         alCambiar={setFiltros}
@@ -300,122 +464,57 @@ export default function Resultados() {
         cuantos={viajes.length}
       />
 
-        <Pestanas valor="Buscar" />
+      <HojaDeEleccion
+        abierta={eligiendoDia}
+        titulo="Qué día viajas"
+        opciones={LOS_PROXIMOS_DIAS()}
+        elegido={dia ?? diaEnPanama(new Date())}
+        alElegir={(v) => setRuta((r) => (r ? { ...r, dia: v } : r))}
+        alCerrar={() => setEligiendoDia(false)}
+      />
     </View>
   );
 }
 
-/**
- * LA BARRA DE FILTROS.
- *
- * Antes había dos sitios para lo mismo: tres pastillas sueltas sobre la arena
- * y un icono arriba que abría una hoja con **esas mismas tres** más el orden.
- * Nada decía cuántos filtros tenías puestos ni por qué estaba ordenado así,
- * y las pastillas se salían del ancho en cuanto una etiqueta era larga.
- *
- * Ahora es una sola tira blanca, del ancho de la pantalla y con desliz
- * horizontal, así que ninguna pastilla se corta. Empieza por lo que resume
- * —«Filtros» con su cuenta— y sigue por el orden, que es lo que más cambia lo
- * que ves y estaba escondido. La hoja sigue existiendo para elegir con calma.
- */
-function BarraDeFiltros({
-  filtros,
-  alAlternar,
-  alOrdenar,
-  alAbrir,
-}: {
-  filtros: Filtros;
-  alAlternar: (clave: keyof Filtros) => void;
-  alOrdenar: (orden: Orden) => void;
-  alAbrir: () => void;
-}) {
-  const cuantos = cuantosFiltros(filtros);
-  const orden: Orden = filtros.orden ?? 'temprano';
+/* ------------------------------------------------------- Piezas de dibujo */
 
+/** El lápiz de editar la búsqueda, 21 en trazo 1.9. */
+function Lapiz() {
   return (
-    <View style={estilos.barra}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={cuantos === 0 ? 'Filtros' : `Filtros, ${cuantos} puestos`}
-        onPress={alAbrir}
-        style={({ pressed }) => [estilos.botonFiltros, pressed && { backgroundColor: color.sand200 }]}
-      >
-        <IconoFiltros tamano={16} tinta={color.ink900} />
-        <Text style={estilos.botonFiltrosTexto}>Filtros</Text>
-        {cuantos > 0 ? (
-          <View style={estilos.cuenta}>
-            <Text style={estilos.cuentaTexto}>{String(cuantos)}</Text>
-          </View>
-        ) : null}
-      </Pressable>
-
-      <View style={estilos.separadorBarra} />
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={estilos.barraTira}
-      >
-        {/* El orden es un interruptor de dos posiciones, no un filtro: se
-            enseña siempre puesto, con el valor que está en uso. */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Ordenar: ${COMO_SE_ORDENA[orden]}`}
-          onPress={() => alOrdenar(orden === 'temprano' ? 'barato' : 'temprano')}
-          style={[estilos.chip, estilos.chipOrden]}
-        >
-          <Text style={[estilos.chipTexto, { color: color.ink900 }]}>
-            {orden === 'temprano' ? 'Más temprano' : 'Aporte más bajo'}
-          </Text>
-          <Intercambio />
-        </Pressable>
-
-        <Chip
-          activo={!!filtros.aceptaMaletas}
-          etiqueta="Maletas"
-          alPulsar={() => alAlternar('aceptaMaletas')}
-        />
-        <Chip
-          activo={!!filtros.aceptaMascotas}
-          etiqueta="Mascota"
-          alPulsar={() => alAlternar('aceptaMascotas')}
-        />
-        <Chip
-          activo={!!filtros.soloMujeres}
-          etiqueta="Mujeres"
-          alPulsar={() => alAlternar('soloMujeres')}
-        />
-        <Chip activo={!!filtros.yappy} etiqueta="Yappy" alPulsar={() => alAlternar('yappy')} />
-      </ScrollView>
-
-      {/* **El desvanecido del borde.** La tira se desliza, pero sin nada que
-          lo diga el último chip se lee como un chip roto contra el canto de la
-          pantalla: el cliente lo señaló en «Acepta maletas». Veintiocho
-          píxeles de blanco que se apaga bastan para que se lea «sigue» en vez
-          de «se cortó». No responde al dedo, así que no se come el desliz. */}
-      <View style={estilos.desvanecido} pointerEvents="none">
-        <Svg width={44} height={56}>
-          <Defs>
-            <LinearGradient id="tira" x1="0" y1="0" x2="1" y2="0">
-              <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0" />
-              <Stop offset="1" stopColor="#FFFFFF" stopOpacity="1" />
-            </LinearGradient>
-          </Defs>
-          <Rect x="0" y="0" width="44" height="56" fill="url(#tira)" />
-        </Svg>
-      </View>
-    </View>
-  );
-}
-
-/** Las dos flechas del interruptor de orden. No está en `@/ui/iconos`. */
-function Intercambio() {
-  return (
-    <Svg viewBox="0 0 24 24" width={14} height={14} fill="none">
+    <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
       <Path
-        d="M7 4v13m0 0l-3-3m3 3l3-3M17 20V7m0 0l-3 3m3-3l3 3"
-        stroke={color.ink500}
+        d="M4 19.4 5.6 14 16.4 3.2l4.4 4.4L10 18.4 4 19.4Z"
+        stroke={color.inkIconoFuerte}
+        strokeWidth={1.9}
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/** La flecha punteada entre DESDE y HASTA, con la punta roja. */
+function FlechaDeRuta() {
+  return (
+    <Svg width={20} height={14} viewBox="0 0 20 14" fill="none" style={{ marginTop: 10 }}>
+      <Path
+        d="M1 7h15"
+        stroke={color.ink300}
         strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeDasharray="3 3.5"
+      />
+      <Path d="M13.6 2.6 19 7l-5.4 4.4V2.6Z" fill={color.rojo500} />
+    </Svg>
+  );
+}
+
+function Chevron() {
+  return (
+    <Svg width={11} height={11} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M6 9.6 12 15.6l6-6"
+        stroke={color.inkIcono}
+        strokeWidth={2.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -423,7 +522,133 @@ function Intercambio() {
   );
 }
 
-function Chip({
+function Visto() {
+  return (
+    <Svg width={19} height={19} viewBox="0 0 24 24" fill="none">
+      <Path d="M12 20.4a8.4 8.4 0 1 0 0-16.8 8.4 8.4 0 0 0 0 16.8Z" stroke={color.rojo800} strokeWidth={1.9} />
+      <Path
+        d="m8.2 12.2 2.6 2.6 5-5.4"
+        stroke={color.rojo800}
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/** El esqueleto de carga, sobre la geometría real de la tarjeta. */
+function Esqueleto() {
+  return (
+    <View style={estilos.esqueleto}>
+      <View style={estilos.esqueletoFila}>
+        <View style={estilos.esqueletoBloque} />
+        <View style={estilos.esqueletoLinea} />
+        <View style={estilos.esqueletoBloque} />
+      </View>
+      <View style={{ height: 1, backgroundColor: 'rgba(10,39,49,.06)' }} />
+      <View style={estilos.esqueletoFila}>
+        <View style={estilos.esqueletoAvatar} />
+        <View style={{ flex: 1, gap: 6 }}>
+          <View style={[estilos.esqueletoLinea, { width: '44%', height: 9 }]} />
+          <View style={[estilos.esqueletoLinea, { width: '28%', height: 8 }]} />
+        </View>
+        <View style={[estilos.esqueletoBloque, { width: 48, height: 24 }]} />
+      </View>
+    </View>
+  );
+}
+
+/* ------------------------------------------------------------- Los filtros */
+
+type ClaveDeFiltro = 'aceptaMaletas' | 'aceptaMascotas' | 'soloMujeres' | 'yappy';
+
+const ETIQUETAS: Record<ClaveDeFiltro, string> = {
+  aceptaMaletas: 'Acepta maletas',
+  aceptaMascotas: 'Con mascota',
+  soloMujeres: 'Solo mujeres',
+  yappy: 'Yappy',
+};
+
+function filtrosActivos(f: Filtros): { clave: ClaveDeFiltro; etiqueta: string }[] {
+  return (Object.keys(ETIQUETAS) as ClaveDeFiltro[])
+    .filter((k) => !!f[k])
+    .map((k) => ({ clave: k, etiqueta: ETIQUETAS[k] }));
+}
+
+function cuantosFiltros(f: Filtros): number {
+  return filtrosActivos(f).length;
+}
+
+/**
+ * La hoja de filtros: lo mismo que la fila de aplicados y lo que no cabe
+ * ahí — el orden y el botón de quitarlos todos.
+ */
+function HojaDeFiltros({
+  abierta,
+  filtros,
+  alCambiar,
+  alCerrar,
+  cuantos,
+}: {
+  abierta: boolean;
+  filtros: Filtros;
+  alCambiar: (f: Filtros) => void;
+  alCerrar: () => void;
+  cuantos: number;
+}) {
+  const alternar = (clave: ClaveDeFiltro) =>
+    alCambiar({ ...filtros, [clave]: filtros[clave] ? undefined : true });
+
+  return (
+    <Modal visible={abierta} transparent animationType="slide" onRequestClose={alCerrar}>
+      <Pressable accessibilityLabel="Cerrar" style={estilos.velo} onPress={alCerrar} />
+      <View style={estilos.hoja}>
+        <View style={estilos.asa} />
+        <Text style={estilos.hojaTitulo}>Filtros</Text>
+
+        <View style={estilos.hojaGrupo}>
+          {(Object.keys(ETIQUETAS) as ClaveDeFiltro[]).map((k) => (
+            <ChipDeHoja
+              key={k}
+              activo={!!filtros[k]}
+              etiqueta={ETIQUETAS[k]}
+              alPulsar={() => alternar(k)}
+            />
+          ))}
+        </View>
+
+        <Text style={estilos.hojaEpigrafe}>Ordenar por</Text>
+        <View style={estilos.hojaGrupo}>
+          {(['temprano', 'barato'] as Orden[]).map((o) => (
+            <ChipDeHoja
+              key={o}
+              activo={(filtros.orden ?? 'temprano') === o}
+              etiqueta={o === 'temprano' ? 'Más temprano' : 'Aporte más bajo'}
+              alPulsar={() => alCambiar({ ...filtros, orden: o })}
+            />
+          ))}
+        </View>
+
+        <View style={estilos.hojaPie}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Quitar los filtros"
+            onPress={() => alCambiar({ orden: filtros.orden })}
+            style={zonaDeToque}
+          >
+            <Text style={estilos.quitar}>Quitar los filtros</Text>
+          </Pressable>
+          <Boton alPulsar={alCerrar}>
+            {cuantos === 1 ? 'Ver 1 viaje' : `Ver ${cuantos} viajes`}
+          </Boton>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function ChipDeHoja({
   activo,
   etiqueta,
   alPulsar,
@@ -439,131 +664,41 @@ function Chip({
       accessibilityLabel={etiqueta}
       onPress={alPulsar}
       style={[
-        estilos.chip,
+        estilos.chipHoja,
         activo
-          ? { backgroundColor: color.azul100, borderColor: 'transparent', paddingRight: 5 }
+          ? { backgroundColor: color.ink900, borderColor: color.ink900 }
           : { backgroundColor: color.blanco, borderColor: color.bordePorDefecto },
       ]}
     >
-      <Text style={[estilos.chipTexto, { color: activo ? color.azul700 : color.ink700 }]}>
+      <Text style={[estilos.chipHojaTexto, { color: activo ? color.blanco : color.ink700 }]}>
         {etiqueta}
       </Text>
-      {activo ? (
-        <View style={estilos.chipQuitar}>
-          <Cerrar tamano={9} tinta="#fff" />
-        </View>
-      ) : null}
     </Pressable>
   );
 }
 
-/** Cuántos filtros están puestos: es lo que enciende el punto del icono. */
-function cuantosFiltros(f: Filtros): number {
-  return [f.aceptaMaletas, f.aceptaMascotas, f.soloMujeres, f.yappy].filter(Boolean).length;
-}
+/* -------------------------------------------------------------- Utilidades */
 
-/**
- * La hoja de filtros. Lo mismo que las pastillas de arriba y dos cosas que no
- * caben ahí: el orden, y el botón de quitarlos todos.
- *
- * Se cierra tocando fuera, como todas las hojas del traspaso.
- */
-function HojaDeFiltros({
-  abierta,
-  filtros,
-  alCambiar,
-  alCerrar,
-  cuantos,
-}: {
-  abierta: boolean;
-  filtros: Filtros;
-  alCambiar: (f: Filtros) => void;
-  alCerrar: () => void;
-  cuantos: number;
-}) {
-  const alternar = (clave: 'aceptaMaletas' | 'aceptaMascotas' | 'soloMujeres' | 'yappy') =>
-    alCambiar({ ...filtros, [clave]: filtros[clave] ? undefined : true });
+const LOS_PROXIMOS_DIAS = (): Opcion[] =>
+  Array.from({ length: 15 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const dia = diaEnPanama(d);
+    return {
+      valor: dia,
+      etiqueta: cuandoTexto(dia),
+      debajo: i <= 1 ? diaLargo(d.toISOString()) : undefined,
+    };
+  });
 
-  return (
-    <Modal visible={abierta} transparent animationType="slide" onRequestClose={alCerrar}>
-      <Pressable accessibilityLabel="Cerrar" style={estilos.velo} onPress={alCerrar} />
-      <View style={estilos.hoja}>
-        <View style={estilos.asa} />
-        <Text style={estilos.hojaTitulo}>Filtros</Text>
-
-        {/* En la hoja sí caben enteros: el rótulo corto es de la tira, donde
-            el sitio manda; aquí manda que se entienda. */}
-        <View style={estilos.hojaGrupo}>
-          <Chip
-            activo={!!filtros.aceptaMaletas}
-            etiqueta="Acepta maletas"
-            alPulsar={() => alternar('aceptaMaletas')}
-          />
-          <Chip
-            activo={!!filtros.aceptaMascotas}
-            etiqueta="Con mascota"
-            alPulsar={() => alternar('aceptaMascotas')}
-          />
-          <Chip
-            activo={!!filtros.soloMujeres}
-            etiqueta="Solo mujeres"
-            alPulsar={() => alternar('soloMujeres')}
-          />
-          <Chip activo={!!filtros.yappy} etiqueta="Yappy" alPulsar={() => alternar('yappy')} />
-        </View>
-
-        <Text style={estilos.hojaEpigrafe}>Ordenar por</Text>
-        <View style={estilos.hojaGrupo}>
-          {(['temprano', 'barato'] as Orden[]).map((o) => (
-            <Chip
-              key={o}
-              activo={(filtros.orden ?? 'temprano') === o}
-              etiqueta={o === 'temprano' ? 'Más temprano' : 'Aporte más bajo'}
-              alPulsar={() => alCambiar({ ...filtros, orden: o })}
-            />
-          ))}
-        </View>
-
-        <View style={estilos.hojaPie}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Quitar los filtros"
-            onPress={() => alCambiar({})}
-          >
-            <Text style={estilos.quitar}>Quitar los filtros</Text>
-          </Pressable>
-          <Boton alPulsar={alCerrar}>
-            {cuantos === 1 ? 'Ver 1 viaje' : `Ver ${cuantos} viajes`}
-          </Boton>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
-/**
- * Los viajes agrupados por franja, en el orden en que empiezan. No reordena
- * nada: recorre la lista ya ordenada y corta cuando cambia la franja, así el
- * orden elegido —hora o aporte— se respeta dentro de cada sección.
- */
-function porFranjas(viajes: ViajeEnTarjeta[]): [Franja, ViajeEnTarjeta[]][] {
-  const grupos = new Map<Franja, ViajeEnTarjeta[]>();
-  for (const v of viajes) {
-    const f = franjaDe(Number(v.salida.slice(0, 2)));
-    const ya = grupos.get(f);
-    if (ya) ya.push(v);
-    else grupos.set(f, [v]);
-  }
-  return [...grupos.entries()];
-}
-
-/** «Hoy», «Mañana» o el día, según cuándo salgan los viajes que hay. */
+/** «Hoy», «Mañana» o el día corto, según cuándo salgan los viajes que hay. */
 function cuandoTexto(dia: string | null): string {
   if (!dia) return 'Hoy';
   const hoy = diaEnPanama(new Date());
   if (dia === hoy) return 'Hoy';
   const manana = diaEnPanama(new Date(Date.now() + 86_400_000));
-  return dia === manana ? 'Mañana' : dia;
+  if (dia === manana) return 'Mañana';
+  return diaCorto(`${dia}T12:00:00-05:00`);
 }
 
 function duracion(salida: string, llegada: string | null): string {
@@ -574,8 +709,9 @@ function duracion(salida: string, llegada: string | null): string {
   return m === 0 ? `${h} h` : `${h} h ${m}`;
 }
 
+/* ----------------------------------------------------------------- Estilos */
+
 const estilos = StyleSheet.create({
-  pie: { paddingHorizontal: espacio.gutter, paddingBottom: 10, paddingTop: 6 },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
@@ -584,98 +720,317 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  cabecera: { paddingHorizontal: espacio.gutter, paddingBottom: 24 },
-  filaSuperior: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  circulo: {
-    width: 40,
-    height: 40,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.campoControl,
+  filaNav: {
+    paddingTop: 8,
+    paddingHorizontal: 9,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  celdaIcono: {
+    width: 44,
+    height: 44,
+    borderRadius: radio.icono,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  titular: {
-    fontSize: 30,
-    lineHeight: 32.86,
-    letterSpacing: -1.395,
-    fontWeight: '400',
-    color: '#fff',
-    marginTop: 14,
-    fontFamily: familia,
-  },
-  titularFuerte: { fontWeight: '600' },
-  subtitulo: {
-    fontSize: 14, lineHeight: 20.3,
-    color: color.campoTexto,
-    marginTop: 10,
-    fontFamily: familia,
-    ...tabular,
-  },
 
-  /* La tira blanca: del ancho de la pantalla, para que el desliz horizontal
-     empiece y acabe en el borde y no dentro de una caja centrada. */
-  barra: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: color.blanco,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: color.bordeSutil,
-    paddingLeft: espacio.gutter,
-    height: 58,
-  },
-  desvanecido: { position: 'absolute', right: 0, top: 1, bottom: 1, width: 44 },
-  barraTira: { flexDirection: 'row', gap: 8, alignItems: 'center', paddingRight: espacio.gutter },
-  botonFiltros: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-    height: 40,
-    paddingHorizontal: 12,
-    borderRadius: radio.pastilla,
-  },
-  botonFiltrosTexto: {
-    fontSize: 13.5,
-    lineHeight: 19.57,
+  cabecera: { paddingTop: 8, paddingHorizontal: espacio.gutter, gap: 6 },
+  filaRuta: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  cejaRuta: {
+    fontSize: 9,
+    lineHeight: 12,
     fontWeight: '600',
+    letterSpacing: 0.99,
+    textTransform: 'uppercase',
+    color: color.ink600,
+    fontFamily: familia,
+  },
+  cejaHasta: { color: color.rojo700 },
+  ciudad: {
+    fontSize: 24,
+    lineHeight: 28,
+    fontWeight: '600',
+    letterSpacing: -0.84,
     color: color.ink900,
     fontFamily: familia,
   },
-  /** La cuenta va en rojo: es lo que tú has tocado, no un dato de la pantalla. */
+  meta: { fontSize: 12, lineHeight: 16, fontWeight: '400', color: color.ink600, fontFamily: familia },
+
+  barraChips: {
+    paddingTop: 16,
+    paddingHorizontal: espacio.gutter,
+    flexDirection: 'row',
+    gap: 8,
+  },
+  chipOscuro: {
+    height: 38,
+    paddingHorizontal: 13,
+    borderRadius: radio.cuadrado,
+    backgroundColor: color.ink900,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chipOscuroTexto: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    letterSpacing: -0.13,
+    color: color.blanco,
+    fontFamily: familia,
+  },
   cuenta: {
     minWidth: 18,
     height: 18,
     paddingHorizontal: 5,
-    borderRadius: radio.pastilla,
+    borderRadius: 7,
     backgroundColor: color.rojo500,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cuentaTexto: {
-    fontSize: 11.5,
-    lineHeight: 15.95,
-    fontWeight: '700',
-    color: '#fff',
+    fontSize: 10,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: color.blanco,
     fontFamily: familia,
     ...tabular,
   },
-  separadorBarra: {
-    width: 1,
-    height: 22,
-    backgroundColor: color.bordeSutil,
-    marginHorizontal: 10,
+  chipClaro: {
+    height: 38,
+    paddingHorizontal: 13,
+    borderRadius: radio.cuadrado,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: 'rgba(10,39,49,.09)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
   },
-  chipOrden: { backgroundColor: color.sand200, borderColor: 'transparent' },
+  chipClaroTexto: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '400',
+    letterSpacing: -0.13,
+    color: color.ink700,
+    fontFamily: familia,
+  },
 
-  velo: { flex: 1, backgroundColor: 'rgba(18,9,12,.42)' },
+  filaAplicados: { paddingTop: 12 },
+  tiraAplicados: {
+    paddingHorizontal: espacio.gutter,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chipAplicado: {
+    height: 32,
+    paddingLeft: 11,
+    paddingRight: 7,
+    borderRadius: radio.ficha,
+    backgroundColor: color.lavadoChip,
+    borderWidth: 1,
+    borderColor: 'rgba(10,39,49,.07)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  chipAplicadoTexto: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '500',
+    letterSpacing: -0.12,
+    color: color.ink700,
+    fontFamily: familia,
+  },
+  limpiar: { height: 32, paddingHorizontal: 6, justifyContent: 'center' },
+  limpiarTexto: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '500',
+    color: color.rojo700,
+    fontFamily: familia,
+  },
+
+  lista: { padding: espacio.gutter, paddingBottom: 24 },
+
+  destacada: {
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    borderRadius: radio.l,
+    padding: 16,
+    gap: 12,
+  },
+  filaDestacada: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  selloMejor: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 9,
+    backgroundColor: 'rgba(225,33,59,.10)',
+  },
+  selloMejorTexto: {
+    fontSize: 10,
+    lineHeight: 14,
+    fontWeight: '600',
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+    color: color.rojo800,
+    fontFamily: familia,
+  },
+  metaDestacada: { fontSize: 11, lineHeight: 15, fontWeight: '400', color: color.ink600, fontFamily: familia },
+  razon: { fontSize: 12, lineHeight: 17, fontWeight: '400', letterSpacing: -0.12, color: color.ink500, fontFamily: familia },
+
+  agotada: {
+    backgroundColor: 'rgba(10,39,49,.035)',
+    borderWidth: 1,
+    borderColor: 'rgba(10,39,49,.05)',
+    borderRadius: radio.l,
+    padding: 16,
+    gap: 12,
+  },
+  filaAgotada: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  horaAgotada: {
+    fontSize: 19,
+    lineHeight: 23,
+    fontWeight: '600',
+    letterSpacing: -0.57,
+    color: color.ink400,
+    fontFamily: familia,
+  },
+  selloAgotado: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 9,
+    backgroundColor: 'rgba(10,39,49,.06)',
+  },
+  selloAgotadoTexto: {
+    fontSize: 10,
+    lineHeight: 14,
+    fontWeight: '600',
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+    color: color.inkIcono,
+    fontFamily: familia,
+  },
+  metaAgotada: { fontSize: 12, lineHeight: 17, fontWeight: '400', color: color.ink400, fontFamily: familia, ...tabular },
+  botonEspera: {
+    height: 40,
+    borderRadius: radio.cuadrado,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: 'rgba(10,39,49,.10)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+  },
+  botonEsperaTexto: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    letterSpacing: -0.13,
+    color: color.ink700,
+    fontFamily: familia,
+  },
+
+  esqueleto: {
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: 'rgba(10,39,49,.06)',
+    borderRadius: radio.l,
+    padding: 16,
+    gap: 14,
+  },
+  esqueletoFila: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  esqueletoBloque: { width: 58, height: 38, borderRadius: 9, backgroundColor: 'rgba(10,39,49,.07)' },
+  esqueletoLinea: { flex: 1, height: 7, borderRadius: 4, backgroundColor: 'rgba(10,39,49,.05)' },
+  esqueletoAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(10,39,49,.07)' },
+
+  vacio: { alignItems: 'center', paddingTop: 24, gap: 6 },
+  vacioDibujo: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: color.lavadoChip,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    marginBottom: 10,
+  },
+  vacioLinea: {
+    width: 16,
+    height: 0,
+    borderBottomWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(10,39,49,.2)',
+  },
+  vacioTitulo: {
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '600',
+    letterSpacing: -0.6,
+    color: color.ink900,
+    textAlign: 'center',
+    fontFamily: familia,
+  },
+  vacioTexto: {
+    maxWidth: 270,
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: '400',
+    color: color.ink500,
+    textAlign: 'center',
+    fontFamily: familia,
+  },
+
+  pieAlerta: { paddingHorizontal: espacio.gutter, paddingTop: 12, paddingBottom: 12 },
+  alerta: {
+    height: 54,
+    borderRadius: radio.boton,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
+    shadowColor: '#0A2731',
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+  },
+  alertaPuesta: {
+    backgroundColor: 'rgba(225,33,59,.07)',
+    borderColor: 'rgba(225,33,59,.20)',
+    shadowOpacity: 0,
+  },
+  alertaTexto: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '500',
+    letterSpacing: -0.15,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+
+  velo: { flex: 1, backgroundColor: 'rgba(10,20,25,.42)' },
   hoja: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
     backgroundColor: color.blanco,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderTopLeftRadius: radio.hoja,
+    borderTopRightRadius: radio.hoja,
     paddingHorizontal: espacio.hoja,
     paddingTop: 12,
     paddingBottom: 34,
@@ -684,104 +1039,41 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
     width: '100%',
   },
-  asa: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: color.bordePorDefecto,
-    alignSelf: 'center',
-  },
+  asa: { width: 40, height: 4, borderRadius: 2, backgroundColor: color.ink200, alignSelf: 'center' },
   hojaTitulo: {
     fontFamily: familia,
-    fontSize: 22,
-    lineHeight: 31.9,
+    fontSize: 20,
+    lineHeight: 26,
     fontWeight: '600',
-    letterSpacing: -0.22,
+    letterSpacing: -0.6,
     color: color.ink900,
   },
   hojaEpigrafe: {
     fontFamily: familia,
-    fontSize: 12.5,
-    lineHeight: 17.4,
+    fontSize: 11,
+    lineHeight: 15,
     fontWeight: '600',
-    letterSpacing: 0.1 * 12,
+    letterSpacing: 1.43,
     textTransform: 'uppercase',
-    color: color.ink600,
+    color: color.ink500,
   },
   hojaGrupo: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   hojaPie: { gap: 12, marginTop: 4 },
   quitar: {
     fontFamily: familia,
-    fontSize: 14,
-    lineHeight: 20.3,
-    fontWeight: '600',
-    color: color.ink600,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    color: color.rojo700,
     textAlign: 'center',
   },
-  chip: {
-    /* 40 y no 34: por debajo de eso el pulgar falla, y son los controles que
-       más se tocan de la pantalla. */
-    height: espacio.tap,
-    paddingHorizontal: 14,
-    borderRadius: radio.pastilla,
-    borderWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-  },
-  chipTexto: { fontSize: 13.5, lineHeight: 18.85, fontWeight: '500', fontFamily: familia },
-  chipQuitar: {
-    width: 21,
-    height: 21,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.azul500,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  lista: { paddingHorizontal: espacio.gutter, paddingTop: 18, paddingBottom: 26 },
-  avisarme: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 18,
-    padding: 15,
-    borderRadius: radio.l,
-    backgroundColor: color.rojo50,
-  },
-  avisarmeTexto: { fontSize: 13.5, lineHeight: 20, color: color.rojo700, fontFamily: familia },
-  botonAvisarme: {
+  chipHoja: {
     height: 38,
-    paddingHorizontal: 17,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.rojo500,
+    paddingHorizontal: 13,
+    borderRadius: radio.cuadrado,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  botonAvisarmeTexto: {
-    fontSize: 13.5,
-    lineHeight: 19.5,
-    fontWeight: '600',
-    color: '#fff',
-    fontFamily: familia,
-  },
-  filaSeccion: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: 10,
-  },
-  orden: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
-
-  vacio: {
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: color.bordePorDefecto,
-    borderRadius: radio.l,
-    padding: 20,
-    gap: 4,
-  },
-  vacioTitulo: { fontSize: 15.5, lineHeight: 21.75, fontWeight: '500', color: color.ink900, fontFamily: familia },
-  vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink600, fontFamily: familia },
+  chipHojaTexto: { fontSize: 13, lineHeight: 18, fontWeight: '500', letterSpacing: -0.13, fontFamily: familia },
 });

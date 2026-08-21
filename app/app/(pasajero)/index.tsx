@@ -1,15 +1,22 @@
 /**
- * `3a` Inicio — la búsqueda, las rutas y el gancho de conductor.
+ * Inicio — la estructura del v6, pantalla «Inicio» de
+ * `diseno/Partimos App v6.dc.html`, sin aproximaciones.
  *
- * El campo rojo entero, con la silueta de la ciudad al pie. La hoja blanca
- * monta sobre su borde y lleva la única acción azul de la pantalla. El
- * degradado del amanecer aparece una sola vez, en la tarjeta que invita a
- * publicar.
+ * De arriba a abajo, lo fijo: la fila de marca (el logo con la campana y el
+ * retrato), el título en dos tintas — «¿Para dónde» en tinta, «partimos
+ * hoy?» apagado —, la tarjeta de búsqueda blanca con SALGO DE / VOY A y el
+ * botón de invertir montado en su borde, la fila Hoy · pasajeros, el CTA
+ * rojo con su lupa, y la línea de confianza. Debajo, una sola columna que se
+ * desplaza: las rutas populares en tarjetas horizontales y las salidas
+ * próximas. Al pie, la barra de pestañas del v6.
+ *
+ * Los rótulos de campo son verbos en primera persona — «Salgo de»,
+ * «Voy a» — porque así los exige el invariante 8 del archivo.
  */
 
 import type { Lugar } from '@/dominio/lugar';
 import { useEffect, useState } from 'react';
-import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
@@ -30,12 +37,13 @@ import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Pestanas } from '@/ui/Pestanas';
-import { Amanecer, Bandera, DibujoDelSitio } from '@/ui/CampoRojo';
-import { Avatar, Boton, Epigrafe } from '@/ui/controles';
-import { formatearDineroRedondo, tabular } from '@/ui/dinero';
+import { CampoRojo, DibujoDelSitio } from '@/ui/CampoRojo';
+import { Avatar } from '@/ui/controles';
+import { PuntaDeFlecha } from '@/ui/TarjetaDeViaje';
+import { cifraRedonda, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, diaLargo, hora } from '@/ui/fechas';
-import { Avanza, Campana, Carro, Escudo, Estrella, Intercambio, Marca } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio, sombra } from '@/ui/tokens';
+import { Calendario, Campana, Escudo, Estrella, Intercambio, Lupa, Marca, Persona } from '@/ui/iconos';
+import { familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
   chitre: require('../../assets/chitre.jpeg'),
@@ -49,22 +57,15 @@ const LETRAS = ['cero', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis'];
 const enLetra = (n: number) => LETRAS[n] ?? String(n);
 
 /**
- * Los quince días que se pueden elegir.
- *
- * Quince y no un calendario entero: los viajes se publican con dos o tres días
- * de antelación —lo dice PRODUCT.md—, así que un mes de casillas vacías sería
- * enseñar sobre todo días sin nadie. Se calcula al abrir, no al cargar el
- * módulo, para que «Hoy» siga siendo hoy si la app queda abierta.
+ * Los quince días que se pueden elegir. Quince y no un calendario entero:
+ * los viajes se publican con dos o tres días de antelación, así que un mes
+ * de casillas vacías sería enseñar sobre todo días sin nadie.
  */
 const LOS_PROXIMOS_DIAS = (): Opcion[] =>
   Array.from({ length: 15 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
     const dia = diaEnPanama(d);
-    /* La fecha larga solo en «Hoy» y «Mañana», que son los dos rótulos que
-       no dicen qué día son. Del tercero en adelante la etiqueta ya es
-       «sábado 22» y debajo ponía «sábado 22 de agosto»: la misma frase dos
-       veces, una encima de otra. */
     return {
       valor: dia,
       etiqueta: comoSeLlamaElDia(dia),
@@ -107,19 +108,14 @@ const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 export default function Inicio() {
   const router = useRouter();
   const yo = useMiId(YO_DEL_RECORRIDO);
-  /* «Hola, Milan» estaba escrito a mano y saludaba a Milan a todo el mundo. */
   const [nombre, setNombre] = useState<string | null>(null);
   const [sinLeer, setSinLeer] = useState(0);
   const [rutas, setRutas] = useState<RutaPopular[]>([]);
   const [salen, setSalen] = useState<SalidaCercana[]>([]);
-  /** En qué tarjeta de la tira vas, para los puntos de abajo. */
-  const [enTira, setEnTira] = useState(0);
   const [gancho, setGancho] = useState<GanchoDeConductor | null>(null);
   const [desde, setDesde] = useState<Lugar>(DESDE_POR_DEFECTO);
   const [hacia, setHacia] = useState<Lugar | null>(null);
-  /** Cuál de los dos campos tiene la hoja abierta, o ninguno. */
   const [buscando, setBuscando] = useState<'desde' | 'hacia' | null>(null);
-  /** Qué día sales, como 'AAAA-MM-DD' en hora de Panamá. */
   const [cuando, setCuando] = useState(() => diaEnPanama(new Date()));
   const [pasajeros, setPasajeros] = useState(1);
   const [eligiendo, setEligiendo] = useState<'cuando' | 'pasajeros' | null>(null);
@@ -138,11 +134,6 @@ export default function Inicio() {
     bandeja(yo).then((b) => setSinLeer(b.sinLeer));
   }, [yo]);
 
-  // Con el campo en blanco, la hoja de «Hacia» enseña a dónde hay corredor
-  // desde donde estás: una lista vacía no dice a dónde llevamos.
-  /* Se calcula al abrir la hoja, no al cargar el módulo: contra la base el
-     almacén todavía está vacío cuando este archivo se evalúa, y la lista
-     habría salido vacía para siempre. */
   const sugerencias =
     buscando === 'hacia'
       ? aDondeSeVaDesde(desde.citySlug ?? CIUDAD_POR_DEFECTO)
@@ -151,9 +142,7 @@ export default function Inicio() {
         : [];
 
   const buscar = () => {
-    /* Sin destino no se busca: mandar a resultados con la ruta del traspaso
-       enseñaría viajes que nadie pidió. Se abre el campo que falta, que es lo
-       que la persona iba a tener que hacer de todas formas. */
+    /* Sin destino no se busca: se abre el campo que falta. */
     if (!hacia) {
       setBuscando('hacia');
       return;
@@ -170,351 +159,358 @@ export default function Inicio() {
     });
   };
 
+  /** El rango de precios de las salidas próximas: «B/9 – B/18». */
+  const precios = salen.map((v) => v.aporteCentavos);
+  const rango =
+    precios.length > 1
+      ? `B/${cifraRedonda(Math.min(...precios))} – B/${cifraRedonda(Math.max(...precios))}`
+      : null;
+
+  /** Las iniciales del retrato de la cabecera. */
+  const iniciales = (nombre ?? 'Tú')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
+
   return (
     <View style={estilos.pantalla}>
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 8 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* El campo y lo que va encima se desplazan juntos: fuera del
-            ScrollView el campo se quedaba clavado y «RUTAS POPULARES»
-            terminaba escrito sobre el rojo. */}
-        {/* La silueta con la torre Tornillo, la que trajo el cliente: a plena
-            opacidad y al pie del campo, que es donde una línea de horizonte va.
-            El «skyline» plano al 26 % no se veía. */}
-        <Bandera altura={326} motivo="ciudadDetras">
-          <BarraDeEstado />
-          <View style={estilos.cabecera}>
-          <View style={estilos.filaSaludo}>
-            {/* El epígrafe dice a quién y cuándo: es el sitio donde el saludo
-                no compite con el titular, que es la pregunta de la pantalla. */}
-            <Text style={estilos.epigrafeCampo} numberOfLines={1}>
-              {nombre ? `Hola, ${nombre}` : 'Panamá'}
-            </Text>
-            <View style={estilos.filaDerecha}>
-              {/* La bandeja de avisos no tenía puerta: existía la pantalla y
-                  no se llegaba a ella desde ningún sitio de la app. */}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={
-                  sinLeer === 0 ? 'Avisos' : `Avisos, ${sinLeer} sin leer`
-                }
-                onPress={() => router.push('/(avisos)/avisos')}
-                style={estilos.campana}
-              >
-                <Campana />
-                {sinLeer > 0 ? (
-                  <View style={estilos.cuentaAviso}>
-                    <Text style={estilos.cuentaAvisoTexto}>{sinLeer > 9 ? '9+' : String(sinLeer)}</Text>
-                  </View>
-                ) : null}
-              </Pressable>
-              <Marca />
-            </View>
-          </View>
-          <Text style={estilos.titular}>
-            {'¿A dónde'}
-            {'\n'}
-            <Text style={estilos.titularFuerte}>vas hoy?</Text>
-          </Text>
-          {/* Qué es esto, dicho una vez, a quien todavía no tiene cuenta. A
-              quien vuelve cada semana no hay que explicárselo otra vez. */}
-          {!yo ? (
-            <Text style={estilos.explicacion}>
-              Carro compartido entre la ciudad y el interior. Te recogen cerca y le aportas
-              directo al conductor.
-            </Text>
-          ) : null}
-        </View>
+      {/* La atmósfera del v6: los dos halos, detrás de todo. */}
+      <CampoRojo altura={400} />
 
-        <View style={estilos.hoja}>
-          {/* LOS DOS LADOS DEL MISMO VIAJE.
-              Publicar estaba solo en el cuadrado rojo de la barra y en una
-              tarjeta al final de la página. Quien abre la app sabiendo que va
-              a manejar tenía que buscarlo. Aquí se elige de entrada. */}
-          <View style={estilos.lados}>
-            <View style={[estilos.lado, estilos.ladoActivo]}>
-              <Text style={[estilos.ladoTexto, estilos.ladoTextoActivo]}>Busco puesto</Text>
+      <BarraDeEstado />
+
+      {/* La fila de marca: el logo a la izquierda, campana y retrato a la derecha. */}
+      <View style={estilos.filaMarca}>
+        <View style={estilos.marca}>
+          <Marca tamano={21} />
+          <Text style={estilos.marcaTexto}>partimos</Text>
+        </View>
+        <View style={estilos.filaDerecha}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={sinLeer === 0 ? 'Avisos' : `Avisos, ${sinLeer} sin leer`}
+            onPress={() => router.push('/(avisos)/avisos')}
+            style={({ pressed }) => [estilos.celdaIcono, pressed && pulsado.celda]}
+          >
+            <Campana tamano={23} tinta={color.inkIconoFuerte} />
+            {sinLeer > 0 ? <View style={estilos.puntoAviso} /> : null}
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Tu perfil"
+            onPress={() => router.push('/(cuenta)/cuenta')}
+            style={estilos.celdaRetrato}
+          >
+            <View style={estilos.retrato}>
+              <Text style={estilos.retratoTexto}>{iniciales}</Text>
             </View>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* El título en dos tintas, como el v6: la pregunta y su eco apagado. */}
+      <View style={estilos.filaTitulo}>
+        <Text style={estilos.titulo} numberOfLines={2}>
+          {'¿Para dónde '}
+          <Text style={estilos.tituloApagado}>partimos hoy?</Text>
+        </Text>
+      </View>
+
+      {/* La tarjeta de búsqueda: SALGO DE / VOY A con el conector punteado,
+          el botón de invertir en su borde, y la fila Hoy · pasajeros. */}
+      <View style={estilos.zonaBusqueda}>
+        <View style={estilos.tarjetaBusqueda}>
+          <View style={{ position: 'relative' }}>
+            {/* El conector punteado entre los dos iconos de campo. */}
+            <View style={estilos.conector} pointerEvents="none" />
+
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Voy manejando: publicar mi viaje"
-              onPress={() => router.push('/(conductor)/publicar')}
-              style={({ pressed }) => [estilos.lado, pressed && { backgroundColor: color.sand200 }]}
+              accessibilityLabel={`Salgo de ${desde.nombre}. Cambiar`}
+              onPress={() => setBuscando('desde')}
+              style={estilos.filaCampo}
             >
-              <Carro tamano={17} tinta={color.ink700} />
-              <Text style={estilos.ladoTexto}>Voy manejando</Text>
+              <View style={estilos.casillaIconoCampo}>
+                <View style={estilos.aroOrigen} />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.cejaCampo}>Salgo de</Text>
+                <Text style={estilos.valorCampo} numberOfLines={1}>
+                  {desde.nombre}
+                </Text>
+              </View>
+            </Pressable>
+
+            <View style={estilos.divisorCampo} />
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={hacia ? `Voy a ${hacia.nombre}. Cambiar` : 'Elegir a dónde vas'}
+              onPress={() => setBuscando('hacia')}
+              style={estilos.filaCampo}
+            >
+              <View style={estilos.casillaIconoCampo}>
+                {/* El pin relleno del destino: rojo, con el punto blanco. */}
+                <View style={estilos.pin}>
+                  <View style={estilos.pinPunto} />
+                </View>
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={[estilos.cejaCampo, estilos.cejaVoyA]}>Voy a</Text>
+                <Text
+                  style={[estilos.valorCampo, !hacia && { color: color.ink400 }]}
+                  numberOfLines={1}
+                >
+                  {hacia?.nombre ?? '¿A dónde vas?'}
+                </Text>
+              </View>
+            </Pressable>
+
+            {/* Invertir: 40 × 40 al radio 14, montado sobre el borde derecho,
+                centrado en la línea que separa los dos campos. */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Invertir origen y destino"
+              disabled={!hacia}
+              onPress={() => {
+                if (!hacia) return;
+                const antes = desde;
+                setDesde(hacia);
+                setHacia(antes);
+              }}
+              style={({ pressed }) => [
+                estilos.invertir,
+                pressed && { transform: [{ translateY: -20 }, { scale: 0.94 }] },
+                !hacia && { opacity: 0.35 },
+              ]}
+            >
+              <Intercambio tamano={17} tinta={color.ink700} />
             </Pressable>
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Desde ${desde.nombre}. Cambiar`}
-            onPress={() => setBuscando('desde')}
-            style={estilos.filaLugar}
-          >
-            <View style={estilos.puntoLleno} />
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={estilos.etiquetaLugar}>Desde</Text>
-              <Text style={estilos.valorLugar} numberOfLines={1}>
-                {desde.nombre}
-              </Text>
-            </View>
-          </Pressable>
+          <View style={estilos.divisorTarjeta} />
 
-          {/* Invertir. Va sobre la línea que separa los dos campos porque es
-              lo que hace: le da la vuelta a esa línea. Vuelves de Chitré un
-              domingo y no tienes que reescribir las dos ciudades. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Invertir origen y destino"
-            disabled={!hacia}
-            onPress={() => {
-              if (!hacia) return;
-              const antes = desde;
-              setDesde(hacia);
-              setHacia(antes);
-            }}
-            style={({ pressed }) => [
-              estilos.invertir,
-              pressed && { backgroundColor: color.sand200 },
-              !hacia && { opacity: 0.35 },
-            ]}
-          >
-            <Intercambio tamano={17} tinta={color.ink700} />
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={hacia ? `Hacia ${hacia.nombre}. Cambiar` : 'Elegir a dónde vas'}
-            onPress={() => setBuscando('hacia')}
-            style={[estilos.filaLugar, estilos.filaConLinea]}
-          >
-            <View style={estilos.puntoVacio} />
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={estilos.etiquetaLugar}>Hacia</Text>
-              <Text
-                style={[estilos.valorLugar, !hacia && { color: color.ink500 }]}
-                numberOfLines={1}
-              >
-                {hacia?.nombre ?? 'Chitré, David, Santiago…'}
-              </Text>
-            </View>
-          </Pressable>
-
-          <View style={estilos.filaCajas}>
+          <View style={estilos.filaOpciones}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Cuándo sales: ${comoSeLlamaElDia(cuando)}. Cambiar`}
               onPress={() => setEligiendo('cuando')}
-              style={estilos.caja}
+              style={({ pressed }) => [estilos.opcion, pressed && { backgroundColor: color.lavadoChip }]}
             >
-              <Text style={estilos.etiquetaCaja}>Cuándo</Text>
-              <Text style={estilos.valorCaja}>{comoSeLlamaElDia(cuando)}</Text>
+              <Calendario tamano={17} />
+              <Text style={estilos.opcionTexto}>{comoSeLlamaElDia(cuando)}</Text>
             </Pressable>
+            <View style={estilos.divisorVertical} />
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`${pasajeros} ${pasajeros === 1 ? 'pasajero' : 'pasajeros'}. Cambiar`}
               onPress={() => setEligiendo('pasajeros')}
-              style={estilos.caja}
+              style={({ pressed }) => [estilos.opcion, pressed && { backgroundColor: color.lavadoChip }]}
             >
-              <Text style={estilos.etiquetaCaja}>Pasajeros</Text>
-              <Text style={[estilos.valorCaja, tabular]}>
+              <Persona tamano={17} tinta={color.inkIcono} grueso={2.1} />
+              <Text style={[estilos.opcionTexto, tabular]}>
                 {`${pasajeros} ${pasajeros === 1 ? 'pasajero' : 'pasajeros'}`}
               </Text>
             </Pressable>
           </View>
-
-          <View style={{ marginTop: 14 }}>
-            <Boton tono="azul" alPulsar={buscar}>
-              Buscar viajes
-            </Boton>
-          </View>
         </View>
-        </Bandera>
 
-        {/* Lo que hace que subirse con un desconocido sea razonable, dicho sin
-            adornos: la cédula es obligatoria para publicar y las notas son de
-            viajes que pasaron. Nada de «soporte 24/7», que no existe. */}
+        {/* El CTA: rojo, 54, con su lupa y la sombra del acento. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Buscar viajes"
+          onPress={buscar}
+          style={({ pressed }) => [
+            estilos.cta,
+            pressed && { backgroundColor: color.rojo600, transform: [{ scale: 0.97 }] },
+          ]}
+        >
+          <Lupa tamano={19} tinta={color.blanco} grueso={2.1} />
+          <Text style={estilos.ctaTexto}>Buscar viajes</Text>
+        </Pressable>
+
+        {/* La línea de confianza. Dice lo que es verdad: sin cédula
+            verificada no se publica. Lleva a la pantalla que lo explica. */}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Cómo cuidamos el viaje"
           onPress={() => router.push('/(ayuda)')}
-          style={({ pressed }) => [estilos.seguro, pressed && { backgroundColor: color.sand200 }]}
+          style={estilos.confianza}
         >
-          <Escudo tamano={20} tinta={color.azul500} />
-          <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={estilos.seguroTitulo}>Viaja tranquilo</Text>
-            <Text style={estilos.seguroTexto}>
-              Todos los conductores pasan por cédula, y las notas son de viajes que ocurrieron.
-            </Text>
-          </View>
-          <Avanza />
+          <Escudo tamano={13} tinta={color.inkIcono} />
+          <Text style={estilos.confianzaTexto}>Solo conductores con cédula verificada</Text>
         </Pressable>
+      </View>
 
-        {salen.length > 0 ? (
-          <View style={estilos.seccionSalen}>
-            <View style={[estilos.filaSeccion, { paddingHorizontal: espacio.gutter }]}>
-              <Epigrafe>Salen en la próxima hora</Epigrafe>
+      {/* La columna que se desplaza: rutas populares y salidas próximas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {rutas.length > 0 ? (
+          <View style={estilos.seccion}>
+            <View style={estilos.cabeceraSeccion}>
+              <View style={estilos.cabeceraIzquierda}>
+                <Estrella tamano={12} tinta={color.ink500} />
+                <Text style={estilos.rotuloSeccion}>Rutas populares</Text>
+              </View>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Ver todas las salidas de hoy"
-                onPress={() => router.push('/(pasajero)/salidas')}
+                accessibilityLabel="Ver todos los destinos"
+                onPress={() => setBuscando('hacia')}
+                style={zonaDeToque}
               >
-                <Text style={estilos.verTodas}>Ver todas</Text>
+                <Text style={estilos.enlaceSeccion}>Ver todas</Text>
               </Pressable>
             </View>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              /* Se para en cada tarjeta: media tarjeta a la vista no es una
-                 posición, es un desliz a medio hacer. */
-              snapToInterval={218}
-              decelerationRate="fast"
-              scrollEventThrottle={16}
-              onScroll={(e) =>
-                setEnTira(Math.round(e.nativeEvent.contentOffset.x / 218))
-              }
-              contentContainerStyle={estilos.tiraSalen}
+              contentContainerStyle={estilos.tiraFavoritas}
             >
-              {salen.map((v) => (
+              {rutas.map((r) => (
                 <Pressable
-                  key={v.viajeId}
+                  key={r.slug}
                   accessibilityRole="button"
-                  accessibilityLabel={`${v.destino} a las ${hora(v.hora)} con ${v.conductor}`}
+                  accessibilityLabel={`${r.origen} a ${r.destino}, desde ${formatearDineroRedondo(r.desdeCentavos)}`}
                   onPress={() =>
-                    router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.viajeId } })
+                    router.push({
+                      pathname: '/(pasajero)/resultados',
+                      params: { origen: CIUDAD_POR_DEFECTO, destino: r.slug, etiquetaDestino: r.destino },
+                    })
                   }
-                  style={({ pressed }) => [estilos.tarjetaSale, pressed && { opacity: 0.9 }]}
+                  style={({ pressed }) => [estilos.tarjetaFavorita, pressed && pulsado.tarjeta]}
                 >
-                  <View style={estilos.fotoSale}>
-                    {FOTOS[v.foto] ? (
-                      <Image source={FOTOS[v.foto]} style={estilos.foto} resizeMode="cover" />
+                  <View style={estilos.miniatura}>
+                    {FOTOS[r.foto] ? (
+                      <Image source={FOTOS[r.foto]} style={estilos.foto} resizeMode="cover" />
                     ) : (
-                      <DibujoDelSitio slug={v.foto} tamano={54} />
+                      <DibujoDelSitio slug={r.foto} tamano={36} />
                     )}
                   </View>
-                  <View style={estilos.cuerpoSale}>
-                    <Text style={estilos.horaSale}>{hora(v.hora)}</Text>
-                    <Text style={estilos.destinoSale} numberOfLines={1}>
-                      {`${v.destino} · `}
-                      <Text style={estilos.precioSale}>
-                        {formatearDineroRedondo(v.aporteCentavos)}
+                  <View style={estilos.cuerpoFavorita}>
+                    <View style={estilos.filaDesde}>
+                      <Text style={estilos.desdeFavorita} numberOfLines={1}>
+                        {r.origen}
                       </Text>
-                    </Text>
-                    <View style={estilos.filaQuienSale}>
-                      <Avatar nombre={v.conductor || '·'} tamano={22} />
-                      <Text style={estilos.quienSale} numberOfLines={1}>
-                        {v.conductor}
-                      </Text>
-                      {v.calificacion != null ? (
-                        <>
-                          <Estrella tamano={10} />
-                          <Text style={estilos.notaSale}>{v.calificacion.toFixed(1)}</Text>
-                        </>
-                      ) : null}
+                      <PuntaDeFlecha tamano={7} />
                     </View>
+                    <Text style={estilos.destinoFavorita} numberOfLines={1}>
+                      {r.destino}
+                    </Text>
                   </View>
                 </Pressable>
               ))}
             </ScrollView>
-
-            {/* Los puntos: cuántas hay y en cuál vas. Sin ellos, una tira que
-                se corta en el borde parece una tarjeta mal cortada. */}
-            {salen.length > 1 ? (
-              <View style={estilos.puntos}>
-                {salen.map((v, i) => (
-                  <View
-                    key={v.viajeId}
-                    style={[estilos.punto, i === enTira && estilos.puntoActivo]}
-                  />
-                ))}
-              </View>
-            ) : null}
           </View>
         ) : null}
 
-        <View style={estilos.seccionRutas}>
-          <View style={estilos.filaSeccion}>
-            <Epigrafe>Rutas populares</Epigrafe>
-            {/* Era un texto rojo sin nada detrás: parecía un enlace y no lo
-                era. «Todas» son los destinos que servimos, y la lista de
-                destinos ya existe: es la del campo «Hacia». */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ver todos los destinos"
-              onPress={() => setBuscando('hacia')}
-            >
-              <Text style={estilos.verTodas}>Ver todas</Text>
-            </Pressable>
-          </View>
-
-          {rutas.map((r, i) => (
-            <Pressable
-              key={r.slug}
-              accessibilityRole="button"
-              accessibilityLabel={`Panamá a ${r.destino}`}
-              onPress={() =>
-                router.push({
-                  pathname: '/(pasajero)/resultados',
-                  params: { origen: CIUDAD_POR_DEFECTO, destino: r.slug, etiquetaDestino: r.destino },
-                })
-              }
-              style={[estilos.filaRuta, i > 0 && estilos.filaRutaConLinea]}
-            >
-              {/* Sin foto va el dibujo del sitio, no un pin: el pin era el
-                  mismo para Penonomé que para Bocas, y no decía nada. Solo hay
-                  cuatro fotografías; dibujos hay para todos. */}
-              <View style={[estilos.miniatura, !FOTOS[r.foto] && estilos.miniaturaSinFoto]}>
-                {FOTOS[r.foto] ? (
-                  <Image source={FOTOS[r.foto]} style={estilos.foto} resizeMode="cover" />
-                ) : (
-                  <DibujoDelSitio slug={r.foto} tamano={34} />
-                )}
+        {salen.length > 0 ? (
+          <View style={estilos.seccion}>
+            <View style={estilos.cabeceraSeccion}>
+              <View style={estilos.cabeceraIzquierda}>
+                {/* El punto en vivo: uno de los cuatro sentidos del rojo. */}
+                <View style={estilos.puntoVivo} />
+                <Text style={estilos.rotuloSeccion}>
+                  {`${salen.length} ${salen.length === 1 ? 'salida próxima' : 'salidas próximas'}`}
+                </Text>
               </View>
-              <Text style={estilos.nombreRuta} numberOfLines={1}>
-                {`${r.origen} → `}
-                <Text style={estilos.nombreRutaFuerte}>{r.destino}</Text>
-              </Text>
-              <Text style={estilos.desde}>desde</Text>
-              <Text style={estilos.precioRuta}>{formatearDineroRedondo(r.desdeCentavos)}</Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {gancho ? (
-          <View style={estilos.seccionGancho}>
-            <View style={estilos.tarjetaGancho}>
-              <Amanecer alto={140} />
-              <View style={estilos.filaGancho}>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={estilos.cifraGancho}>
-                    {formatearDineroRedondo(gancho.recuperasCentavos)}
-                  </Text>
-                  {/* «si llevas» y no «llevando»: la tarjeta es un ejemplo de
-                      una ruta cualquiera, no un viaje que esta persona tenga
-                      publicado. Sin el «si» se lee como si ya fuera a Chitré. */}
-                  <Text style={estilos.fraseGancho}>
-                    {'Lo que '}
-                    <Text style={estilos.fraseGanchoFuerte}>recuperas</Text>
-                    {` si llevas ${enLetra(gancho.puestos)} puestos a ${gancho.destino}`}
-                  </Text>
-                </View>
+              {rango ? (
+                <Text style={[estilos.rangoPrecios, tabular]}>{rango}</Text>
+              ) : (
                 <Pressable
                   accessibilityRole="button"
-                  onPress={() => router.push('/(conductor)/publicar')}
-                  style={estilos.botonPublicar}
+                  accessibilityLabel="Ver todas las salidas de hoy"
+                  onPress={() => router.push('/(pasajero)/salidas')}
+                  style={zonaDeToque}
                 >
-                  <Text style={estilos.botonPublicarTexto}>Publicar</Text>
+                  <Text style={estilos.enlaceSeccion}>Ver todas</Text>
                 </Pressable>
-              </View>
+              )}
             </View>
+
+            <View style={estilos.listaSalen}>
+              {salen.map((v) => (
+                <Pressable
+                  key={v.viajeId}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${v.destino} a las ${hora(v.hora)} con ${v.conductor}, ${formatearDineroRedondo(v.aporteCentavos)}`}
+                  onPress={() =>
+                    router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.viajeId } })
+                  }
+                  style={({ pressed }) => [estilos.tarjetaSale, pressed && pulsado.tarjeta]}
+                >
+                  <Text style={[estilos.horaSale, tabular]}>{hora(v.hora)}</Text>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <View style={estilos.filaHaciaSale}>
+                      <PuntaDeFlecha tamano={7} />
+                      <Text style={estilos.destinoSale} numberOfLines={1}>
+                        {v.destino}
+                      </Text>
+                    </View>
+                    <View style={estilos.filaQuienSale}>
+                      <Avatar nombre={v.conductor || '·'} tamano={20} />
+                      <Text style={estilos.quienSale} numberOfLines={1}>
+                        {v.conductor}
+                        {v.calificacion != null ? ` · ★ ${v.calificacion.toFixed(1)}` : ''}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={estilos.pilaPrecioSale}>
+                    <View style={estilos.filaPrecioSale}>
+                      <Text style={estilos.unidadSale}>B/</Text>
+                      <Text style={[estilos.precioSale, tabular]}>{cifraRedonda(v.aporteCentavos)}</Text>
+                    </View>
+                    <Text
+                      style={[
+                        estilos.cuposSale,
+                        { color: v.puestosLibres <= 2 ? color.rojo800 : color.inkIcono },
+                      ]}
+                    >
+                      {v.puestosLibres === 1 ? '1 cupo' : `${v.puestosLibres} cupos`}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        ) : null}
+
+        {/* El gancho del conductor: lo que RECUPERAS — nunca «ganas»— si
+            llevas puestos. La otra mitad del producto, dicha una vez. */}
+        {gancho ? (
+          <View style={estilos.seccion}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Publicar tu viaje"
+              onPress={() => router.push('/(conductor)/publicar')}
+              style={({ pressed }) => [estilos.tarjetaGancho, pressed && pulsado.tarjeta]}
+            >
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <View style={estilos.filaCifraGancho}>
+                  <Text style={estilos.unidadGancho}>B/</Text>
+                  <Text style={[estilos.cifraGancho, tabular]}>
+                    {cifraRedonda(gancho.recuperasCentavos)}
+                  </Text>
+                </View>
+                <Text style={estilos.fraseGancho}>
+                  {'Lo que recuperas si llevas '}
+                  {`${enLetra(gancho.puestos)} puestos a ${gancho.destino}`}
+                </Text>
+              </View>
+              <View style={estilos.botonGancho}>
+                <Text style={estilos.botonGanchoTexto}>Publicar</Text>
+              </View>
+            </Pressable>
           </View>
         ) : null}
       </ScrollView>
 
-        <Pestanas valor="Buscar" />
+      <Pestanas valor="Buscar" insignias={{ Mensajes: sinLeer > 0 ? sinLeer : undefined }} />
 
       <BuscadorDeLugar
         abierto={buscando !== null}
@@ -549,7 +545,6 @@ export default function Inicio() {
   );
 }
 
-
 const estilos = StyleSheet.create({
   pantalla: {
     flex: 1,
@@ -559,329 +554,397 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 8 },
-  filaDerecha: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  /* 44 y no 34: es el mínimo que el sistema fija para lo que se toca. */
-  campana: { width: espacio.tap, height: espacio.tap, alignItems: 'center', justifyContent: 'center' },
-  /** El punto rojo dice que hay algo sin leer sin tener que abrir nada. */
-  /** La cuenta, no un punto: saber que hay tres avisos evita abrir por nada. */
-  cuentaAviso: {
-    position: 'absolute',
-    top: 1,
-    right: 0,
-    minWidth: 17,
-    height: 17,
-    paddingHorizontal: 4,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.rojo500,
-    borderWidth: 1.5,
-    borderColor: '#C50E2F',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cuentaAvisoTexto: {
-    fontSize: 10.5,
-    lineHeight: 14,
-    fontWeight: '700',
-    color: '#fff',
-    fontFamily: familia,
-    ...tabular,
-  },
-  /* Los dos lados, en una pastilla: el que estás y el otro. */
-  lados: {
-    flexDirection: 'row',
-    padding: 4,
-    marginBottom: 6,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.sand100,
-  },
-  lado: {
-    flex: 1,
-    height: 40,
+  /* ------------------------------------------------------- La cabecera */
+  filaMarca: {
+    paddingTop: 8,
+    paddingLeft: espacio.gutter,
+    paddingRight: 15,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 7,
-    borderRadius: radio.pastilla,
+    justifyContent: 'space-between',
   },
-  /* `sombra.hoja` —radio 40, desplazada 18, teñida de rojo— es la de la hoja
-     entera. Puesta en una pastilla de 40 px de alto la desbordaba por todos
-     lados y el lado activo parecía más ancho que el otro aunque los dos midan
-     lo mismo. La pastilla lleva su propia sombra, corta. */
-  ladoActivo: {
-    backgroundColor: color.blanco,
-    shadowColor: '#14141A',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
-  },
-  ladoTexto: {
-    fontSize: 13.5,
-    lineHeight: 19.5,
+  marca: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  marcaTexto: {
+    fontSize: 19,
+    lineHeight: 24,
     fontWeight: '600',
-    letterSpacing: -0.14,
+    letterSpacing: -0.67,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  filaDerecha: { flexDirection: 'row', alignItems: 'center' },
+  celdaIcono: {
+    width: 44,
+    height: 44,
+    borderRadius: radio.icono,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  /** El punto de «hay algo»: rojo con el aro del fondo alrededor. */
+  puntoAviso: {
+    position: 'absolute',
+    top: 9,
+    right: 10,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: color.rojo500,
+    borderWidth: 2.5,
+    borderColor: color.sand100,
+  },
+  celdaRetrato: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  retrato: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: color.ink100,
+    borderWidth: 1,
+    borderColor: 'rgba(10,39,49,.10)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  retratoTexto: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '600',
+    letterSpacing: 0.24,
     color: color.ink700,
     fontFamily: familia,
   },
-  ladoTextoActivo: { color: color.ink900 },
 
+  filaTitulo: { paddingTop: 14, paddingHorizontal: espacio.gutter },
+  titulo: {
+    fontSize: 22,
+    lineHeight: 26,
+    fontWeight: '600',
+    letterSpacing: -0.77,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  /** El eco apagado del título, `#8FA6AD` en el archivo. */
+  tituloApagado: { color: '#8FA6AD' },
+
+  /* --------------------------------------------- La tarjeta de búsqueda */
+  zonaBusqueda: { paddingTop: 16, paddingHorizontal: espacio.gutter },
+  tarjetaBusqueda: {
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: 'rgba(10,39,49,.09)',
+    borderRadius: radio.l,
+    padding: 8,
+    ...sombra.busqueda,
+  },
+  /** El punteado vertical que ata el aro del origen con el pin del destino. */
+  conector: {
+    position: 'absolute',
+    left: 21,
+    top: 36,
+    height: 32,
+    width: 0,
+    borderLeftWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(10,39,49,.22)',
+  },
+  filaCampo: {
+    height: 52,
+    borderRadius: 17,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 14,
+  },
+  casillaIconoCampo: { width: 16, alignItems: 'center' },
+  aroOrigen: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: color.inkIcono,
+  },
+  pin: {
+    width: 13,
+    height: 13,
+    borderRadius: 7,
+    backgroundColor: color.rojo500,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pinPunto: { width: 4, height: 4, borderRadius: 2, backgroundColor: color.blanco },
+  cejaCampo: {
+    fontSize: 10,
+    lineHeight: 13,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: color.ink600,
+    fontFamily: familia,
+  },
+  /** VOY A va en el acento de texto: es el destino, y el destino es rojo. */
+  cejaVoyA: { color: color.rojo700 },
+  valorCampo: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '500',
+    letterSpacing: -0.22,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  divisorCampo: { height: 1, backgroundColor: color.divisor, marginLeft: 42, marginRight: 14 },
   invertir: {
     position: 'absolute',
-    right: 20,
-    /* Centrado sobre la línea que separa los dos campos. Sube o baja con lo
-       que haya encima: hoy, el interruptor de los dos lados. */
-    top: 110,
-    zIndex: 2,
+    right: 0,
+    top: '50%',
+    transform: [{ translateY: -20 }],
     width: 40,
     height: 40,
-    borderRadius: radio.pastilla,
+    borderRadius: radio.icono,
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: color.bordePorDefecto,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#0A2731',
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
-
-  seguro: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 13,
-    marginHorizontal: espacio.gutter,
-    marginTop: 18,
-    padding: 15,
-    borderRadius: radio.l,
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderColor: color.bordeSutil,
-  },
-  seguroTitulo: {
-    fontSize: 15.5,
-    lineHeight: 21.75,
-    fontWeight: '600',
-    letterSpacing: -0.23,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  seguroTexto: { fontSize: 13.5, lineHeight: 19, color: color.ink600, marginTop: 2, fontFamily: familia },
-
-  seccionSalen: { marginTop: 24 },
-  tiraSalen: { flexDirection: 'row', gap: 10, paddingHorizontal: espacio.gutter, paddingTop: 12 },
-  puntos: { flexDirection: 'row', gap: 6, justifyContent: 'center', marginTop: 12 },
-  punto: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.ink300 },
-  puntoActivo: { width: 18, backgroundColor: color.rojo500 },
-  tarjetaSale: {
-    width: 208,
-    borderRadius: radio.l,
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderColor: color.bordeSutil,
-    overflow: 'hidden',
-  },
-  fotoSale: {
-    height: 92,
-    backgroundColor: color.sand200,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cuerpoSale: { padding: 13, gap: 3 },
-  horaSale: {
-    fontSize: 21,
-    lineHeight: 26,
-    fontWeight: '600',
-    letterSpacing: -0.63,
-    color: color.ink900,
-    fontFamily: familia,
-    ...tabular,
-  },
-  destinoSale: { fontSize: 13.5, lineHeight: 19.5, color: color.ink600, fontFamily: familia },
-  precioSale: {
-    fontSize: 17,
-    lineHeight: 24,
-    fontWeight: '700',
-    letterSpacing: -0.34,
-    color: color.ink900,
-    fontFamily: familia,
-    ...tabular,
-  },
-  filaQuienSale: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
-  quienSale: { flex: 1, fontSize: 12.5, lineHeight: 18, color: color.ink700, fontFamily: familia },
-  notaSale: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia, ...tabular },
-
-  filaSaludo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
-  epigrafeCampo: {
+  divisorTarjeta: { height: 1, backgroundColor: color.divisor, marginHorizontal: 8 },
+  filaOpciones: { flexDirection: 'row', alignItems: 'center', height: 48 },
+  opcion: {
     flex: 1,
-    fontSize: 11.5,
-    lineHeight: 15.95,
-    fontWeight: '600',
-    letterSpacing: 11 * TRACK_MICRO,
-    textTransform: 'uppercase',
-    color: color.campoTexto,
-    fontFamily: familia,
-  },
-  explicacion: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: color.campoTexto,
-    marginTop: 12,
-    fontFamily: familia,
-  },
-  titular: {
-    fontSize: 36,
-    lineHeight: 36.72,
-    letterSpacing: -1.62,
-    fontWeight: '400',
-    color: '#fff',
-    marginTop: 12,
-    fontFamily: familia,
-  },
-  titularFuerte: { fontWeight: '600' },
-
-  hoja: {
-    marginHorizontal: espacio.gutter,
-    marginTop: 22,
-    backgroundColor: color.blanco,
-    borderRadius: radio.hoja,
-    padding: 18,
-    shadowColor: 'rgb(120,10,30)',
-    shadowOpacity: 0.28,
-    shadowRadius: 40,
-    shadowOffset: { width: 0, height: 18 },
-    elevation: 6,
-  },
-  filaLugar: { flexDirection: 'row', gap: 14, alignItems: 'center', paddingVertical: 8 },
-  filaConLinea: { borderTopWidth: 1, borderTopColor: color.bordeSutil },
-  puntoLleno: { width: 10, height: 10, borderRadius: radio.pastilla, backgroundColor: color.rojo500 },
-  puntoVacio: {
-    width: 10,
-    height: 10,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
-    borderWidth: 2,
-    borderColor: color.ink200,
-  },
-  etiquetaLugar: {
-    fontSize: 11.5, lineHeight: 15.95,
-    fontWeight: '600',
-    letterSpacing: 11 * TRACK_MICRO,
-    textTransform: 'uppercase',
-    color: color.ink500,
-    fontFamily: familia,
-  },
-  valorLugar: { fontSize: 15.5, lineHeight: 23.93, letterSpacing: -0.33, color: color.ink900, marginTop: 2, fontFamily: familia },
-
-  filaCajas: { flexDirection: 'row', gap: 10, marginTop: 12 },
-  caja: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: color.bordePorDefecto,
+    height: 48,
     borderRadius: radio.control,
-    paddingVertical: 8,
-    paddingHorizontal: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
   },
-  etiquetaCaja: {
-    fontSize: 10.5, lineHeight: 15.22,
+  opcionTexto: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    color: color.ink700,
+    fontFamily: familia,
+  },
+  divisorVertical: { width: 1, height: 20, backgroundColor: 'rgba(10,39,49,.09)' },
+
+  cta: {
+    marginTop: 12,
+    height: 54,
+    borderRadius: radio.boton,
+    backgroundColor: color.rojo500,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
+    ...sombra.cta,
+  },
+  ctaTexto: {
+    fontSize: 16,
+    lineHeight: 20,
     fontWeight: '600',
-    letterSpacing: 10.5 * TRACK_MICRO,
+    letterSpacing: -0.16,
+    color: color.blanco,
+    fontFamily: familia,
+  },
+
+  confianza: {
+    paddingTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    minHeight: 25,
+  },
+  confianzaTexto: {
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: '500',
+    color: color.ink500,
+    fontFamily: familia,
+  },
+
+  /* ------------------------------------------------------ Las secciones */
+  seccion: { paddingTop: 16 },
+  cabeceraSeccion: {
+    paddingHorizontal: espacio.gutter,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cabeceraIzquierda: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  rotuloSeccion: {
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: '600',
+    letterSpacing: 1.43,
     textTransform: 'uppercase',
     color: color.ink500,
     fontFamily: familia,
   },
-  valorCaja: { fontSize: 15.5, lineHeight: 21.75, fontWeight: '500', color: color.ink900, marginTop: 2, fontFamily: familia },
-
-  seccionRutas: { paddingHorizontal: espacio.gutter, paddingTop: 18 },
-  filaSeccion: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: 2,
-  },
-  verTodas: {
-    fontSize: 13.5,
-    lineHeight: 18.85,
-    fontWeight: '600',
-    color: color.rojo600,
+  enlaceSeccion: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    color: color.rojo700,
     fontFamily: familia,
-    /* El relleno vertical es la zona de toque: un texto de 19 px de alto no
-       se acierta con el pulgar. */
-    paddingVertical: 12,
-    paddingLeft: 14,
   },
-  filaRuta: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 11 },
-  filaRutaConLinea: { borderTopWidth: 1, borderTopColor: color.bordeSutil },
-  miniaturaSinFoto: {
-    backgroundColor: color.sand200,
+  /** El punto en vivo, con su halo del 14 %. */
+  puntoVivo: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: color.rojo500,
+    shadowColor: color.rojo500,
+    shadowOpacity: 0.35,
+    shadowRadius: 3.5,
+    shadowOffset: { width: 0, height: 0 },
+  },
+  rangoPrecios: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: color.ink900,
+    fontFamily: familia,
+  },
+
+  tiraFavoritas: { flexDirection: 'row', gap: 12, paddingHorizontal: espacio.gutter, paddingTop: 10 },
+  tarjetaFavorita: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 10,
+    padding: 8,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: 'rgba(10,39,49,.09)',
+    borderRadius: radio.control,
+    ...sombra.s,
   },
+  /** 52, al radio 8: la superficie anidada resta el padding de la madre. */
   miniatura: {
     width: 52,
-    height: 40,
-    borderRadius: radio.s,
+    height: 52,
+    borderRadius: radio.anidado,
     overflow: 'hidden',
     backgroundColor: color.sand200,
-  },
-  foto: { width: '100%', height: '100%' },
-  nombreRuta: { flex: 1, fontSize: 15.5, lineHeight: 23.93, letterSpacing: -0.36, color: color.ink900, fontFamily: familia },
-  nombreRutaFuerte: { fontWeight: '600' },
-  desde: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
-  precioRuta: {
-    fontSize: 19,
-    lineHeight: 26,
-    fontWeight: '700',
-    letterSpacing: -0.66,
-    color: color.ink900,
-    fontFamily: familia,
-    ...tabular,
-  },
-
-  seccionGancho: { paddingHorizontal: espacio.gutter, paddingTop: 16 },
-  tarjetaGancho: {
-    borderRadius: radio.hoja,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    overflow: 'hidden',
-    backgroundColor: color.blanco,
-    shadowColor: '#14141A',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  filaGancho: { flexDirection: 'row', alignItems: 'flex-end', gap: 14 },
-  cifraGancho: {
-    fontSize: 30,
-    fontWeight: '700',
-    letterSpacing: -1.35,
-    lineHeight: 30,
-    color: color.ink900,
-    fontFamily: familia,
-    ...tabular,
-  },
-  fraseGancho: {
-    fontSize: 15.5,
-    lineHeight: 20.25,
-    marginTop: 8,
-    maxWidth: 190,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  fraseGanchoFuerte: { fontWeight: '600' },
-  botonPublicar: {
-    height: 40,
-    paddingHorizontal: 18,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  botonPublicarTexto: {
-    fontSize: 14, lineHeight: 20.3,
+  foto: { width: '100%', height: '100%' },
+  cuerpoFavorita: { paddingRight: 6 },
+  filaDesde: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  desdeFavorita: {
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: '500',
+    letterSpacing: -0.11,
+    color: color.ink600,
+    fontFamily: familia,
+  },
+  destinoFavorita: {
+    fontSize: 16,
+    lineHeight: 21,
     fontWeight: '600',
-    letterSpacing: -0.14,
+    letterSpacing: -0.48,
     color: color.ink900,
     fontFamily: familia,
   },
 
-  pie: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 22 },
+  listaSalen: { paddingHorizontal: espacio.gutter, paddingTop: 12, gap: 10 },
+  tarjetaSale: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    borderRadius: radio.l,
+  },
+  horaSale: {
+    fontSize: 19,
+    lineHeight: 23,
+    fontWeight: '600',
+    letterSpacing: -0.57,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  filaHaciaSale: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  destinoSale: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    letterSpacing: -0.13,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  filaQuienSale: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
+  quienSale: {
+    flex: 1,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: '400',
+    color: color.ink600,
+    fontFamily: familia,
+  },
+  pilaPrecioSale: { alignItems: 'flex-end', gap: 2 },
+  filaPrecioSale: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
+  unidadSale: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink600, fontFamily: familia },
+  precioSale: {
+    fontSize: 22,
+    lineHeight: 24,
+    fontWeight: '600',
+    letterSpacing: -0.77,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  cuposSale: { fontSize: 11, lineHeight: 15, fontWeight: '500', fontFamily: familia },
+
+  /* ------------------------------------------------ El gancho de manejar */
+  tarjetaGancho: {
+    marginHorizontal: espacio.gutter,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    borderRadius: radio.l,
+  },
+  filaCifraGancho: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
+  unidadGancho: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink600, fontFamily: familia },
+  cifraGancho: {
+    fontSize: 22,
+    lineHeight: 24,
+    fontWeight: '600',
+    letterSpacing: -0.77,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  fraseGancho: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '400',
+    color: color.ink500,
+    marginTop: 3,
+    fontFamily: familia,
+  },
+  botonGancho: {
+    height: 38,
+    paddingHorizontal: 13,
+    borderRadius: 13,
+    backgroundColor: color.ink900,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  botonGanchoTexto: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    letterSpacing: -0.13,
+    color: color.blanco,
+    fontFamily: familia,
+  },
 });
