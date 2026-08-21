@@ -1,11 +1,10 @@
 /**
  * El armazón HTML de la versión web.
  *
- * Sirve Inter Tight desde la propia app en vez de pedirla a Google, que es lo
- * que hace `design_system/tokens/fonts.css`. Misma cara, sin depender de la
- * red: en Apple manda Helvetica Neue y en el resto entra Inter Tight, que es
- * el orden del traspaso. Sin esto el navegador caía a Arial y ni la anchura de
- * los textos ni el interletrado se parecían a los del diseño.
+ * Sirve **Switzer** desde la propia app, que es la grotesca del diseño v6
+ * (`diseno/Partimos App v6.dc.html` la pide a Fontshare; aquí va autoalojada
+ * para no depender de la red). Inter Tight se queda servida como reserva: es
+ * la cara que ya conocen los teléfonos Android compilados con ella.
  */
 
 import type { PropsWithChildren } from 'react';
@@ -44,6 +43,17 @@ const base = (process.env.EXPO_BASE_URL ?? '').replace(/\/$/, '');
 const estilos = `
 ${pesos
   .map(
+    ([, peso]) => `@font-face {
+  font-family: "Switzer";
+  font-style: normal;
+  font-weight: ${peso};
+  font-display: swap;
+  src: url("${base}/fuentes/Switzer-${peso}.woff2") format("woff2");
+}`,
+  )
+  .join('\n')}
+${pesos
+  .map(
     ([archivo, peso]) => `@font-face {
   font-family: "Inter Tight";
   font-style: normal;
@@ -71,7 +81,7 @@ ${pesos
  */
 html, body { height: 100%; margin: 0; width: 100%; }
 body {
-  background-color: #F5F5F7;
+  background-color: #F4F7F8;
   /* Nada de rebote elástico: la app no es una página. */
   overscroll-behavior: none;
 

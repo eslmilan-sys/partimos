@@ -479,7 +479,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: { ...texto.epigrafe, color: color.campoTexto, flex: 1 },
-  titular: { ...texto.titular, color: '#fff', marginTop: 12 },
+  titular: { ...texto.titular, color: color.ink900, marginTop: 12 },
 
   hoja: {
     marginHorizontal: espacio.gutter,

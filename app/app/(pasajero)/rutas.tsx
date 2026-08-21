@@ -191,7 +191,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  titular: { ...texto.titular, color: color.blanco, marginTop: 12 },
+  titular: { ...texto.titular, color: color.ink900, marginTop: 12 },
   titularFuerte: texto.titularFuerte,
 
   cuerpo: { flex: 1, overflow: 'hidden' },

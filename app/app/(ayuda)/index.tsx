@@ -227,7 +227,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: { ...texto.epigrafe, color: color.campoTexto },
-  titular: { ...texto.titular, color: color.blanco, marginTop: 12 },
+  titular: { ...texto.titular, color: color.ink900, marginTop: 12 },
 
   /* La hoja blanca monta sobre el borde del campo rojo: 28 de radio, dos más
      que `radio.hoja`, como en el resto de las pantallas de ayuda. */

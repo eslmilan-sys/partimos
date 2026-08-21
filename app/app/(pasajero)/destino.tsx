@@ -255,7 +255,7 @@ const estilos = StyleSheet.create({
     height: 40,
     borderRadius: radio.pastilla,
     // Aquí sí es vidrio: se sienta sobre una fotografía, que es algo con color.
-    backgroundColor: 'rgba(255,255,255,.34)',
+    backgroundColor: color.campoControl,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,.16)',
     alignItems: 'center',
@@ -265,7 +265,7 @@ const estilos = StyleSheet.create({
     height: 40,
     paddingHorizontal: 15,
     borderRadius: radio.pastilla,
-    backgroundColor: 'rgba(255,255,255,.34)',
+    backgroundColor: color.campoControl,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,.16)',
     justifyContent: 'center',

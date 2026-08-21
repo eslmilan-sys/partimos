@@ -1,401 +1,385 @@
 import { Platform } from 'react-native';
 
 /**
- * PARTIMOS · DESIGN SYSTEM V1
+ * PARTIMOS · SISTEMA v6
  *
- * Portado de `diseno/Partimos Main Screen.dc.html`, turno 10a («Foundation —
- * tokens and components») con las correcciones del turno 14. **Este sistema
- * sustituye al del traspaso anterior**, decidido por el usuario.
+ * Portado de `diseno/Partimos App v6.dc.html`, decidido por el usuario como
+ * **la estructura base de todas las pantallas**: «this is the base structure,
+ * copy it on everywhere». El propio archivo trae su especificación en diez
+ * secciones y nueve invariantes, y advierte: cada valor es el usado en el
+ * archivo, sin aproximaciones. Aquí están esos valores, y solo esos.
  *
- * Lo que cambia respecto de lo que había, y que conviene saber antes de tocar
- * una pantalla:
+ * Lo que cambia respecto del sistema anterior (el v1 del canevas):
  *
- * - **Ya no hay azul.** El sistema anterior repartía la bandera por oficios
- *   —azul `#005293` dueño de las superficies, rojo `#D21034` dueño de la
- *   interacción—. El nuevo no tiene azul en ninguna parte: las superficies son
- *   blanco y gris de lienzo, y el rojo `#E1213B` es lo único que actúa.
- * - **Los neutros son fríos**, no cálidos. La rampa `ink` tira a violeta-gris
- *   y los fondos son gris de lienzo, no arena.
- * - **La escala de radios es fija y de cuatro pasos**: 10 fichas, 15 campos y
- *   botones, 20 tarjetas, 25 hojas. Nada de valores intermedios.
- * - **La rejilla es de 5 pt** y el gutter mide 20.
- *
- * Los nombres de la rampa anterior (`azul*`, `arena*`, `sand*`) se conservan
- * como alias sobre el sistema nuevo para que las pantallas sigan compilando
- * mientras se recorren una a una. **No los uses en código nuevo**: están
- * marcados abajo con su equivalente real.
- *
- * Valores exactos: no se ajustan «a ojo» en las pantallas.
+ * - **El campo rojo héroe desaparece.** El usuario lo rechazó. Ninguna
+ *   pantalla abre con una banda roja: todas abren sobre el lienzo `#F4F7F8`
+ *   con dos halos radiales tenues (sarcelle y rojo) como única atmósfera.
+ * - **La tinta es azul-sarcelle**, no violeta ni negra: `#0A2731` y su rampa.
+ *   Es también la superficie oscura (chip Filtros, botón Publicar, bisel).
+ * - **El rojo queda reservado a cuatro sentidos** — destino, acción primaria,
+ *   poca disponibilidad, «en vivo» — y a nada decorativo. Invariante 4 del
+ *   propio archivo.
+ * - **La grotesca es Switzer** (autoalojada en `public/fuentes/`), con
+ *   Helvetica Neue e Inter Tight detrás.
+ * - Los números comparables — horas, precios, duraciones, calificaciones —
+ *   van SIEMPRE en cifras tabulares. Invariante 9.
  */
 
 export const color = {
   /**
-   * LA ACCIÓN. El único color que actúa: botones primarios, enlaces, estados
-   * activos. Sobre blanco, nunca sobre otro relleno.
+   * LA TINTA, seis pasos medidos por el propio diseño.
+   *
+   * `ink900` es texto primario Y superficie oscura: el chip «Filtros», el
+   * botón de publicar, el bisel del teléfono. Los pasos 500/600 son los
+   * grises con oficio fijo: 500 rotula secciones y meta, 600 lleva unidades
+   * y cejas de campo. `ink400` es texto agotado/deshabilitado; `ink300` son
+   * guiones, chevrones y raíles apagados — **nunca texto corrido**.
+   */
+  ink900: '#0A2731',
+  /** El extremo claro del degradado del botón Publicar (160°, hacia ink900). */
+  ink800: '#123F4D',
+  /** Ink 2 · rótulos de control, cuerpo secundario, nombres de lugar. */
+  ink700: '#2A4B55',
+  /** Ink 3 · rótulos de sección, meta, la línea de confianza. */
+  ink500: '#5A757E',
+  /** Ink 4 · unidades («B/»), meta terciaria, cejas de campo. */
+  ink600: '#7C959D',
+  /** Ink 5 · texto agotado y deshabilitado. */
+  ink400: '#93A8AE',
+  /** Ink 6 · guiones, chevrones, raíl deshabilitado. Nunca para leer. */
+  ink300: '#B0C1C6',
+  ink200: '#D5E2E5',
+  ink100: '#EAF1F2',
+
+  /**
+   * EL ACENTO, en tres profundidades con oficio distinto:
+   * `rojo500` actúa (CTA, marcador de destino, punto en vivo, insignias de
+   * cuenta); `rojo700` es el acento de TEXTO sobre blanco (enlaces, «Llega»,
+   * pestañas activas); `rojo800` es el acento dentro de un chip teñido
+   * (pocos cupos, «Mejor opción»). `rojo600` es el pressed del CTA.
    */
   rojo500: '#E1213B',
-  /** Pressed, y el texto de acento cuando el rojo puro no daría contraste. */
   rojo600: '#A6122A',
-  rojo700: '#A6122A',
-  rojo800: '#8F1024',
-  /** El tinte: fondo de pastillas y avisos de acento. Lleva `rojo700` encima. */
-  rojo50: '#FDE7EA',
+  rojo700: '#C11730',
+  rojo800: '#B01128',
+  /** El tinte: `rgba(225,33,59,.10)` aplanado sobre blanco. */
   rojo100: '#FCE9EC',
+  rojo50: '#FDF0F2',
   rojo200: '#F7C9D1',
   rojo300: '#EE8D9C',
   rojo400: '#E85A70',
 
   /**
-   * LA TINTA. `#14141A` es el negro del sistema: titulares, cifras, cuerpo.
-   *
-   * `ink500` y `ink600` son los dos únicos grises que pueden llevar texto, y
-   * el sistema los da medidos: secundario `#5A5A63` = 6,8:1, terciario
-   * `#6B6B75` = 5,1:1. Los dos pasan AA en todos los tamaños en uso. Por
-   * debajo de `ink600` no va texto: `ink400`, `ink300`, `ink200` e `ink100`
-   * son para bordes, puntos y rellenos, nunca para leer.
+   * LAS SUPERFICIES. Tarjetas y hojas son blanco pleno; el suelo de pantalla
+   * es `#F4F7F8`; detrás del teléfono (solo en el canvas de diseño) está
+   * `#E9EEEF`. Los nombres `sand*`/`arena*` quedaron de sistemas anteriores
+   * y hoy resuelven al lienzo frío del v6.
    */
-  ink900: '#14141A',
-  ink800: '#17171A',
-  ink700: '#2A2A31',
-  /** Secundario · 6,8:1. Segundas líneas, horas de llegada, «por puesto». */
-  ink500: '#5A5A63',
-  /** Terciario · 5,1:1. Metadatos, epígrafes, el gris más claro con texto. */
-  ink600: '#6B6B75',
-  ink400: '#A6A6AF',
-  ink300: '#C9C9D1',
-  ink200: '#E6E6EA',
-  ink100: '#F1F1F4',
-
-  /**
-   * LAS SUPERFICIES. `sand100` es el lienzo `#F5F5F7`, `sand200` el campo
-   * `#F1F1F4`. Los nombres quedaron de la rampa cálida anterior; los valores
-   * ya son los fríos del sistema nuevo.
-   */
-  sand50: '#FCFCFE',
-  sand100: '#F5F5F7',
-  sand200: '#F1F1F4',
-  sand300: '#E6E6EA',
-
-  /** Alias cálidos del sistema anterior. Equivalen al lienzo y al campo. */
-  arena100: '#F5F5F7',
-  arena200: '#F1F1F4',
-
-  /**
-   * ALIAS DEL AZUL RETIRADO.
-   *
-   * El sistema nuevo no tiene azul. Donde el azul vestía una superficie o un
-   * epígrafe, ahora va tinta o gris; donde marcaba un relleno suave, va
-   * lienzo. Se conservan para que las nueve pantallas que aún los nombran
-   * compilen: al recorrerlas, sustitúyelos por `ink*` o `sand*`.
-   */
-  azul50: '#F5F5F7',
-  azul100: '#F1F1F4',
-  azul200: '#E6E6EA',
-  azul300: '#C9C9D1',
-  azul400: '#6B6B75',
-  azul500: '#14141A',
-  azul600: '#17171A',
-  azul700: '#14141A',
-  azul800: '#0E0E10',
-
   blanco: '#FFFFFF',
-  oro500: '#E0A83C',
-  verde500: '#0F7B4F',
+  sand50: '#FFFFFF',
+  sand100: '#F4F7F8',
+  sand200: '#EFF3F4',
+  sand300: '#E9EEEF',
+  arena100: '#F4F7F8',
+  arena200: '#EFF3F4',
+
+  /** Alias del azul retirado hace dos sistemas; hoy la tinta ES azulada. */
+  azul50: '#F4F7F8',
+  azul100: '#EAF1F2',
+  azul200: '#D5E2E5',
+  azul300: '#B0C1C6',
+  azul400: '#7C959D',
+  azul500: '#0A2731',
+  azul600: '#123F4D',
+  azul700: '#0A2731',
+  azul800: '#0A2731',
 
   /**
-   * LOS DOS ESTADOS QUE NO SON LA MARCA.
-   *
-   * El rojo es la marca, así que no puede querer decir «mal» ni «esperando».
-   * El verde del sistema nuevo es `#0B5C3B` sobre `#E7F4EE`. El ámbar se
-   * queda como estaba: el sistema no lo redefine y sigue siendo el único
-   * color de espera.
+   * LOS BORDES Y LOS LAVADOS: el diseño los escribe como tinta con alfa para
+   * que funcionen sobre blanco y sobre lienzo por igual.
+   */
+  bordeSutil: 'rgba(10,39,49,.08)',
+  bordePorDefecto: 'rgba(10,39,49,.11)',
+  /** El fondo pulsado de una celda de icono: «a 6 % ink wash». */
+  lavado: 'rgba(10,39,49,.06)',
+  lavadoChip: 'rgba(10,39,49,.05)',
+  /** El separador dentro de una tarjeta: 1px, a todo el ancho. */
+  divisor: 'rgba(10,39,49,.07)',
+
+  /**
+   * LOS DOS ESTADOS QUE NO SON LA MARCA. El rojo tiene sus cuatro sentidos
+   * tasados, así que «hecho» y «esperando» siguen fuera de él.
    */
   hechoFondo: '#E7F4EE',
   hechoTinta: '#0B5C3B',
   esperaFondo: '#FBF0D8',
   esperaTinta: '#8A6413',
+  verde500: '#0F7B4F',
+  oro500: '#E0A83C',
 
-  /** El borde de tarjeta del sistema: 1 px `#E6E6EA`. */
-  bordeSutil: '#E6E6EA',
-  bordePorDefecto: '#C9C9D1',
-
-  /** Disabled: relleno `#EDEDF0`, letra `#A6A6AF`. */
-  inerteFondo: '#EDEDF0',
-  inerteTinta: '#A6A6AF',
+  inerteFondo: 'rgba(10,39,49,.06)',
+  inerteTinta: '#93A8AE',
 
   /**
-   * Restos del campo rojo héroe del sistema anterior. El sistema nuevo no
-   * tiene superficie roja —el rojo sólo actúa, sobre blanco—, así que estos
-   * dos desaparecen cuando se rehaga `CampoRojo.tsx`. Ver la nota de
-   * `campoRojo` más abajo.
+   * RESTOS DEL CAMPO ROJO HÉROE, que ya no existe. Las pantallas que aún
+   * nombran estos dos tokens ponían texto blanco y controles translúcidos
+   * sobre una banda roja; la banda es ahora el lienzo claro, así que el
+   * «texto sobre el campo» es tinta secundaria y el «control sobre el campo»
+   * es el lavado estándar. Así, cada cabecera vieja se vuelve legible sobre
+   * claro sin tocar la pantalla. Retirar cuando ninguna pantalla los nombre.
    */
-  campoTexto: 'rgba(255,255,255,.92)',
-  campoControl: 'rgba(255,255,255,.18)',
+  campoTexto: '#5A757E',
+  campoControl: 'rgba(10,39,49,.06)',
 } as const;
 
 /**
- * EL CAMPO ROJO — SUPERSEDIDO, PENDIENTE DE RETIRAR.
- *
- * El sistema anterior abría casi todas las pantallas con una superficie roja
- * a sangre de 326 px. **El sistema v1 no tiene superficie roja**: el rojo sólo
- * actúa —botones, enlaces, activos— y siempre sobre blanco. La pantalla de
- * inicio del turno 10d es lienzo con un H1 «Buscar viajes» en tinta.
- *
- * Se conserva para que `CampoRojo.tsx` y las siete pantallas que lo montan
- * sigan compilando. Los tonos se han llevado al rojo nuevo para que, mientras
- * dure la transición, no convivan dos rojos distintos en la misma app.
+ * LOS DOS HALOS DEL LIENZO — la única atmósfera que tiene una pantalla.
+ * Sarcelle arriba-izquierda, rojo arriba-derecha, y ninguno intercepta un
+ * toque. Los dibuja `CampoRojo.tsx` (hoy `FondoAmbiente`).
  */
-export const campoRojo = {
-  luz: 'rgba(255,216,188,.34)',
-  sombra: 'rgba(143,16,36,.62)',
-  de: '#E83950',
-  medio: '#E1213B',
-  a: '#A6122A',
-  alturaInicio: 326,
-  alturaSecundaria: 206,
+export const ambiente = {
+  sarcelle: 'rgba(38,120,140,.16)',
+  rojo: 'rgba(225,33,59,.10)',
 } as const;
 
 /**
- * LOS RADIOS, CON ASIGNACIÓN FIJA.
- *
- * Cuatro pasos y un círculo, y cada uno tiene su sitio. No se elige el radio
- * «que quede bien»: se elige por lo que es la pieza.
- *
- *   10 · fichas, pastillas, insignias
- *   15 · campos y botones
- *   20 · tarjetas
- *   25 · hojas y modales
- *   círculo · avatares
+ * LOS RADIOS, sección 05 de la spec, con su regla: **una superficie anidada
+ * resta el padding de la madre** (miniatura 8 dentro de tarjeta 16 con
+ * padding 8); los controles conservan su propia escala e ignoran la regla.
  */
 export const radio = {
-  /** Fichas e insignias. */
-  ficha: 10,
-  xs: 10,
-  s: 10,
-  cuadrado: 10,
-  /** Campos y botones. */
-  control: 15,
-  m: 15,
-  /** Tarjetas. */
-  l: 20,
-  /** Hojas y modales. */
-  xl: 25,
-  hoja: 25,
-  /** Avatares y pastillas a media altura. */
+  /** Superficie anidada (miniatura dentro de una tarjeta). */
+  anidado: 8,
+  xs: 8,
+  /** Chip retirable, 32 de alto. */
+  ficha: 11,
+  s: 11,
+  /** Chip de barra (Filtros, orden, fecha), 38 de alto. */
+  cuadrado: 13,
+  /** Celda de icono con fondo pulsado, 44 × 44. */
+  icono: 14,
+  /** Control dentro de tarjeta (48), tarjeta favorita, fila compacta. */
+  control: 16,
+  m: 16,
+  /** Botón a todo lo ancho, 54 — primario y secundario por igual. */
+  boton: 18,
+  /** Tarjeta de viaje y tarjeta de búsqueda. */
+  l: 24,
+  xl: 24,
+  hoja: 24,
   pastilla: 999,
 } as const;
 
 export const espacio = {
   /**
-   * EL ANCHO DEL MARCO.
-   *
-   * El traspaso se dibujó a 390, que es el iPhone «normal». Pero el 14 Pro
-   * mide 393, el Plus 428, el Pro Max 430 y el 16 Pro Max 440: en todos ellos
-   * un marco de 390 centrado deja una franja de fondo a cada lado. Sobre el
-   * campo rojo esa franja se ve como una raya clara pegada al borde, que es
-   * exactamente lo que se veía en el teléfono, y al tocar cerca del borde la
-   * página se desplazaba de lado.
-   *
-   * 440 cubre todos los iPhone en venta, así que en el teléfono la pantalla
-   * llena la ventana y no hay franja. En el escritorio el marco sigue siendo
-   * un teléfono, 50 px más ancho: nada del diseño depende de un ancho exacto,
-   * todo mide en porcentaje o en flex.
+   * EL ANCHO DEL MARCO. El diseño se dibuja a 393 (iPhone 14/15), pero a 393
+   * reales los iPhone anchos dejaban una franja de fondo a cada lado — fallo
+   * medido en el teléfono. 440 cubre todos los iPhone en venta; en escritorio
+   * el marco sigue siendo un teléfono. Nada del diseño depende del ancho
+   * exacto: todo mide en porcentaje o en flex.
    */
   marco: 440,
-  /**
-   * LA REJILLA DE 5 PT.
-   *
-   * El sistema v1 mide todo en múltiplos de cinco: 5 compacto, 10 de icono a
-   * texto, 15 relleno interno, 20 gutter y separación entre componentes, 30
-   * entre secciones, 40 entre bloques mayores. El gutter pasa de 26 a 20 —el
-   * lienzo del diseño mide 393 con 20 a cada lado, o sea 353 de contenido—.
-   */
-  compacto: 5,
-  iconoATexto: 10,
-  relleno: 15,
-  gutter: 20,
-  seccion: 30,
-  bloque: 40,
 
-  entreTarjetas: 10,
-  tarjeta: 20,
-  hoja: 25,
-  fila: 60,
-  filaY: 15,
-  control: 52,
-  controlS: 40,
   /**
-   * El área mínima de algo que se toca. Es también la corrección 5 del turno
-   * 14: «Ver todo» y «Editar» medían 17 px de alto y no tenían zona de toque.
+   * LA ESCALA, sección 02: 4 · 8 · 10 · 12 · 16 · 20, y en el teléfono el
+   * hueco más grande ES 20. El 10 tiene un solo oficio: icono-o-imagen a
+   * texto, nada más.
    */
+  compacto: 4,
+  chip: 8,
+  iconoATexto: 10,
+  fila: 12,
+  relleno: 16,
+  gutter: 20,
+  seccion: 20,
+  bloque: 20,
+
+  entreTarjetas: 16,
+  tarjeta: 16,
+  hoja: 20,
+  filaY: 12,
+
+  /** Alturas de control, sección 07: 32 · 38 · 44 · 48 · 52 · 54. */
+  chipS: 32,
+  chipBarra: 38,
   tap: 44,
+  controlS: 48,
+  campo: 52,
+  control: 54,
 } as const;
 
 /**
- * UNA SOLA GROTESCA NEUTRA.
- *
- * El diseño v1 está dibujado en **Neue Montreal**, que es una tipografía de
- * pago y **no está en el repositorio**: no hay ningún fichero suyo en
- * `app/public/fuentes/`, donde sí está Inter Tight en cuatro pesos. La pila la
- * pide primero, de modo que si algún día se licencia y se añade, el diseño se
- * ve tal cual fue dibujado sin tocar una línea; mientras tanto cae en la misma
- * grotesca de siempre, que es la sustituta que el propio diseño declara.
- *
- * Nunca peso 300. No hay monoespaciada: los números usan cifras tabulares de
- * la misma fuente.
+ * UNA SOLA GROTESCA: **Switzer**, la del v6, autoalojada en
+ * `public/fuentes/Switzer-{400,500,600,700}.woff2` y declarada en
+ * `app/+html.tsx`. Detrás, la misma cadena de siempre: Helvetica Neue en
+ * Apple, Inter Tight donde esté registrada, Arial al final. En el teléfono
+ * nativo Switzer no está registrada todavía — allí manda la reserva.
  */
 export const familia = Platform.select({
-  // Inter Tight se carga en app/+html.tsx; «Neue Montreal» sólo resuelve si se
-  // instala. El orden es el del propio diseño.
-  web: '"Neue Montreal", "Helvetica Neue", Helvetica, "Inter Tight", Arial, sans-serif',
-  // En Apple la grotesca sustituta del diseño existe de verdad.
+  web: '"Switzer", "Helvetica Neue", Helvetica, "Inter Tight", Arial, sans-serif',
   ios: 'Helvetica Neue',
-  // En Android hace falta registrar Inter Tight por peso, que pide una
-  // compilación propia: en Expo Go se ve con la grotesca del sistema.
   default: undefined,
 });
 
+/** Cifras tabulares — invariante 9: todo número comparable las lleva. */
+export const tabulares = { fontVariant: ['tabular-nums'] as 'tabular-nums'[] };
+
 /**
- * La altura de línea del cuerpo, `--lh-body`. En el navegador el texto la
- * hereda; React Native no hereda nada, así que va explícita en cada estilo.
- * Sin ella cada fila queda ~4 px más corta y la pantalla entera se comprime.
+ * La altura de línea del cuerpo para las pantallas aún no migradas a la
+ * escala v6 (23 sitios la llaman). En código nuevo se escribe el interlineado
+ * absoluto del paso, nunca esta razón.
  */
 export const INTERLINEA = 1.45;
-
-/** Redondeada al cuarto de píxel, como la calcula el navegador. */
 export const interlinea = (tamano: number) => Math.round(tamano * INTERLINEA * 100) / 100;
 
 const conFuente = { fontFamily: familia };
 
+/**
+ * LAS SOMBRAS, tal como las tasa la sección 07:
+ * tarjetas 0 4 14 al 5 % · tarjeta de búsqueda 0 12 32 al 7 % ·
+ * destacada 0 16 36 al 10 % · CTA rojo 0 10 24 al 28 % del acento.
+ */
 export const sombra = {
   s: {
-    shadowColor: '#14141A',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: '#0A2731',
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
+  busqueda: {
+    shadowColor: '#0A2731',
+    shadowOpacity: 0.07,
+    shadowRadius: 32,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 5,
+  },
   l: {
-    shadowColor: '#14141A',
-    shadowOpacity: 0.12,
-    shadowRadius: 48,
-    shadowOffset: { width: 0, height: 18 },
+    shadowColor: '#0A2731',
+    shadowOpacity: 0.1,
+    shadowRadius: 36,
+    shadowOffset: { width: 0, height: 16 },
     elevation: 8,
   },
-  /** La hoja blanca que monta sobre el campo, con sombra teñida de rojo. */
-  hoja: {
-    shadowColor: 'rgb(120,10,30)',
+  cta: {
+    shadowColor: '#E1213B',
     shadowOpacity: 0.28,
-    shadowRadius: 40,
-    shadowOffset: { width: 0, height: 18 },
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 10 },
     elevation: 6,
+  },
+  /** El botón Publicar de la barra: sombra de tinta, más corta y más honda. */
+  publicar: {
+    shadowColor: '#0A2731',
+    shadowOpacity: 0.28,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 7,
+  },
+  hoja: {
+    shadowColor: '#0A2731',
+    shadowOpacity: 0.1,
+    shadowRadius: 36,
+    shadowOffset: { width: 0, height: 16 },
+    elevation: 8,
   },
 } as const;
 
-/** `--track-micro` es 0.1em. En un epígrafe de 11px son 1,1px. */
 export const TRACK_MICRO = 0.1;
 export const trackMicro = (tamano: number) => tamano * TRACK_MICRO;
 
 /**
- * LA ESCALA, TAL COMO LA ESPECIFICA EL TURNO 10a.
- *
- * Seis pasos, con su interlineado en píxeles y su crenado por escalón. El
- * interlineado del sistema v1 es **absoluto**, no una razón: 28/34, 20/26,
- * 18/23, 14/20, 12/17, 10/14. `interlinea()` sigue exportada porque veintitrés
- * sitios la llaman, pero en código nuevo se escribe el número del sistema.
+ * LA ESCALA, sección 03 de la spec — tamaño / peso / interlineado absolutos,
+ * con el crenado de cada paso. Los nombres dicen el oficio, porque en el v6
+ * cada paso TIENE oficio: no se elige el «que quede bien».
  */
 export const texto = {
-  /** H1 · 28/34 · -0,03 em. Titulares de pantalla: «Buscar viajes». */
-  h1: { fontSize: 28, lineHeight: 34, letterSpacing: -0.84, fontWeight: '700' as const, ...conFuente },
-  /** H2 · 20/26 · -0,02 em. Títulos de sección, y **el precio**. */
-  h2: { fontSize: 20, lineHeight: 26, letterSpacing: -0.4, fontWeight: '700' as const, ...conFuente },
-  /** H3 · 18/23 · -0,015 em. Horas: «14:30 → 20:15». */
-  h3: { fontSize: 18, lineHeight: 23, letterSpacing: -0.27, fontWeight: '600' as const, ...conFuente },
-  /** Body · 14/20. */
+  /** 22/600/26 · −0.035em — título de pantalla («¿Para dónde partimos hoy?»). */
+  titulo: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600' as const, ...conFuente },
+  /** 24/600/28 · −0.035em — cabecera de ruta en Resultados (DESDE / HASTA). */
+  ruta: { fontSize: 24, lineHeight: 28, letterSpacing: -0.84, fontWeight: '600' as const, ...conFuente },
+  /** 19/600/23 · −0.03em, tabular — horas de salida y llegada. */
+  hora: { fontSize: 19, lineHeight: 23, letterSpacing: -0.57, fontWeight: '600' as const, ...conFuente, ...tabulares },
+  /**
+   * 22/600/24 · −0.035em, tabular — la cifra del aporte. La precede un «B/»
+   * de 12/500 en `ink600`, sobre la misma línea de base. El precio va en
+   * TINTA: el rojo tiene cuatro sentidos y «precio» no es ninguno.
+   */
+  precio: { fontSize: 22, lineHeight: 24, letterSpacing: -0.77, fontWeight: '600' as const, ...conFuente, ...tabulares },
+  /** 12/500/16 — la unidad «B/» junto al precio. */
+  precioUnidad: { fontSize: 12, lineHeight: 16, fontWeight: '500' as const, ...conFuente },
+  /** 16/600/21 · −0.03em — destino favorito. */
+  favorito: { fontSize: 16, lineHeight: 21, letterSpacing: -0.48, fontWeight: '600' as const, ...conFuente },
+  /** 15/500/20 · −0.015em — valores de campo; a peso 600 es rótulo de botón. */
+  campo: { fontSize: 15, lineHeight: 20, letterSpacing: -0.22, fontWeight: '500' as const, ...conFuente },
+  boton: { fontSize: 15, lineHeight: 20, letterSpacing: -0.15, fontWeight: '600' as const, ...conFuente },
+  /** 13/500/18 · −0.01em — nombre del conductor, rótulos de control. */
+  nombre: { fontSize: 13, lineHeight: 18, letterSpacing: -0.13, fontWeight: '500' as const, ...conFuente },
+  /** 12/500/17 · −0.01em — el lugar bajo su propia hora. */
+  lugar: { fontSize: 12, lineHeight: 17, letterSpacing: -0.12, fontWeight: '500' as const, ...conFuente },
+  /** 12/400/17 — meta: calificaciones, cuentas de viajes, paradas. */
+  meta: { fontSize: 12, lineHeight: 17, fontWeight: '400' as const, ...conFuente },
+  metaS: { fontSize: 11, lineHeight: 15, fontWeight: '400' as const, ...conFuente },
+  /** 14/400/20 — cuerpo corrido (explicaciones, avisos). */
   cuerpo: { fontSize: 14, lineHeight: 20, fontWeight: '400' as const, ...conFuente },
-  /** Small · 12/17 · peso 500. Segundas líneas, en `ink500`. */
-  pequeno: { fontSize: 12, lineHeight: 17, fontWeight: '500' as const, ...conFuente },
-  /**
-   * XS · 10/14 · 0,09 em, versalitas. **Sólo metadatos no esenciales**, que es
-   * literalmente como los rotula el sistema: «DESDE · METADATA NO ESENCIAL».
-   * Un epígrafe que titula una sección entera no es metadato: ese usa
-   * `epigrafe`, abajo.
-   */
-  micro: {
+  /** 10/600/13 · +0.1em versalitas — SALE / LLEGA, texto de insignia. */
+  ceja: {
     fontSize: 10,
-    lineHeight: 14,
-    fontWeight: '500' as const,
-    letterSpacing: 10 * 0.09,
+    lineHeight: 13,
+    fontWeight: '600' as const,
+    letterSpacing: 1,
     textTransform: 'uppercase' as const,
     ...conFuente,
   },
-
-  /**
-   * EL EPÍGRAFE QUE TITULA UNA SECCIÓN — «RUTA DEL VIAJE», «SALEN POR LA
-   * NOCHE».
-   *
-   * Se queda en el paso Small, 12/17, y no baja al XS de 10. La razón está
-   * medida y sigue valiendo en el sistema nuevo: once píxeles en versalitas
-   * con el crenado abierto se descifran, no se leen, y fue el fallo más
-   * repetido de la app. El sistema v1 reserva el XS para «metadata no
-   * esencial»; estos epígrafes titulan secciones, así que no le corresponden.
-   *
-   * Con `ink600` sobre lienzo da 5,1:1, que pasa AA.
-   */
+  /** 11/600/15 · +0.13em versalitas — cabeceras de sección. */
   epigrafe: {
-    fontSize: 12,
-    fontWeight: '500' as const,
-    letterSpacing: 12 * 0.09,
-    lineHeight: 17,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: '600' as const,
+    letterSpacing: 1.43,
     textTransform: 'uppercase' as const,
     ...conFuente,
   },
+  /** 10/500/13 — duraciones y rótulos de la barra de pestañas. */
+  micro: { fontSize: 10, lineHeight: 13, fontWeight: '500' as const, ...conFuente },
+  /** 10/400/13 — cuenta de paradas. */
+  microSuave: { fontSize: 10, lineHeight: 13, fontWeight: '400' as const, ...conFuente },
 
-  /**
-   * EL PRECIO ES UN H2, NO UN CARTEL.
-   *
-   * Era 31 px en peso 700 y en rojo, más grande que el titular de la propia
-   * pantalla. En el sistema v1 el precio se dibuja en H2 —20/26, peso 700— y
-   * **en tinta, no en rojo**: el rojo es la acción, y un precio no se pulsa.
-   */
-  precio: { fontSize: 20, lineHeight: 26, letterSpacing: -0.4, fontWeight: '700' as const, ...conFuente },
-  pastilla: { fontSize: 10, lineHeight: 14, fontWeight: '500' as const, ...conFuente },
-
-  /** Alias del sistema anterior, para que las pantallas sigan compilando. */
-  titular: { fontSize: 28, lineHeight: 34, letterSpacing: -0.84, fontWeight: '700' as const, ...conFuente },
+  /** Alias de sistemas anteriores, apuntados al paso v6 más cercano. */
+  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600' as const, ...conFuente },
   titularFuerte: { fontWeight: '700' as const },
-  titularSecundario: { fontSize: 20, lineHeight: 26, letterSpacing: -0.4, fontWeight: '700' as const, ...conFuente },
-  tituloTarjeta: { fontSize: 18, lineHeight: 23, letterSpacing: -0.27, fontWeight: '600' as const, ...conFuente },
-  fila: { fontSize: 14, lineHeight: 20, fontWeight: '400' as const, ...conFuente },
+  titularSecundario: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600' as const, ...conFuente },
+  tituloTarjeta: { fontSize: 16, lineHeight: 21, letterSpacing: -0.48, fontWeight: '600' as const, ...conFuente },
+  h1: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600' as const, ...conFuente },
+  h2: { fontSize: 19, lineHeight: 23, letterSpacing: -0.57, fontWeight: '600' as const, ...conFuente },
+  h3: { fontSize: 16, lineHeight: 21, letterSpacing: -0.48, fontWeight: '600' as const, ...conFuente },
+  fila: { fontSize: 13, lineHeight: 18, letterSpacing: -0.13, fontWeight: '500' as const, ...conFuente },
+  pequeno: { fontSize: 12, lineHeight: 17, fontWeight: '500' as const, ...conFuente },
+  pastilla: { fontSize: 10, lineHeight: 13, fontWeight: '600' as const, letterSpacing: 1, ...conFuente },
 } as const;
 
 /**
- * EL ÁREA MÍNIMA DE ALGO QUE SE TOCA, cuando lo que se toca es una palabra.
- *
- * React Native Web **no implementa `hitSlop`**: medido en el navegador, el
- * rectángulo que responde al dedo es exactamente el del elemento, ni un píxel
- * más. Un enlace de una línea mide dieciocho píxeles de alto —«ver todo»,
- * «Compartir mi llegada», «Cambiar»—, que es menos de la mitad de los
- * cuarenta y cuatro que pide cualquier guía táctil, y falla primero a quien
- * tiene el pulso menos firme o va en un carro en marcha, que es exactamente
- * quien usa esto.
- *
- * Así que el relleno tiene que ser de verdad. Esto se pone en el `Pressable`,
- * nunca en el `Text`: lo que crece es la zona que responde, no la letra.
+ * EL ÁREA MÍNIMA DE ALGO QUE SE TOCA — 44 px, sección 07. React Native Web
+ * no implementa `hitSlop`, así que el relleno tiene que ser de verdad, y se
+ * pone en el `Pressable`, nunca en el `Text`.
  */
 export const zonaDeToque = { minHeight: espacio.tap, justifyContent: 'center' } as const;
 
 /**
- * EL VIDRIO.
- *
- * Una superficie translúcida sin desenfoque no es vidrio: es una capa a medio
- * pintar. Medido en la barra de «Pedir mi puesto» —blanco al 86 % sin
- * desenfoque—: el texto de la tarjeta de debajo se leía entero a través del
- * pie, y las dos capas se mezclaban en una sopa gris. El desenfoque es lo que
- * separa el primer plano del fondo; la translucidez sola sólo los junta.
- *
- * En el teléfono no hay `backdropFilter`, así que allí la superficie va casi
- * opaca y punto: mejor una capa honesta que un vidrio que no filtra.
+ * LOS ESTADOS PULSADOS, sección 07, tres y solo tres:
+ * botones a `scale(.97)`, tarjetas a `scale(.985)`, celdas de icono con el
+ * lavado del 6 %. 120 ms ease-out. En RN el timing lo pone el Pressable.
+ */
+export const pulsado = {
+  boton: { transform: [{ scale: 0.97 }] },
+  tarjeta: { transform: [{ scale: 0.985 }] },
+  celda: { backgroundColor: color.lavado },
+} as const;
+
+/**
+ * EL VIDRIO. La barra de pestañas es blanco al 94 % con borde superior; en
+ * web se le suma desenfoque real. En el teléfono no hay `backdropFilter`:
+ * mejor una capa casi opaca honesta que un vidrio que no filtra.
  */
 export const vidrio =
   Platform.OS === 'web'

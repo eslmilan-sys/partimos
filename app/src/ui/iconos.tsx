@@ -30,7 +30,8 @@ export const trazo = (tamano: number) => (1.6 * 24) / tamano;
 
 type Props = { tamano?: number; tinta?: string };
 
-export function Atras({ tamano = 20, tinta = '#fff' }: Props) {
+/** Sobre el lienzo claro del v6 la flecha es tinta; nadie vuelve sobre rojo. */
+export function Atras({ tamano = 23, tinta = color.ink900 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path

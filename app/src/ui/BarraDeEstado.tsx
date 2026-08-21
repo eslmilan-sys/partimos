@@ -22,12 +22,13 @@ import { Bateria, Cobertura } from './iconos';
 import { familia, color, espacio } from './tokens';
 
 /**
- * `claro` sobre el campo rojo o un mapa oscuro; `oscuro` sobre el mapa de día,
- * donde el blanco no se lee.
+ * En el v6 toda pantalla abre sobre el lienzo claro, así que la tinta de la
+ * barra ES la tinta: `oscuro` por defecto. `claro` queda para las dos
+ * pantallas que ponen un mapa nocturno debajo.
  */
 export function BarraDeEstado({
   hora = '9:41',
-  tono = 'claro',
+  tono = 'oscuro',
 }: {
   hora?: string;
   tono?: 'claro' | 'oscuro';
@@ -60,6 +61,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  hora: { fontSize: 14, lineHeight: 20.3, fontWeight: '600', letterSpacing: -0.14, fontFamily: familia },
+  /** 15/600/20 · −0.01em — el reloj del v6. */
+  hora: { fontSize: 15, lineHeight: 20, fontWeight: '600', letterSpacing: -0.15, fontFamily: familia },
   iconos: { flexDirection: 'row', gap: 5, alignItems: 'center' },
 });

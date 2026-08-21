@@ -238,7 +238,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: { ...texto.epigrafe, color: color.campoTexto },
-  titular: { ...texto.titular, color: color.blanco, marginTop: 12 },
+  titular: { ...texto.titular, color: color.ink900, marginTop: 12 },
   titularFuerte: texto.titularFuerte,
 
   // El cuerpo no desplaza: las tres razones y el ensayo del cartel caben, y lo

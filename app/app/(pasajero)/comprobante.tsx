@@ -205,7 +205,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: { ...texto.epigrafe, color: color.campoTexto },
-  titular: { ...texto.titular, color: color.blanco, marginTop: 12 },
+  titular: { ...texto.titular, color: color.ink900, marginTop: 12 },
 
   cuerpo: { paddingHorizontal: espacio.tarjeta, paddingTop: 20 },
 

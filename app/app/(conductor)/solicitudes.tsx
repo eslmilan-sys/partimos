@@ -270,7 +270,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   epigrafeCampo: { ...texto.epigrafe, color: color.campoTexto, flex: 1 },
-  titular: { fontSize: 33, lineHeight: 34.65, letterSpacing: -1.32, fontWeight: '400', color: '#fff', marginTop: 12, fontFamily: familia },
+  titular: { ...texto.titulo, color: color.ink900, marginTop: 12 },
   subtitulo: {
     fontSize: 14,
     lineHeight: 21,
