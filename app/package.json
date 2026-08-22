@@ -14,6 +14,7 @@
     "expo-linear-gradient": "~57.0.1",
     "expo-linking": "~57.0.6",
     "expo-router": "~57.0.14",
+    "expo-secure-store": "^57.0.1",
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.2",
     "react": "19.2.3",
@@ -36,7 +37,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --experimental-strip-types src/dominio/*.test.ts",
+    "test": "node --test --experimental-strip-types 'src/dominio/*.test.ts' 'src/servicios/**/*.test.ts'",
     "export:web": "rm -rf dist && PARTIMOS_BASE_URL=/partimos/app/ expo export --platform web --output-dir dist"
   },
   "private": true

@@ -1,0 +1,33 @@
+{
+  "cli": { "version": ">= 16.0.0", "appVersionSource": "remote" },
+  "build": {
+    "revision": {
+      "channel": "revision",
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "ios": { "simulator": true },
+      "env": {
+        "EXPO_PUBLIC_FUENTE": "simulado"
+      }
+    },
+    "prueba": {
+      "channel": "prueba",
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "env": {
+        "EXPO_PUBLIC_FUENTE": "supabase"
+      }
+    },
+    "tiendas": {
+      "channel": "produccion",
+      "autoIncrement": true,
+      "android": { "buildType": "app-bundle" },
+      "env": {
+        "EXPO_PUBLIC_FUENTE": "supabase"
+      }
+    }
+  },
+  "submit": {
+    "tiendas": {}
+  }
+}

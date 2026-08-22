@@ -5,16 +5,18 @@
  * política RLS de cada tabla. Por eso puede vivir en el paquete que se descarga
  * al teléfono sin que eso sea un agujero.
  *
- * La sesión se guarda en el almacén del teléfono —o en el del navegador cuando
- * la app corre en web— para que entrar sea una vez y no cada vez.
+ * La sesión se guarda en el llavero del teléfono —o en el almacén del navegador
+ * cuando la app corre en web— para que entrar sea una vez y no cada vez.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 import { createClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/tipos/base';
+
+import { crearAlmacenPartido } from './almacen';
 
 const URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const LLAVE = process.env.EXPO_PUBLIC_SUPABASE_LLAVE;
@@ -27,8 +29,9 @@ if (!URL || !LLAVE) {
 
 export const supabase = createClient<Database>(URL, LLAVE, {
   auth: {
-    // En web el almacén es el del navegador y lo pone la propia librería.
-    storage: Platform.OS === 'web' ? undefined : AsyncStorage,
+    // En web el almacén es el del navegador y lo pone la propia librería. En el
+    // teléfono, el llavero del sistema —ver `almacen.ts` y por qué se parte.
+    storage: Platform.OS === 'web' ? undefined : crearAlmacenPartido(SecureStore),
     autoRefreshToken: true,
     persistSession: true,
     // El enlace mágico vuelve con la sesión en la URL; solo en web hay URL.
