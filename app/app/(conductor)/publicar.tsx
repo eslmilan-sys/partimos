@@ -178,8 +178,18 @@ export default function Publicar() {
   if (desde && hacia && !ruta) {
     return (
       <View style={estilos.pantalla}>
+      <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 18 }}
+          showsVerticalScrollIndicator={false}
+        >
+
         <CampoRojo altura={206} />
-        <BarraDeEstado />
 
         <View style={estilos.cabecera}>
           <View style={estilos.filaEpigrafe}>
@@ -199,11 +209,6 @@ export default function Publicar() {
           </Text>
         </View>
 
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: 18 }}
-          showsVerticalScrollIndicator={false}
-        >
           <View style={estilos.hoja}>
             <Pressable
               accessibilityRole="button"

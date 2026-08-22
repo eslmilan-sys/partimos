@@ -56,8 +56,17 @@ export default function SalenPronto() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={196} motivo="tornillo" />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
+      <CampoRojo altura={196} motivo="tornillo" />
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaSuperior}>
@@ -79,11 +88,7 @@ export default function SalenPronto() {
         </Text>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         {salidas.length === 0 ? (
           <View style={estilos.vacio}>
             <Text style={estilos.vacioTitulo}>Nadie sale en las próximas doce horas.</Text>
@@ -152,6 +157,7 @@ export default function SalenPronto() {
             </View>
           ))
         )}
+      </View>
       </ScrollView>
 
       <Pestanas valor="Buscar" />
@@ -170,7 +176,7 @@ const estilos = StyleSheet.create({
 
   /* El relleno de abajo empuja el cuerpo por debajo del campo: sin él, el
      epígrafe de la primera sección quedaba escrito sobre el rojo. */
-  cabecera: { paddingHorizontal: espacio.gutter, paddingBottom: 96 },
+  cabecera: { paddingHorizontal: espacio.gutter, paddingBottom: 6 },
   filaSuperior: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   circulo: {
     width: 40,

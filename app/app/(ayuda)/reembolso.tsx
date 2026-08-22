@@ -102,8 +102,14 @@ export default function Reembolso() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={214} />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView style={estilos.medio} showsVerticalScrollIndicator={false}>
+
+      <CampoRojo altura={214} />
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaEpigrafe}>
@@ -125,7 +131,6 @@ export default function Reembolso() {
         </Text>
       </View>
 
-      <ScrollView style={estilos.medio} showsVerticalScrollIndicator={false}>
         <View style={estilos.hoja}>
           <View style={{ marginBottom: 14 }}>
             <Epigrafe>¿Qué pasó?</Epigrafe>

@@ -98,8 +98,14 @@ export default function Cancelar() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={206} />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+
+      <CampoRojo altura={206} />
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaVolver}>
@@ -122,7 +128,6 @@ export default function Cancelar() {
         </Text>
       </View>
 
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <View style={estilos.hoja}>
           <View style={estilos.filaRuta}>
             <View style={estilos.punto} />

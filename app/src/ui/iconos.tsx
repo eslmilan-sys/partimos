@@ -45,25 +45,39 @@ export function Atras({ tamano = 23, tinta = color.ink900 }: Props) {
   );
 }
 
-/** El carro del v6: cabina, chasis y las dos ruedas rellenas. */
+/**
+ * EL CARRO. Antes eran dos cajas apiladas con dos puntos debajo: a 19 px se
+ * leía como una furgoneta chata, y el usuario lo señaló.
+ *
+ * Ahora es la silueta de perfil que se reconoce de un vistazo: **una sola
+ * línea** hace techo, parabrisas y capó, baja a los dos extremos y se abre en
+ * los pasos de rueda; las ruedas son aros centrados sobre esa misma línea, de
+ * modo que el arco que entra en la carrocería ES el guardabarros. La cintura
+ * separa la cabina del cuerpo — sin ella el techo parece una joroba.
+ */
 export function Carro({ tamano = 19, tinta = color.ink600, grueso }: Props) {
   const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      {/* Techo, parabrisas y costados, de esquina baja a esquina baja. */}
       <Path
-        d="M9 7.2h6a1.4 1.4 0 0 1 1.2.7l1.9 3.3H5.9l1.9-3.3A1.4 1.4 0 0 1 9 7.2Z"
+        d="M2.7 15.5v-2.4c0-.53.33-1 .83-1.18l2.55-.92 1.9-2.74A2.7 2.7 0 0 1 10.2 7.1h3.6c.88 0 1.7.43 2.22 1.16l1.9 2.74 2.55.92c.5.18.83.65.83 1.18v2.4"
         stroke={tinta}
         strokeWidth={t}
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
+      {/* El suelo, partido: los huecos son los pasos de rueda. */}
       <Path
-        d="M4.7 11.2h14.6a1.3 1.3 0 0 1 1.3 1.3v1.6a1.3 1.3 0 0 1-1.3 1.3H4.7a1.3 1.3 0 0 1-1.3-1.3v-1.6a1.3 1.3 0 0 1 1.3-1.3Z"
+        d="M2.7 15.5h2.3M9.1 15.5h5.8M19 15.5h2.3"
         stroke={tinta}
         strokeWidth={t}
-        strokeLinejoin="round"
+        strokeLinecap="round"
       />
-      <Circle cx={7.9} cy={15.4} r={1.3} fill={tinta} />
-      <Circle cx={16.1} cy={15.4} r={1.3} fill={tinta} />
+      {/* La cintura: donde acaba el cristal y empieza la chapa. */}
+      <Path d="M6.08 10.99h11.84" stroke={tinta} strokeWidth={t} strokeLinecap="round" />
+      <Circle cx={7.05} cy={15.5} r={2.05} stroke={tinta} strokeWidth={t} />
+      <Circle cx={16.95} cy={15.5} r={2.05} stroke={tinta} strokeWidth={t} />
     </Svg>
   );
 }

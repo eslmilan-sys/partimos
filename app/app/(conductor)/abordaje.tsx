@@ -96,6 +96,16 @@ export default function Abordaje() {
 
   return (
     <View style={estilos.pantalla}>
+      <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
       <CampoRojo altura={196} />
 
       <BarraDeEstado hora={hora(mas(datos.salida, -1))} />
@@ -112,11 +122,7 @@ export default function Abordaje() {
         </Text>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         <View style={estilos.hoja}>
           <View style={estilos.filaTitulo}>
             <Epigrafe>
@@ -230,6 +236,7 @@ export default function Abordaje() {
           ))}
         </View>
 
+      </View>
       </ScrollView>
 
       <View style={estilos.pie}>

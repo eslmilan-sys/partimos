@@ -90,8 +90,17 @@ export default function MisViajesPantalla() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={214} motivo="tornillo" />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
+      <CampoRojo altura={214} motivo="tornillo" />
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaSuperior}>
@@ -106,7 +115,7 @@ export default function MisViajesPantalla() {
             onPress={() => router.push('/(avisos)/avisos')}
             style={estilos.circulo}
           >
-            <Campana tamano={18} tinta="#fff" />
+            <Campana tamano={18} />
             {avisos > 0 ? (
               <View style={estilos.chincheta}>
                 <Text style={estilos.chinchetaTexto}>{avisos > 9 ? '9+' : avisos}</Text>
@@ -146,11 +155,7 @@ export default function MisViajesPantalla() {
         </View>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         {pestana === 'proximos' && proximo ? (
           <>
             <Epigrafe>Tu próximo viaje</Epigrafe>
@@ -227,6 +232,7 @@ export default function MisViajesPantalla() {
             <Avanza />
           </Pressable>
         </View>
+      </View>
       </ScrollView>
 
       <Pestanas valor="Mis viajes" />
@@ -504,7 +510,7 @@ const estilos = StyleSheet.create({
 
   /* El relleno de abajo empuja el cuerpo por debajo del campo: sin él, el
      epígrafe «Tu próximo viaje» quedaba escrito en azul sobre el rojo. */
-  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 16, paddingBottom: 66 },
+  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 16, paddingBottom: 4 },
   filaSuperior: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, },
   bajada: {

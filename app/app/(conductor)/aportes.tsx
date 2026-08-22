@@ -45,8 +45,17 @@ export default function AportesPantalla() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={196} />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
+      <CampoRojo altura={196} />
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaSuperior}>
@@ -67,11 +76,7 @@ export default function AportesPantalla() {
         </Text>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         <View style={estilos.hoja}>
           <Brillo ancho={346} alto={178} />
 
@@ -130,6 +135,7 @@ export default function AportesPantalla() {
             <Text style={estilos.cambiar}>Cambiar</Text>
           </Pressable>
         </View>
+      </View>
       </ScrollView>
     </View>
   );

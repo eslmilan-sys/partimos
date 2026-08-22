@@ -55,8 +55,17 @@ export default function Puestos() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={196} />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
+      <CampoRojo altura={196} />
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaSuperior}>
@@ -70,11 +79,7 @@ export default function Puestos() {
         </Text>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         <View style={estilos.hoja}>
           <View style={estilos.filaControl}>
             <View style={{ flex: 1, minWidth: 0 }}>
@@ -149,6 +154,7 @@ export default function Puestos() {
             </View>
           </View>
         </View>
+      </View>
       </ScrollView>
 
       <View style={estilos.pie}>

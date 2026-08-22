@@ -188,9 +188,12 @@ export default function Resultados() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={340} />
-
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA: la cabecera de búsqueda y los filtros se van
+          con la lista, como en una app. Solo la barra de estado queda fija. */}
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+      <CampoRojo altura={340} />
 
       {/* La fila de navegación: dos celdas de 44 en los extremos. */}
       <View style={estilos.filaNav}>
@@ -317,11 +320,7 @@ export default function Resultados() {
         </View>
       ) : null}
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.lista}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.lista}>
         {cargando ? (
           <View style={{ gap: 16 }}>
             {[0, 1, 2].map((i) => (
@@ -428,6 +427,7 @@ export default function Resultados() {
             ))}
           </View>
         )}
+      </View>
       </ScrollView>
 
       {/* Fijo abajo: la alerta de ruta. Blanca cuando está por poner, teñida

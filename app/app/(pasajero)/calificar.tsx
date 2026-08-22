@@ -59,8 +59,17 @@ export default function Calificar() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={196} />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
+      <CampoRojo altura={196} />
 
       <View style={estilos.cabecera}>
         <Text style={estilos.epigrafeCampo}>
@@ -73,11 +82,7 @@ export default function Calificar() {
         </Text>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         <View style={estilos.hoja}>
           <View style={estilos.filaPersona}>
             <Avatar nombre={datos.otro} />
@@ -142,6 +147,7 @@ export default function Calificar() {
             />
           </View>
         </View>
+      </View>
       </ScrollView>
 
       <View style={estilos.pie}>

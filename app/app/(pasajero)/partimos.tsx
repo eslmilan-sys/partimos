@@ -67,8 +67,17 @@ export default function MensajeDePartimos() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={186} motivo="hibisco" />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
+      <CampoRojo altura={186} motivo="hibisco" />
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaSuperior}>
@@ -88,11 +97,7 @@ export default function MensajeDePartimos() {
         </View>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         <View style={estilos.burbuja}>
           <Text style={estilos.burbujaTexto}>
             {`Bienvenido a bordo${nombre ? `, ${nombre}` : ''}. Aquí van las tres cosas que puedes hacer desde ya.`}
@@ -134,6 +139,7 @@ export default function MensajeDePartimos() {
           Este es un mensaje nuestro, no una conversación: aquí no contestamos. Para escribirnos,
           Perfil → Ayuda.
         </Text>
+      </View>
       </ScrollView>
     </View>
   );

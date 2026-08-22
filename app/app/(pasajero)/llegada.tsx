@@ -42,6 +42,16 @@ export default function LlegadaPantalla() {
 
   return (
     <View style={estilos.pantalla}>
+      <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
       <CampoRojo altura={214} motivo="hibisco" />
 
       <BarraDeEstado hora={hora(datos.llegadaHora)} />
@@ -55,11 +65,7 @@ export default function LlegadaPantalla() {
         </Text>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         <View style={estilos.hoja}>
           <Epigrafe>Código de llegada</Epigrafe>
           <View style={estilos.digitos}>
@@ -121,6 +127,7 @@ export default function LlegadaPantalla() {
             <Text style={estilos.totalMonto}>{formatearDineroRedondo(datos.totalCentavos)}</Text>
           </View>
         </View>
+      </View>
       </ScrollView>
     </View>
   );

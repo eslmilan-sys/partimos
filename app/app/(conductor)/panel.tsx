@@ -51,8 +51,17 @@ export default function Panel() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={214} />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
+      <CampoRojo altura={214} />
 
       <View style={estilos.cabecera}>
         <Text style={estilos.epigrafeCampo}>{nombre ? `Conductor · ${nombre}` : 'Conductor'}</Text>
@@ -62,11 +71,7 @@ export default function Panel() {
         </Text>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         {hoy ? <Hoy viaje={hoy} router={router} /> : null}
 
         {resto.map((v) => (
@@ -74,6 +79,7 @@ export default function Panel() {
         ))}
 
         <Text style={estilos.pieTexto}>Puedes editar un viaje mientras nadie haya asegurado su puesto.</Text>
+      </View>
       </ScrollView>
 
       <Pressable

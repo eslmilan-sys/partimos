@@ -84,6 +84,9 @@ export default function Avisos() {
 
       <BarraDeEstado />
 
+      {/* TODA LA PANTALLA DESLIZA, cabecera incluida. Solo el fondo se queda:
+          es el lienzo de la pantalla entera, no un trozo de la cabecera. */}
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
       <View style={estilos.cabecera}>
         <View style={estilos.filaEpigrafe}>
           <Pressable
@@ -118,11 +121,7 @@ export default function Avisos() {
         </Text>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         {datos.pideAccion.length > 0 ? (
           <>
             <View style={estilos.filaSeccion}>
@@ -239,6 +238,7 @@ export default function Avisos() {
             Solo te escribimos por tus viajes. Nunca promociones.
           </Text>
         )}
+      </View>
       </ScrollView>
 
       <Pestanas valor="Perfil" />

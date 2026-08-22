@@ -142,9 +142,18 @@ export default function TuCuenta() {
 
   return (
     <View style={estilos.pantalla}>
+      <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
       <CampoRojo altura={230} motivo="mapa" />
 
-      <BarraDeEstado />
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaPersona}>
@@ -179,11 +188,7 @@ export default function TuCuenta() {
         </Pressable>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.contenido}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.contenido}>
         {/* Las dos solapas montan sobre el borde del campo, que es donde el
             arquetipo pone la hoja blanca. */}
         <View style={estilos.solapas}>
@@ -296,6 +301,7 @@ export default function TuCuenta() {
           <Salir tamano={19} />
           <Text style={estilos.cerrarTexto}>Cerrar sesión</Text>
         </Pressable>
+      </View>
       </ScrollView>
 
         <Pestanas valor="Perfil" />

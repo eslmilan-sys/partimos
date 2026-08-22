@@ -106,6 +106,12 @@ export default function DetalleDelViaje() {
   const nombre = conductor?.nombre ?? '';
   const deNombre = nombre.split(' ')[0] || 'el conductor';
   const carro = conductor?.carro;
+  /**
+   * NADIE SE PIDE UN PUESTO EN SU PROPIO CARRO. Al conductor que llega aquí
+   * —desde su panel, o desde un enlace que compartió él mismo— la barra le
+   * ofrece administrarlo, no reservarlo.
+   */
+  const esMio = !!yo && yo === viaje.driver_id;
 
   return (
     <View style={estilos.pantalla}>
@@ -138,7 +144,7 @@ export default function DetalleDelViaje() {
               }
               style={estilos.circulo}
             >
-              <Compartir tinta="#fff" />
+              <Compartir />
             </Pressable>
           </View>
 
@@ -339,30 +345,45 @@ export default function DetalleDelViaje() {
               este producto no se puede permitir. */}
           <View style={estilos.filaDirecto}>
             <Escudo tamano={15} tinta={color.ink600} />
-            <Text style={estilos.directo}>Aporte directo</Text>
+            <Text style={estilos.directo}>{esMio ? 'Tu viaje' : 'Aporte directo'}</Text>
           </View>
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Pedir mi puesto"
-          disabled={preguntando}
-          onPress={() =>
-            router.push(
-              yo
-                ? { pathname: '/(pasajero)/reservar', params: { viaje: viajeId } }
-                : { pathname: '/(cuenta)/puerta', params: { viaje: viajeId } },
-            )
-          }
-          style={({ pressed }) => [
-            estilos.cta,
-            { backgroundColor: pressed ? color.rojo600 : color.rojo500, opacity: preguntando ? 0.5 : 1 },
-          ]}
-        >
-          <Asiento tamano={21} />
-          <Text style={estilos.ctaTexto}>Pedir mi puesto</Text>
-          <Avanza tamano={19} tinta="#fff" />
-        </Pressable>
+        {esMio ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Administrar mi viaje"
+            onPress={() => router.push('/(conductor)/panel')}
+            style={({ pressed }) => [
+              estilos.cta,
+              { backgroundColor: pressed ? color.ink800 : color.ink900 },
+            ]}
+          >
+            <Text style={estilos.ctaTexto}>Administrar mi viaje</Text>
+            <Avanza tamano={19} tinta="#fff" />
+          </Pressable>
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Pedir mi puesto"
+            disabled={preguntando}
+            onPress={() =>
+              router.push(
+                yo
+                  ? { pathname: '/(pasajero)/reservar', params: { viaje: viajeId } }
+                  : { pathname: '/(cuenta)/puerta', params: { viaje: viajeId } },
+              )
+            }
+            style={({ pressed }) => [
+              estilos.cta,
+              { backgroundColor: pressed ? color.rojo600 : color.rojo500, opacity: preguntando ? 0.5 : 1 },
+            ]}
+          >
+            <Asiento tamano={21} />
+            <Text style={estilos.ctaTexto}>Pedir mi puesto</Text>
+            <Avanza tamano={19} tinta="#fff" />
+          </Pressable>
+        )}
 
       </View>
     </View>
@@ -396,7 +417,7 @@ const estilos = StyleSheet.create({
 
   /* El relleno de abajo es lo que da altura al bloque de la bandera: sin él
      la hoja subía —lleva margen negativo— y tapaba la línea de la ruta. */
-  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 66 },
+  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 44 },
   filaTitular: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14 },
   epigrafeCampo: {
     fontSize: 11.5,

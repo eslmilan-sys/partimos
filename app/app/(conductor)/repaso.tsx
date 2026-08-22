@@ -250,7 +250,10 @@ export default function Repaso() {
                 aceptaMascotas: !!p.mascotas,
                 sePuedeFumar: !!p.fumar,
               });
-              router.replace({ pathname: '/(pasajero)/viaje', params: { viaje: viaje.id } });
+              // Al panel del conductor, NO al detalle del pasajero: quien
+              // acaba de publicar no tiene que pedirse un puesto en su
+              // propio carro. Aquí ve su viaje y las solicitudes que lleguen.
+              router.replace('/(conductor)/panel');
             } catch (e) {
               setQuePaso(e instanceof Error ? e.message : 'No se pudo publicar. Prueba otra vez.');
             } finally {
@@ -334,7 +337,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 58 },
+  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 6 },
   epigrafeCampo: {
     fontSize: 11.5,
     lineHeight: 15.95,

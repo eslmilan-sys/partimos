@@ -82,8 +82,17 @@ export default function Conversaciones() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={214} motivo="hibisco" />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA, no solo el cuerpo: en el teléfono se siente
+          como una app y no como una cabecera clavada. Solo la barra de estado
+          —y la de pestañas, donde la hay— quedan fijas. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+
+      <CampoRojo altura={214} motivo="hibisco" />
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaSuperiorCampo}>
@@ -140,11 +149,7 @@ export default function Conversaciones() {
         </View>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={estilos.cuerpo}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={estilos.cuerpo}>
         {/* El hilo de Partimos va siempre y va primero: una bandeja vacía el
             primer día no dice nada, y quien acaba de entrar no sabe qué puede
             hacer. No se guarda en `messages` porque no es de nadie. */}
@@ -261,6 +266,7 @@ export default function Conversaciones() {
           Los chats se abren cuando el conductor acepta y se cierran 48 h después de la llegada.
           Todo lo del punto de recogida que se acuerde aquí queda por escrito.
         </Text>
+      </View>
       </ScrollView>
 
       <Pestanas valor="Mensajes" />
