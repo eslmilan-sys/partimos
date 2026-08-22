@@ -6,6 +6,7 @@
  * acordó, y por eso los mensajes no se editan ni se borran.
  */
 
+import { formatearDineroRedondo } from '@/ui/dinero';
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import type { Message } from '@/tipos';
 
@@ -48,7 +49,7 @@ export async function hiloDelViaje(reservaId: string, yo: string): Promise<HiloD
     ruta: `${(viaje.origin_label ?? '').split(' · ')[0]} → ${(viaje.destination_label ?? '').split(' · ')[0]}`,
     cuando: viaje.departure_at,
     puesto: {
-      resumen: `${aporte % 100 === 0 ? aporte / 100 : (aporte / 100).toFixed(2)} $ · ${NOMBRE_DEL_CANAL[reserva.payment_channel]} · código ${reserva.boarding_code}`,
+      resumen: `${formatearDineroRedondo(aporte)} · ${NOMBRE_DEL_CANAL[reserva.payment_channel]} · código ${reserva.boarding_code}`,
       estado: reserva.status === 'confirmed' ? 'Aceptado' : 'Pendiente',
       confirmado: reserva.status === 'confirmed',
     },

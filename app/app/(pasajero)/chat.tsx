@@ -153,9 +153,13 @@ export default function Chat() {
             accessibilityLabel="Enviar"
             disabled={!texto.trim()}
             onPress={mandar}
-            style={[estilos.enviar, !texto.trim() && estilos.enviarApagado]}
+            style={({ pressed }) => [
+              estilos.enviar,
+              !texto.trim() && estilos.enviarApagado,
+              pressed && texto.trim() ? { backgroundColor: color.rojo600 } : null,
+            ]}
           >
-            <Avion />
+            <Avion tinta={texto.trim() ? '#fff' : color.inerteTinta} />
           </Pressable>
         </View>
       </View>
@@ -187,12 +191,13 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /** Círculo, como todo retrato del v6. */
   retrato: {
-    width: 38,
-    height: 38,
-    borderRadius: radio.cuadrado,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: color.ink100,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: 'rgba(10,39,49,.10)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -211,17 +216,14 @@ const estilos = StyleSheet.create({
   cuerpo: { flex: 1, paddingHorizontal: espacio.gutter },
   tarjetaPuesto: {
     backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
     borderRadius: radio.l,
     paddingVertical: 14,
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    shadowColor: '#14141A',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
   },
   resumenPuesto: {
     fontSize: 14,
@@ -244,27 +246,37 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
 
-  burbuja: { maxWidth: '78%', paddingVertical: 12, paddingHorizontal: 14 },
+  burbuja: { maxWidth: '78%', paddingVertical: 10, paddingHorizontal: 14 },
+  /** La suya: blanca con borde de pelo, la esquina de salida recogida. */
   suya: {
     alignSelf: 'flex-start',
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: color.bordeSutil,
-    borderTopLeftRadius: radio.l,
-    borderTopRightRadius: radio.l,
-    borderBottomRightRadius: radio.l,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    borderBottomRightRadius: 18,
     borderBottomLeftRadius: 6,
   },
+  /** La mía: la superficie oscura de tinta — la única del v6. */
   mia: {
     alignSelf: 'flex-end',
-    backgroundColor: color.azul500,
-    borderTopLeftRadius: radio.l,
-    borderTopRightRadius: radio.l,
+    backgroundColor: color.ink900,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
     borderBottomRightRadius: 6,
-    borderBottomLeftRadius: radio.l,
+    borderBottomLeftRadius: 18,
   },
-  textoBurbuja: { fontSize: 14, lineHeight: 21.02, color: color.ink900, fontFamily: familia },
-  horaBurbuja: { fontSize: 11.5, lineHeight: interlinea(11), color: color.ink500, marginTop: 5, fontFamily: familia, ...tabular },
+  textoBurbuja: { fontSize: 14, lineHeight: 20, color: color.ink900, fontFamily: familia },
+  horaBurbuja: {
+    fontSize: 10,
+    lineHeight: 14,
+    color: color.ink500,
+    marginTop: 4,
+    alignSelf: 'flex-end',
+    fontFamily: familia,
+    ...tabular,
+  },
 
   barraEscribir: {
     flexDirection: 'row',
@@ -273,24 +285,23 @@ const estilos = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 26,
   },
+  /** La celda de icono del v6: 44, radio 14, lavado al pulsar. */
   adjuntar: {
     width: 44,
     height: 44,
-    borderRadius: radio.pastilla,
-    borderWidth: 1,
-    borderColor: color.bordePorDefecto,
+    borderRadius: radio.icono,
+    backgroundColor: color.lavado,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /** El campo del v6: superficie de campo, sin borde. */
   campoMensaje: {
     flex: 1,
     height: 48,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderColor: color.bordePorDefecto,
+    borderRadius: radio.control,
+    backgroundColor: color.sand200,
     justifyContent: 'center',
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
   },
   entradaMensaje: {
     fontSize: 15.5,
@@ -299,12 +310,14 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     outlineStyle: 'none',
   } as never,
-  enviarApagado: { opacity: 0.4 },
+  /** Apagado sigue OPACO — lo que se apaga es el dibujo, no la superficie. */
+  enviarApagado: { backgroundColor: color.inerteFondo },
+  /** Enviar ES la acción: va en rojo, con la sombra del acento. */
   enviar: {
     width: 48,
     height: 48,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.azul500,
+    borderRadius: radio.control,
+    backgroundColor: color.rojo500,
     alignItems: 'center',
     justifyContent: 'center',
   },

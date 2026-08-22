@@ -42,7 +42,7 @@ import { Avatar } from '@/ui/controles';
 import { PuntaDeFlecha } from '@/ui/TarjetaDeViaje';
 import { cifraRedonda, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, diaLargo, hora } from '@/ui/fechas';
-import { Calendario, Campana, Escudo, Estrella, Intercambio, Lupa, Marca, Persona } from '@/ui/iconos';
+import { Calendario, Campana, Carro, Cerrar, Escudo, Intercambio, Lupa, Marca, Persona } from '@/ui/iconos';
 import { familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -119,6 +119,8 @@ export default function Inicio() {
   const [cuando, setCuando] = useState(() => diaEnPanama(new Date()));
   const [pasajeros, setPasajeros] = useState(1);
   const [eligiendo, setEligiendo] = useState<'cuando' | 'pasajeros' | null>(null);
+  /** El banner de manejar se puede cerrar; vuelve al abrir de nuevo. */
+  const [sinBanner, setSinBanner] = useState(false);
 
   useEffect(() => {
     rutasPopulares().then(setRutas);
@@ -359,17 +361,14 @@ export default function Inicio() {
         {rutas.length > 0 ? (
           <View style={estilos.seccion}>
             <View style={estilos.cabeceraSeccion}>
-              <View style={estilos.cabeceraIzquierda}>
-                <Estrella tamano={12} tinta={color.ink500} />
-                <Text style={estilos.rotuloSeccion}>Rutas populares</Text>
-              </View>
+              <Text style={estilos.tituloSeccion}>Destinos populares desde Panamá</Text>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Ver todos los destinos"
                 onPress={() => setBuscando('hacia')}
                 style={zonaDeToque}
               >
-                <Text style={estilos.enlaceSeccion}>Ver todas</Text>
+                <Text style={estilos.enlaceSeccion}>Ver todos</Text>
               </Pressable>
             </View>
             <ScrollView
@@ -420,22 +419,16 @@ export default function Inicio() {
               <View style={estilos.cabeceraIzquierda}>
                 {/* El punto en vivo: uno de los cuatro sentidos del rojo. */}
                 <View style={estilos.puntoVivo} />
-                <Text style={estilos.rotuloSeccion}>
-                  {`${salen.length} ${salen.length === 1 ? 'salida próxima' : 'salidas próximas'}`}
-                </Text>
+                <Text style={estilos.tituloSeccion}>Próximas salidas desde Panamá</Text>
               </View>
-              {rango ? (
-                <Text style={[estilos.rangoPrecios, tabular]}>{rango}</Text>
-              ) : (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Ver todas las salidas de hoy"
-                  onPress={() => router.push('/(pasajero)/salidas')}
-                  style={zonaDeToque}
-                >
-                  <Text style={estilos.enlaceSeccion}>Ver todas</Text>
-                </Pressable>
-              )}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ver todas las salidas de hoy"
+                onPress={() => router.push('/(pasajero)/salidas')}
+                style={zonaDeToque}
+              >
+                <Text style={estilos.enlaceSeccion}>Ver todas</Text>
+              </Pressable>
             </View>
 
             <View style={estilos.listaSalen}>
@@ -449,27 +442,31 @@ export default function Inicio() {
                   }
                   style={({ pressed }) => [estilos.tarjetaSale, pressed && pulsado.tarjeta]}
                 >
-                  <Text style={[estilos.horaSale, tabular]}>{hora(v.hora)}</Text>
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <View style={estilos.filaHaciaSale}>
-                      <PuntaDeFlecha tamano={7} />
-                      <Text style={estilos.destinoSale} numberOfLines={1}>
-                        {v.destino}
-                      </Text>
+                  {/* Fila 1: las dos horas con su flecha, y el aporte. */}
+                  <View style={estilos.filaSale}>
+                    <View style={estilos.filaHoras}>
+                      <Text style={[estilos.horaSale, tabular]}>{hora(v.hora)}</Text>
+                      {v.llegada ? (
+                        <>
+                          <PuntaDeFlecha tamano={8} />
+                          <Text style={[estilos.horaSale, tabular]}>{hora(v.llegada)}</Text>
+                        </>
+                      ) : null}
                     </View>
-                    <View style={estilos.filaQuienSale}>
-                      <Avatar nombre={v.conductor || '·'} tamano={20} />
-                      <Text style={estilos.quienSale} numberOfLines={1}>
-                        {v.conductor}
-                        {v.calificacion != null ? ` · ★ ${v.calificacion.toFixed(1)}` : ''}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={estilos.pilaPrecioSale}>
                     <View style={estilos.filaPrecioSale}>
                       <Text style={estilos.unidadSale}>B/</Text>
                       <Text style={[estilos.precioSale, tabular]}>{cifraRedonda(v.aporteCentavos)}</Text>
                     </View>
+                  </View>
+
+                  {/* Fila 2: a dónde va y de dónde recoge, y los cupos. */}
+                  <View style={estilos.filaSale}>
+                    <Text style={estilos.rutaSale} numberOfLines={1}>
+                      {v.destino}
+                      {v.recogida ? (
+                        <Text style={estilos.recogidaSale}>{`  ·  ${v.recogida}`}</Text>
+                      ) : null}
+                    </Text>
                     <Text
                       style={[
                         estilos.cuposSale,
@@ -479,38 +476,64 @@ export default function Inicio() {
                       {v.puestosLibres === 1 ? '1 cupo' : `${v.puestosLibres} cupos`}
                     </Text>
                   </View>
+
+                  <View style={estilos.divisorSale} />
+
+                  {/* Fila 3: quién maneja, con su nota y sus viajes; Directo. */}
+                  <View style={estilos.filaQuienSale}>
+                    <Avatar nombre={v.conductor || '·'} tamano={24} />
+                    <Text style={estilos.quienSale} numberOfLines={1}>
+                      {v.conductor}
+                      {v.calificacion != null ? (
+                        <Text style={[estilos.notaSale, tabular]}>
+                          {`  ★ ${v.calificacion.toFixed(1)}`}
+                          {v.viajesHechos > 0 ? ` · ${v.viajesHechos} viajes` : ''}
+                        </Text>
+                      ) : null}
+                    </Text>
+                    {v.directo ? (
+                      <View style={estilos.chipDirecto}>
+                        <Text style={estilos.chipDirectoTexto}>Directo</Text>
+                      </View>
+                    ) : null}
+                  </View>
                 </Pressable>
               ))}
             </View>
           </View>
         ) : null}
 
-        {/* El gancho del conductor: lo que RECUPERAS — nunca «ganas»— si
-            llevas puestos. La otra mitad del producto, dicha una vez. */}
-        {gancho ? (
+        {/* La bannière del conductor: la otra mitad del producto, dicha una
+            vez, con su salida. «recuperas», jamás «ganas» — regla R5. */}
+        {gancho && !sinBanner ? (
           <View style={estilos.seccion}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Publicar tu viaje"
-              onPress={() => router.push('/(conductor)/publicar')}
-              style={({ pressed }) => [estilos.tarjetaGancho, pressed && pulsado.tarjeta]}
-            >
+            <View style={estilos.banner}>
+              <View style={estilos.bannerIcono}>
+                <Carro tamano={26} tinta={color.rojo700} grueso={1.6} />
+              </View>
               <View style={{ flex: 1, minWidth: 0 }}>
-                <View style={estilos.filaCifraGancho}>
-                  <Text style={estilos.unidadGancho}>B/</Text>
-                  <Text style={[estilos.cifraGancho, tabular]}>
-                    {cifraRedonda(gancho.recuperasCentavos)}
-                  </Text>
-                </View>
-                <Text style={estilos.fraseGancho}>
-                  {'Lo que recuperas si llevas '}
-                  {`${enLetra(gancho.puestos)} puestos a ${gancho.destino}`}
+                <Text style={estilos.bannerTitulo}>¿Vas a manejar?</Text>
+                <Text style={estilos.bannerTexto}>
+                  {`Comparte tu viaje y recuperas hasta ${formatearDineroRedondo(gancho.recuperasCentavos)} llevando ${enLetra(gancho.puestos)} puestos a ${gancho.destino}.`}
                 </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Publicar mi viaje"
+                  onPress={() => router.push('/(conductor)/publicar')}
+                  style={({ pressed }) => [estilos.bannerBoton, pressed && pulsado.boton]}
+                >
+                  <Text style={estilos.bannerBotonTexto}>Publicar mi viaje</Text>
+                </Pressable>
               </View>
-              <View style={estilos.botonGancho}>
-                <Text style={estilos.botonGanchoTexto}>Publicar</Text>
-              </View>
-            </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Cerrar este aviso"
+                onPress={() => setSinBanner(true)}
+                style={estilos.bannerCerrar}
+              >
+                <Cerrar tamano={14} tinta={color.inkIcono} />
+              </Pressable>
+            </View>
           </View>
         ) : null}
       </ScrollView>
@@ -779,6 +802,16 @@ const estilos = StyleSheet.create({
     justifyContent: 'space-between',
   },
   cabeceraIzquierda: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  tituloSeccion: {
+    flex: 1,
+    minWidth: 0,
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: '600',
+    letterSpacing: -0.48,
+    color: color.ink900,
+    fontFamily: familia,
+  },
   rotuloSeccion: {
     fontSize: 11,
     lineHeight: 15,
@@ -856,27 +889,33 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  listaSalen: { paddingHorizontal: espacio.gutter, paddingTop: 12, gap: 10 },
+  listaSalen: { paddingHorizontal: espacio.gutter, paddingTop: 12, gap: 12 },
   tarjetaSale: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
     padding: 14,
+    gap: 8,
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: color.bordeSutil,
     borderRadius: radio.l,
   },
+  filaSale: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  filaHoras: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   horaSale: {
-    fontSize: 19,
-    lineHeight: 23,
+    fontSize: 17,
+    lineHeight: 22,
     fontWeight: '600',
-    letterSpacing: -0.57,
+    letterSpacing: -0.51,
     color: color.ink900,
     fontFamily: familia,
   },
-  filaHaciaSale: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  destinoSale: {
+  rutaSale: {
+    flex: 1,
+    minWidth: 0,
     fontSize: 13,
     lineHeight: 18,
     fontWeight: '500',
@@ -884,72 +923,107 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  filaQuienSale: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
+  recogidaSale: { fontWeight: '400', color: color.ink500, letterSpacing: 0 },
+  divisorSale: { height: 1, backgroundColor: color.divisor, marginTop: 2 },
+  filaQuienSale: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   quienSale: {
     flex: 1,
-    fontSize: 11,
-    lineHeight: 15,
-    fontWeight: '400',
-    color: color.ink600,
+    minWidth: 0,
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '500',
+    color: color.ink700,
     fontFamily: familia,
   },
-  pilaPrecioSale: { alignItems: 'flex-end', gap: 2 },
+  notaSale: { fontWeight: '400', color: color.ink600 },
   filaPrecioSale: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
   unidadSale: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink600, fontFamily: familia },
   precioSale: {
-    fontSize: 22,
-    lineHeight: 24,
+    fontSize: 20,
+    lineHeight: 23,
     fontWeight: '600',
-    letterSpacing: -0.77,
+    letterSpacing: -0.7,
     color: color.ink900,
     fontFamily: familia,
   },
   cuposSale: { fontSize: 11, lineHeight: 15, fontWeight: '500', fontFamily: familia },
+  /** «Directo»: el verde de estado, nunca el rojo — el rojo no decora. */
+  chipDirecto: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: color.hechoFondo,
+  },
+  chipDirectoTexto: {
+    fontSize: 10,
+    lineHeight: 14,
+    fontWeight: '600',
+    color: color.hechoTinta,
+    fontFamily: familia,
+  },
 
-  /* ------------------------------------------------ El gancho de manejar */
-  tarjetaGancho: {
+  /* ---------------------------------------------- La bannière de manejar */
+  banner: {
     marginHorizontal: espacio.gutter,
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
+    alignItems: 'flex-start',
+    gap: 12,
     padding: 16,
-    backgroundColor: color.blanco,
+    backgroundColor: 'rgba(225,33,59,.06)',
     borderWidth: 1,
-    borderColor: color.bordeSutil,
+    borderColor: 'rgba(225,33,59,.14)',
     borderRadius: radio.l,
   },
-  filaCifraGancho: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  unidadGancho: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink600, fontFamily: familia },
-  cifraGancho: {
-    fontSize: 22,
-    lineHeight: 24,
+  bannerIcono: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: color.blanco,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bannerTitulo: {
+    fontSize: 15,
+    lineHeight: 20,
     fontWeight: '600',
-    letterSpacing: -0.77,
+    letterSpacing: -0.22,
     color: color.ink900,
     fontFamily: familia,
   },
-  fraseGancho: {
+  bannerTexto: {
+    marginTop: 3,
     fontSize: 12,
     lineHeight: 17,
     fontWeight: '400',
     color: color.ink500,
-    marginTop: 3,
     fontFamily: familia,
   },
-  botonGancho: {
-    height: 38,
-    paddingHorizontal: 13,
+  bannerBoton: {
+    alignSelf: 'flex-start',
+    marginTop: 10,
+    height: 40,
+    paddingHorizontal: 16,
     borderRadius: 13,
-    backgroundColor: color.ink900,
+    backgroundColor: color.rojo500,
     alignItems: 'center',
     justifyContent: 'center',
+    ...sombra.cta,
   },
-  botonGanchoTexto: {
+  bannerBotonTexto: {
     fontSize: 13,
     lineHeight: 18,
-    fontWeight: '500',
+    fontWeight: '600',
     letterSpacing: -0.13,
     color: color.blanco,
     fontFamily: familia,
+  },
+  bannerCerrar: {
+    width: 32,
+    height: 32,
+    marginTop: -4,
+    marginRight: -4,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

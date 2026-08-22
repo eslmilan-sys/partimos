@@ -11,6 +11,7 @@ import type { ReservaFila } from '@/tipos';
 
 import { fuente } from './_fuente';
 import { liberarAporte } from './pagos';
+import { formatearDineroRedondo } from '@/ui/dinero';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -277,7 +278,7 @@ export async function marcarNoShow(reservaId: string): Promise<ReservaFila> {
 
 function lineaDePago(reserva: ReservaFila): string {
   const aporte = reserva.unit_price_cents * reserva.seats;
-  const enDolares = aporte % 100 === 0 ? `${aporte / 100} $` : `${(aporte / 100).toFixed(2)} $`;
+  const enDolares = formatearDineroRedondo(aporte);
   if (!seCobraEnLaApp(reserva.payment_channel)) {
     return `Le pagas ${enDolares} en efectivo al llegar.`;
   }

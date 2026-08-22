@@ -195,13 +195,21 @@ export async function rutasPopulares(limite = 6): Promise<RutaPopular[]> {
 export type SalidaCercana = {
   viajeId: string;
   hora: string;
+  /** La llegada estimada, para poder decir «19:00 → 22:30». Nula si falta. */
+  llegada: string | null;
   destino: string;
+  /** De dónde arranca, para leer: «Albrook · Terminal». */
+  recogida: string;
   aporteCentavos: number;
   /** El slug de la ciudad, que es como se encuentra su fotografía. */
   foto: string;
   /** Quién maneja: una salida sin nombre no invita a nadie a subirse. */
   conductor: string;
   calificacion: number | null;
+  /** Cuántos viajes lleva hechos: es la otra mitad de la confianza. */
+  viajesHechos: number;
+  /** Sin paradas intermedias incluidas: se va directo. */
+  directo: boolean;
   puestosLibres: number;
 };
 
@@ -230,11 +238,15 @@ export async function proximasSalidas(limite = 3, ventanaMin = 60): Promise<Sali
       return {
         viajeId: v.id,
         hora: v.departure_at,
+        llegada: v.arrival_estimate_at ?? null,
         destino,
+        recogida: v.origin_label ?? '',
         aporteCentavos: v.price_cents,
         foto: ciudad?.slug ?? '',
         conductor: p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : '',
         calificacion: fuente.reputacion[v.driver_id]?.calificacion ?? null,
+        viajesHechos: fuente.reputacion[v.driver_id]?.viajes ?? 0,
+        directo: !fuente.paradas.some((x) => x.trip_id === v.id),
         puestosLibres: v.seats_offered - contarVendidos(v.id),
       };
     });

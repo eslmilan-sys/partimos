@@ -15,6 +15,7 @@ import { NOMBRE_DEL_CANAL, TARIFA_PCT, tarifaDeServicio } from '@/dominio/tarifa
 import { resumenDeEquipaje } from '@/dominio/equipaje';
 
 import { fuente } from './_fuente';
+import { formatearDineroRedondo } from '@/ui/dinero';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -45,7 +46,7 @@ export async function viajeDeAyuda(reservaId: string): Promise<ViajeDeAyuda | nu
     viajeId: reserva.trip_id,
     destino: (viaje?.destination_label ?? '').split(' · ')[0],
     cuando: viaje?.departure_at ?? '',
-    linea: `${aporte % 100 === 0 ? aporte / 100 : (aporte / 100).toFixed(2).replace('.', ',')} $ · ${NOMBRE_DEL_CANAL[reserva.payment_channel]} · ${nombre}`,
+    linea: `${formatearDineroRedondo(aporte)} · ${NOMBRE_DEL_CANAL[reserva.payment_channel]} · ${nombre}`,
     conductor: nombre,
   });
 }

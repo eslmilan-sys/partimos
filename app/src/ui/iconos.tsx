@@ -159,20 +159,21 @@ export function Compartir({ tamano = 19, tinta = color.ink900 }: Props) {
   );
 }
 
-export function Escudo({ tamano = 18, tinta = color.azul500 }: Props) {
+/** El escudo del v6 — el de «Solo conductores…», de la caja de 16 a la de 24. */
+export function Escudo({ tamano = 18, tinta = color.inkIcono, grueso }: Props) {
+  const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path
-        d="M12 21s7-3.5 7-9V6l-7-3-7 3v6c0 5.5 7 9 7 9Z"
+        d="M12 2.1 19.2 4.8v6.45c0 4.8-3.15 8.4-7.2 10.65-4.05-2.25-7.2-5.85-7.2-10.65V4.8L12 2.1Z"
         stroke={tinta}
-        strokeWidth={trazo(tamano)}
-        strokeLinecap="round"
+        strokeWidth={t}
         strokeLinejoin="round"
       />
       <Path
-        d="M9.5 12l1.8 1.8 3.4-3.6"
+        d="m8.55 12 2.55 2.55 4.65-5.1"
         stroke={tinta}
-        strokeWidth={trazo(tamano)}
+        strokeWidth={t}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -368,13 +369,14 @@ export function Bateria({ tinta = '#fff' }: Props) {
  * icono al lado**, que es lo que lo separa de una etiqueta cualquiera.
  */
 /** La punta que dice que una fila lleva a otro sitio. */
-export function Avanza({ tamano = 17, tinta = color.ink500 }: Props) {
+/** El chevron del v6: «hay más detrás», en gris de trazo apagado. */
+export function Avanza({ tamano = 16, tinta = color.ink300, grueso }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path
-        d="M9 6l6 6-6 6"
+        d="m9.6 4.8 7.2 7.2-7.2 7.2"
         stroke={tinta}
-        strokeWidth={trazo(tamano)}
+        strokeWidth={grueso ?? 2.1}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -542,16 +544,18 @@ export function Mascota({ tamano = 15, tinta = color.ink600 }: Props) {
 }
 
 /** La campana de los avisos. Solo la lleva el inicio, arriba a la derecha. */
-export function Campana({ tamano = 21, tinta = '#fff' }: Props) {
+/** La campana del v6 — el trazo exacto de la cabecera del archivo. */
+export function Campana({ tamano = 23, tinta = color.inkIconoFuerte, grueso }: Props) {
+  const t = grueso ?? 1.75;
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path
-        d="M12 3a5.5 5.5 0 0 0-5.5 5.5c0 3.3-.8 5-1.6 6-.4.5 0 1.2.6 1.2h13c.6 0 1-.7.6-1.2-.8-1-1.6-2.7-1.6-6A5.5 5.5 0 0 0 12 3Z"
+        d="M12 4.2a5.4 5.4 0 0 0-5.4 5.4c0 4-1.6 5.5-1.6 5.5h14s-1.6-1.5-1.6-5.5A5.4 5.4 0 0 0 12 4.2Z"
         stroke={tinta}
-        strokeWidth={trazo(tamano)}
+        strokeWidth={t}
         strokeLinejoin="round"
       />
-      <Path d="M10 19a2 2 0 0 0 4 0" stroke={tinta} strokeWidth={trazo(tamano)} strokeLinecap="round" />
+      <Path d="M10.2 18.2a2 2 0 0 0 3.6 0" stroke={tinta} strokeWidth={t} strokeLinecap="round" />
     </Svg>
   );
 }
