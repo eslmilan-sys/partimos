@@ -1,0 +1,57 @@
+# =====================================================================
+#  Importer les lieux d'OpenStreetMap — à la demande, depuis GitHub.
+#
+#  POURQUOI CE FICHIER EXISTE. Le script `scripts/importar-lugares.mjs`
+#  tourne partout, mais il faut un terminal, Node installé et la clé de
+#  service sous la main. Ici, c'est un bouton : Actions → « Lugares » →
+#  Run workflow. Le runner a Internet, la clé vit dans les secrets du
+#  dépôt et ne passe par aucun écran.
+#
+#  À FAIRE UNE FOIS AVANT LE PREMIER LANCEMENT
+#    Settings → Secrets and variables → Actions → New repository secret
+#      SUPABASE_URL                 https://zcwueglgirqxwazhfidi.supabase.co
+#      SUPABASE_SERVICE_ROLE_KEY    (Supabase → Settings → API → service_role)
+#
+#  La clé de service ignore TOUTES les politiques RLS. Elle n'a rien à
+#  faire ailleurs que dans ces secrets — jamais dans le code, jamais dans
+#  l'app, jamais dans un message.
+# =====================================================================
+
+name: Lugares
+
+on:
+  workflow_dispatch:
+    inputs:
+      seco:
+        description: 'Essai à blanc — compte et n''écrit rien'
+        type: boolean
+        default: true
+
+jobs:
+  importar:
+    runs-on: ubuntu-latest
+    # Overpass est lent et poli : dix-huit catégories avec des pauses.
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Importar
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::error::Faltan los secretos SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY."
+            echo "Se ponen en Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          if [ "${{ inputs.seco }}" = "true" ]; then
+            node scripts/importar-lugares.mjs --seco
+          else
+            node scripts/importar-lugares.mjs
+          fi

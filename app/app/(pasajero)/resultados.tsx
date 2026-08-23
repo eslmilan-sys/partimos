@@ -22,7 +22,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -183,7 +183,7 @@ export default function Resultados() {
 
   const etiquetaDestino = ruta.etiqueta || nombreDeCiudad(destino);
   /* Le corps du titre suit la longueur de la paire — voir `corpoDeLaRuta`. */
-  const cuerpoRuta = tamanoDeRuta(nombreDeCiudad(origen), etiquetaDestino);
+  const cuerpoRuta = tamanoDeRuta(etiquetaDestino);
   const cuantosFiltrosPuestos = cuantosFiltros(filtros);
   const activos = filtrosActivos(filtros);
 
@@ -228,25 +228,24 @@ export default function Resultados() {
       {/* La cabecera de ruta: DESDE → HASTA, y la línea de meta que se lee
           de la propia búsqueda — no puede contradecirla. */}
       <View style={estilos.cabecera}>
-        <View style={estilos.filaRuta}>
-          {/* `flex: 1, minWidth: 0` des deux côtés. Sans largeur bornée, la
-              vue prend celle de son texte et « El Valle de Antón » sortait de
-              l'écran — `numberOfLines` ne peut rien tronquer tant que le
-              conteneur peut grandir. */}
-          <View style={estilos.ladoRuta}>
-            <Text style={estilos.cejaRuta}>Desde</Text>
-            <Text style={[estilos.ciudad, cuerpoRuta]} numberOfLines={1}>
-              {nombreDeCiudad(origen)}
-            </Text>
-          </View>
-          <FlechaDeRuta />
-          <View style={estilos.ladoRuta}>
-            <Text style={[estilos.cejaRuta, estilos.cejaHasta]}>Hasta</Text>
-            <Text style={[estilos.ciudad, cuerpoRuta]} numberOfLines={1}>
-              {etiquetaDestino}
-            </Text>
+        <View style={estilos.parRuta}>
+          <CurvaDeRuta />
+          <View style={estilos.columnaRuta}>
+            <View>
+              <Text style={estilos.cejaRuta}>Desde</Text>
+              <Text style={estilos.origen} numberOfLines={1}>
+                {nombreDeCiudad(origen)}
+              </Text>
+            </View>
+            <View style={estilos.bloqueDestino}>
+              <Text style={[estilos.cejaRuta, estilos.cejaHasta]}>Hasta</Text>
+              <Text style={[estilos.destino, cuerpoRuta]} numberOfLines={2}>
+                {etiquetaDestino}
+              </Text>
+            </View>
           </View>
         </View>
+
         <Text style={[estilos.meta, tabular]}>
           {`${cuandoTexto(dia)} · ${ruta.pasajeros} ${ruta.pasajeros === 1 ? 'pasajero' : 'pasajeros'} · ${
             cargando
@@ -510,32 +509,43 @@ function Lapiz() {
 
 
 /**
- * LE CORPS DE LA PAIRE DE NOMS.
+ * LE CORPS DE LA DESTINATION.
  *
- * `Panamá → Chitré` tient à 24 ; `Ciudad de Panamá → El Valle de Antón` non,
- * et c'est une vraie route. Plutôt que de tronquer les deux —on perdait le
- * nom du lieu où l'on va— le corps descend jusqu'à ce que la paire entre.
- * En dessous de 16 on ne descend plus : un titre illisible ne vaut pas mieux
- * qu'un titre coupé, et la ligne de meta répète la route en entier.
+ * Sur une ligne partagée, « Ciudad de Panamá → El Valle de Antón » forçait
+ * les deux noms à 18 et les coupait quand même. Empilés, chacun a la largeur
+ * entière : l'arrivée peut donc rester grosse, et ne rétrécit que pour les
+ * noms vraiment longs. Deux lignes autorisées avant de réduire.
  */
-function tamanoDeRuta(a: string, b: string): { fontSize: number; lineHeight: number } {
-  const largo = Math.max(a.length, b.length);
-  const cuerpo = largo <= 11 ? 24 : largo <= 14 ? 21 : largo <= 17 ? 18 : 16;
-  return { fontSize: cuerpo, lineHeight: Math.round(cuerpo * 1.17) };
+function tamanoDeRuta(destino: string): { fontSize: number; lineHeight: number } {
+  const cuerpo = destino.length <= 18 ? 28 : destino.length <= 26 ? 24 : 21;
+  return { fontSize: cuerpo, lineHeight: Math.round(cuerpo * 1.14) };
 }
 
-/** La flecha punteada entre DESDE y HASTA, con la punta roja. */
-function FlechaDeRuta() {
+/**
+ * LA COURBE QUI DESCEND DU DÉPART VERS L'ARRIVÉE.
+ *
+ * Le couple se lit maintenant de haut en bas — d'où l'on part, puis où l'on
+ * va — et la courbe fait le trajet des yeux. Elle part sous l'anneau creux du
+ * départ, s'incurve vers la droite et arrive en pointe rouge sur la ligne de
+ * la destination : la direction s'écrit deux fois, par les cejas ET par le
+ * dessin (invariant 1 du v6). L'anneau creux et la pointe pleine sont les
+ * mêmes qu'ailleurs dans l'app.
+ */
+function CurvaDeRuta() {
   return (
-    <Svg width={20} height={14} viewBox="0 0 20 14" fill="none" style={{ marginTop: 10, flexShrink: 0 }}>
+    <Svg width={26} height={64} viewBox="0 0 26 64" fill="none" style={estilos.curva}>
+      {/* L'anneau du départ : creux, comme sur chaque carte. */}
+      <Circle cx={6} cy={7} r={3.4} stroke={color.inkIcono} strokeWidth={1.9} fill="none" />
+      {/* Le trait descend droit, puis s'ouvre vers la destination. */}
       <Path
-        d="M1 7h15"
+        d="M6 13.5v22c0 8.5 3.5 13 11 14.5"
         stroke={color.ink300}
-        strokeWidth={1.8}
+        strokeWidth={1.9}
         strokeLinecap="round"
-        strokeDasharray="3 3.5"
+        fill="none"
       />
-      <Path d="M13.6 2.6 19 7l-5.4 4.4V2.6Z" fill={color.rojo500} />
+      {/* La pointe rouge : le rouge dit la destination, et rien d'autre. */}
+      <Path d="M15.4 45.6 21.6 50.2 15 54Z" fill={color.rojo500} />
     </Svg>
   );
 }
@@ -768,9 +778,12 @@ const estilos = StyleSheet.create({
   },
 
   cabecera: { paddingTop: 8, paddingHorizontal: espacio.gutter, gap: 6 },
-  filaRuta: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  /** La flèche garde sa place ; les deux noms se partagent le reste. */
-  ladoRuta: { flex: 1, minWidth: 0 },
+  /** Le couple vertical : la courbe à gauche, les deux noms à droite. */
+  parRuta: { flexDirection: 'row', gap: 12 },
+  curva: { marginTop: 4, flexShrink: 0 },
+  columnaRuta: { flex: 1, minWidth: 0, gap: 10 },
+  /** L'arrivée s'aligne sur la pointe de la courbe. */
+  bloqueDestino: { marginTop: 2 },
   cejaRuta: {
     fontSize: 9,
     lineHeight: 12,
@@ -781,11 +794,23 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   cejaHasta: { color: color.rojo700 },
-  ciudad: {
-    fontSize: 24,
-    lineHeight: 28,
-    fontWeight: '600',
-    letterSpacing: -0.84,
+  /**
+   * LE DÉPART EST LE CONTEXTE, L'ARRIVÉE EST LE SUJET. D'où la hiérarchie :
+   * le départ en corps de lieu, dans l'encre secondaire ; l'arrivée en
+   * titre plein, dans l'encre forte. On sait toujours d'où l'on part ; ce
+   * qu'on cherche des yeux, c'est où l'on va.
+   */
+  origen: {
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '500',
+    letterSpacing: -0.34,
+    color: color.ink600,
+    fontFamily: familia,
+  },
+  destino: {
+    fontWeight: '700',
+    letterSpacing: -0.9,
     color: color.ink900,
     fontFamily: familia,
   },
