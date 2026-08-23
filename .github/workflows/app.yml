@@ -84,6 +84,9 @@ jobs:
           EXPO_PUBLIC_SUPABASE_URL: https://zcwueglgirqxwazhfidi.supabase.co
           EXPO_PUBLIC_SUPABASE_LLAVE: sb_publishable_isfWgZ9aT6QTUDtubxr_Iw_xdPLvp9e
           EXPO_PUBLIC_FUENTE: simulado
+          # La démo aussi : c'est le lien qu'on envoie aux amis, et chercher
+          # un lieu est une des choses qu'ils doivent pouvoir éprouver.
+          EXPO_PUBLIC_MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
           PARTIMOS_BASE_URL: /partimos/demo/
         run: npx expo export --platform web --output-dir dist-demo
 
