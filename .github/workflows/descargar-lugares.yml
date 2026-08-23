@@ -1,0 +1,44 @@
+# =====================================================================
+#  Télécharger les données OSM — sans aucun secret.
+#
+#  POURQUOI CE FICHIER EXISTE, EN PLUS DE `lugares.yml`. L'import complet
+#  (`lugares.yml`) a besoin de la clé de service dans les secrets du
+#  dépôt. Celui-ci n'a besoin de RIEN : il ne fait que la moitié réseau —
+#  interroger Overpass — et publie le résultat brut sur la branche
+#  `datos-osm`. N'importe quel environnement qui lit le dépôt peut alors
+#  faire la moitié base de données avec ses propres accès.
+#
+#  Actions → « Descargar lugares (OSM) » → Run workflow. C'est tout.
+# =====================================================================
+
+name: Descargar lugares (OSM)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  descargar:
+    runs-on: ubuntu-latest
+    # Overpass est lent et poli : vingt-et-une requêtes avec des pauses.
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Descargar de Overpass
+        run: node scripts/descargar-lugares.mjs
+
+      - name: Publicar en la rama datos-osm
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan datos-osm
+          git add -f datos-osm
+          git commit -m "Datos OSM del $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -f origin datos-osm
