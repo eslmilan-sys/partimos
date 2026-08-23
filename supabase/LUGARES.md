@@ -24,7 +24,7 @@ todavía no tengamos.
 | Pieza | Qué hace |
 | --- | --- |
 | `supabase/migrations/0013_lugares.sql` | Tabla `places` (PostGIS + trigramas), políticas RLS, función `search_places(q, near_city, max)` y `bump_place(id)`. |
-| `supabase/migrations/0032_catalogo_de_arranque.sql` | El catálogo escrito a mano: unos setenta lugares que la gente cita de verdad, al punto de su ciudad. Funciona sin ninguna llave. |
+| `supabase/migrations/0032_catalogo_de_arranque.sql` | El catálogo escrito a mano: 66 lugares en 15 ciudades, al punto de su ciudad. Aplicado el 23-08-2026: 66 en el archivo, 66 en la base, ninguna perdida en el JOIN. Funciona sin ninguna llave. |
 | `scripts/importar-lugares.mjs` | Trae **todas** las direcciones de OpenStreetMap por Overpass y las sube. Solo pide Node. Sustituye al importador viejo, que exigía `osmium-tool`. |
 | `app/src/servicios/geobusqueda.ts` | Consulta las cuatro fuentes **a la vez**, la nuestra primero. Cada una que falle desaparece en silencio. |
 
@@ -42,7 +42,8 @@ anunciando «solo buscamos entre las ciudades que servimos». Corregido.
 
 ### Salida 1 · El catálogo de arranque (ya hecho, sin llaves)
 
-`0032_catalogo_de_arranque.sql` mete unos setenta lugares que los panameños
+`0032_catalogo_de_arranque.sql` mete **66 lugares** —repartidos en 15 ciudades—
+que los panameños
 citan de verdad: Albrook Mall, Multiplaza, Metromall, Costa del Este, Vía
 España, Punta Chame, Playa Blanca, Chiriquí Mall, Zona Libre… Sin llave, sin
 red, sin factura.

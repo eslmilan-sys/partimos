@@ -7,8 +7,8 @@
 --  commercial ne sont pas configurées. Donc on tape « Multiplaza » et on
 --  ne trouve rien : la recherche ne connaît que les 32 villes servies.
 --
---  CE QUE FAIT CE FICHIER. Il met dedans les lieux que les Panaméens
---  citent vraiment comme point de rendez-vous. Ce n'est PAS « toutes les
+--  CE QUE FAIT CE FICHIER. Il met dedans les 66 lieux — sur 15 villes —
+--  que les Panaméens citent vraiment comme point de rendez-vous. Ce n'est PAS « toutes les
 --  adresses » — c'est le noyau qui rend la recherche utile le premier
 --  jour, sans clé, sans réseau, sans facture. L'import OpenStreetMap
 --  (`scripts/importar-lugares.mjs`) le complète ensuite par dizaines de
