@@ -77,6 +77,27 @@ const CATEGORIAS = [
 /** Au-delà, le lieu appartient à une ville qu'on ne sert pas : on le laisse. */
 const KM_MAXIMO = 40;
 
+/**
+ * LES AUTRES NOMS D'UN LIEU, tels qu'OSM les porte. On ne fabrique aucun
+ * alias : on recopie les étiquettes que des gens ont renseignées.
+ */
+const ETIQUETAS_DE_ALIAS = ['alt_name', 'short_name', 'official_name', 'name:es', 'old_name'];
+
+/**
+ * LA GÉOGRAPHIE ADMINISTRATIVE, aux niveaux où le Panama est cartographié :
+ * 4 pour les provinces et les comarcas, 6 pour les districts, 8 pour les
+ * corregimientos. Le niveau se déduit de l'étiquette, pas d'une supposition.
+ */
+const NIVELES = [
+  { admin_level: 4, filtro: 'relation["boundary"="administrative"]["admin_level"="4"]' },
+  { admin_level: 6, filtro: 'relation["boundary"="administrative"]["admin_level"="6"]' },
+  { admin_level: 8, filtro: 'relation["boundary"="administrative"]["admin_level"="8"]' },
+];
+
+/** Sans accents et en minuscules — la même règle que la base. */
+const normalizar = (t) =>
+  t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function conReintentos(hacer, cuantos = 4) {
@@ -132,13 +153,13 @@ async function bajar(filtro) {
 }
 
 /** Écrit par paquets : une requête de dix mille lignes meurt en chemin. */
-async function subir(filas) {
+async function subir(filas, tabla = 'places', conflicto = 'source,source_id') {
   const PAQUETE = 500;
   let escritas = 0;
   for (let i = 0; i < filas.length; i += PAQUETE) {
     const trozo = filas.slice(i, i + PAQUETE);
     await conReintentos(async () => {
-      const r = await fetch(`${URL_SB}/rest/v1/places?on_conflict=source,source_id`, {
+      const r = await fetch(`${URL_SB}/rest/v1/${tabla}?on_conflict=${conflicto}`, {
         method: 'POST',
         headers: {
           apikey: LLAVE,
@@ -148,7 +169,7 @@ async function subir(filas) {
         },
         body: JSON.stringify(trozo),
       });
-      if (!r.ok) throw new Error(`places: ${r.status} ${(await r.text()).slice(0, 300)}`);
+      if (!r.ok) throw new Error(`${tabla}: ${r.status} ${(await r.text()).slice(0, 300)}`);
     });
     escritas += trozo.length;
     process.stdout.write(`\r  escritas ${escritas}/${filas.length}`);
@@ -156,11 +177,115 @@ async function subir(filas) {
   process.stdout.write('\n');
 }
 
+
+/**
+ * LA GÉOGRAPHIE DU PAYS, en deux temps.
+ *
+ * D'abord les trois niveaux tels quels, puis le rattachement de chacun à son
+ * parent — qu'OSM ne donne pas explicitement. On le déduit de
+ * `is_in:province` / `is_in:district` quand ils existent, et sinon du nom
+ * porté par l'étiquette. Ce qu'on ne sait pas rattacher reste sans parent
+ * plutôt que rattaché au hasard : un district sous la mauvaise province est
+ * pire qu'un district orphelin.
+ */
+async function importarAdministrativo() {
+  const porNivel = { 4: [], 6: [], 8: [] };
+
+  for (const n of NIVELES) {
+    process.stdout.write(`admin_level=${n.admin_level} … `);
+    const elementos = await bajar(n.filtro);
+    for (const e of elementos) {
+      const nombre = e.tags?.name?.trim();
+      if (!nombre) continue;
+      porNivel[n.admin_level].push({
+        nombre,
+        // Une comarca se déclare comme telle : OSM la nomme « Comarca … »
+        // ou porte border_type=comarca. Sinon c'est une province.
+        esComarca:
+          n.admin_level === 4 &&
+          (/comarca/i.test(nombre) || /comarca/i.test(e.tags['border_type'] ?? '')),
+        padreNombre:
+          e.tags['is_in:district'] ?? e.tags['is_in:province'] ?? e.tags['is_in'] ?? null,
+        source_id: `${e.type}/${e.id}`,
+      });
+    }
+    console.log(`${porNivel[n.admin_level].length} con nombre`);
+    await dormir(2500);
+  }
+
+  const total = porNivel[4].length + porNivel[6].length + porNivel[8].length;
+  console.log(`\n${total} áreas administrativas.`);
+  if (SECO) {
+    console.table(
+      [...porNivel[4].slice(0, 4), ...porNivel[6].slice(0, 3), ...porNivel[8].slice(0, 3)].map(
+        (a) => ({ nombre: a.nombre, comarca: a.esComarca, padre: a.padreNombre }),
+      ),
+    );
+    return new Map();
+  }
+
+  // Premier niveau : provinces et comarcas, sans parent.
+  await subir(
+    porNivel[4].map((a) => ({
+      nivel: a.esComarca ? 'comarca' : 'provincia',
+      parent_id: null,
+      name: a.nombre,
+      normalized_name: normalizar(a.nombre),
+      source: 'osm',
+      source_id: a.source_id,
+    })),
+    'admin_areas',
+  );
+
+  // On relit ce qui vient d'être écrit pour connaître les identifiants.
+  const porNombre = await leerAreas();
+
+  // Districts, puis corregimientos : chacun cherche son parent par le nom.
+  for (const [nivel, lista] of [['distrito', porNivel[6]], ['corregimiento', porNivel[8]]]) {
+    const filas = lista.map((a) => ({
+      nivel,
+      parent_id: a.padreNombre ? (porNombre.get(normalizar(a.padreNombre)) ?? null) : null,
+      name: a.nombre,
+      normalized_name: normalizar(a.nombre),
+      source: 'osm',
+      source_id: a.source_id,
+    }));
+    // Le trigger refuse un district sans parent : on n'écrit que ce qu'on
+    // sait situer, et on dit combien on a laissé de côté.
+    const situados = filas.filter((f) => f.parent_id);
+    if (filas.length > situados.length) {
+      console.log(`  ${filas.length - situados.length} ${nivel}s sin área madre reconocible: no se escriben`);
+    }
+    if (situados.length) await subir(situados, 'admin_areas');
+    porNombre.clear();
+    for (const [k, v] of await leerAreas()) porNombre.set(k, v);
+  }
+
+  return porNombre;
+}
+
+/** Les aires déjà en base, par nom normalisé, pour rattacher les suivantes. */
+async function leerAreas() {
+  const r = await fetch(`${URL_SB}/rest/v1/admin_areas?select=id,normalized_name&limit=20000`, {
+    headers: { apikey: LLAVE, Authorization: `Bearer ${LLAVE}` },
+  });
+  if (!r.ok) throw new Error(`admin_areas: ${r.status} ${await r.text()}`);
+  const m = new Map();
+  for (const a of await r.json()) if (!m.has(a.normalized_name)) m.set(a.normalized_name, a.id);
+  return m;
+}
+
 async function principal() {
   const ciudades = await ciudadesServidas();
-  console.log(`${ciudades.length} ciudades servidas.`);
+  console.log(`${ciudades.length} ciudades servidas.\n`);
+
+  console.log('── La geografía administrativa ──');
+  await importarAdministrativo();
+
+  console.log('\n── Los lugares ──');
 
   const porClave = new Map();
+  const alias = [];
   let vistos = 0;
   let lejos = 0;
   let sinNombre = 0;
@@ -190,6 +315,11 @@ async function principal() {
       if (!cerca || mejor > KM_MAXIMO) { lejos++; continue; }
 
       const clave = `${e.type}/${e.id}`;
+      // Les autres noms, recopiés des étiquettes — voir ETIQUETAS_DE_ALIAS.
+      for (const et of ETIQUETAS_DE_ALIAS) {
+        const otro = e.tags[et]?.trim();
+        if (otro && otro !== nombre) alias.push({ clave, alias: otro });
+      }
       porClave.set(clave, {
         name: nombre,
         kind: cat.kind,
@@ -217,12 +347,36 @@ async function principal() {
   );
   console.log(`${filas.length} lugares listos para escribir.`);
 
+  console.log(`${alias.length} otros nombres (alt_name, short_name…).`);
+
   if (SECO) {
     console.log('\n--seco: no se escribió nada. Muestra:');
     console.table(filas.slice(0, 10).map(({ name, kind, city_slug }) => ({ name, kind, city_slug })));
     return;
   }
   await subir(filas);
+
+  // Les alias après les lieux : ils pendent d'eux. On relit les
+  // identifiants attribués plutôt que de les supposer.
+  if (alias.length) {
+    const r = await fetch(`${URL_SB}/rest/v1/places?select=id,source_id&source=eq.osm&limit=200000`, {
+      headers: { apikey: LLAVE, Authorization: `Bearer ${LLAVE}` },
+    });
+    if (r.ok) {
+      const idPorClave = new Map((await r.json()).map((p) => [p.source_id, p.id]));
+      const filasAlias = alias
+        .map((a) => ({
+          place_id: idPorClave.get(a.clave),
+          alias: a.alias,
+          normalized_alias: normalizar(a.alias),
+          source: 'osm',
+        }))
+        .filter((a) => a.place_id && a.normalized_alias);
+      await subir(filasAlias, 'place_aliases', 'place_id,normalized_alias');
+      console.log(`${filasAlias.length} alias escritos.`);
+    }
+  }
+
   console.log('Hecho. La búsqueda de la app ya los encuentra, sin ninguna llave.');
 }
 

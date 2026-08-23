@@ -50,6 +50,15 @@ const MAPBOX = process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? '';
 /** Cuántos resultados ve la persona. */
 export const CUANTOS_RESULTADOS = 6;
 
+/**
+ * A partir de cuántos resultados propios ya no se sale afuera.
+ *
+ * Bajo a propósito: tres resultados de la casa —con su contexto
+ * administrativo y su cuenta de uso real— valen más que ocho donde seis
+ * vienen de un proveedor que no conoce «la bomba de Divisa».
+ */
+export const SUFICIENTES = 3;
+
 /** Las ciudades, con la forma que el dominio pide. Se leen del almacén. */
 const ciudades = (): CiudadConocida[] =>
   fuente.ciudades.map((c) => ({
@@ -109,9 +118,24 @@ async function deLaNuestra(q: string, citySlug?: string | null): Promise<Bruto[]
       max_results: CUANTOS_RESULTADOS,
     } as never);
     if (error || !Array.isArray(data)) return [];
-    return (data as { name: string; address: string | null; lat: number; lng: number }[]).map(
-      (r) => ({ nombre: r.name, contexto: r.address ?? '', lat: r.lat, lng: r.lng }),
-    );
+    return (
+      data as {
+        name: string;
+        address: string | null;
+        lat: number;
+        lng: number;
+        /** « Punta Pacífica, San Francisco, Panamá » — migración 0033. */
+        contexto?: string | null;
+      }[]
+    ).map((r) => ({
+      /* Le contexte administratif d'abord : c'est comme ça qu'un Panaméen
+         situe un lieu, et c'est ce qui distingue les deux « Santa Rosa ».
+         L'adresse de rue reste le repli quand on ne sait pas encore situer. */
+      nombre: r.name,
+      contexto: r.contexto?.trim() || r.address || '',
+      lat: r.lat,
+      lng: r.lng,
+    }));
   } catch {
     return [];
   }
@@ -218,8 +242,28 @@ export async function buscarEnTodas(
   const q = texto.trim();
   if (q.length < MINIMO_PARA_BUSCAR) return [];
 
+  /**
+   * LA MAISON D'ABORD, ET SOUVENT SEULE.
+   *
+   * On interrogeait les quatre sources à chaque frappe. Maintenant que
+   * `places` porte l'import OSM, elle répond bien la plupart du temps — et
+   * chaque appel externe coûte une session facturée pour rien.
+   *
+   * Donc : on demande à la nôtre, et on ne sort dehors que si elle rend
+   * moins de `SUFICIENTES` résultats. Le seuil est bas exprès : deux
+   * résultats justes valent mieux que huit dont six viennent d'ailleurs.
+   */
+  const deCasa = await deLaNuestra(q, citySlug);
+  if (deCasa.length >= SUFICIENTES) {
+    return ordenar(
+      deduplicar(deCasa.filter((b) => b.nombre?.trim()).map((b) => comoLugar(b, 'propia'))),
+      q,
+      cerca,
+    ).slice(0, CUANTOS_RESULTADOS);
+  }
+
   const respuestas = await Promise.allSettled([
-    deLaNuestra(q, citySlug),
+    Promise.resolve(deCasa),
     deTomtom(q, cerca, corte),
     deLocationiq(q, corte),
     MAPBOX
