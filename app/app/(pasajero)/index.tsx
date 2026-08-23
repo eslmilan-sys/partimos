@@ -406,6 +406,12 @@ export default function Inicio() {
                     <Text style={estilos.destinoFavorita} numberOfLines={1}>
                       {r.destino}
                     </Text>
+                    {/* L'aport le plus bas publié sur la route. « Desde » et
+                        pas un prix sec : ce n'est pas un tarif, c'est le
+                        moins cher qu'on ait vu passer aujourd'hui. */}
+                    <Text style={estilos.desdePrecioFavorita} numberOfLines={1}>
+                      {`Desde ${formatearDineroRedondo(r.desdeCentavos)}`}
+                    </Text>
                   </View>
                 </Pressable>
               ))}
@@ -887,6 +893,17 @@ const estilos = StyleSheet.create({
     letterSpacing: -0.48,
     color: color.ink900,
     fontFamily: familia,
+  },
+  /** Un chiffre comparable d'une carte à l'autre : chiffres tabulaires. */
+  desdePrecioFavorita: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '500',
+    letterSpacing: -0.12,
+    color: color.ink600,
+    marginTop: 1,
+    fontFamily: familia,
+    ...tabular,
   },
 
   listaSalen: { paddingHorizontal: espacio.gutter, paddingTop: 12, gap: 12 },
