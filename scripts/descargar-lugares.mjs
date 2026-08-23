@@ -19,7 +19,13 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 
-const OVERPASS = 'https://overpass-api.de/api/interpreter';
+// Deux serveurs qui parlent la même API. Le principal jette parfois les
+// connexions quand on insiste (vu au premier run : ETIMEDOUT après quinze
+// requêtes) ; à chaque nouvel essai on change de guichet.
+const ESPEJOS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+];
 const AGENTE = 'Partimos/1.0 (descarga de lugares; contacto: hola@partimos.app)';
 
 // Les mêmes listes qu'`importar-lugares.mjs`, à l'identique.
@@ -52,13 +58,13 @@ const NIVELES = [
 
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function conReintentos(hacer, cuantos = 4) {
+async function conReintentos(hacer, cuantos = 6) {
   for (let i = 0; ; i++) {
     try {
-      return await hacer();
+      return await hacer(i);
     } catch (e) {
       if (i >= cuantos) throw e;
-      const espera = 2 ** i * 3000;
+      const espera = 2 ** i * 5000;
       console.warn(`  reintento en ${espera / 1000}s — ${e.message}`);
       await dormir(espera);
     }
@@ -72,11 +78,12 @@ async function bajar(filtro) {
     ${filtro}(area.pa);
     out center tags;
   `;
-  return conReintentos(async () => {
-    const r = await fetch(OVERPASS, {
+  return conReintentos(async (intento) => {
+    const r = await fetch(ESPEJOS[intento % ESPEJOS.length], {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain', 'User-Agent': AGENTE },
       body: consulta,
+      signal: AbortSignal.timeout(240_000),
     });
     if (!r.ok) throw new Error(`overpass ${r.status}`);
     const j = await r.json();
@@ -97,7 +104,7 @@ for (const n of NIVELES) {
   console.log(`${elementos.length} elementos`);
   guardar(`admin_${n.admin_level}`, { admin_level: n.admin_level, elements: elementos });
   // Overpass est un service gratuit et partagé. On respire entre deux.
-  await dormir(2500);
+  await dormir(5000);
 }
 
 for (let i = 0; i < CATEGORIAS.length; i++) {
@@ -110,7 +117,7 @@ for (let i = 0; i < CATEGORIAS.length; i++) {
     filtro: cat.filtro,
     elements: elementos,
   });
-  await dormir(2500);
+  await dormir(5000);
 }
 
 console.log('Hecho. Todo en datos-osm/.');
