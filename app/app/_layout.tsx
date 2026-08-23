@@ -14,6 +14,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import { MODO, cargar } from '@/servicios/_fuente';
+import { Comentar } from '@/ui/Comentar';
 import { NotaProvider } from '@/ui/Nota';
 import { familia, color, espacio, interlinea } from '@/ui/tokens';
 
@@ -34,13 +35,18 @@ export default function Layout() {
 
   return (
     <NotaProvider>
-      <StatusBar style="light" />
+      {/* Encre sur lienzo clair : `light` peignait le texte de la barre en
+          blanc, invisible depuis que le champ rouge a disparu. */}
+      <StatusBar style="dark" />
       <Stack
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: color.sand100 },
         }}
       />
+      {/* Monté ici, donc présent sur les cinquante-huit écrans sans qu'aucun
+          n'ait à le savoir. Le jour où le test se ferme, cette ligne part. */}
+      <Comentar />
     </NotaProvider>
   );
 }
