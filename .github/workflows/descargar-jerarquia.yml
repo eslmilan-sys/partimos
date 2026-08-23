@@ -1,0 +1,47 @@
+# =====================================================================
+#  Qui est dans quoi — la hiérarchie administrative, sans secret.
+#
+#  Complète `descargar-lugares.yml` : lit les niveaux déjà téléchargés sur
+#  la branche `datos-osm`, demande à Overpass le contenu géométrique de
+#  chaque aire (district → province, corregimiento → district), et publie
+#  `padres_6.json.gz` / `padres_8.json.gz` sur la même branche.
+#
+#  Lancer `Descargar lugares (OSM)` d'abord ; puis celui-ci.
+# =====================================================================
+
+name: Descargar jerarquia (OSM)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  jerarquia:
+    runs-on: ubuntu-latest
+    # ~100 petites requêtes avec des pauses de 3 s.
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Recuperar los niveles ya descargados
+        run: |
+          git fetch --depth 1 origin datos-osm
+          git checkout FETCH_HEAD -- datos-osm
+
+      - name: Preguntar a Overpass
+        run: node scripts/descargar-jerarquia.mjs
+
+      - name: Publicar en la rama datos-osm
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan datos-osm-nueva
+          git add -f datos-osm
+          git commit -m "Datos OSM + jerarquía del $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -f origin datos-osm-nueva:datos-osm
