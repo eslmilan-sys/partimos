@@ -24,47 +24,75 @@ todavía no tengamos.
 | Pieza | Qué hace |
 | --- | --- |
 | `supabase/migrations/0013_lugares.sql` | Tabla `places` (PostGIS + trigramas), políticas RLS, función `search_places(q, near_city, max)` y `bump_place(id)`. |
-| `scripts/import-places.mjs` | Baja el extracto de Panamá, filtra lo que sirve como punto de encuentro, lo asigna a la ciudad servida más cercana y lo sube. |
-| `src/lib/geosearch.ts` | Ahora consulta **primero** nuestra tabla; TomTom, LocationIQ y Mapbox quedan de respaldo. Sin Supabase configurado se comporta igual que antes. |
+| `supabase/migrations/0032_catalogo_de_arranque.sql` | El catálogo escrito a mano: unos setenta lugares que la gente cita de verdad, al punto de su ciudad. Funciona sin ninguna llave. |
+| `scripts/importar-lugares.mjs` | Trae **todas** las direcciones de OpenStreetMap por Overpass y las sube. Solo pide Node. Sustituye al importador viejo, que exigía `osmium-tool`. |
+| `app/src/servicios/geobusqueda.ts` | Consulta las cuatro fuentes **a la vez**, la nuestra primero. Cada una que falle desaparece en silencio. |
 
-## Cómo se corre (una vez)
+## Por qué hoy no encuentra nada — y las tres salidas
 
-**Atajo — un solo comando.** Con las cuatro claves en `.env.local`
-(`SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `SUPABASE_SERVICE_ROLE_KEY`,
-`NEXT_PUBLIC_SUPABASE_URL`):
+**El diagnóstico, 23-08-2026.** La tabla `places` existe con su índice
+trigrama y su función `search_places`, y la app la consulta **primero** en
+cada tecla. Pero está vacía, y las tres llaves de geocodificación comercial
+—TomTom, LocationIQ, Mapbox— no están puestas. Así que se escribe
+«Multiplaza» y no sale nada: la búsqueda solo conoce las 32 ciudades.
+
+Había además un fallo propio: `HAY_BUSQUEDA` contaba las tres llaves y **no
+contaba la nuestra**. Con el catálogo lleno y sin llaves, la pantalla seguía
+anunciando «solo buscamos entre las ciudades que servimos». Corregido.
+
+### Salida 1 · El catálogo de arranque (ya hecho, sin llaves)
+
+`0032_catalogo_de_arranque.sql` mete unos setenta lugares que los panameños
+citan de verdad: Albrook Mall, Multiplaza, Metromall, Costa del Este, Vía
+España, Punta Chame, Playa Blanca, Chiriquí Mall, Zona Libre… Sin llave, sin
+red, sin factura.
+
+**Cada entrada lleva el punto de SU ciudad**, no una coordenada escrita de
+memoria. Una coordenada inventada entra en el cálculo de la distancia, del
+costo y del tope, y nadie vería el error. La ciudad sí es exacta: viene de
+`cities`. Albrook queda a 3,7 km del centro de la capital — sobre un viaje de
+250 km, un 1,5 % de diferencia. El importador de abajo la sustituye por la
+verdadera.
+
+**No hay ni un terminal de bus, a propósito.** `PRODUCT.md` lo hace condición
+jurídica y el conflicto sigue abierto en `CLAUDE.md`. Este archivo no lo
+tranca solo.
+
+### Salida 2 · Todas las direcciones, de OpenStreetMap (una vez, gratis)
 
 ```bash
-bash scripts/setup-lugares.sh
+export SUPABASE_URL=https://xxxx.supabase.co
+export SUPABASE_SERVICE_ROLE_KEY=...        # nunca en el repositorio
+
+node scripts/importar-lugares.mjs --seco     # cuenta, no escribe nada
+node scripts/importar-lugares.mjs            # escribe de verdad
 ```
 
-Hace lo mismo que los pasos de abajo, en orden, y se puede correr dos
-veces sin romper nada.
+`scripts/importar-lugares.mjs` reemplaza al importador viejo, que pedía
+`osmium-tool` y 120 MB de extracto. Este habla con **Overpass**: solo hace
+falta Node. Trae centros comerciales, supermercados, bombas, hospitales,
+universidades, parques, hoteles, aeropuertos y barrios; descarta lo que no
+tiene nombre y lo que queda a más de 40 km de una ciudad servida. Se puede
+correr las veces que sea: escribe por `(source, source_id)`.
 
-### Paso a paso, si prefieres verlo
+Los datos son **nuestros** desde ese momento: ODbL permite copiarlos,
+transformarlos y servirlos. La única condición es la atribución.
+
+### Salida 3 · Mapbox, si se quiere red de seguridad (5 minutos)
+
+Para lo que OSM no tenga todavía. Cuenta gratis en mapbox.com, un token
+público, y:
 
 ```bash
-# 1. herramienta de extracción
-brew install osmium-tool          # o: apt install osmium-tool
-
-# 2. centros de las ciudades servidas (los lee el importador)
-node -e "import('./src/lib/corridors.ts').then(m=>console.log(JSON.stringify(
-  m.ALL_CITIES.map(c=>({slug:c.slug,lat:c.lat,lng:c.lng})))))" \
-  > scripts/city-centers.json
-
-# 3. la migración
-supabase db push
-
-# 4. prueba en seco: extrae y cuenta, no sube nada
-node scripts/import-places.mjs --dry
-
-# 5. la buena
-SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… node scripts/import-places.mjs
+gh secret set MAPBOX_TOKEN --body "pk.ey..."   # o desde la web de GitHub
 ```
 
-Órdenes de magnitud: el extracto de Panamá pesa unos **60 MB**, salen del
-orden de **100 000–200 000 lugares con nombre**, y en Postgres son unos
-**40 MB con índices**. Cabe en el plan pequeño de Supabase. Refrescarlo
-cada mes o dos es suficiente: OSM en Panamá no cambia a diario.
+El código ya lo espera en `EXPO_PUBLIC_MAPBOX_TOKEN` y el flujo de CI ya lo
+pasa al exportar. **Restringirlo por dominio en la consola de Mapbox**: un
+token público sin restricción lo usa cualquiera y la factura llega aquí.
+
+Las tres salidas se suman: `buscarEnTodas` pregunta a todas a la vez y funde
+lo que vuelva. Una fuente de menos degrada la lista; nunca la rompe.
 
 ## El problema del PH que no aparece
 

@@ -39,7 +39,7 @@ import {
   ordenar,
 } from '@/dominio/lugar';
 
-import { fuente } from './_fuente';
+import { MODO, fuente } from './_fuente';
 import { supabase } from './_fuente/supabase/cliente';
 import { MINIMO_PARA_BUSCAR, concretar, geocodificar, sugerir } from './lugares';
 
@@ -342,5 +342,14 @@ export async function lugaresCerca(centro: Punto, corte?: AbortSignal): Promise<
   }
 }
 
-/** Si alguna fuente puede contestar. Sin ninguna, la pantalla lo dice. */
-export const HAY_BUSQUEDA = Boolean(TOMTOM || LOCATIONIQ || MAPBOX);
+/**
+ * Si alguna fuente puede contestar. Sin ninguna, la pantalla lo dice.
+ *
+ * **Faltaba la nuestra.** `places` es el proveedor de la casa y el primero al
+ * que se pregunta —lo hace `buscarEnTodas`, siempre— pero no contaba aquí. Con
+ * las tres llaves ausentes la pantalla anunciaba «solo buscamos entre las
+ * ciudades que servimos» aunque el catálogo tuviera diez mil lugares dentro.
+ *
+ * Contra datos simulados no hay tabla que preguntar, y ahí el aviso es cierto.
+ */
+export const HAY_BUSQUEDA = Boolean(TOMTOM || LOCATIONIQ || MAPBOX) || MODO === 'supabase';
