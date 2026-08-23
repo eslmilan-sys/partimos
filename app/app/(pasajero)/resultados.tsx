@@ -182,6 +182,8 @@ export default function Resultados() {
     : null;
 
   const etiquetaDestino = ruta.etiqueta || nombreDeCiudad(destino);
+  /* Le corps du titre suit la longueur de la paire — voir `corpoDeLaRuta`. */
+  const cuerpoRuta = tamanoDeRuta(nombreDeCiudad(origen), etiquetaDestino);
   const cuantosFiltrosPuestos = cuantosFiltros(filtros);
   const activos = filtrosActivos(filtros);
 
@@ -227,16 +229,20 @@ export default function Resultados() {
           de la propia búsqueda — no puede contradecirla. */}
       <View style={estilos.cabecera}>
         <View style={estilos.filaRuta}>
-          <View>
+          {/* `flex: 1, minWidth: 0` des deux côtés. Sans largeur bornée, la
+              vue prend celle de son texte et « El Valle de Antón » sortait de
+              l'écran — `numberOfLines` ne peut rien tronquer tant que le
+              conteneur peut grandir. */}
+          <View style={estilos.ladoRuta}>
             <Text style={estilos.cejaRuta}>Desde</Text>
-            <Text style={estilos.ciudad} numberOfLines={1}>
+            <Text style={[estilos.ciudad, cuerpoRuta]} numberOfLines={1}>
               {nombreDeCiudad(origen)}
             </Text>
           </View>
           <FlechaDeRuta />
-          <View>
+          <View style={estilos.ladoRuta}>
             <Text style={[estilos.cejaRuta, estilos.cejaHasta]}>Hasta</Text>
-            <Text style={estilos.ciudad} numberOfLines={1}>
+            <Text style={[estilos.ciudad, cuerpoRuta]} numberOfLines={1}>
               {etiquetaDestino}
             </Text>
           </View>
@@ -502,10 +508,26 @@ function Lapiz() {
   );
 }
 
+
+/**
+ * LE CORPS DE LA PAIRE DE NOMS.
+ *
+ * `Panamá → Chitré` tient à 24 ; `Ciudad de Panamá → El Valle de Antón` non,
+ * et c'est une vraie route. Plutôt que de tronquer les deux —on perdait le
+ * nom du lieu où l'on va— le corps descend jusqu'à ce que la paire entre.
+ * En dessous de 16 on ne descend plus : un titre illisible ne vaut pas mieux
+ * qu'un titre coupé, et la ligne de meta répète la route en entier.
+ */
+function tamanoDeRuta(a: string, b: string): { fontSize: number; lineHeight: number } {
+  const largo = Math.max(a.length, b.length);
+  const cuerpo = largo <= 11 ? 24 : largo <= 14 ? 21 : largo <= 17 ? 18 : 16;
+  return { fontSize: cuerpo, lineHeight: Math.round(cuerpo * 1.17) };
+}
+
 /** La flecha punteada entre DESDE y HASTA, con la punta roja. */
 function FlechaDeRuta() {
   return (
-    <Svg width={20} height={14} viewBox="0 0 20 14" fill="none" style={{ marginTop: 10 }}>
+    <Svg width={20} height={14} viewBox="0 0 20 14" fill="none" style={{ marginTop: 10, flexShrink: 0 }}>
       <Path
         d="M1 7h15"
         stroke={color.ink300}
@@ -747,6 +769,8 @@ const estilos = StyleSheet.create({
 
   cabecera: { paddingTop: 8, paddingHorizontal: espacio.gutter, gap: 6 },
   filaRuta: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  /** La flèche garde sa place ; les deux noms se partagent le reste. */
+  ladoRuta: { flex: 1, minWidth: 0 },
   cejaRuta: {
     fontSize: 9,
     lineHeight: 12,
