@@ -14,6 +14,7 @@ import {
   loQueRecuperas,
   topeDeRuta,
 } from '@/dominio/aporte';
+import { soloCiudad, soloPunto } from '@/dominio/comoSeLlama';
 import { type Lugar, distanciaKm as kmEntrePuntos } from '@/dominio/lugar';
 import type { AvailableTrip, Corridor, TripStop, Vehicle, ViajeFila } from '@/tipos';
 
@@ -198,7 +199,7 @@ export type SalidaCercana = {
   /** La llegada estimada, para poder decir «19:00 → 22:30». Nula si falta. */
   llegada: string | null;
   destino: string;
-  /** De dónde arranca, para leer: «Albrook · Terminal». */
+  /** El punto exacto de recogida, sin la ciudad: «Albrook». */
   recogida: string;
   aporteCentavos: number;
   /** El slug de la ciudad, que es como se encuentra su fotografía. */
@@ -232,15 +233,21 @@ export async function proximasSalidas(limite = 3, ventanaMin = 60): Promise<Sali
     .sort((a, b) => a.departure_at.localeCompare(b.departure_at))
     .slice(0, limite)
     .map((v) => {
-      const destino = (v.destination_label ?? '').split(' · ')[0];
-      const ciudad = fuente.ciudades.find((c) => c.name === destino);
+      /* Un bloc de découverte dit la VILLE : « Albrook » ne dit rien à qui
+         n'habite pas la capitale. La règle est dans `comoSeLlama`. */
+      const ciudad = fuente.ciudades.find((c) => c.id === v.destination_city_id);
+      const destino = soloCiudad(ciudad?.name, v.destination_label);
+      const salida = fuente.ciudades.find((c) => c.id === v.origin_city_id);
       const p = fuente.perfiles.find((x) => x.id === v.driver_id);
       return {
         viajeId: v.id,
         hora: v.departure_at,
         llegada: v.arrival_estimate_at ?? null,
         destino,
-        recogida: v.origin_label ?? '',
+        /* Le point exact SANS sa ville : le titre du bloc dit déjà « desde
+           Panamá », et « Chitré · Ciudad de Panamá · Albrook » se lisait comme
+           trois lieux à la file. */
+        recogida: soloPunto(salida?.name, v.origin_label),
         aporteCentavos: v.price_cents,
         foto: ciudad?.slug ?? '',
         conductor: p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : '',
@@ -283,11 +290,12 @@ export async function resumenDeRuta(corredorSlug: string, pasajeros = 1): Promis
   const origen = fuente.ciudades.find((x) => x.id === c.origin_city_id);
   const suyos = fuente.viajes.filter((v) => v.corridor_id === c.id && v.status === 'published');
 
-  // El nombre que se enseña es el del sitio al que se llega de verdad —«Playa
-  // Blanca»—, no el de la ciudad del corredor. Es el que dicen los viajes.
+  /* Un bloc de découverte nomme la VILLE. Celle où les voyages arrivent
+     vraiment, qui n'est pas toujours celle du couloir : le couloir
+     panama-coronado sert aussi Río Hato. */
   const comun = suyos
-    .map((v) => (v.destination_label ?? '').split(' · ')[0])
-    .find((etiqueta, _i, todas) => todas.filter((x) => x === etiqueta).length > 1);
+    .map((v) => ciudadDestino(v))
+    .find((nombre, _i, todas) => nombre && todas.filter((x) => x === nombre).length > 1);
 
   return demora({
     slug: c.slug,
@@ -511,6 +519,11 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
     destination_place_id: null,
     origin_label: preparada.origen,
     destination_label: preparada.destino,
+    /* LA VILLE SE FIXE ICI, en publiant, où on sait encore ce qui a été
+       choisi. Après, personne ne peut plus la deviner : « Albrook » ne dit
+       pas « Ciudad de Panamá ». Migration 0031. */
+    origin_city_id: preparada.corredor.origin_city_id,
+    destination_city_id: preparada.corredor.destination_city_id,
     origin_lat: null,
     origin_lng: null,
     destination_lat: null,
@@ -758,6 +771,47 @@ function comoResultado(v: ViajeFila): ViajeEnResultados {
     accepts_luggage: v.accepts_luggage,
     origin_label: v.origin_label,
     destination_label: v.destination_label,
+    /* La ville à côté de l'étiquette, jamais à sa place : les blocs de
+       découverte lisent l'une, la page d'offres écrit les deux. */
+    origin_city: ciudadDe(v.origin_city_id),
+    destination_city: ciudadDe(v.destination_city_id),
+    origin_city_slug: slugDe(v.origin_city_id),
+    destination_city_slug: slugDe(v.destination_city_id),
     driver_rating: fuente.reputacion[v.driver_id]?.calificacion ?? null,
   };
 }
+
+/** Le nom de la ville, ou rien : `comoSeLlama` sait retomber sur l'étiquette. */
+const ciudadDe = (id: string | null): string | null =>
+  fuente.ciudades.find((c) => c.id === id)?.name ?? null;
+
+/**
+ * LES DEUX VILLES D'UN VOYAGE. Depuis 0031 elles sont sur la ligne ; ceci
+ * évite que chaque écran refasse la jointure à la main — et surtout que
+ * quelqu'un retombe dans `origin_label.split(' · ')[0]`, qui rendait
+ * « Albrook » là où il fallait lire « Ciudad de Panamá ».
+ */
+export function ciudadesDelViaje(viaje: ViajeFila): { origen: string | null; destino: string | null } {
+  return {
+    origen: ciudadDe(viaje.origin_city_id),
+    destino: ciudadDe(viaje.destination_city_id),
+  };
+}
+
+/** La ville de départ, pour tout ce qui n'est ni la page d'offres ni le détail. */
+export const ciudadOrigen = (viaje: ViajeFila): string =>
+  soloCiudad(ciudadDe(viaje.origin_city_id), viaje.origin_label);
+
+export const ciudadDestino = (viaje: ViajeFila): string =>
+  soloCiudad(ciudadDe(viaje.destination_city_id), viaje.destination_label);
+
+/**
+ * « Ciudad de Panamá → Chitré ». La ligne que lisent le chat, les avis, les
+ * demandes, l'aide et les notes : partout où on RÉSUME un voyage, on nomme les
+ * villes. Le point exact n'apparaît qu'au moment de choisir.
+ */
+export const rutaCorta = (viaje: ViajeFila): string =>
+  `${ciudadOrigen(viaje)} → ${ciudadDestino(viaje)}`;
+
+const slugDe = (id: string | null): string | null =>
+  fuente.ciudades.find((c) => c.id === id)?.slug ?? null;

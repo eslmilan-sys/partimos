@@ -18,6 +18,7 @@ import type { Cancellation, CancelParty, Refund } from '@/tipos';
 
 import { nuevoId } from './_id';
 import { fuente } from './_fuente';
+import { ciudadDestino } from './viajes';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -188,7 +189,7 @@ export async function estadoDelReembolso(reembolsoId: string): Promise<EstadoDel
   const reserva = fuente.reservas.find((r) => r.id === cancelacion.booking_id);
   const viaje = fuente.viajes.find((v) => v.id === cancelacion.trip_id);
   const conductor = fuente.perfiles.find((p) => p.id === viaje?.driver_id);
-  const destino = (viaje?.destination_label ?? '').split(' · ')[0];
+  const destino = viaje ? ciudadDestino(viaje) : '';
   const enviado = reembolso.status === 'issued';
 
   return demora({

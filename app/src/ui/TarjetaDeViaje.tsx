@@ -34,8 +34,12 @@ export type ViajeEnTarjeta = {
   duracion: string;
   aporteCentavos: number;
   puestosLibres: number;
+  /** La VILLE de départ : « Ciudad de Panamá ». */
   origen: string;
+  /** Le point exact, sur sa propre ligne : « Albrook ». Facultatif. */
+  origenPunto?: string;
   destino: string;
+  destinoPunto?: string;
   llegada: string;
   equipaje: 'Acepta maletas' | 'Solo mochila';
   aceptaMascotas: boolean;
@@ -118,6 +122,14 @@ export function TarjetaDeViaje({
           <Text style={estilos.lugar} numberOfLines={1}>
             {viaje.origen}
           </Text>
+          {/* Le point exact sous sa ville : sur une seule ligne, « Ciudad de
+              Panamá · Albrook » se faisait tronquer et le point — la seule
+              chose qui dit où se tenir — disparaissait. */}
+          {viaje.origenPunto ? (
+            <Text style={estilos.punto} numberOfLines={1}>
+              {viaje.origenPunto}
+            </Text>
+          ) : null}
         </View>
 
         <View style={estilos.columnaRail}>
@@ -141,6 +153,11 @@ export function TarjetaDeViaje({
           <Text style={estilos.lugar} numberOfLines={1}>
             {viaje.destino}
           </Text>
+          {viaje.destinoPunto ? (
+            <Text style={[estilos.punto, { textAlign: 'right' }]} numberOfLines={1}>
+              {viaje.destinoPunto}
+            </Text>
+          ) : null}
         </View>
       </View>
 
@@ -220,11 +237,18 @@ const estilos = StyleSheet.create({
   },
 
   rejilla: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  columna: { gap: 1 },
+  /* `flex: 1, minWidth: 0` sur les DEUX côtés : depuis que le lieu s'écrit
+     « Ciudad de Panamá · Albrook », une colonne dimensionnée par son contenu
+     poussait la colonne LLEGA hors de la carte. Elles partagent, et
+     `numberOfLines={1}` tronque proprement. */
+  columna: { flex: 1, minWidth: 0, gap: 1 },
   columnaDerecha: { alignItems: 'flex-end' },
   columnaRail: {
-    flex: 1,
-    minWidth: 48,
+    /* Le raíl ne s'étire plus : il prend ce qu'il lui faut et rend le reste
+       aux deux noms de lieux, qui en ont plus besoin que lui. */
+    flexGrow: 0,
+    flexShrink: 0,
+    minWidth: 66,
     alignItems: 'center',
     gap: 3,
     /* 21 para que el raíl se centre sobre el glifo de la hora. */
@@ -257,6 +281,15 @@ const estilos = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: -0.12,
     color: color.ink700,
+    fontFamily: familia,
+  },
+
+  /** Le point exact : un cran plus bas que sa ville dans la rampe d'encre. */
+  punto: {
+    fontSize: 11.5,
+    lineHeight: 15,
+    letterSpacing: -0.1,
+    color: color.ink500,
     fontFamily: familia,
   },
 

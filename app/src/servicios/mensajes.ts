@@ -11,6 +11,7 @@ import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import type { Message } from '@/tipos';
 
 import { fuente } from './_fuente';
+import { rutaCorta } from './viajes';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -46,7 +47,7 @@ export async function hiloDelViaje(reservaId: string, yo: string): Promise<HiloD
   return demora({
     reservaId,
     otro: { id: otroId, nombre, iniciales: iniciales(nombre) },
-    ruta: `${(viaje.origin_label ?? '').split(' · ')[0]} → ${(viaje.destination_label ?? '').split(' · ')[0]}`,
+    ruta: rutaCorta(viaje),
     cuando: viaje.departure_at,
     puesto: {
       resumen: `${formatearDineroRedondo(aporte)} · ${NOMBRE_DEL_CANAL[reserva.payment_channel]} · código ${reserva.boarding_code}`,

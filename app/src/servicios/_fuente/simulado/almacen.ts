@@ -8,7 +8,7 @@
 import type { Booking, Message, Payment, ReservaFila, TripStop, ViajeFila } from '@/tipos';
 
 import { ANDRES_ID, CARLA_ID, DANIELA_ID, ELANTRA_ID, JOSE_ID, LUCIA_ID, MARIA_ID, MATEO_ID, ROSA_ID, TUCSON_ID } from './personas';
-import { corredores } from './geografia';
+import { CIUDAD_PANAMA_ID, ciudades, corredores } from './geografia';
 import { AHORA, LLEGADA, SALIDA, desdeLaSalida, enMinutos, enPanama, haceMinutos } from './reloj';
 
 const CHITRE = corredores.find((c) => c.slug === 'panama-chitre')!;
@@ -18,6 +18,19 @@ export const VIAJE_CHITRE_ID = '55555555-5555-4555-8555-555555555555';
 export const VIAJE_SIN_MALETAS_ID = '55555555-5555-4555-8555-555555555556';
 /** El de esta mañana, a punto de salir: es el que se aborda en `1f` / `1g`. */
 export const VIAJE_ABORDANDO_ID = '55555555-5555-4555-8555-555555555557';
+
+
+/**
+ * DE QUELLE VILLE PARLE CETTE ÉTIQUETTE. Les données simulées ont la forme
+ * exacte des tables (règle 5), et depuis 0031 une ligne `trips` porte sa ville.
+ * On la déduit du premier morceau de l'étiquette — « Chitré · Parque Unión »
+ * → Chitré — et sinon on prend celle qu'on nous donne : « Albrook » et « Vía
+ * España » sont des quartiers de la capitale, pas des villes.
+ */
+const ciudadDe = (etiqueta: string, siNo: string): string => {
+  const cabeza = etiqueta.split(' · ')[0]?.trim();
+  return ciudades.find((c) => c.name === cabeza)?.id ?? siNo;
+};
 
 /**
  * El viaje del recorrido del diseño: Albrook → Chitré, publicado y con gente
@@ -57,6 +70,8 @@ export const viajes: ViajeFila[] = [
     destination_place_id: null,
     origin_label: 'Albrook · Terminal',
     destination_label: 'Chitré · Parque Unión',
+    origin_city_id: CIUDAD_PANAMA_ID,
+    destination_city_id: ciudadDe('Chitré · Parque Unión', CIUDAD_PANAMA_ID),
     origin_lat: 8.9737,
     origin_lng: -79.5527,
     destination_lat: 7.9614,
@@ -173,6 +188,7 @@ otrasSalidas.forEach((s, i) => {
     price_cents: s.precio,
     accepts_luggage: s.maletas,
     origin_label: s.origen,
+    origin_city_id: ciudadDe(s.origen, CIUDAD_PANAMA_ID),
     gender_preference: i === 2 ? 'women_only' : 'any',
     accepts_cash: i !== 1,
   });
@@ -273,6 +289,8 @@ const playa = (i: number, hora: number, precio: number, origen: string, destino:
     snap_max_price_cents: 600,
     origin_label: origen,
     destination_label: destino,
+    origin_city_id: ciudadDe(origen, CIUDAD_PANAMA_ID),
+    destination_city_id: ciudadDe(destino, CORONADO.destination_city_id),
     accepts_luggage: true,
   });
   paradas.push(

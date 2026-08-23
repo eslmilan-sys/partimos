@@ -18,6 +18,7 @@ import type { Incident, IdentityVerification } from '@/tipos';
 
 import { nuevoId } from './_id';
 import { fuente } from './_fuente';
+import { rutaCorta } from './viajes';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -121,7 +122,7 @@ export async function datosParaLlamar(reservaId: string): Promise<DatosParaLlama
 
   return demora({
     placa: carro ? (fuente.placasCompletas[carro.id] ?? '') : '',
-    ruta: `${(viaje?.origin_label ?? '').split(' · ')[0]} → ${(viaje?.destination_label ?? '').split(' · ')[0]}`,
+    ruta: viaje ? rutaCorta(viaje) : '',
     cuando: viaje?.departure_at ?? '',
     conductor: conductor ? `${conductor.first_name} ${conductor.last_initial ?? ''}`.trim() : '',
     carro: carro ? `${carro.make} ${carro.model} ${carro.color ?? ''}`.trim() : '',

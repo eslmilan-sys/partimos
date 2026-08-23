@@ -1,9 +1,3 @@
-// GENERADO — no editar a mano.
-// Origen: proyecto Supabase Partimos (zcwueglgirqxwazhfidi), esquema public.
-// Regenerar con:  supabase gen types typescript --project-id zcwueglgirqxwazhfidi
-// Esta es la forma real de las tablas. Los datos simulados de servicios/_fuente/simulado
-// se declaran contra estos tipos, así que si una columna cambia, el simulado deja de compilar.
-
 export type Json =
   | string
   | number
@@ -22,28 +16,28 @@ export type Database = {
     Tables: {
       bookings: {
         Row: {
-          boarding_code: string | null
-          arrival_code: string | null
-          boarded_at: string | null
-          released_at: string | null
-          expires_at: string | null
-          detour_minutes: number | null
-          mochilas: number
-          maletas: number
           alight_sequence: number | null
+          arrival_code: string | null
           board_sequence: number | null
+          boarded_at: string | null
+          boarding_code: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           completed_at: string | null
           confirmed_at: string | null
           created_at: string
+          detour_minutes: number | null
+          expires_at: string | null
           id: string
+          maletas: number
+          mochilas: number
           offer_accepted: boolean | null
           offer_price_cents: number | null
           passenger_id: string
           payment_channel: Database["public"]["Enums"]["payment_channel"]
           proposal_accepted: boolean | null
           proposed_point: string | null
+          released_at: string | null
           seats: number
           service_fee_cents: number
           status: Database["public"]["Enums"]["booking_status"]
@@ -54,28 +48,28 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          boarding_code?: string | null
-          arrival_code?: string | null
-          boarded_at?: string | null
-          released_at?: string | null
-          expires_at?: string | null
-          detour_minutes?: number | null
-          mochilas?: number
-          maletas?: number
           alight_sequence?: number | null
+          arrival_code?: string | null
           board_sequence?: number | null
+          boarded_at?: string | null
+          boarding_code?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
           confirmed_at?: string | null
           created_at?: string
+          detour_minutes?: number | null
+          expires_at?: string | null
           id?: string
+          maletas?: number
+          mochilas?: number
           offer_accepted?: boolean | null
           offer_price_cents?: number | null
           passenger_id: string
           payment_channel?: Database["public"]["Enums"]["payment_channel"]
           proposal_accepted?: boolean | null
           proposed_point?: string | null
+          released_at?: string | null
           seats: number
           service_fee_cents?: number
           status?: Database["public"]["Enums"]["booking_status"]
@@ -86,28 +80,28 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          boarding_code?: string | null
-          arrival_code?: string | null
-          boarded_at?: string | null
-          released_at?: string | null
-          expires_at?: string | null
-          detour_minutes?: number | null
-          mochilas?: number
-          maletas?: number
           alight_sequence?: number | null
+          arrival_code?: string | null
           board_sequence?: number | null
+          boarded_at?: string | null
+          boarding_code?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
           confirmed_at?: string | null
           created_at?: string
+          detour_minutes?: number | null
+          expires_at?: string | null
           id?: string
+          maletas?: number
+          mochilas?: number
           offer_accepted?: boolean | null
           offer_price_cents?: number | null
           passenger_id?: string
           payment_channel?: Database["public"]["Enums"]["payment_channel"]
           proposal_accepted?: boolean | null
           proposed_point?: string | null
+          released_at?: string | null
           seats?: number
           service_fee_cents?: number
           status?: Database["public"]["Enums"]["booking_status"]
@@ -118,6 +112,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "bookings_passenger_id_fkey"
+            columns: ["passenger_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bookings_passenger_id_fkey"
             columns: ["passenger_id"]
@@ -275,6 +276,13 @@ export type Database = {
             foreignKeyName: "cancellations_actor_id_fkey"
             columns: ["actor_id"]
             isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cancellations_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -353,7 +361,6 @@ export type Database = {
       }
       corridors: {
         Row: {
-          max_price_cents: number | null
           bus_price_cents: number | null
           created_at: string
           destination_city_id: string
@@ -361,13 +368,13 @@ export type Database = {
           id: string
           is_active: boolean
           is_priority: boolean
+          max_price_cents: number | null
           origin_city_id: string
           slug: string
           toll_cents: number
           typical_duration_min: number | null
         }
         Insert: {
-          max_price_cents?: number | null
           bus_price_cents?: number | null
           created_at?: string
           destination_city_id: string
@@ -375,13 +382,13 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_priority?: boolean
+          max_price_cents?: number | null
           origin_city_id: string
           slug: string
           toll_cents?: number
           typical_duration_min?: number | null
         }
         Update: {
-          max_price_cents?: number | null
           bus_price_cents?: number | null
           created_at?: string
           destination_city_id?: string
@@ -389,6 +396,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_priority?: boolean
+          max_price_cents?: number | null
           origin_city_id?: string
           slug?: string
           toll_cents?: number
@@ -455,6 +463,13 @@ export type Database = {
             columns: ["consumed_booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credits_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
             referencedColumns: ["id"]
           },
           {
@@ -552,6 +567,13 @@ export type Database = {
             foreignKeyName: "demand_signals_searcher_id_fkey"
             columns: ["searcher_id"]
             isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demand_signals_searcher_id_fkey"
+            columns: ["searcher_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -593,6 +615,13 @@ export type Database = {
           trips_published_count?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "driver_activation_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "driver_activation_profile_id_fkey"
             columns: ["profile_id"]
@@ -668,6 +697,61 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          clase: string | null
+          contexto: Json
+          created_at: string
+          id: string
+          pantalla: string
+          profile_id: string | null
+          texto: string
+          visto: boolean
+        }
+        Insert: {
+          clase?: string | null
+          contexto?: Json
+          created_at?: string
+          id?: string
+          pantalla: string
+          profile_id?: string | null
+          texto: string
+          visto?: boolean
+        }
+        Update: {
+          clase?: string | null
+          contexto?: Json
+          created_at?: string
+          id?: string
+          pantalla?: string
+          profile_id?: string | null
+          texto?: string
+          visto?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       identity_verifications: {
         Row: {
           created_at: string
@@ -712,6 +796,13 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "identity_verifications_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "identity_verifications_profile_id_fkey"
             columns: ["profile_id"]
@@ -777,6 +868,13 @@ export type Database = {
             foreignKeyName: "incidents_reporter_id_fkey"
             columns: ["reporter_id"]
             isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -785,6 +883,13 @@ export type Database = {
             columns: ["reporter_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
             referencedColumns: ["id"]
           },
           {
@@ -872,6 +977,13 @@ export type Database = {
             foreignKeyName: "ledger_entries_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -915,6 +1027,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
             referencedColumns: ["id"]
           },
           {
@@ -979,6 +1098,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "no_show_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
             referencedColumns: ["id"]
           },
           {
@@ -1083,6 +1209,13 @@ export type Database = {
             foreignKeyName: "payout_batches_executed_by_fkey"
             columns: ["executed_by"]
             isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payout_batches_executed_by_fkey"
+            columns: ["executed_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1135,6 +1268,13 @@ export type Database = {
             columns: ["batch_id"]
             isOneToOne: false
             referencedRelation: "payout_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
             referencedColumns: ["id"]
           },
           {
@@ -1475,6 +1615,13 @@ export type Database = {
             foreignKeyName: "reviews_author_id_fkey"
             columns: ["author_id"]
             isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1490,6 +1637,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
             referencedColumns: ["id"]
           },
           {
@@ -1545,6 +1699,13 @@ export type Database = {
             columns: ["from_city_id"]
             isOneToOne: false
             referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routines_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
             referencedColumns: ["id"]
           },
           {
@@ -1651,17 +1812,18 @@ export type Database = {
       }
       trips: {
         Row: {
+          accepts_cash: boolean
           accepts_luggage: boolean
+          accepts_yappy_direct: boolean
           allows_pets: boolean
           allows_smoking: boolean
-          accepts_cash: boolean
-          accepts_yappy_direct: boolean
           arrival_estimate_at: string | null
           cancelled_at: string | null
           completed_at: string | null
           corridor_id: string | null
           created_at: string
           departure_at: string
+          destination_city_id: string | null
           destination_label: string | null
           destination_lat: number | null
           destination_lng: number | null
@@ -1670,6 +1832,7 @@ export type Database = {
           gender_preference: Database["public"]["Enums"]["gender_pref"]
           id: string
           notes: string | null
+          origin_city_id: string | null
           origin_label: string | null
           origin_lat: number | null
           origin_lng: number | null
@@ -1691,17 +1854,18 @@ export type Database = {
           vehicle_id: string
         }
         Insert: {
+          accepts_cash?: boolean
           accepts_luggage?: boolean
+          accepts_yappy_direct?: boolean
           allows_pets?: boolean
           allows_smoking?: boolean
-          accepts_cash?: boolean
-          accepts_yappy_direct?: boolean
           arrival_estimate_at?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
           corridor_id?: string | null
           created_at?: string
           departure_at: string
+          destination_city_id?: string | null
           destination_label?: string | null
           destination_lat?: number | null
           destination_lng?: number | null
@@ -1710,6 +1874,7 @@ export type Database = {
           gender_preference?: Database["public"]["Enums"]["gender_pref"]
           id?: string
           notes?: string | null
+          origin_city_id?: string | null
           origin_label?: string | null
           origin_lat?: number | null
           origin_lng?: number | null
@@ -1731,17 +1896,18 @@ export type Database = {
           vehicle_id: string
         }
         Update: {
+          accepts_cash?: boolean
           accepts_luggage?: boolean
+          accepts_yappy_direct?: boolean
           allows_pets?: boolean
           allows_smoking?: boolean
-          accepts_cash?: boolean
-          accepts_yappy_direct?: boolean
           arrival_estimate_at?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
           corridor_id?: string | null
           created_at?: string
           departure_at?: string
+          destination_city_id?: string | null
           destination_label?: string | null
           destination_lat?: number | null
           destination_lng?: number | null
@@ -1750,6 +1916,7 @@ export type Database = {
           gender_preference?: Database["public"]["Enums"]["gender_pref"]
           id?: string
           notes?: string | null
+          origin_city_id?: string | null
           origin_label?: string | null
           origin_lat?: number | null
           origin_lng?: number | null
@@ -1779,10 +1946,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "trips_destination_city_id_fkey"
+            columns: ["destination_city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "trips_destination_place_id_fkey"
             columns: ["destination_place_id"]
             isOneToOne: false
             referencedRelation: "places"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
             referencedColumns: ["id"]
           },
           {
@@ -1797,6 +1978,13 @@ export type Database = {
             columns: ["driver_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_origin_city_id_fkey"
+            columns: ["origin_city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
             referencedColumns: ["id"]
           },
           {
@@ -1915,6 +2103,13 @@ export type Database = {
             foreignKeyName: "vehicles_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1979,6 +2174,9 @@ export type Database = {
           corridor_id: string | null
           corridor_slug: string | null
           departure_at: string | null
+          destination_city: string | null
+          destination_city_slug: string | null
+          destination_label: string | null
           distance_km: number | null
           driver_id: string | null
           first_name: string | null
@@ -1988,6 +2186,9 @@ export type Database = {
           last_initial: string | null
           make: string | null
           model: string | null
+          origin_city: string | null
+          origin_city_slug: string | null
+          origin_label: string | null
           photo_path: string | null
           photo_url: string | null
           price_cents: number | null
@@ -2002,6 +2203,13 @@ export type Database = {
             columns: ["corridor_id"]
             isOneToOne: false
             referencedRelation: "corridors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
             referencedColumns: ["id"]
           },
           {
@@ -2055,6 +2263,13 @@ export type Database = {
             foreignKeyName: "reviews_subject_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_subject_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2077,6 +2292,13 @@ export type Database = {
           trips_completed: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "trips_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles_publicos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trips_driver_id_fkey"
             columns: ["driver_id"]
@@ -2211,6 +2433,50 @@ export type Database = {
             columns: ["corridor_id"]
             isOneToOne: false
             referencedRelation: "corridors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      perfiles_publicos: {
+        Row: {
+          bio: string | null
+          created_at: string | null
+          first_name: string | null
+          gender: string | null
+          id: string | null
+          is_id_verified: boolean | null
+          is_phone_verified: boolean | null
+          last_initial: string | null
+          photo_url: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          gender?: string | null
+          id?: string | null
+          is_id_verified?: boolean | null
+          is_phone_verified?: boolean | null
+          last_initial?: string | null
+          photo_url?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          gender?: string | null
+          id?: string | null
+          is_id_verified?: boolean | null
+          is_phone_verified?: boolean | null
+          last_initial?: string | null
+          photo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "metricas_usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -2485,6 +2751,7 @@ export type Database = {
         | { Args: { table_name: string }; Returns: string }
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      es_parte_de_la_reserva: { Args: { la_reserva: string }; Returns: boolean }
       geometry: { Args: { "": string }; Returns: unknown }
       geometry_above: {
         Args: { geom1: unknown; geom2: unknown }

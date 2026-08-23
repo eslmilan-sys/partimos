@@ -25,10 +25,11 @@ import { DIJO, compartir } from '@/ui/salidas';
 
 import { useVolver } from '@/ui/salidas';
 
+import { ciudadYPunto, soloCiudad } from '@/dominio/comoSeLlama';
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { useSesion } from '@/servicios/sesion';
-import { obtenerViaje, paradasDelViaje, slugDestinoDe } from '@/servicios/viajes';
+import { ciudadesDelViaje, obtenerViaje, paradasDelViaje, slugDestinoDe } from '@/servicios/viajes';
 import type { TripStop, ViajeFila } from '@/tipos';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando, Hueso } from '@/ui/Cargando';
@@ -112,6 +113,7 @@ export default function DetalleDelViaje() {
    * ofrece administrarlo, no reservarlo.
    */
   const esMio = !!yo && yo === viaje.driver_id;
+  const ciudades = ciudadesDelViaje(viaje);
 
   return (
     <View style={estilos.pantalla}>
@@ -139,7 +141,7 @@ export default function DetalleDelViaje() {
               accessibilityLabel="Compartir el viaje"
               onPress={() =>
                 compartir(
-                  `${viaje.origin_label ?? ''} → ${viaje.destination_label ?? ''} · ${diaLargo(viaje.departure_at)} ${hora(viaje.departure_at)} · ${formatearDineroRedondo(viaje.price_cents)} por puesto`,
+                  `${ciudadYPunto(ciudades.origen, viaje.origin_label)} → ${ciudadYPunto(ciudades.destino, viaje.destination_label)} · ${diaLargo(viaje.departure_at)} ${hora(viaje.departure_at)} · ${formatearDineroRedondo(viaje.price_cents)} por puesto`,
                 ).then((c) => decir(DIJO[c]))
               }
               style={estilos.circulo}
@@ -163,7 +165,7 @@ export default function DetalleDelViaje() {
               </View>
             </View>
             <Text style={estilos.subtitulo} numberOfLines={1}>
-              {`${(viaje.origin_label ?? '').split(' · ')[0]} → ${(viaje.destination_label ?? '').split(' · ')[0]}`}
+              {`${soloCiudad(ciudades.origen, viaje.origin_label)} → ${soloCiudad(ciudades.destino, viaje.destination_label)}`}
             </Text>
           </View>
         </Bandera>

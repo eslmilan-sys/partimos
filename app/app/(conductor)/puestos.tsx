@@ -144,7 +144,7 @@ export default function Puestos() {
             <View style={estilos.filaRuta}>
               <View style={estilos.puntoAzul} />
               <Text style={estilos.ruta}>
-                {`${datos.origen.split(' · ')[0]} → ${datos.destino.split(' · ')[0]}`}
+                {`${datos.origen} → ${datos.destino}`}
               </Text>
             </View>
 

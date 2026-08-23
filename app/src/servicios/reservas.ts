@@ -11,6 +11,7 @@ import type { ReservaFila } from '@/tipos';
 
 import { nuevoId } from './_id';
 import { fuente } from './_fuente';
+import { ciudadDestino } from './viajes';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -48,7 +49,7 @@ export async function prepararReserva(viajeId: string): Promise<ReservaPreparada
   return demora({
     viajeId,
     conductor: conductor?.first_name ?? 'El conductor',
-    destino: (viaje.destination_label ?? '').split(' · ')[0],
+    destino: ciudadDestino(viaje),
     salida: viaje.departure_at,
     origen: {
       etiqueta: origen?.custom_label ?? viaje.origin_label ?? '',

@@ -16,6 +16,7 @@ import { resumenDeEquipaje } from '@/dominio/equipaje';
 
 import { fuente } from './_fuente';
 import { formatearDineroRedondo } from '@/ui/dinero';
+import { ciudadDestino, rutaCorta } from './viajes';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -44,7 +45,7 @@ export async function viajeDeAyuda(reservaId: string): Promise<ViajeDeAyuda | nu
   return demora({
     reservaId,
     viajeId: reserva.trip_id,
-    destino: (viaje?.destination_label ?? '').split(' · ')[0],
+    destino: viaje ? ciudadDestino(viaje) : '',
     cuando: viaje?.departure_at ?? '',
     linea: `${formatearDineroRedondo(aporte)} · ${NOMBRE_DEL_CANAL[reserva.payment_channel]} · ${nombre}`,
     conductor: nombre,
@@ -136,7 +137,7 @@ export async function comprobante(reservaId: string): Promise<Comprobante> {
   return demora({
     referencia: reserva.boarding_code ?? reserva.id.slice(0, 8),
     cuando: reserva.confirmed_at ?? reserva.created_at,
-    destino: (viaje.destination_label ?? '').split(' · ')[0],
+    destino: ciudadDestino(viaje),
     totalCentavos: aporte + tarifa,
     aportadoCon: NOMBRE_DEL_CANAL[reserva.payment_channel],
     desglose: [
@@ -147,7 +148,7 @@ export async function comprobante(reservaId: string): Promise<Comprobante> {
     filas: [
       {
         etiqueta: 'Viaje',
-        valor: `${(viaje.origin_label ?? '').split(' · ')[0]} → ${(viaje.destination_label ?? '').split(' · ')[0]}`,
+        valor: rutaCorta(viaje),
       },
       { etiqueta: 'Salida y llegada', valor: `${hhmm(viaje.departure_at)} · ${hhmm(viaje.arrival_estimate_at)}` },
       {

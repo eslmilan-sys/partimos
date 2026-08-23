@@ -11,6 +11,7 @@
  * una preferencia.
  */
 
+import { soloCiudad, soloPunto } from '@/dominio/comoSeLlama';
 import type { Lugar } from '@/dominio/lugar';
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -136,13 +137,13 @@ export default function YaMapa() {
             <View style={estilos.filaRuta}>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.ruta}>
-                  {`${(primero.origin_label ?? '').split(' · ')[0]} → `}
+                  {`${soloCiudad(primero.origin_city, primero.origin_label)} → `}
                   <Text style={estilos.rutaFuerte}>
-                    {(primero.destination_label ?? '').split(' · ')[0]}
+                    {soloCiudad(primero.destination_city, primero.destination_label)}
                   </Text>
                 </Text>
                 <Text style={estilos.aPie}>
-                  {`3 min a pie · te espera en ${(primero.origin_label ?? '').split(' · ')[1] ?? 'el punto'}`}
+                  {`3 min a pie · te espera en ${soloPunto(primero.origin_city, primero.origin_label) || 'el punto'}`}
                 </Text>
               </View>
               <Text style={estilos.precio}>
@@ -186,7 +187,7 @@ export default function YaMapa() {
                 >
                   <Text style={estilos.otroCuando}>{faltan(v.departure_at!)}</Text>
                   <Text style={estilos.otroLugar}>
-                    {`${(v.destination_label ?? '').split(' · ')[0]} · ${formatearDineroRedondo(Number(v.price_cents ?? 0))}`}
+                    {`${soloCiudad(v.destination_city, v.destination_label)} · ${formatearDineroRedondo(Number(v.price_cents ?? 0))}`}
                   </Text>
                 </Pressable>
               ))}

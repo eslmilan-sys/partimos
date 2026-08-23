@@ -464,7 +464,7 @@ export default function Inicio() {
                     <Text style={estilos.rutaSale} numberOfLines={1}>
                       {v.destino}
                       {v.recogida ? (
-                        <Text style={estilos.recogidaSale}>{`  ·  ${v.recogida}`}</Text>
+                        <Text style={estilos.recogidaSale}>{`  ·  sale de ${v.recogida}`}</Text>
                       ) : null}
                     </Text>
                     <Text

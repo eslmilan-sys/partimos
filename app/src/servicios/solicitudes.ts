@@ -11,6 +11,7 @@ import type { EstadoDeSolicitud, Payment, ReservaFila } from '@/tipos';
 
 import { nuevoId } from './_id';
 import { fuente } from './_fuente';
+import { ciudadDestino, ciudadOrigen } from './viajes';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -73,8 +74,8 @@ export async function listarSolicitudes(
   return demora({
     viaje: {
       salida: viaje.departure_at,
-      origen: (viaje.origin_label ?? '').split(' · ')[0],
-      destino: (viaje.destination_label ?? '').split(' · ')[0],
+      origen: ciudadOrigen(viaje),
+      destino: ciudadDestino(viaje),
     },
     solicitudes,
     confirmados,

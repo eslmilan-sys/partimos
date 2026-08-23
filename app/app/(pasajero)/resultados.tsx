@@ -28,6 +28,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
 
+import { soloCiudad, soloPunto } from '@/dominio/comoSeLlama';
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import {
@@ -124,8 +125,15 @@ export default function Resultados() {
           duracion: duracion(v.departure_at!, v.arrival_estimate_at),
           aporteCentavos: Number(v.price_cents ?? 0),
           puestosLibres: v.seats_available ?? 0,
-          origen: v.origin_label ?? '',
-          destino: (v.destination_label ?? '').replace(' Unión', ''),
+          /* LA PAGE D'OFFRES dit ville ET point exact : c'est là qu'on décide,
+             et c'est là qu'il faut savoir où se tenir. Sur deux lignes, parce
+             que sur une seule le point se faisait tronquer. Le `.replace` qui
+             rabotait « Unión » est parti avec : on n'ampute pas un nom de lieu
+             pour gagner de la place. */
+          origen: soloCiudad(v.origin_city, v.origin_label),
+          origenPunto: soloPunto(v.origin_city, v.origin_label),
+          destino: soloCiudad(v.destination_city, v.destination_label),
+          destinoPunto: soloPunto(v.destination_city, v.destination_label),
           llegada: v.arrival_estimate_at ? hora(v.arrival_estimate_at) : '',
           equipaje: etiquetaDeMaletero(v.accepts_luggage),
           aceptaMascotas: v.allows_pets,

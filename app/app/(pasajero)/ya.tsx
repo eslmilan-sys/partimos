@@ -11,6 +11,7 @@
  * minutos, y decirlo es lo que hace que se pueda confiar en él.
  */
 
+import { soloCiudad } from '@/dominio/comoSeLlama';
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -79,10 +80,10 @@ export default function Ya() {
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={estilos.saleEn}>{`Sale en ${faltan(primero.departure_at!)}`}</Text>
                   <Text style={estilos.ruta}>
-                    {`${(primero.origin_label ?? '').split(' · ')[0]} →`}
+                    {`${soloCiudad(primero.origin_city, primero.origin_label)} →`}
                     {'\n'}
                     <Text style={estilos.rutaFuerte}>
-                      {(primero.destination_label ?? '').split(' · ')[0]}
+                      {soloCiudad(primero.destination_city, primero.destination_label)}
                     </Text>
                   </Text>
                 </View>
@@ -167,9 +168,9 @@ export default function Ya() {
             >
               <Text style={estilos.filaCuando}>{faltan(v.departure_at!)}</Text>
               <Text style={estilos.filaRuta} numberOfLines={1}>
-                {`${(v.origin_label ?? '').split(' · ')[0]} → `}
+                {`${soloCiudad(v.origin_city, v.origin_label)} → `}
                 <Text style={estilos.filaRutaFuerte}>
-                  {(v.destination_label ?? '').split(' · ')[0]}
+                  {soloCiudad(v.destination_city, v.destination_label)}
                 </Text>
               </Text>
               <Text style={estilos.filaPrecio}>

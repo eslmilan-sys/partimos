@@ -18,6 +18,7 @@ import type { Review } from '@/tipos';
 
 import { nuevoId } from './_id';
 import { fuente } from './_fuente';
+import { ciudadDestino, ciudadOrigen } from './viajes';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -73,8 +74,8 @@ export async function prepararCalificacion(
   const otroId = autorId === reserva.passenger_id ? viaje.driver_id : reserva.passenger_id;
   const otro = fuente.perfiles.find((p) => p.id === otroId);
 
-  const origen = (viaje.origin_label ?? '').split(' · ')[0];
-  const destino = (viaje.destination_label ?? '').split(' · ')[0];
+  const origen = ciudadOrigen(viaje);
+  const destino = ciudadDestino(viaje);
 
   return demora({
     reservaId,

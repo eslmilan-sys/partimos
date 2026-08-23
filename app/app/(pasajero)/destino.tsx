@@ -10,6 +10,7 @@
  * como una banda que sale de la foto.
  */
 
+import { ciudadYPunto, soloCiudad } from '@/dominio/comoSeLlama';
 import { useEffect, useState } from 'react';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -126,9 +127,9 @@ export default function Destino() {
                 {`${diaAbrev(v.departure_at!)} ${hora(v.departure_at!)}`}
               </Text>
               <Text style={estilos.compactaRuta} numberOfLines={1}>
-                {`${(v.origin_label ?? '').split(' · ')[0]} → `}
+                {`${soloCiudad(v.origin_city, v.origin_label)} → `}
                 <Text style={estilos.compactaRutaFuerte}>
-                  {(v.destination_label ?? '').split(' · ')[0]}
+                  {soloCiudad(v.destination_city, v.destination_label)}
                 </Text>
               </Text>
               <Text style={estilos.compactaPrecio}>
@@ -173,7 +174,7 @@ function Detallada({ viaje, alPulsar }: { viaje: ViajeEnResultados; alPulsar: ()
       <View style={estilos.puntos}>
         <View style={estilos.filaPunto}>
           <View style={estilos.puntoLleno} />
-          <Text style={estilos.punto}>{(viaje.origin_label ?? '').split(' · ')[0]}</Text>
+          <Text style={estilos.punto}>{ciudadYPunto(viaje.origin_city, viaje.origin_label)}</Text>
         </View>
         <View style={estilos.filaPunto}>
           <View style={estilos.puntoVacio} />

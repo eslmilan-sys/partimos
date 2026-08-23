@@ -11,11 +11,13 @@
  * ya pagó no es editar: es cancelarle el viaje a otro sin decírselo.
  */
 
+import { soloPunto } from '@/dominio/comoSeLlama';
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import type { ViajeFila } from '@/tipos';
 
 import { fuente } from './_fuente';
 import { puestosLibresDe } from './solicitudes';
+import { ciudadDestino, ciudadOrigen, ciudadesDelViaje, rutaCorta } from './viajes';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -161,8 +163,12 @@ function comoPuesto(r: (typeof fuente.reservas)[number]): PuestoMio | null {
     year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'America/Panama',
   });
 
-  const [origen, origenSitio = ''] = (viaje.origin_label ?? '').split(' · ');
-  const [destino, destinoSitio = ''] = (viaje.destination_label ?? '').split(' · ');
+  /* La carte de « Mis viajes » résume : en haut la VILLE, en dessous le point
+     exact. Avant, la ligne du haut disait « Albrook » — un quartier. */
+  const origen = ciudadOrigen(viaje);
+  const origenSitio = soloPunto(ciudadesDelViaje(viaje).origen, viaje.origin_label);
+  const destino = ciudadDestino(viaje);
+  const destinoSitio = soloPunto(ciudadesDelViaje(viaje).destino, viaje.destination_label);
   const rep = conductor ? fuente.reputacion[conductor.id] : undefined;
   const suCarro = fuente.vehiculos.find((v) => v.owner_id === viaje.driver_id && v.is_active);
 
@@ -235,7 +241,7 @@ export async function prepararEdicion(viajeId: string): Promise<Edicion> {
   return demora({
     viajeId,
     cuando: viaje.departure_at,
-    ruta: `${(viaje.origin_label ?? '').split(' · ')[0]} → ${(viaje.destination_label ?? '').split(' · ')[0]}`,
+    ruta: rutaCorta(viaje),
     aviso: hayPagados
       ? `${quien?.first_name ?? 'Alguien'} ya pagó su puesto. La hora y la ruta quedan cerradas.`
       : null,
