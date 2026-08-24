@@ -1,0 +1,48 @@
+# =====================================================================
+#  Les polygones des corregimientos — sans secret.
+#
+#  Troisième passe Overpass : les frontières de niveau 8, une province à
+#  la fois, publiées sur la branche `datos-osm`. Sert à calculer dans
+#  quel corregimiento tombe chaque lieu (places.admin_area_id).
+#
+#  Lancer après `Descargar lugares (OSM)`.
+# =====================================================================
+
+name: Descargar geometria (OSM)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  geometria:
+    runs-on: ubuntu-latest
+    # 14 requêtes lourdes (out geom) avec des pauses de 5 s.
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Recuperar lo ya descargado
+        run: |
+          git fetch --depth 1 origin datos-osm
+          git checkout FETCH_HEAD -- datos-osm
+
+      - name: Preguntar a Overpass
+        run: node scripts/descargar-geometria.mjs
+
+      # Même un résultat partiel se publie : relancer reprend au manquant.
+      - name: Publicar en la rama datos-osm
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan datos-osm-nueva
+          git add -f datos-osm
+          git commit -m "Datos OSM + geometrías del $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -f origin datos-osm-nueva:datos-osm
