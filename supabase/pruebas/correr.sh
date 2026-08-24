@@ -23,7 +23,8 @@ correr () { psql -d "$PGDATABASE" -v ON_ERROR_STOP=1 -q -f "$1" >/dev/null; }
 
 correr "$aqui/00-banco.sql"
 for m in 0033_donde_queda_de_verdad 0034_arreglo_search_places_minusculas \
-         0035_los_lugares_de_la_gente 0036_sin_punto_no_hay_lugar; do
+         0035_los_lugares_de_la_gente 0036_sin_punto_no_hay_lugar \
+         0037_ph_es_opcional; do
   correr "$migraciones/migrations/$m.sql"
 done
 correr "$aqui/01-datos.sql"

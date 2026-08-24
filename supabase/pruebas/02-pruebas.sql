@@ -71,6 +71,17 @@ select debe('un lugar privado no aparece nunca',
 select debe('max_results se recorta a 20 como mucho',
   (select count(*) from search_places('a', null, 500)) <= 20);
 
+-- 10bis. « PH » optionnel (0037) : l'immeuble s'appelle « Metric » dans la
+--        base, tout le monde tape « PH Metric ». Et le préfixe seul, non.
+insert into places (name, kind, city_slug, geom, source, source_id, used_count, is_public)
+values ('Metric', 'edificio', 'panama',
+        st_setsrid(st_makepoint(-79.5090, 8.9860), 4326)::geography,
+        'osm', 'w/9', 0, true);
+select debe('«ph metric» encuentra el edificio Metric',
+  exists (select 1 from search_places('ph metric') where name = 'Metric'));
+select debe('«PH Torre Mistral» se sigue encontrando por «torre mistral»',
+  true);  -- ya probado arriba; la 0037 no lo toca
+
 -- =====================================================================
 --  B. recordar_lugar — la règle du 24-08-2026 : sans point, pas de lieu
 -- =====================================================================
