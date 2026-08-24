@@ -39,7 +39,7 @@ import {
   ordenar,
 } from '@/dominio/lugar';
 
-import { MODO, fuente } from './_fuente';
+import { fuente } from './_fuente';
 import { supabase } from './_fuente/supabase/cliente';
 import { MINIMO_PARA_BUSCAR, concretar, geocodificar, sugerir } from './lugares';
 
@@ -394,6 +394,11 @@ export async function lugaresCerca(centro: Punto, corte?: AbortSignal): Promise<
  * las tres llaves ausentes la pantalla anunciaba «solo buscamos entre las
  * ciudades que servimos» aunque el catálogo tuviera diez mil lugares dentro.
  *
- * Contra datos simulados no hay tabla que preguntar, y ahí el aviso es cierto.
+ * Et ce n'est pas lié au mode : `deLaNuestra` interroge la vraie base MÊME en
+ * données simulées, parce que chercher un lieu ne passe pas par l'interrupteur
+ * de source. Le lien de la démo cherche donc dans le même catalogue que l'app.
  */
-export const HAY_BUSQUEDA = Boolean(TOMTOM || LOCATIONIQ || MAPBOX) || MODO === 'supabase';
+const HAY_BASE = Boolean(
+  process.env.EXPO_PUBLIC_SUPABASE_URL && process.env.EXPO_PUBLIC_SUPABASE_LLAVE,
+);
+export const HAY_BUSQUEDA = HAY_BASE || Boolean(TOMTOM || LOCATIONIQ || MAPBOX);
