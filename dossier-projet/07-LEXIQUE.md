@@ -14,7 +14,9 @@ pour Claude autant que pour un nouveau venu.
 | **galón** | Le Panama vend le carburant **au gallon**, pas au litre, et c'est au gallon que le prix officiel est publié. 1 gallon US = 3,785 L. |
 | **recuperas** | Ce que fait le conducteur : il récupère une part de ses frais. Le verbe autorisé. |
 | **compartir gastos** | Le nom de ce qu'on fait. La formule juridiquement exacte. |
-| **corredor** (corridor) | Une paire de villes = une page = un jeu de paramètres de prix. Six ouverts. |
+| **corredor** (corridor) | ⚠️ **Deux sens.** Chez Partimos : une paire de villes = une page = un jeu de paramètres de prix. Six ouverts. **Au Panama** : une autoroute urbaine à péage de la capitale — Corredor Norte, Este, Sur, opérées par ENA. Ce ne sont pas les mêmes routes ; les confondre mettrait les péages de la ville dans un trajet vers David. |
+| **caseta** | Une gare de péage. Le montant dépend de l'entrée et de la sortie empruntées, pas seulement de la route. |
+| **ENA** | Empresa Nacional de Autopistas. L'opérateur des corredores urbains, et la source du barème des péages. |
 | **ruta libre** | Un trajet dont l'origine et la destination sont écrites au clavier, hors corridor. |
 | **tarifa de servicio** | Le supplément prévu sur une réservation payée en ligne. Rémunère le service numérique, jamais le transport. |
 | **Yappy** | Le paiement mobile panaméen, adossé aux banques locales. Omniprésent au Panama. |
@@ -73,6 +75,7 @@ marketing, courriels, publicités. Voir la règle nº 5 de `02-PRODUIT.md`.
 | `app/src/ui/tokens.ts` | Le portage en code de v6, chaque valeur commentée avec sa raison. |
 | `app/src/dominio/aporte.ts` | Le calcul de l'aporte et du plafond. |
 | `supabase/CONSUMO.md` | Le carburant, les cinq catégories de véhicule, la liste des modèles. Ferme la question du taux au kilomètre. |
+| `supabase/PEAJES.md` | Le barème des péages et la règle du péage de référence par corridor. |
 | `supabase/migrations/` | L'histoire complète de la base, une décision par fichier. |
 | `supabase/LUGARES.md` | Comment marche la recherche d'adresses, et pourquoi pas Google. |
 | `supabase/PAGOS.md` | Le paiement en ligne — décidé, pas branché. |

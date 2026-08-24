@@ -22,11 +22,17 @@ SUV 9,5 · 4×4 12,0 · híbrido 4,5 L/100 km — et le prix du carburant devien
 une donnée datée. Détail complet, liste des modèles et ce qui reste à migrer :
 `supabase/CONSUMO.md`.
 
-**Ce qui reste ouvert derrière cette décision :** les **péages réels** des six
-corridors, qui entrent dans le même calcul. Sans eux, la migration attend.
-Et le prix du carburant retenu (1,27 $/L) vient d'un résumé Google — il faut
-le relever chez la Secretaría Nacional de Energía, séparément pour le 91, le
-95 et le diesel.
+**Ce qui reste ouvert derrière cette décision**, et qui retient la migration :
+
+- **Les péages des six corridors.** Le barème des autoroutes urbaines de la
+  capitale est relevé (`supabase/PEAJES.md`), mais il manque **l'Autopista
+  Arraiján – La Chorrera** : c'est la sortie ouest, celle que prend *tout*
+  trajet vers Chitré, Santiago, Penonomé, Coronado, Las Tablas et David. Sans
+  elle, aucun de nos corridors ne se chiffre.
+- **Le prix du carburant.** Le 1,27 $/L retenu vient d'un résumé Google, qui
+  donne le même prix à l'essence et au diesel — ce qui n'est jamais le cas. À
+  relever chez la Secretaría Nacional de Energía, séparément pour le 91, le 95
+  et le diesel.
 
 ---
 
@@ -77,16 +83,28 @@ carte, avec un raisonnement de coût : Yappy commerçant coûte ~1 %, un
 processeur carte ~3,5–4 %, la marge du service est la même (~1,5 point) et le
 canal recommandé est aussi le moins cher pour le passager.
 
-Mais la base de données impose **5 % / 8 %** (migration `0018_tarifa_5_8`).
+Mais **deux autres sources disent 5 % / 8 %** : la base de données (migration
+`0018_tarifa_5_8`, contrainte `fee_is_fixed_pct`) et la fiche de règles du
+projet (`.claude/skills/partimos-reglas`), qui est le fichier chargé avant
+toute modification touchant au prix.
+
+**Donc c'est deux contre un**, et le « un » est un document, pas un mécanisme.
+Le plus probable est que 2,5/5 soit la décision d'origine et 5/8 une révision
+que `PAGOS.md` n'a jamais enregistrée. À vérifier avant de trancher — mais
+c'est `PAGOS.md` qu'il faut aligner, pas la base.
 
 **Ce que ça bloque.** Rien pour l'instant — le paiement en ligne n'est pas
-branché. Mais ça bloquera le jour où il le sera, et la contrainte est déjà
-écrite dans la base.
+branché. Mais ça bloquera le jour où il le sera.
 
 **Ce qu'il faut décider.** Le taux réel, une fois les coûts des prestataires
 confirmés par un devis, pas par une estimation. Et faire valider la structure
 entière par un avocat panaméen **avant le premier encaissement** : c'est le
 point où « on ne touche jamais l'argent » devient une phrase à défendre.
+
+Trois invariants ne bougent pas quel que soit le taux retenu : le conducteur
+reçoit son aporte **complet** (la tarifa s'ajoute, elle ne se déduit jamais) ;
+l'**espèce reste toujours disponible et gratuite** ; **aucun pourcentage ne
+varie** avec la demande, la date ou la rareté.
 
 ---
 

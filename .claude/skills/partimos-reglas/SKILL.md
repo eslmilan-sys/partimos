@@ -18,7 +18,22 @@ Ne l'implémente pas en silence, et ne refuse pas non plus en bloc.
 ## Les six règles
 
 **R1 — Le conducteur ne gagne jamais d'argent.**
-L'aporte par siège est plafonné par `(km × taux véhicule × 1,10 + péages) ÷ (sièges + 1)`.
+L'aporte par siège est plafonné par
+`(km × litres-aux-100 ÷ 100 × prix du litre × 1,10 + péages) ÷ (occupants + 1)`.
+
+**Le coût part de la consommation réelle, jamais d'un « taux au kilomètre ».**
+Tranché le 24-08-2026 (`supabase/CONSUMO.md`). Un taux de 22–32 c/km est un
+coût de possession complet — dépréciation, assurance, entretien — que le
+conducteur paie voiture vide ou pleine ; le lui faire rembourser par ses
+passagers lui rapporterait 27 $ sur un Panamá → Chitré, et R1 tomberait sans
+que la formule ait l'air fausse. **R1 ne se juge pas sur la formule, elle se
+juge sur le billet dans la poche.** Le `× 1,10` couvre l'usure et n'est jamais
+remplacé par de la dépréciation. Cinq catégories portent la consommation :
+compacto 6,5 · sedán 7,5 · SUV 9,5 · 4×4 12,0 · híbrido 4,5 L/100 km.
+Le prix du carburant est une donnée datée relevée sur la publication
+officielle panaméenne, jamais une constante du code. Les péages sont un
+**péage de référence par corridor** (`supabase/PEAJES.md`), pas le trajet réel
+du conducteur — sinon deux voitures afficheraient deux prix pour la même route.
 Le `+1` est le conducteur : il paie sa part. Voiture pleine, il ne récupère
 jamais 100 % de son coût. Retirer le `+1` casse tout le modèle.
 Autorité finale : la contrainte `CHECK price_within_cap` en base, pas le code

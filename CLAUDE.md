@@ -20,6 +20,11 @@ d'identité), `LUGARES.md` (géocodage), `PAGOS.md`, `LINKEDIN.md`. Ils disent c
 qui est branché, avec quelles clés et ce qui reste à faire. Lis celui qui te
 concerne avant d'y toucher.
 
+Les deux entrées du calcul du prix ont aussi le leur : **`CONSUMO.md`** (le
+carburant, les cinq catégories de véhicule, les modèles) et **`PEAJES.md`**
+(le barème et la règle du péage de référence). À lire avant de toucher à
+`app/src/dominio/aporte.ts`.
+
 ## Les règles
 
 **1 · Jamais de compilé dans le dépôt.** Ni `out/`, ni `dist/`, ni un export
@@ -163,6 +168,12 @@ parler :
   la prochaine migration, remplacée par `consumo_litros_100km` sur cinq
   catégories. `supabase/CONSUMO.md` porte la décision et les valeurs. Ne pas
   s'en servir en attendant : elle donne un aporte trois fois trop haut.
+- **« Corredor » a deux sens et ils se confondent facilement.** Chez nous,
+  c'est une **paire de villes** (table `corridors`). Au Panama, c'est une
+  **autoroute urbaine à péage** de la capitale — Norte, Este, Sur, opérées par
+  ENA. Une session qui cherche « les péages des six corridors » tombera sur
+  ENA et mettra des péages de ville dans un trajet vers David. Le barème et la
+  règle du péage de référence sont dans `supabase/PEAJES.md`.
 - **Le prix du carburant dans `aporte.ts` vaut 0,80 $/L, et c'est faux.** Le
   vrai prix panaméen tourne autour de **1,27 $/L** — donc tous les montants
   affichés aujourd'hui sont environ un tiers trop bas. La correction attend la

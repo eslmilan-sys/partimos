@@ -199,4 +199,9 @@ migration.
 Rien de tout ça n'est encore écrit. Ce fichier est la décision ; la migration
 suit quand les péages réels des six corridors seront connus, parce qu'ils
 entrent dans le même calcul et qu'on ne fait pas deux migrations pour une
-formule.
+formule. **Les péages ont leur propre fichier : `PEAJES.md`.**
+
+Attention en le lisant : au Panama, « corredor » désigne une autoroute urbaine
+à péage de la capitale (Norte, Este, Sur) ; chez nous, un corridor est une
+**paire de villes**. Ce ne sont pas les mêmes routes, et confondre les deux
+mettrait les péages urbains de Panamá dans un trajet vers David.
