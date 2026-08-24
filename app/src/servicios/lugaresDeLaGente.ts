@@ -13,7 +13,13 @@
  * le rang, c'est l'usage réel, pas la curiosité. C'est la même règle que
  * `bump_place` depuis 0013.
  *
- * CE QUE ÇA NE FAIT PAS. Le lieu écrit reste invisible aux autres jusqu'à
+ * CE QU'ON NE GARDE PAS. Un nom sans coordonnées. Décidé le 24-08-2026 :
+ * « on n'a pas l'adresse et il n'y a pas de carte pour placer un point ».
+ * Un lieu inconnu qui arrive en texte nu n'entre donc pas au catalogue —
+ * il continue de vivre dans `trips.origin_label`, où il sert au trajet
+ * sans que tout le pays le cherche. Migration 0036.
+ *
+ * CE QUE ÇA NE FAIT PAS. Le lieu retenu reste invisible aux autres jusqu'à
  * ce qu'une DEUXIÈME personne s'en serve : la promotion vit dans la base
  * (migration 0035), pas ici, et le client ne peut pas la déclencher.
  * ───────────────────────────────────────────────────────────────────────
@@ -36,12 +42,17 @@ export async function recordarLugar(
   const limpio = (nombre ?? '').trim();
   if (!limpio || !citySlug) return;
 
+  /* La base refuse déjà de créer un lieu sans point — mais autant ne pas
+     l'appeler pour rien : sans coordonnées, l'appel ne peut que compter
+     l'usage d'un lieu qui existe déjà, et le nom seul ne le prouve pas. */
+  const situado = Number.isFinite(punto?.lat) && Number.isFinite(punto?.lng);
+
   try {
     await supabase.rpc('recordar_lugar' as never, {
       nombre: limpio,
       ciudad: citySlug,
-      lat: punto?.lat ?? null,
-      lng: punto?.lng ?? null,
+      lat: situado ? punto?.lat : null,
+      lng: situado ? punto?.lng : null,
     } as never);
   } catch {
     // Le catalogue apprendra la prochaine fois. Rien à dire à personne.

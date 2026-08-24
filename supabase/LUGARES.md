@@ -112,6 +112,21 @@ token público sin restricción lo usa cualquiera y la factura llega aquí.
 Las tres salidas se suman: `buscarEnTodas` pregunta a todas a la vez y funde
 lo que vuelva. Una fuente de menos degrada la lista; nunca la rompe.
 
+## La regla del punto: sin coordenadas no hay lugar
+
+**Decidido el 24-08-2026.** Un nombre que llega sin coordenadas **no entra al
+catálogo**. La razón es del producto, no de la técnica: no hay mapa donde
+poner un alfiler, así que un nombre suelto no dice dónde para el carro.
+Prestarle el centro de su ciudad sería una coordenada inventada — y esa
+coordenada entraría en el cálculo de la distancia como si fuera cierta.
+
+Lo que sí se guarda: el lugar elegido de una lista de sugerencias, porque
+llega **con su punto**. Ahí no hay nada que inventar.
+
+El texto libre sigue viviendo donde siempre: `trips.origin_label`, «el lugar
+TAL COMO lo escribió el conductor» (migración 0022). Sirve al viaje; no se
+vuelve una entrada que todo el país busca.
+
 ## El problema del PH que no aparece
 
 Que un PH no salga hoy **no siempre es culpa del proveedor**: si nadie lo
