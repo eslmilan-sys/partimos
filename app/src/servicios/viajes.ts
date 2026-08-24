@@ -19,6 +19,7 @@ import { type Lugar, distanciaKm as kmEntrePuntos } from '@/dominio/lugar';
 import type { AvailableTrip, Corridor, TripStop, Vehicle, ViajeFila } from '@/tipos';
 
 import { nuevoId } from './_id';
+import { recordarLugar } from './lugaresDeLaGente';
 import { fuente } from './_fuente';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
@@ -536,6 +537,21 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
   const guardado = await fuente.guardarViaje(viaje);
 
   /**
+   * LE CATALOGUE APPREND CE QUE LE CONDUCTEUR A ÉCRIT.
+   *
+   * C'est ici et pas dans le champ de recherche : ce qui compte est
+   * l'engagement, pas la frappe. Quelqu'un qui publie un trajet depuis
+   * « PH Torre Mistral » dit que ce point existe et qu'on peut s'y arrêter.
+   *
+   * Sans `await` et sans conséquence : publier ne doit jamais échouer
+   * parce que le catalogue n'a pas pu retenir un nom. Le lieu reste
+   * invisible aux autres jusqu'à ce qu'une deuxième personne s'en serve —
+   * la règle vit dans la base, migration 0035.
+   */
+  void recordarLugar(preparada.origen, ciudadSlugDe(viaje.origin_city_id));
+  void recordarLugar(preparada.destino, ciudadSlugDe(viaje.destination_city_id));
+
+  /**
    * Y SUS PARADAS. Publicar escribía el viaje y no las paradas, así que un
    * viaje recién publicado enseñaba la tarjeta «ruta del viaje» en blanco:
    * sin `trip_stops` no hay ni de dónde sale ni dónde termina, y `7a` no
@@ -815,3 +831,6 @@ export const rutaCorta = (viaje: ViajeFila): string =>
 
 const slugDe = (id: string | null): string | null =>
   fuente.ciudades.find((c) => c.id === id)?.slug ?? null;
+
+/** Le slug de la ville d'un bout de trajet, pour rattacher le lieu appris. */
+const ciudadSlugDe = (id: string | null): string | null => slugDe(id);
