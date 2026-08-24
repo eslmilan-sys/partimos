@@ -1,35 +1,32 @@
 # 05 · Ce que personne n'a encore tranché
 
-Quatre questions. Aucune n'est technique : ce sont des **décisions de
+Trois questions. Aucune n'est technique : ce sont des **décisions de
 produit**, et elles bloquent des choses concrètes. Elles sont listées ici pour
 que ni toi, ni ton associé, ni Claude ne les « corrige » chacun de son côté.
 
 ---
 
-## 1 · Le taux au kilomètre — la formule et la table se contredisent
+## ✅ 1 · Le taux au kilomètre — **tranché le 24-08-2026**
 
-**Le fait.** `PRODUCT.md` pose la formule
-`(km × taux du véhicule × 1,10 + péages) ÷ (sièges + 1)`, avec un taux dérivé
-de la consommation : 8 L/100 km × 0,80 $/L = **6,4 centimes/km**. C'est ce que
-calcule le code (`app/src/dominio/aporte.ts`), et ça donne Panamá → Chitré à
-**6 $** d'aporte.
+C'est la **consommation** qui fait foi, pas un taux au kilomètre. La colonne
+`vehicle_categories.rate_per_km_cents` (22/25/32) sort à la prochaine
+migration.
 
-Mais la table `vehicle_categories.rate_per_km_cents` contient **22 / 25 / 32**.
-Avec ces valeurs-là, le même trajet donnerait **17,94 $**.
+L'argument, sur Panamá → Chitré avec 3 passagers : au taux au kilomètre, le
+conducteur encaisse 53,82 $ pour 26,81 $ réellement dépensés — **27 $ de plus
+qu'en partant**. Un taux de 22–32 c/km est un coût de possession complet
+(dépréciation, assurance, entretien) qu'il paie voiture vide ou pleine.
 
-**Ce que ça bloque.** Le prix affiché. C'est-à-dire le produit.
+Cinq catégories portent désormais la consommation — compacto 6,5 · sedán 7,5 ·
+SUV 9,5 · 4×4 12,0 · híbrido 4,5 L/100 km — et le prix du carburant devient
+une donnée datée. Détail complet, liste des modèles et ce qui reste à migrer :
+`supabase/CONSUMO.md`.
 
-**Ce qu'il faut décider.** Laquelle des deux est juste. Trois pistes :
-6,4 c/km est le **carburant seul** ; 22–32 c/km ressemble à un **coût de
-possession complet** (carburant + usure + assurance + dépréciation) ; le
-`× 1,10` de la formule suggère qu'on voulait le carburant *plus* une petite
-usure. Si c'est le carburant qui fait foi, la table est à corriger ; si c'est
-le coût complet, c'est la formule et tous les exemples de la doc.
-
-> ⚠️ Point d'attention juridique : plus le taux est haut, plus le plafond est
-> haut, et plus le conducteur s'approche de rentrer dans ses frais. La règle
-> nº 1 tient tant que le `+ 1` reste — mais un taux gonflé est exactement ce
-> qu'un régulateur regarderait.
+**Ce qui reste ouvert derrière cette décision :** les **péages réels** des six
+corridors, qui entrent dans le même calcul. Sans eux, la migration attend.
+Et le prix du carburant retenu (1,27 $/L) vient d'un résumé Google — il faut
+le relever chez la Secretaría Nacional de Energía, séparément pour le 91, le
+95 et le diesel.
 
 ---
 
@@ -98,6 +95,8 @@ point où « on ne touche jamais l'argent » devient une phrase à défendre.
 Pour éviter de rouvrir ce qui est clos :
 
 - **Les six règles non négociables.** Tranchées. Voir `02-PRODUIT.md`.
+- **La base du calcul de l'aporte** : la consommation, pas un taux au
+  kilomètre. Tranchée le 24-08-2026. Voir `supabase/CONSUMO.md`.
 - **Le Sistema v6.** Tranché le 21-08-2026. Le champ rouge héros est mort.
 - **Le nom et le pin.** Fixes.
 - **La règle du point** (sans coordonnées, pas de lieu). Tranchée le

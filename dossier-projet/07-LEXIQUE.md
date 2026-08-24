@@ -10,7 +10,8 @@ pour Claude autant que pour un nouveau venu.
 | **aporte** | La participation aux frais que paie un passager. **Jamais** « prix » ni « tarif » : ces deux mots-là décrivent du transport vendu. |
 | **cupo** / **puesto** | Une place dans la voiture. On dit « puesto », jamais « asiento ». |
 | **carro** | La voiture. Jamais « coche » — c'est de l'espagnol d'Espagne. |
-| **tope** | Le plafond de l'aporte, calculé. Le mécanisme central du produit. |
+| **tope** | Le plafond de l'aporte, calculé. Le mécanisme central du produit. Toujours calculé avec le **sedán de référence** : qui conduit un 4×4 ne facture pas sa camionnette au passager. |
+| **galón** | Le Panama vend le carburant **au gallon**, pas au litre, et c'est au gallon que le prix officiel est publié. 1 gallon US = 3,785 L. |
 | **recuperas** | Ce que fait le conducteur : il récupère une part de ses frais. Le verbe autorisé. |
 | **compartir gastos** | Le nom de ce qu'on fait. La formule juridiquement exacte. |
 | **corredor** (corridor) | Une paire de villes = une page = un jeu de paramètres de prix. Six ouverts. |
@@ -71,6 +72,7 @@ marketing, courriels, publicités. Voir la règle nº 5 de `02-PRODUIT.md`.
 | `diseno/Partimos App v6.dc.html` | La référence visuelle. Fait foi. |
 | `app/src/ui/tokens.ts` | Le portage en code de v6, chaque valeur commentée avec sa raison. |
 | `app/src/dominio/aporte.ts` | Le calcul de l'aporte et du plafond. |
+| `supabase/CONSUMO.md` | Le carburant, les cinq catégories de véhicule, la liste des modèles. Ferme la question du taux au kilomètre. |
 | `supabase/migrations/` | L'histoire complète de la base, une décision par fichier. |
 | `supabase/LUGARES.md` | Comment marche la recherche d'adresses, et pourquoi pas Google. |
 | `supabase/PAGOS.md` | Le paiement en ligne — décidé, pas branché. |

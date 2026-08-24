@@ -46,7 +46,8 @@ retourner aux conducteurs du corridor.
 L'aporte par siège est **borné par un calcul**, pas laissé au conducteur :
 
 ```
-plafond par siège = (km × taux du véhicule × 1,10 + péages) ÷ (sièges + 1)
+essence = km × (litres/100 km du véhicule ÷ 100) × prix du litre
+plafond = (essence × 1,10 + péages) ÷ (occupants + 1)
 ```
 
 Le `+ 1` du diviseur, c'est le conducteur : **il paie sa part**. Voiture
@@ -54,6 +55,12 @@ pleine, il ne récupère jamais 100 % de son coût. Ce n'est pas une promesse
 dans les conditions générales — c'est une contrainte de la base de données
 (`CHECK price_within_cap`) : un trajet dont le prix dépasse le plafond ne
 s'écrit pas.
+
+Le calcul part de **ce que le trajet consomme réellement** — les litres de la
+voiture, au prix du jour — et jamais d'un « taux au kilomètre ». La différence
+n'est pas cosmétique : sur Panamá → Chitré, un taux au kilomètre ferait
+rentrer le conducteur chez lui avec 27 $ de plus qu'en partant. Voir
+`supabase/CONSUMO.md`.
 
 C'est exactement ce qui sépare le **covoiturage à frais partagés** du
 **transport rémunéré non autorisé**. Un concurrent qui laisse le conducteur

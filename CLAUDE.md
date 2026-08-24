@@ -145,14 +145,10 @@ qu'ils documentent ce qui a existé ; ils ne guident plus rien.
 produit se contredisent, et la production suit le design.** À trancher avant
 d'envoyer un lien à qui que ce soit.
 
-**La formule et la table ne concordent pas.** `PRODUCT.md` écrit
-`(km × taux du véhicule × 1,10 + péages) ÷ (sièges + 1)`. Le traspaso donne
-Panamá → Chitré = 20,60 $ de coût, 7 $ de plafond, 6 $ d'apport — ce qui sort
-d'un taux dérivé de la consommation (8 L/100 × 0,80 $/L = 6,4 c/km), et c'est
-ce que calcule `app/src/dominio/aporte.ts`. Mais
-`vehicle_categories.rate_per_km_cents` vaut 22/25/32 : avec ce taux, le même
-trajet donnerait 17,94 $ d'apport. **Une des deux valeurs est fausse et
-personne ne sait laquelle.**
+*(La formule et la table ne concordaient pas. **Tranché le 24-08-2026 : c'est
+la consommation qui fait foi**, la colonne `rate_per_km_cents` est à retirer.
+Voir `supabase/CONSUMO.md` — l'argument, les cinq catégories, la liste des
+modèles et ce qui reste à migrer.)*
 
 ## Divergences assumées entre le design et la production
 
@@ -162,8 +158,15 @@ parler :
 - **Le design dessine un SMS avec un code à 4 chiffres.** La production entre
   par **courriel et mot de passe** : aucun fournisseur de SMS n'est contracté
   et tous les comptes existants sont des comptes courriel.
-- **`vehicle_categories.rate_per_km_cents`** (22/25/32) ne correspond pas à la
-  formule décidée, qui part de la consommation et du prix de l'essence. La
-  formule de `PRODUCT.md` fait foi ; cette table reste à corriger.
+- **`vehicle_categories.rate_per_km_cents`** (22/25/32) est **périmée** : la
+  formule part de la consommation et du prix de l'essence. La colonne sort à
+  la prochaine migration, remplacée par `consumo_litros_100km` sur cinq
+  catégories. `supabase/CONSUMO.md` porte la décision et les valeurs. Ne pas
+  s'en servir en attendant : elle donne un aporte trois fois trop haut.
+- **Le prix du carburant dans `aporte.ts` vaut 0,80 $/L, et c'est faux.** Le
+  vrai prix panaméen tourne autour de **1,27 $/L** — donc tous les montants
+  affichés aujourd'hui sont environ un tiers trop bas. La correction attend la
+  même migration, parce que le prix doit devenir une ligne datée, pas une
+  autre constante.
 - **Il n'y a pas de table `notifications`.** Les avis du design existent comme
   type dans l'app, en attendant la migration.

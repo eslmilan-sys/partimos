@@ -52,21 +52,40 @@ dossier**. Ni l'image du document, ni le selfie, ni le numéro.
 ## Le calcul de l'aporte
 
 ```
-coût total  = km × taux du véhicule × 1,10 + péages
-plafond/pl. = coût total ÷ (sièges + 1)
+essence     = km × (litres/100 km du véhicule ÷ 100) × prix du litre
+coût total  = essence × 1,10 + péages
+plafond/pl. = coût total ÷ (occupants + 1)
 ```
 
-- `1,10` couvre l'usure au-delà du carburant.
+- `1,10` couvre l'usure au-delà du carburant, et **rien d'autre**.
 - `+ 1` : le conducteur est un passager de son propre trajet.
-- Le taux du véhicule dérive de la consommation et du prix de l'essence.
-  Exemple de référence : 8 L/100 km × 0,80 $/L = **6,4 centimes/km**.
+- La consommation vient de la catégorie du véhicule ; le prix du litre est une
+  donnée datée, relevée sur la publication officielle panaméenne.
 
-Sur Panamá → Chitré, ça donne un coût d'environ 20,60 $, un plafond de 7 $ et
-un aporte affiché de 6 $.
+**Tranché le 24-08-2026 : le coût part de la consommation, jamais d'un taux au
+kilomètre.** L'argument tient en une ligne — Panamá → Chitré, 3 passagers :
 
-> ⚠️ La table `vehicle_categories.rate_per_km_cents` contient 22 / 25 / 32,
-> ce qui donnerait 17,94 $ pour le même trajet. **Une des deux valeurs est
-> fausse.** Voir `05-DECISIONS-OUVERTES.md`.
+| | Le conducteur encaisse | Il a dépensé | Écart |
+|---|---|---|---|
+| Taux au km (25 c) | 53,82 $ | 26,81 $ | **+ 27,01 $** |
+| Consommation (sedán) | 24,00 $ | 26,81 $ | − 2,81 $ |
+
+Un taux de 22–32 c/km est un coût de possession complet — dépréciation,
+assurance, entretien — que le conducteur paie voiture vide ou pleine. Le faire
+rembourser par les passagers, c'est leur facturer ce qu'ils ne causent pas.
+**La règle nº 1 ne se juge pas sur la formule, elle se juge sur le billet dans
+la poche.**
+
+Les cinq catégories, en litres aux 100 km : **compacto 6,5 · sedán 7,5 ·
+SUV 9,5 · 4×4 12,0 · híbrido 4,5**. Le sedán est le véhicule de référence du
+plafond : qui conduit un 4×4 a un coût plus haut, mais **ne facture pas sa
+camionnette au passager**. Le détail et la liste des modèles sont dans
+`supabase/CONSUMO.md`.
+
+> ⚠️ Le prix du carburant en vigueur dans le code (0,80 $/L) est faux : le
+> vrai prix panaméen tourne autour de **1,27 $/L**. Tous les montants affichés
+> aujourd'hui sont donc environ un tiers trop bas — Panamá → Chitré passe d'un
+> aporte de 6 $ à **8 $**. La correction est décidée, pas encore migrée.
 
 **Le détour ne se facture jamais en supplément.** Il change la distance, donc
 le coût, donc le plafond — par la même formule. L'écart s'exprime en

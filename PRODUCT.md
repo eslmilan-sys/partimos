@@ -40,11 +40,26 @@ dispose Partimos est ce que les deux parties confirment.
 Le mécanisme qu'un concurrent ne peut pas copier honnêtement est le
 **plafond calculé**. L'aporte par siège est borné par
 
-    (km × taux du véhicule × 1,10 + péages) ÷ (sièges + 1)
+    essence = km × (litres/100 km du véhicule ÷ 100) × prix du litre
+    plafond = (essence × 1,10 + péages) ÷ (occupants + 1)
 
 où le `+ 1` est le conducteur : il paie sa part. Carro plein, il ne récupère
 jamais 100 % de son coût. La contrainte est appliquée par la base de données
 (`CHECK price_within_cap`), pas par une page de conditions.
+
+**Le coût part de la consommation réelle, jamais d'un taux au kilomètre.**
+Décidé le 24-08-2026, détaillé dans `supabase/CONSUMO.md`. Un « taux » de 22 à
+32 centimes est un coût de possession complet — dépréciation, assurance,
+entretien — que le conducteur paie voiture vide ou pleine ; le lui faire
+rembourser par ses passagers lui rapporterait 27 $ sur un Panamá → Chitré. La
+règle nº 1 ne se juge pas sur la formule, elle se juge sur le billet dans la
+poche. Le `× 1,10` est ce qui couvre l'usure, et il n'est pas remplacé par de
+la dépréciation.
+
+Cinq catégories portent la consommation (compacto 6,5 · sedán 7,5 · SUV 9,5 ·
+4×4 12,0 · híbrido 4,5 L/100 km), et le prix du carburant est une **donnée
+datée**, relevée sur la publication officielle panaméenne, pas une constante
+du code.
 
 C'est ce qui sépare le covoiturage à frais partagés du transport rémunéré non
 autorisé. Un concurrent qui laisse le conducteur fixer son prix vend du
