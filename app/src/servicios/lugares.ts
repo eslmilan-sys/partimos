@@ -272,5 +272,17 @@ export function hayCorredor(origen: string, destino: string): boolean {
 
 /** El nombre bonito de un slug de ciudad. «chitre» → «Chitré». */
 export function nombreDeCiudad(slug: string): string {
-  return fuente.ciudades.find((c) => c.slug === slug)?.name ?? slug;
+  const conocida = fuente.ciudades.find((c) => c.slug === slug)?.name;
+  if (conocida) return conocida;
+  /* Un slug desconocido no se enseña crudo: «las-tablas» en una cabecera es
+     un identificador interno asomando. Se viste lo mejor posible — guiones a
+     espacios, iniciales arriba — que para un nombre de ciudad panameña
+     acierta casi siempre. */
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((p) => (p === 'de' || p === 'del' || p === 'la' || p === 'las' || p === 'los'
+      ? p
+      : p.charAt(0).toUpperCase() + p.slice(1)))
+    .join(' ');
 }

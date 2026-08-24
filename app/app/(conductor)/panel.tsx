@@ -29,7 +29,6 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { cuando, diaAbrev, hora } from '@/ui/fechas';
-import { Mas } from '@/ui/iconos';
 import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
@@ -82,16 +81,10 @@ export default function Panel() {
       </View>
       </ScrollView>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Publicar un viaje"
-        onPress={() => router.push('/(conductor)/publicar')}
-        style={estilos.fab}
-      >
-        <Mas tamano={24} tinta="#fff" />
-      </Pressable>
-
-        <Pestanas valor="Mis viajes" />
+      {/* Sin FAB propio: la barra de abajo YA tiene la casilla Publicar
+          levantada en el centro. Dos «+» flotando a sesenta píxeles el uno
+          del otro eran la misma acción dibujada dos veces. */}
+      <Pestanas valor="Mis viajes" />
     </View>
   );
 }
@@ -184,10 +177,20 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         </Pressable>
       </View>
 
-      <View style={estilos.filaRutaSuelta}>
-        <View style={estilos.puntoAzul} />
-        <Text style={estilos.parada}>{`${viaje.origen} → ${viaje.destino}`}</Text>
-        <Text style={estilos.horaParada}>{formatearDineroRedondo(viaje.aporteCentavos)}</Text>
+      {/* La dirección se escribe con el raíl, no con una flecha entre dos
+          nombres en una línea (invariante 1) — que además, con un nombre
+          largo, envolvía y se metía debajo del aporte. Cada lugar en su
+          fila; el aporte vive junto al origen. */}
+      <View style={estilos.recorrido}>
+        <View style={estilos.filaRuta}>
+          <View style={estilos.puntoAzul} />
+          <Text style={estilos.parada} numberOfLines={1}>{viaje.origen}</Text>
+          <Text style={estilos.horaParada}>{formatearDineroRedondo(viaje.aporteCentavos)}</Text>
+        </View>
+        <View style={estilos.filaRuta}>
+          <View style={estilos.puntoVacio} />
+          <Text style={estilos.parada} numberOfLines={1}>{viaje.destino}</Text>
+        </View>
       </View>
 
       <View style={estilos.filaVendidos}>
@@ -321,7 +324,6 @@ const estilos = StyleSheet.create({
 
   recorrido: { gap: 9, marginTop: 13 },
   filaRuta: { flexDirection: 'row', alignItems: 'center', gap: 11 },
-  filaRutaSuelta: { flexDirection: 'row', alignItems: 'center', gap: 11, marginTop: 13 },
   puntoLleno: { width: 9, height: 9, borderRadius: 999, backgroundColor: color.rojo500 },
   puntoAzul: { width: 9, height: 9, borderRadius: 999, backgroundColor: color.azul700 },
   puntoVacio: {
@@ -443,22 +445,6 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  fab: {
-    position: 'absolute',
-    right: 22,
-    bottom: 130,
-    width: 56,
-    height: 56,
-    borderRadius: radio.cuadrado,
-    backgroundColor: color.rojo500,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: 'rgb(210,16,52)',
-    shadowOpacity: 0.4,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
-  },
 
   pie: { paddingTop: 10, paddingHorizontal: 14, paddingBottom: 22 },
 });

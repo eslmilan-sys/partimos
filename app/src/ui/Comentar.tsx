@@ -57,6 +57,14 @@ const CLASES: { valor: Clase; etiqueta: string }[] = [
   { valor: 'idea', etiqueta: 'Se me ocurre' },
 ];
 
+/**
+ * Les écrans d'entrée n'ont pas d'ancre : denses en contrôles de haut en bas
+ * — champs, CTA, liens de pied — il n'y a AUCUNE position où elle ne couvre
+ * pas quelque chose (constaté sur téléphone : elle mordait le champ CORREO).
+ * Et un testeur commente le produit, pas le formulaire de connexion.
+ */
+const SIN_ANCLA = /^\/(apertura|bienvenida|entrar|registro|acceso|puerta)/;
+
 export function Comentar() {
   const pantalla = usePathname();
   /* En simulado personne n'est vraiment connecté : le commentaire part sans
@@ -107,6 +115,8 @@ export function Comentar() {
       setMandando(false);
     }
   };
+
+  if (SIN_ANCLA.test(pantalla)) return null;
 
   return (
     <>
@@ -235,7 +245,9 @@ export function Comentar() {
 }
 
 const estilos = StyleSheet.create({
-  /** Bord droit, à mi-hauteur : le seul endroit libre sur les 58 écrans. */
+  /** Bord droit, à mi-hauteur : le seul endroit libre des écrans du produit.
+      (Les écrans d'entrée, où toute position couvrait un contrôle, n'ont
+      simplement pas d'ancre — voir SIN_ANCLA.) */
   ancla: {
     position: 'absolute',
     right: 0,

@@ -17,11 +17,35 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { Redirect } from 'expo-router';
 
+import { MODO } from '@/servicios/_fuente';
 import { useSesion } from '@/servicios/sesion';
 import { color } from '@/ui/tokens';
 
 /** En simulado no hay autenticación: se entra como la persona del traspaso. */
 const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
+
+/**
+ * La demo también empieza por la apertura — quien prueba tiene que ver el
+ * recorrido entero, láminas incluidas. Pero solo la PRIMERA vez: ni volver a
+ * `/` ni RECARGAR la página debe reiniciarle el paseo, así que la marca vive
+ * en sessionStorage y no en una variable que muere con cada carga. Cerrar la
+ * pestaña y volver, eso sí, vuelve a empezar — es una visita nueva.
+ */
+const VISTA = 'partimos.apertura.vista';
+const yaLaVio = () => {
+  try {
+    return globalThis.sessionStorage?.getItem(VISTA) === '1';
+  } catch {
+    return false;
+  }
+};
+const recordarla = () => {
+  try {
+    globalThis.sessionStorage?.setItem(VISTA, '1');
+  } catch {
+    /* sin almacén no hay memoria: se verá dos veces, que no rompe nada */
+  }
+};
 
 export default function Puerta() {
   const { id, preguntando } = useSesion(DEL_RECORRIDO);
@@ -32,6 +56,11 @@ export default function Puerta() {
         <ActivityIndicator color={color.ink900} />
       </View>
     );
+  }
+
+  if (MODO === 'simulado' && !yaLaVio()) {
+    recordarla();
+    return <Redirect href="/(cuenta)/apertura" />;
   }
 
   return <Redirect href={id ? '/(pasajero)' : '/(cuenta)/apertura'} />;

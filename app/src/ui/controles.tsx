@@ -221,8 +221,12 @@ export function Boton({
           paddingHorizontal: medida.paddingHorizontal,
           backgroundColor: pressed ? paleta.pulsado : paleta.fondo,
           borderColor: paleta.borde,
-          opacity: desactivado ? 0.5 : 1,
         },
+        /* Desactivado NO es rojo al 50 % — eso da una losa rosada que parece
+           un error de pintura, y el rojo tiene sus cuatro sentidos tasados.
+           Agotado se dice con los tokens de agotado: lavado de tinta y
+           tinta apagada, como todo lo inerte del v6. */
+        desactivado && { backgroundColor: color.inerteFondo, borderColor: 'transparent' },
         tono === 'rojo' && !desactivado ? sombra.cta : null,
         pressed && { transform: [{ scale: 0.97 }] },
         ancho && { flex: 1 },
@@ -236,7 +240,7 @@ export function Boton({
             lineHeight: interlinea(medida.fontSize),
             // `-.01em` del traspaso: depende del tamaño, no es un número fijo.
             letterSpacing: -medida.fontSize / 100,
-            color: paleta.tinta,
+            color: desactivado ? color.inerteTinta : paleta.tinta,
           },
         ]}
       >

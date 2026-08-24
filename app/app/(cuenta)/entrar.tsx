@@ -82,13 +82,18 @@ function LogoGoogle() {
   );
 }
 
-/** La manzana, blanca, para el botón negro. */
+/**
+ * La manzana, negra, para el botón blanco. La versión clara del botón de
+ * Apple es oficial de sus guías — y así la única losa oscura de la pantalla
+ * deja de competir con el CTA: en el v6 la superficie de tinta es de
+ * Filtros y de Publicar, no de un proveedor.
+ */
 function LogoApple() {
   return (
     <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
       <Path
         d="M13.9 10.6c0-2 1.6-3 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7-.6 0-1.6-.7-2.6-.7-1.3 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.5 2.1 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0 0-2.1-.8-2.1-3.1ZM11.9 4.4c.5-.7.9-1.6.8-2.6-.8 0-1.7.6-2.3 1.2-.5.6-.9 1.6-.8 2.5.9.1 1.8-.4 2.3-1.1Z"
-        fill="#FFF"
+        fill="#000"
       />
     </Svg>
   );
@@ -159,10 +164,10 @@ export default function Entrar() {
             onPress={async () => {
               if (!(await entrarCon('apple'))) setQuePaso(SIN_PROVEEDOR('Apple'));
             }}
-            style={({ pressed }) => [estilos.social, estilos.socialOscuro, pressed && pulsado.boton]}
+            style={({ pressed }) => [estilos.social, pressed && pulsado.boton]}
           >
             <LogoApple />
-            <Text style={[estilos.socialTexto, { color: color.blanco }]}>Continuar con Apple</Text>
+            <Text style={estilos.socialTexto}>Continuar con Apple</Text>
           </Pressable>
         </View>
 
@@ -209,14 +214,9 @@ export default function Entrar() {
           </Boton>
         </View>
 
+        {/* La acción antes que la nota al pie: crear cuenta es una puerta,
+            lo legal es una letra pequeña. */}
         <View style={estilos.pie}>
-          <Text style={estilos.legal}>
-            {'Al continuar aceptas los '}
-            <Text style={estilos.legalFuerte}>Términos</Text>
-            {' y la '}
-            <Text style={estilos.legalFuerte}>Política de privacidad</Text>
-            {'.'}
-          </Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Crear una cuenta"
@@ -228,6 +228,13 @@ export default function Entrar() {
               <Text style={estilos.crearFuerte}>Regístrate</Text>
             </Text>
           </Pressable>
+          <Text style={estilos.legal}>
+            {'Al continuar aceptas los '}
+            <Text style={estilos.legalFuerte}>Términos</Text>
+            {' y la '}
+            <Text style={estilos.legalFuerte}>Política de privacidad</Text>
+            {'.'}
+          </Text>
         </View>
       </ScrollView>
     </View>
@@ -244,19 +251,19 @@ const estilos = StyleSheet.create({
   },
   desplazable: { paddingBottom: 24 },
 
-  cabecera: { paddingTop: 40, paddingHorizontal: espacio.gutter, gap: 15 },
-  /** La teja de 52 al radio 15, roja, con la marca en blanco. */
+  cabecera: { paddingTop: 24, paddingHorizontal: espacio.gutter, gap: 12 },
+  /** La teja de 52 al radio 14 — la celda de icono del v6 — roja, con la marca en blanco. */
   teja: {
     width: 52,
     height: 52,
-    borderRadius: 15,
+    borderRadius: 14,
     backgroundColor: color.rojo500,
     alignItems: 'center',
     justifyContent: 'center',
   },
   titulo: {
     fontSize: 28,
-    lineHeight: 34,
+    lineHeight: 33,
     fontWeight: '700',
     letterSpacing: -0.84,
     color: color.ink900,
@@ -264,34 +271,33 @@ const estilos = StyleSheet.create({
   },
   bajada: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
 
-  sociales: { paddingTop: 40, paddingHorizontal: espacio.gutter, gap: 10 },
+  sociales: { paddingTop: 20, paddingHorizontal: espacio.gutter, gap: 10 },
   social: {
     height: 52,
-    borderRadius: 15,
+    borderRadius: 18,
     backgroundColor: color.blanco,
-    borderWidth: 1.5,
-    borderColor: color.ink200,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
   },
-  socialOscuro: { backgroundColor: color.ink900, borderColor: color.ink900 },
   socialTexto: {
-    fontSize: 16,
+    fontSize: 15,
     lineHeight: 20,
     fontWeight: '600',
-    letterSpacing: -0.16,
+    letterSpacing: -0.15,
     color: color.ink900,
     fontFamily: familia,
   },
 
   separador: {
-    paddingTop: 25,
+    paddingTop: 20,
     paddingHorizontal: espacio.gutter,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15,
+    gap: 12,
   },
   raya: { flex: 1, height: 1, backgroundColor: color.ink200 },
   oTexto: {
@@ -304,7 +310,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  campos: { paddingTop: 25, paddingHorizontal: espacio.gutter, gap: 15 },
+  campos: { paddingTop: 20, paddingHorizontal: espacio.gutter, gap: 14 },
   olvide: { alignSelf: 'flex-start' },
   olvideTexto: {
     fontSize: 13,
@@ -314,7 +320,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  pie: { paddingTop: 30, paddingHorizontal: espacio.gutter, gap: 8, alignItems: 'center' },
+  pie: { paddingTop: 20, paddingHorizontal: espacio.gutter, gap: 10, alignItems: 'center' },
   legal: {
     fontSize: 12,
     lineHeight: 17,
