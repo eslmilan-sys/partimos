@@ -1,6 +1,6 @@
 # 05 · Ce que personne n'a encore tranché
 
-Trois questions. Aucune n'est technique : ce sont des **décisions de
+Deux questions. Aucune n'est technique : ce sont des **décisions de
 produit**, et elles bloquent des choses concrètes. Elles sont listées ici pour
 que ni toi, ni ton associé, ni Claude ne les « corrige » chacun de son côté.
 
@@ -76,35 +76,30 @@ ne peut pas faire, c'est laisser les deux textes coexister.**
 
 ---
 
-## 4 · Le taux de la tarifa de servicio — 2,5/5 % ou 5/8 % ?
+## ✅ 4 · Le taux de la tarifa de servicio — **tranché le 24-08-2026**
 
-**Le fait.** `supabase/PAGOS.md` décide **2,5 %** sur Yappy et **5 %** sur
-carte, avec un raisonnement de coût : Yappy commerçant coûte ~1 %, un
-processeur carte ~3,5–4 %, la marge du service est la même (~1,5 point) et le
-canal recommandé est aussi le moins cher pour le passager.
+**5 % sur Yappy dans l'app, 8 % sur carte, 0 en espèces.**
 
-Mais **deux autres sources disent 5 % / 8 %** : la base de données (migration
+Il n'y avait en réalité pas de débat : la base de données (migration
 `0018_tarifa_5_8`, contrainte `fee_is_fixed_pct`) et la fiche de règles du
-projet (`.claude/skills/partimos-reglas`), qui est le fichier chargé avant
-toute modification touchant au prix.
+projet portaient déjà ces valeurs. `supabase/PAGOS.md` était seul à écrire
+2,5 / 5 — c'était une révision qu'il n'avait jamais enregistrée. Il est
+maintenant aligné.
 
-**Donc c'est deux contre un**, et le « un » est un document, pas un mécanisme.
-Le plus probable est que 2,5/5 soit la décision d'origine et 5/8 une révision
-que `PAGOS.md` n'a jamais enregistrée. À vérifier avant de trancher — mais
-c'est `PAGOS.md` qu'il faut aligner, pas la base.
+Le raisonnement tient toujours : la tarifa suit **le coût du canal**, jamais
+la demande. Yappy commerçant coûte ~1 %, un processeur carte ~3,5–4 % — la
+marge du service est la même sur les deux (~4 points), et le canal recommandé
+reste le moins cher pour le passager.
 
-**Ce que ça bloque.** Rien pour l'instant — le paiement en ligne n'est pas
-branché. Mais ça bloquera le jour où il le sera.
+**Trois invariants, quels que soient les taux :** le conducteur reçoit son
+aporte **complet** (la tarifa s'ajoute, elle ne se déduit jamais) ; l'**espèce
+reste toujours disponible et gratuite** ; **aucun pourcentage ne varie** avec
+la demande, la date ou la rareté.
 
-**Ce qu'il faut décider.** Le taux réel, une fois les coûts des prestataires
-confirmés par un devis, pas par une estimation. Et faire valider la structure
-entière par un avocat panaméen **avant le premier encaissement** : c'est le
-point où « on ne touche jamais l'argent » devient une phrase à défendre.
-
-Trois invariants ne bougent pas quel que soit le taux retenu : le conducteur
-reçoit son aporte **complet** (la tarifa s'ajoute, elle ne se déduit jamais) ;
-l'**espèce reste toujours disponible et gratuite** ; **aucun pourcentage ne
-varie** avec la demande, la date ou la rareté.
+**Ce qui reste ouvert :** faire valider la structure par un avocat panaméen
+**avant le premier encaissement réel**. C'est le point où « la plateforme ne
+touche jamais l'argent du trajet » doit se défendre autrement que par une
+intention.
 
 ---
 
@@ -115,6 +110,8 @@ Pour éviter de rouvrir ce qui est clos :
 - **Les six règles non négociables.** Tranchées. Voir `02-PRODUIT.md`.
 - **La base du calcul de l'aporte** : la consommation, pas un taux au
   kilomètre. Tranchée le 24-08-2026. Voir `supabase/CONSUMO.md`.
+- **La tarifa de servicio** : 5 % Yappy, 8 % carte, 0 en espèces. Tranchée le
+  24-08-2026. Voir `supabase/PAGOS.md`.
 - **Le Sistema v6.** Tranché le 21-08-2026. Le champ rouge héros est mort.
 - **Le nom et le pin.** Fixes.
 - **La règle du point** (sans coordonnées, pas de lieu). Tranchée le

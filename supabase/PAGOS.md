@@ -2,10 +2,10 @@
 
 Décision produit (2026-08-12, amendée le même jour) : trois canaux,
 présentés partout dans cet ordre — **Yappy dans l'app** (recommandé,
-tarifa de servicio **2,5 %**), **tarjeta dans l'app** (tarifa **5 %**),
+tarifa de servicio **5 %**), **tarjeta dans l'app** (tarifa **8 %**),
 **efectivo** en dernier (gratuit, toujours disponible). La tarifa est
 fixe PAR CANAL parce qu'elle suit le coût du canal : Yappy commerçant
-coûte ~1 %, un processeur carte ~3,5–4 % — la marge du service (~1,5 pt)
+coûte ~1 %, un processeur carte ~3,5–4 % — la marge du service (~4 pts)
 est la même sur les deux canaux en ligne, et le canal recommandé est
 aussi le moins cher pour le passager. Le conducteur reçoit son aporte
 **complet** dans les trois cas. La doctrine : la tarifa rémunère le
@@ -13,6 +13,14 @@ service digital de réservation, jamais le transport — c'est le modèle
 BlaBlaCar, et c'est ce qui garde le partage de frais intact. ⚠️ Fais
 valider cette structure par un avocat panaméen avant le premier cobro
 réel — les CGU (`/terminos`) sont déjà rédigées dans ce sens.
+
+> **Corrigé le 24-08-2026.** Ce fichier disait 2,5 % / 5 %, et il était
+> seul à le dire : la migration `0018_tarifa_5_8` avait relevé les taux à
+> 5 % / 8 % « por decisión del dueño », et la fiche de règles du projet
+> les portait déjà. La contrainte `fee_is_fixed_pct` fait autorité — si le
+> front réclamait autre chose, la base refuserait la réservation.
+> Confirmé par le propriétaire le 24-08-2026. **Les taux ci-dessus sont
+> désormais les bons partout.**
 
 ## Architecture (identique à Didit : les secrets vivent dans Supabase)
 
@@ -34,8 +42,8 @@ Le schéma 0001 avait tout prévu : `payments` (avec `provider_order_id`
 pour le Botón de Pago Yappy), `payout_batches`, `ledger_entries`
 (comptes `passenger_escrow`, `driver_payable`, `platform_revenue`,
 `psp_fees`). La migration 0009 ajoute le canal choisi, la 0010 grave la
-tarifa par canal en contrainte : 0 hors app, 2,5 % Yappy, 5 % tarjeta —
-et le moyen favori (`profiles.preferred_pay_channel`), choisi à
+tarifa par canal en contrainte, que la 0018 relève à ses valeurs
+actuelles : 0 hors app, **5 % Yappy, 8 % tarjeta** — et le moyen favori (`profiles.preferred_pay_channel`), choisi à
 l'inscription, qui présélectionne le canal à la réservation.
 
 ## 1. Yappy — le Botón de Pago ⛔ (tes comptes)
@@ -83,7 +91,7 @@ clé secrète, redirige vers leur page, leur webhook signé confirme.
   anti-rejeu ; écriture idempotente par `UNIQUE (provider,
   provider_ref)` (déjà dans 0001).
 - Montants recalculés CÔTÉ SERVEUR dans `pago-crear` depuis la base
-  (aporte de la réservation + la tarifa du canal : 2,5 % Yappy, 5 %
+  (aporte de la réservation + la tarifa du canal : 5 % Yappy, 8 %
   tarjeta) — jamais reçus du client.
 - Remboursements : suivre les règles d'annulation existantes (100 % à
   +24 h, aporte entre 24 h et 2 h, 50 % retenu en deçà) — le cobro en

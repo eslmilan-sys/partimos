@@ -78,10 +78,23 @@ réserver et payer dans l'app plutôt qu'en espèces. Elle rémunère le service
 numérique de réservation, jamais le transport, et le conducteur reçoit son
 aporte **complet** dans les trois cas. C'est le modèle BlaBlaCar.
 
-> ⚠️ Le taux exact n'est pas tranché : la documentation dit 2,5 % (Yappy) /
-> 5 % (carte), la base de données impose 5 % / 8 %. **Voir
-> `05-DECISIONS-OUVERTES.md`.** Et cette structure doit être validée par un
-> avocat panaméen avant le premier encaissement réel.
+**Les trois canaux, présentés partout dans cet ordre :**
+
+| Canal | Tarifa | Pourquoi ce taux |
+|---|---|---|
+| **Yappy dans l'app** *(recommandé)* | **5 %** | Yappy commerçant coûte ~1 % |
+| **Carte dans l'app** | **8 %** | Un processeur carte coûte ~3,5–4 % |
+| **Espèces** *(toujours disponible)* | **0** | Rien à encaisser |
+
+La tarifa suit **le coût du canal**, jamais la demande — c'est ce qui la
+distingue d'une commission. La marge du service est la même sur les deux
+canaux en ligne (~4 points), et le canal recommandé est aussi le moins cher
+pour le passager. C'est gravé dans la base (`fee_is_fixed_pct`) : si
+l'interface réclamait autre chose, la réservation serait refusée.
+
+> ⚠️ Cette structure doit être validée par un avocat panaméen **avant le
+> premier encaissement réel**. C'est le point où « la plateforme ne touche
+> jamais l'argent du trajet » doit se défendre autrement que par une intention.
 
 L'espèce reste toujours disponible et toujours gratuite. Si tout le monde
 choisit l'espèce, Partimos ne gagne rien — c'est un risque assumé, parce que
