@@ -13,22 +13,30 @@
  * comarca à défaut — deux comarcas n'ont pas de districts). Les clés et
  * valeurs sont des ids OSM « type/id », les mêmes que `source_id`.
  *
+ * REPRENABLE EXPRÈS. Une centaine de requêtes, et Overpass finit par
+ * jeter l'IP qui insiste (vu deux fois : les miroirs tombent ensemble
+ * vers la 60e). Donc : la progression s'écrit après CHAQUE aire dans
+ * `jerarquia_estado.json.gz`, une aire qui échoue est notée et on passe
+ * à la suivante, et au prochain lancement on ne refait que ce qui manque.
+ * Le workflow publie même un résultat partiel ; relancer suffit.
+ *
  * Lit `datos-osm/admin_4.json.gz` et `admin_6.json.gz` produits par
  * `descargar-lugares.mjs` : le lancer d'abord.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { gzipSync, gunzipSync } from 'node:zlib';
 
 const ESPEJOS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ];
 const AGENTE = 'Partimos/1.0 (jerarquia administrativa; contacto: hola@partimos.app)';
 
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function conReintentos(hacer, cuantos = 6) {
+async function conReintentos(hacer, cuantos = 5) {
   for (let i = 0; ; i++) {
     try {
       return await hacer(i);
@@ -62,8 +70,10 @@ async function hijosDe(rel, nivel) {
   });
 }
 
-const leer = (n) => JSON.parse(gunzipSync(readFileSync(`datos-osm/${n}.json.gz`)));
-const guardar = (n, c) => writeFileSync(`datos-osm/${n}.json.gz`, gzipSync(JSON.stringify(c)));
+const ruta = (n) => `datos-osm/${n}.json.gz`;
+const leer = (n) => JSON.parse(gunzipSync(readFileSync(ruta(n))));
+const leerOpc = (n, defecto) => (existsSync(ruta(n)) ? leer(n) : defecto);
+const guardar = (n, c) => writeFileSync(ruta(n), gzipSync(JSON.stringify(c)));
 
 const nivel4 = leer('admin_4').elements.filter((e) => e.tags?.name);
 const nivel6 = leer('admin_6').elements.filter((e) => e.tags?.name);
@@ -76,35 +86,49 @@ const esComarca = (e) =>
       .join(' '),
   );
 
+// Ce qui a déjà été fait lors d'un lancement précédent.
+const estado = leerOpc('jerarquia_estado', { hechas: [] });
+const hechas = new Set(estado.hechas);
+const padres6 = leerOpc('padres_6', {});
+const padres8 = leerOpc('padres_8', {});
+let fallos = 0;
+
+/** Interroge chaque aire pas encore faite ; note la progression à chaque pas. */
+async function recorrer(areas, nivelHijos, padres, archivo) {
+  for (const a of areas) {
+    const marca = `${a.id}>${nivelHijos}`;
+    if (hechas.has(marca)) continue;
+    process.stdout.write(`nivel ${nivelHijos} en ${a.tags.name} … `);
+    try {
+      const hijos = await hijosDe(a.id, nivelHijos);
+      console.log(`${hijos.length}`);
+      for (const h of hijos) padres[`relation/${h}`] ??= `relation/${a.id}`;
+      hechas.add(marca);
+      guardar(archivo, padres);
+      guardar('jerarquia_estado', { hechas: [...hechas] });
+    } catch (e) {
+      // Une aire qui échoue n'arrête pas les autres : elle reste à faire
+      // et le prochain lancement ne reprendra qu'elle.
+      console.warn(`FALLO — ${e.message}`);
+      fallos++;
+    }
+    await dormir(4000);
+  }
+}
+
 // District → province ou comarca. Le premier contenant trouvé gagne ; un
 // district dans deux aires de niveau 4 serait une erreur de carte, pas de code.
-const padres6 = {};
-for (const p of nivel4) {
-  process.stdout.write(`nivel 6 en ${p.tags.name} … `);
-  const hijos = await hijosDe(p.id, 6);
-  console.log(`${hijos.length}`);
-  for (const h of hijos) padres6[`relation/${h}`] ??= `relation/${p.id}`;
-  await dormir(3000);
-}
-guardar('padres_6', padres6);
+await recorrer(nivel4, 6, padres6, 'padres_6');
 console.log(`${Object.keys(padres6).length} distritos situados.\n`);
 
 // Corregimiento → district d'abord ; comarca à défaut, pour les deux
 // comarcas qui n'ont pas de districts (Madungandí, Wargandí).
-const padres8 = {};
-for (const d of nivel6) {
-  process.stdout.write(`nivel 8 en ${d.tags.name} … `);
-  const hijos = await hijosDe(d.id, 8);
-  console.log(`${hijos.length}`);
-  for (const h of hijos) padres8[`relation/${h}`] ??= `relation/${d.id}`;
-  await dormir(3000);
-}
-for (const c of nivel4.filter(esComarca)) {
-  process.stdout.write(`nivel 8 en ${c.tags.name} (comarca) … `);
-  const hijos = await hijosDe(c.id, 8);
-  console.log(`${hijos.length}`);
-  for (const h of hijos) padres8[`relation/${h}`] ??= `relation/${c.id}`;
-  await dormir(3000);
-}
-guardar('padres_8', padres8);
+await recorrer(nivel6, 8, padres8, 'padres_8');
+await recorrer(nivel4.filter(esComarca), 8, padres8, 'padres_8');
 console.log(`${Object.keys(padres8).length} corregimientos situados.`);
+
+if (fallos) {
+  console.error(`${fallos} áreas quedaron pendientes: relanzar para continuar.`);
+  process.exit(2);
+}
+console.log('Hecho, sin pendientes.');

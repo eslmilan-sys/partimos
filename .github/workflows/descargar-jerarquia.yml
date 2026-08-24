@@ -37,7 +37,10 @@ jobs:
       - name: Preguntar a Overpass
         run: node scripts/descargar-jerarquia.mjs
 
+      # Même un résultat partiel se publie : le script note sa progression
+      # et le prochain lancement ne refait que ce qui manque.
       - name: Publicar en la rama datos-osm
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
