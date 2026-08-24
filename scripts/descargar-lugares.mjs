@@ -48,6 +48,23 @@ const CATEGORIAS = [
   { kind: 'barrio', filtro: 'nwr["place"="quarter"]' },
   { kind: 'barrio', filtro: 'nwr["place"="village"]' },
   { kind: 'barrio', filtro: 'nwr["place"="town"]' },
+
+  // ── Ce qui manquait, et qui est exactement ce qu'on cherche au Panama ──
+  // Un PH est un `building=apartments` nommé. Sans cette ligne, aucune tour
+  // résidentielle du pays n'entrait — et c'est le premier mot que tape
+  // quelqu'un qui donne son point de rendez-vous.
+  { kind: 'edificio', filtro: 'nwr["building"="apartments"]["name"]' },
+  { kind: 'edificio', filtro: 'nwr["building"="residential"]["name"]' },
+  { kind: 'edificio', filtro: 'nwr["building"="commercial"]["name"]' },
+  { kind: 'edificio', filtro: 'nwr["building"="office"]["name"]' },
+  // Urbanizaciones et barriadas : elles sont tracées en emprise, pas en point.
+  { kind: 'urbanizacion', filtro: 'nwr["landuse"="residential"]["name"]' },
+  // « Frente a la iglesia », « al lado del colegio » : des repères réels ici.
+  { kind: 'poi', filtro: 'nwr["amenity"="place_of_worship"]["name"]' },
+  { kind: 'poi', filtro: 'nwr["amenity"="school"]["name"]' },
+  { kind: 'poi', filtro: 'nwr["amenity"="bank"]["name"]' },
+  { kind: 'poi', filtro: 'nwr["amenity"="fast_food"]["name"]' },
+  { kind: 'poi', filtro: 'nwr["amenity"="restaurant"]["name"]' },
 ];
 
 const NIVELES = [

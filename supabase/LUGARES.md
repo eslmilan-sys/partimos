@@ -79,6 +79,23 @@ correr las veces que sea: escribe por `(source, source_id)`.
 Los datos son **nuestros** desde ese momento: ODbL permite copiarlos,
 transformarlos y servirlos. La única condición es la atribución.
 
+### Por qué un PH no salía — y por qué ahora sí
+
+**El import del 24-08-2026 trajo 5 042 lugares y no incluía ni un edificio.**
+La lista de categorías pedía centros comerciales, bombas, hospitales, parques
+y barrios; nunca `building`. Y un PH panameño, en OpenStreetMap, es un
+`building=apartments` con nombre. La torre entera del país quedaba fuera por
+una línea ausente.
+
+Añadidas: `building` en sus cuatro formas nombradas (apartments, residential,
+commercial, office), `landuse=residential` con nombre —las urbanizaciones y
+barriadas se trazan en superficie, no en punto— y los puntos de referencia que
+un panameño da de verdad: iglesias, colegios, bancos y comida rápida. Volver a
+correr el import los trae; lo ya escrito no se duplica.
+
+**Lo que esto NO arregla.** Un PH que nadie cartografió en OSM no existe para
+nadie. Ahí entran las otras dos salidas.
+
 ### Salida 3 · Mapbox, si se quiere red de seguridad (5 minutos)
 
 Para lo que OSM no tenga todavía. Cuenta gratis en mapbox.com, un token
