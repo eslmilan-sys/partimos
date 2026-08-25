@@ -34,7 +34,7 @@ import { useRouter } from 'expo-router';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Boton } from '@/ui/controles';
 import { Marca } from '@/ui/iconos';
-import { color, espacio, familia, zonaDeToque } from '@/ui/tokens';
+import { color, espacio, familia, pulsado, zonaDeToque } from '@/ui/tokens';
 
 const LAMINAS = [
   {
@@ -233,19 +233,33 @@ export default function Apertura() {
           <Text style={estilos.copia}>{lamina.copia}</Text>
         </Animated.View>
 
-        <View style={{ marginTop: 18 }}>
+        <View style={{ marginTop: 18, gap: 10 }}>
           <Boton alPulsar={avanzar}>{ultima ? 'Crear cuenta' : 'Continuar'}</Boton>
+          {ultima ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ya tengo cuenta"
+              onPress={() => router.push('/(cuenta)/entrar')}
+              style={({ pressed }) => [estilos.secundario, pressed && pulsado.boton]}
+            >
+              <Text style={estilos.secundarioTexto}>Ya tengo cuenta</Text>
+            </Pressable>
+          ) : null}
         </View>
 
         <View style={estilos.salidas}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push('/(cuenta)/entrar')}
-            style={zonaDeToque}
-          >
-            <Text style={estilos.salida}>Ya tengo cuenta</Text>
-          </Pressable>
-          <Text style={estilos.salidaSeparador}>·</Text>
+          {ultima ? null : (
+            <>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.push('/(cuenta)/entrar')}
+                style={zonaDeToque}
+              >
+                <Text style={estilos.salida}>Ya tengo cuenta</Text>
+              </Pressable>
+              <Text style={estilos.salidaSeparador}>·</Text>
+            </>
+          )}
           <Pressable
             accessibilityRole="button"
             onPress={() => router.replace('/(pasajero)')}
@@ -359,6 +373,25 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     textShadowColor: 'rgba(10,39,49,.4)',
     textShadowRadius: 8,
+  },
+
+  /** El fantasma blanco sobre foto: mismo cuerpo que el CTA, sin gritar. */
+  secundario: {
+    height: 52,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.45)',
+    backgroundColor: 'rgba(255,255,255,.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secundarioTexto: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '600',
+    letterSpacing: -0.15,
+    color: color.blanco,
+    fontFamily: familia,
   },
 
   salidas: {
