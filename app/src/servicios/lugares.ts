@@ -233,28 +233,42 @@ export function ciudadesQueCasan(texto: string): Lugar[] {
 }
 
 /** Las ciudades desde las que hay corredor abierto. La lista de «Desde». */
+/**
+ * DE DÓNDE SE SALE: de cualquier ciudad servida — toda ruta se publica
+ * (24-08-2026). Las que originan un corredor van primero, porque son las de
+ * los kilómetros medidos; detrás, el resto del país, por nombre.
+ */
 export function ciudadesDeSalida(): Lugar[] {
-  const ids = new Set(fuente.corredores.map((c) => c.origin_city_id));
-  return fuente.ciudades.filter((c) => ids.has(c.id)).map((c) =>
-    comoLugar({ slug: c.slug, name: c.name, province: c.province, lat: c.lat, lng: c.lng }),
-  );
+  const conCorredor = new Set(fuente.corredores.map((c) => c.origin_city_id));
+  return [...fuente.ciudades]
+    .sort(
+      (a, b) =>
+        Number(conCorredor.has(b.id)) - Number(conCorredor.has(a.id)) ||
+        a.name.localeCompare(b.name),
+    )
+    .map((c) => comoLugar({ slug: c.slug, name: c.name, province: c.province, lat: c.lat, lng: c.lng }));
 }
 
 /**
- * A dónde hay corredor desde una ciudad. Es lo que enseña «Hacia» con el
- * campo en blanco: una lista vacía no dice a dónde llevamos.
+ * A DÓNDE SE VA desde una ciudad: los destinos con corredor medido primero,
+ * y detrás cualquier otra ciudad servida — una ruta sin corredor también se
+ * publica, con la distancia estimada. La propia ciudad no se ofrece: nadie
+ * viaja a donde ya está.
  */
 export function aDondeSeVaDesde(origen: string): Lugar[] {
   const de = fuente.ciudades.find((c) => c.slug === origen);
   if (!de) return [];
-  return fuente.corredores
+  const medidos = fuente.corredores
     .filter((c) => c.origin_city_id === de.id)
-    .flatMap((c) => {
-      const a = fuente.ciudades.find((x) => x.id === c.destination_city_id);
-      return a
-        ? [comoLugar({ slug: a.slug, name: a.name, province: a.province, lat: a.lat, lng: a.lng })]
-        : [];
-    });
+    .map((c) => c.destination_city_id);
+  const orden = new Map(medidos.map((id, i) => [id, i]));
+  return [...fuente.ciudades]
+    .filter((c) => c.id !== de.id)
+    .sort(
+      (a, b) =>
+        (orden.get(a.id) ?? 999) - (orden.get(b.id) ?? 999) || a.name.localeCompare(b.name),
+    )
+    .map((c) => comoLugar({ slug: c.slug, name: c.name, province: c.province, lat: c.lat, lng: c.lng }));
 }
 
 /**

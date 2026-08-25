@@ -16,7 +16,7 @@
  * esta pantalla no promete lo que el producto no hace.
  */
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -24,7 +24,6 @@ import {
   StyleSheet,
   Text,
   View,
-  useWindowDimensions,
 } from 'react-native';
 
 import { useRouter } from 'expo-router';
@@ -66,12 +65,30 @@ const VIAJES_DE_MUESTRA = [
 
 export default function Apertura() {
   const router = useRouter();
-  const { width } = useWindowDimensions();
-  /* Una lámina mide lo que el marco: en escritorio el marco, en el teléfono
-     la ventana. Es lo que hace que el desliz pare lámina a lámina. */
-  const ancho = Math.min(width, espacio.marco);
+  /* Una lámina mide lo que el marco — pero MEDIDO, no preguntado a la
+     ventana. `useWindowDimensions` responde CERO durante el prerender del
+     export estático: las tres láminas quedaban congeladas a ancho cero en
+     el HTML publicado, y el teléfono enseñaba las letras apiladas en
+     vertical (visto en un iPhone el 24-08). Con `onLayout` el ancho llega
+     del marco ya puesto en página, sea cual sea la ventana, y hasta
+     entonces las láminas no se dibujan: un fotograma en blanco, nunca uno
+     roto. */
+  const [ancho, setAncho] = useState(0);
   const [enCual, setEnCual] = useState(0);
   const tira = useRef<ScrollView>(null);
+
+  /* «Ya la vi» se escribe cuando la apertura de verdad se montó — no cuando
+     el índice DECIDIÓ mandarte aquí. Escribirlo durante el render del índice
+     era un efecto en pleno render: dos renders seguidos se contradecían y el
+     export estático se quedaba a medio camino. La llave es la que lee
+     `app/index.tsx`. */
+  useEffect(() => {
+    try {
+      globalThis.sessionStorage?.setItem('partimos.apertura.vista', '1');
+    } catch {
+      /* sin almacén, se verá dos veces: no rompe nada */
+    }
+  }, []);
 
   const ultima = enCual === LAMINAS.length - 1;
 
@@ -84,7 +101,10 @@ export default function Apertura() {
   };
 
   return (
-    <View style={estilos.pantalla}>
+    <View
+      style={estilos.pantalla}
+      onLayout={(e) => setAncho(Math.min(e.nativeEvent.layout.width, espacio.marco))}
+    >
       <CampoRojo altura={400} />
       <BarraDeEstado />
 
@@ -104,7 +124,11 @@ export default function Apertura() {
         </Pressable>
       </View>
 
-      {/* El deslizador: tres láminas, una pantalla cada una. */}
+      {/* El deslizador: tres láminas, una pantalla cada una. No se dibuja
+          hasta conocer el ancho — ver el comentario de arriba. */}
+      {ancho === 0 ? (
+        <View style={{ flex: 1 }} />
+      ) : (
       <ScrollView
         ref={tira}
         horizontal
@@ -192,6 +216,7 @@ export default function Apertura() {
           <Text style={estilos.copia}>{LAMINAS[2].copia}</Text>
         </View>
       </ScrollView>
+      )}
 
       {/* Debajo, fijos: los puntos, el botón, y las dos salidas calladas. */}
       <View style={estilos.pie}>

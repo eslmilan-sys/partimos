@@ -1,8 +1,9 @@
 # 05 · Ce que personne n'a encore tranché
 
-Deux questions. Aucune n'est technique : ce sont des **décisions de
-produit**, et elles bloquent des choses concrètes. Elles sont listées ici pour
-que ni toi, ni ton associé, ni Claude ne les « corrige » chacun de son côté.
+**Une seule question reste ouverte — la nº 3, les terminaux de bus — et
+c'est celle qui bloque l'envoi du lien de test.** Les trois autres sont
+tranchées et restent ici pour mémoire, avec leur raisonnement : c'est ce qui
+évite qu'on les rouvre sans s'en rendre compte.
 
 ---
 
@@ -36,23 +37,20 @@ une donnée datée. Détail complet, liste des modèles et ce qui reste à migre
 
 ---
 
-## 2 · Le facteur de route — 1,3 ou 1,65 ?
+## ✅ 2 · Le facteur de route — **tranché le 24-08-2026 : 1,65**
 
-**Le fait.** Pour un trajet en route libre (origine et destination écrites au
-clavier, hors corridor préétabli), on ne connaît que la **distance à vol
-d'oiseau** entre deux points. On la multiplie par un facteur pour approcher la
-distance réelle par la route.
+Les routes libres sont **ouvertes à la publication** (« all routes shall be
+opened »), et le facteur retenu est **1,65** — pas le 1,3 « classique » des
+mapas européens, parce qu'ici il se mesure : Panamá → Chitré fait 151 km à
+vol d'oiseau et 250 par la route. Avec 1,3, l'estimation était 35 % trop
+courte, le plafond trop bas, et le conducteur payait plus que sa part —
+l'erreur du mauvais côté.
 
-Panamá → Chitré : **151 km à vol d'oiseau**, **250 km par la route**. Soit un
-facteur réel de **1,65** sur ce corridor-là. Un facteur générique de 1,3 —
-courant ailleurs dans le monde — sous-estimerait ici de 35 %.
+Les péages inconnus restent à **zéro** : ce qu'on ne connaît pas ne se
+facture pas. Et l'écran dit « aproximado », parce que ça l'est.
 
-**Ce que ça bloque.** L'ouverture des trajets en route libre. Un facteur trop
-bas rend le plafond trop bas, et le conducteur paie plus que sa part.
-
-**Ce qu'il faut décider.** Un facteur unique (et lequel), ou un facteur par
-corridor mesuré sur les six corridors connus. La deuxième option est plus
-juste et pas beaucoup plus chère.
+**Reste à affiner, sans urgence :** un facteur par corridor mesuré, plutôt
+qu'un facteur unique, quand les six corridors auront leurs kilomètres relevés.
 
 ---
 

@@ -21,21 +21,25 @@ const CHITRE = {
   consumoL100km: CONSUMO_L_100KM.standard,
 };
 
-test('un sedán gasta 6,4 centavos por kilómetro', () => {
-  assert.equal(tasaPorKm(CONSUMO_L_100KM.standard), 6.4);
+/* La tabla de referencia es la de CONSUMO.md (24-08-2026): gasolina a
+   1,27 $/L y el sedán a 7,5 L/100 km. Las cifras viejas —20,60 / 7 / 6—
+   salían de 0,80 $/L, que nunca fue el precio panameño. */
+
+test('un sedán gasta 9,5 centavos por kilómetro', () => {
+  assert.equal(Math.round(tasaPorKm(CONSUMO_L_100KM.standard) * 1000) / 1000, 9.525);
 });
 
-test('el costo del viaje de referencia es 20,60 $', () => {
-  assert.equal(costoDelViaje(CHITRE), 2060);
+test('el costo del viaje de referencia es 29,19 $', () => {
+  assert.equal(costoDelViaje(CHITRE), 2919);
 });
 
-test('el tope de la ruta a Chitré es 7 $', () => {
-  assert.equal(topeDeRuta(costoDelViaje(CHITRE)), 700);
+test('el tope de la ruta a Chitré es 10 $', () => {
+  assert.equal(topeDeRuta(costoDelViaje(CHITRE)), 1000);
 });
 
-test('el aporte por defecto con 3 puestos es 6 $', () => {
+test('el aporte por defecto con 3 puestos es 8 $', () => {
   const costo = costoDelViaje(CHITRE);
-  assert.equal(aporteCalculado(costo, 3, topeDeRuta(costo)), 600);
+  assert.equal(aporteCalculado(costo, 3, topeDeRuta(costo)), 800);
 });
 
 test('el aporte baja al añadir puestos y nunca pasa del tope', () => {
@@ -43,7 +47,7 @@ test('el aporte baja al añadir puestos y nunca pasa del tope', () => {
   const tope = topeDeRuta(costo);
   assert.deepEqual(
     [1, 2, 3, 4].map((p) => aporteCalculado(costo, p, tope)),
-    [700, 700, 600, 500],
+    [1000, 1000, 800, 600],
   );
 });
 
@@ -52,11 +56,12 @@ test('el aporte nunca baja del suelo de 3 $', () => {
   assert.equal(aporteCalculado(coronado, 4, topeDeRuta(coronado)), 300);
 });
 
-test('con el carro lleno el conductor recupera 18 $ de 20,60 $ y pone 2,60 $', () => {
+test('con el carro lleno el conductor recupera 24 $ de 29,19 $ y pone 5,19 $', () => {
   const costo = costoDelViaje(CHITRE);
-  const recupera = loQueRecuperas(600, 3);
-  assert.equal(recupera, 1800);
-  assert.equal(loQuePonesDeTuBolsillo(costo, recupera), 260);
+  const recupera = loQueRecuperas(800, 3);
+  assert.equal(recupera, 2400);
+  // R1 en una línea: ni lleno recupera lo que gastó.
+  assert.equal(loQuePonesDeTuBolsillo(costo, recupera), 519);
 });
 
 test('la pastilla dice de dónde sale la cifra', () => {
@@ -70,7 +75,7 @@ test('el tope no sube porque el conductor maneje una camioneta', () => {
   const suv = costoDelViaje({ ...CHITRE, consumoL100km: CONSUMO_L_100KM.suv });
   assert.ok(suv > sedan);
   // el tope es de la ruta: se calcula con el carro de referencia, no con el suyo
-  assert.equal(topeDeRuta(sedan), 700);
+  assert.equal(topeDeRuta(sedan), 1000);
 });
 
 test('las tarifas sobre un aporte de 6 $', () => {

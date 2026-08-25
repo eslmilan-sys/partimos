@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import { useVolver } from '@/ui/salidas';
 
 import { aporteCalculado, origenDelAporte } from '@/dominio/aporte';
-import type { Lugar } from '@/dominio/lugar';
+import { type Lugar, aParams } from '@/dominio/lugar';
 import { LO_QUE_FALTA, quePuedeHacer } from '@/dominio/permiso';
 import {
   type PublicacionPreparada,
@@ -136,11 +136,19 @@ export default function Publicar() {
   }, [desde, hacia]);
 
   useEffect(() => {
-    if (!yo || !ruta) return;
-    prepararPublicacion(yo, ruta, salidaISO)
+    if (!yo) return;
+    /* Ruta libre (24-08-2026): sin corredor también se prepara — con los
+       dos lugares elegidos. Sin par completo no hay nada que preparar. */
+    if (!ruta && !(desde && hacia)) return;
+    prepararPublicacion(
+      yo,
+      ruta,
+      salidaISO,
+      !ruta && desde && hacia ? { desde, hacia } : undefined,
+    )
       .then(setDatos)
       .catch(() => setDatos(null));
-  }, [yo, ruta, salidaISO]);
+  }, [yo, ruta, salidaISO, desde, hacia]);
 
   const calculado = useMemo(
     () => (datos ? aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos) : 0),
@@ -169,13 +177,14 @@ export default function Publicar() {
   );
 
   /**
-   * LA RUTA QUE LA LISTA NO TRAE. El par elegido no casa con ningún corredor
-   * abierto: se calcula igual —misma fórmula, distancia por carretera desde
-   * las coordenadas, sin peajes— y se ofrece guardar la ruta. No se publica
-   * lo que no está abierto: abrir un corredor es una decisión del producto,
-   * no de esta pantalla.
+   * TODA RUTA SE PUBLICA — decidido el 24-08-2026. El par que no casa con
+   * ningún corredor sigue por el MISMO formulario de siempre: la distancia
+   * sale de las coordenadas, los peajes van en cero, y la base lo acepta
+   * desde 0022. Esta pantalla intermedia solo queda para el único caso que
+   * de verdad no puede seguir: un par SIN coordenadas, al que no se le puede
+   * calcular el aporte — y sin aporte calculado no hay tope que defender.
    */
-  if (desde && hacia && !ruta) {
+  if (desde && hacia && !ruta && !estimacion) {
     return (
       <View style={estilos.pantalla}>
       <BarraDeEstado />
@@ -241,54 +250,20 @@ export default function Publicar() {
 
             <View style={estilos.separadorHoja} />
 
-            {estimacion ? (
-              <>
-                <Epigrafe>Lo que saldría, con la misma fórmula</Epigrafe>
-                <View style={estilos.filaLibre}>
-                  <Text style={estilos.libreEtiqueta}>Distancia</Text>
-                  <Text style={[estilos.libreValor, tabular]}>
-                    {`${estimacion.esAproximada ? '≈ ' : ''}${estimacion.distanciaKm} km`}
-                  </Text>
-                </View>
-                <View style={estilos.filaLibre}>
-                  <Text style={estilos.libreEtiqueta}>Costo del viaje</Text>
-                  <Text style={[estilos.libreValor, tabular]}>
-                    {formatearDinero(estimacion.costoCentavos)}
-                  </Text>
-                </View>
-                <View style={estilos.filaLibre}>
-                  <Text style={estilos.libreEtiqueta}>Tope por puesto</Text>
-                  <Text style={[estilos.libreValor, tabular]}>
-                    {formatearDineroRedondo(estimacion.topeCentavos)}
-                  </Text>
-                </View>
-                <View style={estilos.filaLibre}>
-                  <Text style={estilos.libreEtiqueta}>{`Aporte con ${puestos} puestos`}</Text>
-                  <View style={estilos.filaPrecioLibre}>
-                    <Text style={estilos.unidadLibre}>B/</Text>
-                    <Text style={[estilos.precioLibre, tabular]}>
-                      {cifraRedonda(estimacion.aporteCentavos)}
-                    </Text>
-                  </View>
-                </View>
-                <Text style={estilos.notaLibre}>
-                  {estimacion.esAproximada
-                    ? 'Aproximado: sale de la distancia por carretera y sin contar peajes. La fórmula es la misma de todas las rutas — nunca depende de la demanda.'
-                    : 'Con los kilómetros medidos del corredor.'}
-                </Text>
-              </>
-            ) : (
-              <Text style={estilos.notaLibre}>
-                A este par le faltan coordenadas para estimar la distancia. Elige los
-                sitios desde las sugerencias del buscador.
-              </Text>
-            )}
+            {/* Aquí solo se llega SIN estimación: el resumen con cifras vive
+                en el formulario normal, que ahora recibe también la ruta
+                libre. */}
+            <Text style={estilos.notaLibre}>
+              A este par le faltan coordenadas para estimar la distancia. Elige
+              los sitios desde las sugerencias del buscador.
+            </Text>
           </View>
 
           <View style={estilos.pieLibre}>
             <Text style={estilos.notaPie}>
-              Esta ruta todavía no está abierta para publicar. Guárdala y te
-              avisamos en cuanto se abra.
+              A este par le faltan coordenadas para calcular el aporte, y sin
+              cálculo no se publica. Elige los sitios desde las sugerencias del
+              buscador — o guarda la ruta y te avisamos.
             </Text>
             {rutaGuardada ? (
               <Boton tono="blanco" desactivado>
@@ -625,6 +600,10 @@ export default function Publicar() {
               pathname: '/(conductor)/repaso',
               params: {
                 ruta,
+                /* Los dos extremos viajan también: en ruta libre son lo único
+                   que dice qué se publica. */
+                ...aParams(desde, 'o'),
+                ...aParams(hacia, 'd'),
                 salida: salidaISO,
                 paradas: String(paradas),
                 puestos: String(puestos),

@@ -38,7 +38,7 @@ import {
   diaEnPanama,
   proximoDiaConViajes,
 } from '@/servicios/viajes';
-import { hayCorredor, nombreDeCiudad, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
+import { nombreDeCiudad, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { guardarRutaBuscada } from '@/servicios/rutas';
 import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -93,7 +93,6 @@ export default function Resultados() {
 
   const origen = ruta?.origen ?? ORIGEN_POR_DEFECTO;
   const destino = ruta?.destino ?? DESTINO_POR_DEFECTO;
-  const servimosLaRuta = hayCorredor(origen, destino);
   const yo = useMiId('22222222-2222-4222-8222-222222222222');
   const [guardada, setGuardada] = useState(false);
   const [filtros, setFiltros] = useState<Filtros>({});
@@ -107,13 +106,8 @@ export default function Resultados() {
   const buscar = useCallback(async () => {
     if (!ruta) return;
     setCargando(true);
-    if (!servimosLaRuta) {
-      setDia(ruta.dia);
-      setViajes([]);
-      setAgotados([]);
-      setCargando(false);
-      return;
-    }
+    /* Toda ruta se busca — decidido el 24-08-2026. Un viaje de ruta libre
+       no cuelga de ningún corredor y aun así tiene que aparecer aquí. */
     const fecha = ruta.dia ?? (await proximoDiaConViajes(origen, destino));
     setDia(fecha);
     const encontrados = await buscarViajes(origen, destino, fecha, filtros);
@@ -153,7 +147,7 @@ export default function Resultados() {
     setViajes(todos.filter((v) => v.puestosLibres >= (ruta.pasajeros ?? 1)));
     setAgotados(todos.filter((v) => v.puestosLibres < (ruta.pasajeros ?? 1)));
     setCargando(false);
-  }, [filtros, ruta, origen, destino, servimosLaRuta]);
+  }, [filtros, ruta, origen, destino]);
 
   useEffect(() => {
     buscar();
@@ -347,25 +341,17 @@ export default function Resultados() {
               <View style={estilos.vacioLinea} />
               <PuntaDeFlecha tamano={10} tinta={color.ink300} />
             </View>
-            {servimosLaRuta ? (
-              <>
-                <Text style={estilos.vacioTitulo}>{`Sin viajes a ${etiquetaDestino}`}</Text>
-                <Text style={estilos.vacioTexto}>
-                  {activos.length > 0
-                    ? 'Nadie ha publicado esta ruta con los filtros aplicados. Quita alguno o mira otro día.'
-                    : ruta.pasajeros > 1
-                      ? `Nadie lleva ${ruta.pasajeros} puestos juntos ese día. Prueba con menos puestos o con otro día.`
-                      : 'Nadie sale ese día. Mira otro día, o guarda la ruta y te avisamos.'}
-                </Text>
-              </>
-            ) : (
-              <>
-                <Text style={estilos.vacioTitulo}>Todavía no hay esa ruta.</Text>
-                <Text style={estilos.vacioTexto}>
-                  {`Nadie ha publicado ${nombreDeCiudad(origen)} → ${etiquetaDestino}. Guárdala y te avisamos cuando alguien la abra.`}
-                </Text>
-              </>
-            )}
+            {/* Una sola voz: toda ruta existe y se busca; lo único que puede
+                faltar son viajes. El «todavía no hay esa ruta» murió con la
+                apertura de las rutas libres (24-08-2026). */}
+            <Text style={estilos.vacioTitulo}>{`Sin viajes a ${etiquetaDestino}`}</Text>
+            <Text style={estilos.vacioTexto}>
+              {activos.length > 0
+                ? 'Nadie ha publicado esta ruta con los filtros aplicados. Quita alguno o mira otro día.'
+                : ruta.pasajeros > 1
+                  ? `Nadie lleva ${ruta.pasajeros} puestos juntos ese día. Prueba con menos puestos o con otro día.`
+                  : 'Nadie sale ese día. Mira otro día, o guarda la ruta y te avisamos.'}
+            </Text>
           </View>
         ) : (
           <View style={{ gap: 16 }}>
@@ -445,7 +431,7 @@ export default function Resultados() {
 
       {/* Fijo abajo: la alerta de ruta. Blanca cuando está por poner, teñida
           del acento cuando ya quedó puesta. */}
-      {servimosLaRuta ? (
+      {origen && destino ? (
         <View style={estilos.pieAlerta}>
           {guardada ? (
             <View style={[estilos.alerta, estilos.alertaPuesta]}>

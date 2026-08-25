@@ -82,11 +82,21 @@ export async function buscarViajes(
   fecha: string,
   filtros: Filtros = {},
 ): Promise<ViajeEnResultados[]> {
+  /* Por corredor cuando lo hay — y por las CIUDADES del viaje cuando no:
+     un viaje de ruta libre no cuelga de ningún corredor (0022) y aun así
+     tiene que aparecer donde se le busca. Es el espejo del LEFT JOIN de
+     `available_trips` (0031). */
   const corredor = corredorDe(origen, destino);
-  if (!corredor) return demora([]);
+  const idOrigen = fuente.ciudades.find((c) => c.slug === origen)?.id ?? null;
+  const idDestino = fuente.ciudades.find((c) => c.slug === destino)?.id ?? null;
+  if (!corredor && (!idOrigen || !idDestino)) return demora([]);
 
   const encontrados = fuente.viajes
-    .filter((v) => v.corridor_id === corredor.id)
+    .filter(
+      (v) =>
+        (corredor != null && v.corridor_id === corredor.id) ||
+        (v.origin_city_id === idOrigen && v.destination_city_id === idDestino),
+    )
     .filter((v) => v.status === 'published')
     .filter((v) => diaEnPanama(v.departure_at) === fecha)
     .filter((v) => (filtros.aceptaMaletas ? v.accepts_luggage : true))
@@ -356,7 +366,15 @@ export type ParadaOfrecida = {
 
 /** Todo lo que `5c` necesita saber antes de que el conductor toque nada. */
 export type PublicacionPreparada = {
-  corredor: Corridor;
+  /** Null en ruta libre: el viaje no cuelga de ningún corredor (0022). */
+  corredor: Corridor | null;
+  /** La ciudad de cada extremo, resuelta al preparar — en ruta libre no hay
+      corredor que la sepa después. Null si el extremo no es ciudad servida. */
+  origenCiudadId: string | null;
+  destinoCiudadId: string | null;
+  /** El punto exacto de cada extremo, si el lugar elegido lo traía. */
+  origenPunto: { lat: number; lng: number } | null;
+  destinoPunto: { lat: number; lng: number } | null;
   carro: Vehicle;
   placa: string;
   origen: string;
@@ -378,9 +396,18 @@ export async function prepararPublicacion(
   conductorId: string,
   corredorSlug: string,
   salida: string,
+  /**
+   * LA RUTA LIBRE TAMBIÉN SE PUBLICA. Decidido el 24-08-2026: «all routes
+   * shall be opened». Antes, un par sin corredor solo podía guardarse; la
+   * base lo permite desde 0022 (`corridor_id` nullable) y la búsqueda lo
+   * encuentra desde 0031 (LEFT JOIN). Sin corredor, los kilómetros salen de
+   * las coordenadas por el factor de carretera y los peajes van en cero —
+   * desconocidos no se cobran.
+   */
+  libre?: { desde: Lugar; hacia: Lugar },
 ): Promise<PublicacionPreparada> {
-  const corredor = fuente.corredores.find((c) => c.slug === corredorSlug);
-  if (!corredor) throw new Error(`No conocemos la ruta ${corredorSlug}`);
+  const corredor = fuente.corredores.find((c) => c.slug === corredorSlug) ?? null;
+  if (!corredor && !libre) throw new Error(`No conocemos la ruta ${corredorSlug}`);
 
   /**
    * SIN CARRO TAMBIÉN SE CALCULA.
@@ -414,33 +441,59 @@ export async function prepararPublicacion(
       created_at: new Date().toISOString(),
     };
 
+  /* Los kilómetros y peajes del camino: medidos si hay corredor; de las
+     coordenadas por el factor de carretera —y peaje cero— si no. La fórmula
+     es la misma; solo cambia de dónde sale la distancia. */
+  let distanciaKm: number;
+  let peajeCentavos: number;
+  let duracionMin: number;
+  if (corredor) {
+    distanciaKm = Number(corredor.distance_km);
+    peajeCentavos = Number(corredor.toll_cents);
+    duracionMin = corredor.typical_duration_min ?? 0;
+  } else {
+    const estimada = estimarRuta(libre!.desde, libre!.hacia);
+    if (!estimada) {
+      throw new Error('A este par le faltan coordenadas para estimar la distancia.');
+    }
+    distanciaKm = estimada.distanciaKm;
+    peajeCentavos = 0;
+    duracionMin = estimada.duracionMin;
+  }
+
   const consumo = consumoDe(carro);
-  const costo = costoDelViaje({
-    distanciaKm: Number(corredor.distance_km),
-    peajeCentavos: Number(corredor.toll_cents),
-    consumoL100km: consumo,
-  });
+  const costo = costoDelViaje({ distanciaKm, peajeCentavos, consumoL100km: consumo });
 
   // El tope es de la ruta: se calcula con el carro de referencia, no con el suyo.
   const costoDeReferencia = costoDelViaje({
-    distanciaKm: Number(corredor.distance_km),
-    peajeCentavos: Number(corredor.toll_cents),
+    distanciaKm,
+    peajeCentavos,
     consumoL100km: CONSUMO_L_100KM.standard,
   });
 
+  const ciudadId = (slug: string | null | undefined) =>
+    slug ? (fuente.ciudades.find((c) => c.slug === slug)?.id ?? null) : null;
+  const punto = (l: Lugar | undefined) =>
+    l && l.lat != null && l.lng != null ? { lat: l.lat, lng: l.lng } : null;
+
   return demora({
     corredor,
+    origenCiudadId: corredor ? corredor.origin_city_id : ciudadId(libre?.desde.citySlug),
+    destinoCiudadId: corredor ? corredor.destination_city_id : ciudadId(libre?.hacia.citySlug),
+    origenPunto: corredor ? null : punto(libre?.desde),
+    destinoPunto: corredor ? null : punto(libre?.hacia),
     carro,
     carroPropio: suyo != null,
     placa: fuente.placasCompletas[carro.id] ?? '',
     /* De las ciudades del corredor y no escrito a mano: aquí ponía siempre
        «Albrook · Terminal» y «Chitré · Parque Unión», así que publicar
-       Panamá → David dejaba un viaje que decía ir a Chitré. */
-    origen: nombreDeCiudadDe(corredor.origin_city_id),
-    destino: nombreDeCiudadDe(corredor.destination_city_id),
+       Panamá → David dejaba un viaje que decía ir a Chitré. En ruta libre,
+       el lugar TAL COMO el conductor lo eligió (0022: origin_label). */
+    origen: corredor ? nombreDeCiudadDe(corredor.origin_city_id) : libre!.desde.nombre,
+    destino: corredor ? nombreDeCiudadDe(corredor.destination_city_id) : libre!.hacia.nombre,
     salida,
-    distanciaKm: Number(corredor.distance_km),
-    duracionMin: corredor.typical_duration_min ?? 0,
+    distanciaKm,
+    duracionMin,
     costoCentavos: costo,
     topeCentavos: topeDeRuta(costoDeReferencia),
     // el conductor nunca se ofrece a sí mismo: los puestos del carro menos el suyo
@@ -455,7 +508,11 @@ export async function prepararPublicacion(
 export type BorradorDePublicacion = {
   conductorId: string;
   carroId: string;
+  /** Vacío en ruta libre: entonces mandan `desde` y `hacia`. */
   corredorSlug: string;
+  /** Los dos extremos de una ruta libre, tal como se eligieron. */
+  desde?: Lugar | null;
+  hacia?: Lugar | null;
   salida: string;
   /** Cuántas paradas de las ofrecidas van incluidas, en orden. */
   paradas: number;
@@ -474,6 +531,7 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
     borrador.conductorId,
     borrador.corredorSlug,
     borrador.salida,
+    borrador.desde && borrador.hacia ? { desde: borrador.desde, hacia: borrador.hacia } : undefined,
   );
   const aporte =
     borrador.aporteCentavos ??
@@ -488,7 +546,7 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
     id: nuevoId(),
     driver_id: borrador.conductorId,
     vehicle_id: borrador.carroId,
-    corridor_id: preparada.corredor.id,
+    corridor_id: preparada.corredor?.id ?? null,
     departure_at: borrador.salida,
     /* La llegada estimada se guarda: sin ella los resultados no pueden
        decir cuánto dura el viaje ni a qué hora llegas. */
@@ -503,7 +561,8 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
     price_rule_id: '6ad0a57f-ec7c-4a83-b331-523af650584e',
     snap_distance_km: preparada.distanciaKm,
     snap_rate_per_km_cents: Math.round(preparada.costoCentavos / preparada.distanciaKm),
-    snap_toll_cents: Number(preparada.corredor.toll_cents),
+    // Ruta libre: peaje desconocido no se cobra, y la prueba lo dice.
+    snap_toll_cents: preparada.corredor ? Number(preparada.corredor.toll_cents) : 0,
     snap_cost_total_cents: preparada.costoCentavos,
     snap_occupants: borrador.puestos + 1,
     snap_max_price_cents: preparada.topeCentavos,
@@ -523,12 +582,12 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
     /* LA VILLE SE FIXE ICI, en publiant, où on sait encore ce qui a été
        choisi. Après, personne ne peut plus la deviner : « Albrook » ne dit
        pas « Ciudad de Panamá ». Migration 0031. */
-    origin_city_id: preparada.corredor.origin_city_id,
-    destination_city_id: preparada.corredor.destination_city_id,
-    origin_lat: null,
-    origin_lng: null,
-    destination_lat: null,
-    destination_lng: null,
+    origin_city_id: preparada.origenCiudadId,
+    destination_city_id: preparada.destinoCiudadId,
+    origin_lat: preparada.origenPunto?.lat ?? null,
+    origin_lng: preparada.origenPunto?.lng ?? null,
+    destination_lat: preparada.destinoPunto?.lat ?? null,
+    destination_lng: preparada.destinoPunto?.lng ?? null,
     accepts_luggage: borrador.aceptaMaletas,
     allows_pets: borrador.aceptaMascotas,
     allows_smoking: borrador.sePuedeFumar,
@@ -548,8 +607,14 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
    * invisible aux autres jusqu'à ce qu'une deuxième personne s'en serve —
    * la règle vit dans la base, migration 0035.
    */
-  void recordarLugar(preparada.origen, ciudadSlugDe(viaje.origin_city_id));
-  void recordarLugar(preparada.destino, ciudadSlugDe(viaje.destination_city_id));
+  /* Con su punto cuando lo hay: la regla del 24-08 — sin coordenadas no se
+     crea lugar, solo se cuenta el uso de uno que ya exista (0036). */
+  void recordarLugar(preparada.origen, ciudadSlugDe(viaje.origin_city_id), preparada.origenPunto);
+  void recordarLugar(
+    preparada.destino,
+    ciudadSlugDe(viaje.destination_city_id),
+    preparada.destinoPunto,
+  );
 
   /**
    * Y SUS PARADAS. Publicar escribía el viaje y no las paradas, así que un
@@ -630,11 +695,17 @@ export function rutasPublicables(): RutaPublicable[] {
 
 /**
  * Del camino entre dos LADOS de la carretera a la cifra en kilómetros: la
- * distancia en línea recta por el factor de carretera. 1,3 es el factor
- * clásico para vías interurbanas — la Interamericana es bastante directa —
- * y se dice «aproximado» en pantalla precisamente porque lo es.
+ * distancia en línea recta por el factor de carretera.
+ *
+ * 1,65 y no el 1,3 «clásico», porque el 1,3 es de mapas europeos y aquí se
+ * puede MEDIR: Panamá → Chitré son 151 km en línea recta y 250 por
+ * carretera — la Interamericana bordea el golfo antes de bajar a Azuero —
+ * o sea un factor real de 1,655. Con 1,3 el estimado quedaba un 35 % corto
+ * (245 km para Playa Venao → Panamá, que anda por los 330 reales): un tope
+ * corto hace que el conductor pague más que su parte, y la equivocación
+ * barata es la contraria. Se dice «aproximado» en pantalla porque lo es.
  */
-const FACTOR_DE_CARRETERA = 1.3;
+const FACTOR_DE_CARRETERA = 1.65;
 /** A cuánto se avanza de media entre ciudades, para estimar la duración. */
 const KM_POR_HORA = 65;
 

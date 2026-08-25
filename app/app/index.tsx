@@ -32,18 +32,16 @@ const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
  * pestaña y volver, eso sí, vuelve a empezar — es una visita nueva.
  */
 const VISTA = 'partimos.apertura.vista';
+/* Solo LEE. Quien escribe es la apertura misma, al montarse: escribir aquí,
+   en pleno render, hacía que dos renders seguidos se contradijeran — el
+   primero decidía «a la apertura», el segundo leía la marca recién puesta y
+   decidía «a buscar» — y el export estático se quedaba clavado entre los
+   dos, con el spinner puesto. */
 const yaLaVio = () => {
   try {
     return globalThis.sessionStorage?.getItem(VISTA) === '1';
   } catch {
     return false;
-  }
-};
-const recordarla = () => {
-  try {
-    globalThis.sessionStorage?.setItem(VISTA, '1');
-  } catch {
-    /* sin almacén no hay memoria: se verá dos veces, que no rompe nada */
   }
 };
 
@@ -59,7 +57,6 @@ export default function Puerta() {
   }
 
   if (MODO === 'simulado' && !yaLaVio()) {
-    recordarla();
     return <Redirect href="/(cuenta)/apertura" />;
   }
 

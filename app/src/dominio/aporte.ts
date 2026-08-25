@@ -4,26 +4,49 @@
  * Todo en centavos enteros, como la base (`*_cents`). El formato «6,00 $» vive
  * en ui/Dinero.tsx y en ningún otro sitio.
  *
- * Origen de las cifras: `5c` Publicar y `5d` El tope del traspaso de diseño.
  * Viaje de referencia — Albrook → Chitré, 250 km, peaje 3,00 $, sedán:
- *   costo 20,60 $ · tope 7 $ · aporte por defecto con 3 puestos 6 $.
+ *   costo 29,19 $ · tope 10 $ · aporte por defecto con 3 puestos 8 $.
+ * (El traspaso de diseño decía 20,60 / 7 / 6: eran las cifras con la
+ * gasolina a 0,80 $/L, que nunca fue el precio panameño. Corregido el
+ * 24-08-2026 con la decisión de `supabase/CONSUMO.md`.)
  */
 
 export type CategoriaVehiculo = 'economy' | 'standard' | 'suv';
 
-/** Litros a los 100 km por categoría. El SUV gasta más, y por eso su costo sube. */
+/**
+ * Litros a los 100 km por categoría — los de `supabase/CONSUMO.md`, EN
+ * CARRETERA y no en ciudad: un interurbano rueda estable por la
+ * Interamericana, y tomar el consumo urbano inflaría el tope. En la duda,
+ * el valor bajo: equivocarse hacia abajo le cuesta centavos al conductor;
+ * hacia arriba, el estatuto jurídico del producto.
+ *
+ * Los CÓDIGOS siguen siendo los de `vehicle_categories` en la base
+ * (economy/standard/suv); el renombre a compacto/sedán/SUV — y las dos
+ * categorías nuevas, 4×4 e híbrido — llegan con la migración que también
+ * retira `rate_per_km_cents`. Los VALORES ya son los decididos.
+ */
 export const CONSUMO_L_100KM: Record<CategoriaVehiculo, number> = {
-  economy: 7.0,
-  standard: 8.0,
-  suv: 11.0,
+  /** Compacto — Picanto, Yaris, March. */
+  economy: 6.5,
+  /** Sedán — Corolla, Sentra, Civic. El carro de referencia del tope. */
+  standard: 7.5,
+  /** SUV dos ruedas — CR-V, Tucson, Kicks. */
+  suv: 9.5,
 };
 
 /**
  * Precio de la gasolina en centavos por litro.
- * En Panamá cambia cada quincena: esto es un dato, no una constante del código.
- * Vive aquí hasta que exista la fila versionada en la base.
+ *
+ * 1,27 $/L (≈ 4,82 $ el galón) — el precio panameño real a 24-08-2026,
+ * todavía de un resumen y no del boletín de la Secretaría Nacional de
+ * Energía: A CONFIRMAR contra la publicación oficial, por tipo (91/95/
+ * diésel), antes del primer aporte enseñado a un pasajero de verdad.
+ *
+ * En Panamá cambia por resolución cada quincena: esto es un dato fechado,
+ * no una constante del código. Vive aquí hasta que exista la fila
+ * versionada en la base (`fuel_prices`, ver CONSUMO.md).
  */
-export const PRECIO_GASOLINA_CENTAVOS_POR_LITRO = 80;
+export const PRECIO_GASOLINA_CENTAVOS_POR_LITRO = 127;
 
 /** Margen sobre el recorrido para cubrir los desvíos de recogida. `price_rules.detour_tolerance_pct`. */
 export const MARGEN_DESVIO_PCT = 10;

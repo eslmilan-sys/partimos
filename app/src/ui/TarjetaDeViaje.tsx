@@ -125,7 +125,9 @@ export function TarjetaDeViaje({
           {/* Le point exact sous sa ville : sur une seule ligne, « Ciudad de
               Panamá · Albrook » se faisait tronquer et le point — la seule
               chose qui dit où se tenir — disparaissait. */}
-          {viaje.origenPunto ? (
+          {/* El punto solo si añade algo: «David · David» no dice nada
+              dos veces (invariante: la ciudad nunca aparece dos veces). */}
+          {viaje.origenPunto && viaje.origenPunto !== viaje.origen ? (
             <Text style={estilos.punto} numberOfLines={1}>
               {viaje.origenPunto}
             </Text>
@@ -153,7 +155,7 @@ export function TarjetaDeViaje({
           <Text style={estilos.lugar} numberOfLines={1}>
             {viaje.destino}
           </Text>
-          {viaje.destinoPunto ? (
+          {viaje.destinoPunto && viaje.destinoPunto !== viaje.destino ? (
             <Text style={[estilos.punto, { textAlign: 'right' }]} numberOfLines={1}>
               {viaje.destinoPunto}
             </Text>

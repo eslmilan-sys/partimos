@@ -174,10 +174,16 @@ parler :
   ENA. Une session qui cherche « les péages des six corridors » tombera sur
   ENA et mettra des péages de ville dans un trajet vers David. Le barème et la
   règle du péage de référence sont dans `supabase/PEAJES.md`.
-- **Le prix du carburant dans `aporte.ts` vaut 0,80 $/L, et c'est faux.** Le
-  vrai prix panaméen tourne autour de **1,27 $/L** — donc tous les montants
-  affichés aujourd'hui sont environ un tiers trop bas. La correction attend la
-  même migration, parce que le prix doit devenir une ligne datée, pas une
-  autre constante.
+- **Le prix du carburant côté app est à 1,27 $/L depuis le 24-08-2026**
+  (`aporte.ts`), avec les consommations de `CONSUMO.md` (6,5/7,5/9,5). Le
+  trajet de référence vaut désormais 29,19 / 10 / 8 — plus 20,60 / 7 / 6.
+  Reste la migration : le prix doit devenir une ligne datée (`fuel_prices`),
+  la colonne `rate_per_km_cents` doit sortir, et les catégories 4×4/híbrido
+  doivent naître. Elle attend le péage de l'Autopista Arraiján–La Chorrera.
+- **Toutes les routes se publient depuis le 24-08-2026** — « all routes
+  shall be opened ». La route libre suit le même formulaire, kilomètres
+  estimés par coordonnées × 1,65 (facteur MESURÉ sur Panamá–Chitré :
+  151 km à vol d'oiseau, 250 par la route), péages inconnus à zéro. La
+  recherche trouve ces trajets par leurs villes (miroir du LEFT JOIN 0031).
 - **Il n'y a pas de table `notifications`.** Les avis du design existent comme
   type dans l'app, en attendant la migration.

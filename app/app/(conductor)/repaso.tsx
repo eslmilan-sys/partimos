@@ -13,12 +13,14 @@
  * el carro lleno no cubre el viaje entero, porque tú también pones tu parte.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
+import { deParams } from '@/dominio/lugar';
+import { ciudadesConocidas } from '@/servicios/lugares';
 
 import { aporteCalculado } from '@/dominio/aporte';
 import {
@@ -50,6 +52,14 @@ export default function Repaso() {
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const p = useLocalSearchParams<{
     ruta?: string;
+    o?: string;
+    oNom?: string;
+    oTipo?: string;
+    oPos?: string;
+    d?: string;
+    dNom?: string;
+    dTipo?: string;
+    dPos?: string;
     salida?: string;
     paradas?: string;
     puestos?: string;
@@ -69,14 +79,22 @@ export default function Repaso() {
   const puestos = Number(p.puestos ?? 3);
   const aporteElegido = p.aporte ? Number(p.aporte) : null;
 
+  /* Los dos extremos, si vinieron: en ruta libre son lo único que dice qué
+     se publica. `deParams` es el mismo des-serializador de resultados. */
+  const desde = useMemo(() => deParams(ciudadesConocidas(), p, 'o'), [p.o, p.oNom, p.oPos]);
+  const hacia = useMemo(() => deParams(ciudadesConocidas(), p, 'd'), [p.d, p.dNom, p.dPos]);
+  const libre = !p.ruta && desde && hacia ? { desde, hacia } : undefined;
+
   useEffect(() => {
-    if (!yo || !p.ruta || !p.salida) return;
-    prepararPublicacion(yo, p.ruta, p.salida)
+    if (!yo || !p.salida) return;
+    if (!p.ruta && !libre) return;
+    prepararPublicacion(yo, p.ruta ?? '', p.salida, libre)
       .then(setDatos)
       .catch(() => setNoEsta(true));
-  }, [yo, p.ruta, p.salida]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yo, p.ruta, p.salida, desde, hacia]);
 
-  if (noEsta || (!p.ruta && !datos))
+  if (noEsta || (!p.ruta && !libre && !datos))
     return (
       <NoEsta
         titulo="Falta lo que ibas a publicar"
@@ -233,14 +251,16 @@ export default function Repaso() {
          
           desactivado={publicando}
           alPulsar={async () => {
-            if (!yo || !p.ruta || !p.salida) return;
+            if (!yo || !p.salida || (!p.ruta && !libre)) return;
             setPublicando(true);
             setQuePaso(null);
             try {
               const viaje = await publicarViaje({
                 conductorId: yo,
                 carroId: datos.carro.id,
-                corredorSlug: p.ruta,
+                corredorSlug: p.ruta ?? '',
+                desde: libre?.desde ?? null,
+                hacia: libre?.hacia ?? null,
                 salida: p.salida,
                 paradas,
                 puestos,

@@ -193,7 +193,7 @@ migration.
 | `fuel_prices` *(nouvelle)* | `fuel_type` (91/95/diesel), `precio_galon_centavos`, `vigente_desde`, `fuente`. Versionnée, jamais modifiée en place — comme `price_rules`. |
 | `vehicle_models` *(nouvelle)* | `marca`, `modelo`, `category_code`. Alimente la liste de choix. |
 | `vehicles` | Un `model_id` optionnel, et une consommation ajustée bornée 4–16. |
-| `aporte.ts` | `CONSUMO_L_100KM` passe de 3 à 5 entrées ; `PRECIO_GASOLINA_CENTAVOS_POR_LITRO` **disparaît** — le prix arrive en paramètre depuis la base. |
+| `aporte.ts` | **Fait le 24-08-2026 :** le prix est à 127 c/L et les consommations aux valeurs décidées (economy→6,5 · standard→7,5 · suv→9,5 — les codes restent ceux de la base jusqu'à la migration). Restera : la constante disparaît quand `fuel_prices` existera, et les 5 catégories nommées naîtront avec la migration. |
 | `trips.snap_rate_per_km_cents` | Reste : c'est une **preuve figée**, pas un paramètre. On y écrit le taux effectif calculé, pour pouvoir reconstituer un prix trois ans plus tard. |
 
 Rien de tout ça n'est encore écrit. Ce fichier est la décision ; la migration
