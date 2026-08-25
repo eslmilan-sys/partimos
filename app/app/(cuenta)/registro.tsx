@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -46,6 +46,9 @@ export default function Registro() {
   const [apellido, setApellido] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [creando, setCreando] = useState(false);
+  /** Cuenta creada, correo de confirmación en camino: un estado propio, no
+      un «error» verde. Aquí es donde se explica QUÉ hacer ahora. */
+  const [hecha, setHecha] = useState(false);
 
   /**
    * La cuenta se crea en el último paso, no en el primero: hasta que no hay
@@ -66,10 +69,10 @@ export default function Registro() {
       return;
     }
 
-    // Sin sesión hay un correo de confirmación esperando: decirlo, y no dejar
-    // a alguien mirando una pantalla que no avanza.
+    // Sin sesión hay un correo de confirmación esperando: la pantalla entera
+    // se vuelve la explicación de qué hacer — no un aviso con pinta de error.
     if (!r.dentro) {
-      setError('Cuenta creada. Confirma el correo que acabamos de enviarte y entra.');
+      setHecha(true);
       return;
     }
 
@@ -100,16 +103,26 @@ export default function Registro() {
           <Text style={estilos.epigrafeCampo}>{`Paso ${paso} de 3`}</Text>
         </View>
         <Text style={estilos.titular}>
-          {paso === 1 ? 'Tu ' : paso === 2 ? 'Elige una ' : '¿Cómo te '}
+          {hecha ? 'Revisa tu ' : paso === 1 ? 'Tu ' : paso === 2 ? 'Elige una ' : '¿Cómo te '}
           <Text style={estilos.titularFuerte}>
-            {paso === 1 ? 'correo' : paso === 2 ? 'contraseña' : 'llamas?'}
+            {hecha ? 'correo' : paso === 1 ? 'correo' : paso === 2 ? 'contraseña' : 'llamas?'}
           </Text>
         </Text>
       </View>
 
       <View style={estilos.cuerpo}>
         <View style={estilos.hoja}>
-          {paso === 1 ? (
+          {hecha ? (
+            <>
+              <Text style={estilos.hechaTitulo}>Tu cuenta está creada.</Text>
+              <Text style={estilos.ayuda}>
+                {`Te enviamos un enlace a ${correo}. Púlsalo desde este teléfono y vuelve a entrar con tu contraseña.`}
+              </Text>
+              <View style={{ marginTop: 18 }}>
+                <Boton alPulsar={() => router.replace('/(cuenta)/entrar')}>Ir a entrar</Boton>
+              </View>
+            </>
+          ) : paso === 1 ? (
             <PasoCorreo
               correo={correo}
               alEscribir={(v) => { setCorreo(v); setError(null); }}
@@ -136,7 +149,7 @@ export default function Registro() {
           )}
         </View>
 
-        {paso === 3 ? (
+        {paso === 3 && !hecha ? (
           <View style={estilos.loQueSigue}>
             <Text style={estilos.loQueSigueTitulo}>Lo que sigue</Text>
             <Paso numero="1" texto="Pides tu puesto y el conductor acepta" />
@@ -236,27 +249,23 @@ function PasoNombre({
   const inicial = inicialDelApellido(apellido);
   return (
     <>
-      <View style={{ gap: 9 }}>
-        <View style={estilos.campo}>
-          <TextInput
-            accessibilityLabel="Tu nombre"
-            value={nombre}
-            onChangeText={alEscribirNombre}
-            placeholder="Nombre"
-            placeholderTextColor={color.ink400}
-            style={estilos.entradaGrande}
-          />
-        </View>
-        <View style={estilos.campo}>
-          <TextInput
-            accessibilityLabel="Tu apellido"
-            value={apellido}
-            onChangeText={alEscribirApellido}
-            placeholder="Apellido"
-            placeholderTextColor={color.ink400}
-            style={estilos.entradaGrande}
-          />
-        </View>
+      {/* Los MISMOS campos que el correo y la contraseña: ceja arriba,
+          marcador dentro. Este paso tenía dos cajas mudas con el marcador
+          haciendo de rótulo — en cuanto escribes, el campo ya no dice qué
+          es (visto en el teléfono, 25-08). */}
+      <View style={{ gap: 12 }}>
+        <Campo
+          etiqueta="Nombre"
+          valor={nombre}
+          alEscribir={alEscribirNombre}
+          marcador="Como te dicen"
+        />
+        <Campo
+          etiqueta="Apellido"
+          valor={apellido}
+          alEscribir={alEscribirApellido}
+          marcador="Solo se verá la inicial"
+        />
       </View>
 
       <Text style={estilos.ayuda}>
@@ -365,6 +374,14 @@ const estilos = StyleSheet.create({
     ...tabular,
     outlineStyle: 'none',
   } as never,
+  hechaTitulo: {
+    fontSize: 17,
+    lineHeight: 23,
+    fontWeight: '600',
+    letterSpacing: -0.26,
+    color: color.ink900,
+    fontFamily: familia,
+  },
   ayuda: { fontSize: 13.5, lineHeight: 20, color: color.ink600, marginTop: 16, fontFamily: familia },
   ayudaCorta: { flex: 1, fontSize: 13.5, lineHeight: 19.57, color: color.ink600, fontFamily: familia, ...tabular },
   legal: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, marginTop: 12, textAlign: 'center', fontFamily: familia },

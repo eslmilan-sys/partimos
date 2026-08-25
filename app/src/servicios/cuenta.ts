@@ -42,19 +42,25 @@ export function inicialDelApellido(apellido: string): string | null {
  * A dónde vuelve el enlace de confirmación del correo.
  *
  * **Sin esto, el enlace no vuelve aquí.** Supabase manda a la «Site URL» del
- * proyecto, que apunta al sitio y no a la app, y quien pulsa el enlace acaba
- * en una página de error sin entender qué hizo mal. Es exactamente el fallo
- * que se vio al probar.
+ * proyecto, y quien pulsa el enlace acaba donde esa URL apunte — se vio de
+ * verdad el 25-08: un amigo confirmó su correo y aterrizó en la DEMO,
+ * saludado como «Andrés M.», el conductor simulado.
  *
- * En el navegador se vuelve a la misma dirección desde donde se pidió; en el
- * teléfono, al esquema de la app, que es lo que hace que el enlace abra
- * Partimos y no el navegador.
+ * **A la RAÍZ de la app, no a la página exacta.** Antes se mandaba
+ * `window.location.href` — `…/app/registro?paso=3` — y esa dirección, con su
+ * ruta y su parámetro, tiene que estar en la lista de «Redirect URLs» del
+ * proyecto O Supabase la descarta EN SILENCIO y cae en la Site URL. La raíz
+ * (`…/app/`) es una sola dirección estable que sí se puede poner en la
+ * lista, y el índice hace el resto: detecta la sesión recién confirmada y
+ * lleva a buscar. En el teléfono, el esquema de la app.
  *
- * La dirección tiene que estar además en la lista de «Redirect URLs» del
- * proyecto, o Supabase la rechaza y cae otra vez en la Site URL.
+ * (La lista se edita en el panel de Supabase: Authentication → URL
+ * Configuration. Con `…/app/**` en Redirect URLs quedan cubiertas las dos.)
  */
 function volverA(): string {
-  return Platform.OS === 'web' ? window.location.href : Linking.createURL('/');
+  if (Platform.OS !== 'web') return Linking.createURL('/');
+  const base = (process.env.EXPO_BASE_URL ?? '/').replace(/\/?$/, '/');
+  return `${window.location.origin}${base}`;
 }
 
 export type Fallo =

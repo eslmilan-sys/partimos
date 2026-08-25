@@ -605,29 +605,44 @@ export default function Publicar() {
           </Text>
         </View>
 
+        {/* Cada interruptor dice QUÉ cambia al encenderlo — invariante 7:
+            una afirmación porta su razón. «Solo mujeres» suelto entre tres
+            «acepto» leía raro (visto en el teléfono, 25-08): no es una
+            comodidad del carro, decide QUIÉN puede pedir puesto, y ahora lo
+            dice con todas sus letras. */}
         <View style={estilos.tarjetaInterruptores}>
-          <View style={{ paddingVertical: 9 }}>
+          <Epigrafe>Condiciones del viaje</Epigrafe>
+          <View style={{ paddingTop: 6 }}>
             <Interruptor
               activo={aceptaMaletas}
               alCambiar={setAceptaMaletas}
               etiqueta="Acepto maletas"
+              descripcion="Con maleta grande, no solo mochila."
             />
           </View>
           <View style={estilos.interruptorSeparado}>
-            <Interruptor activo={soloMujeres} alCambiar={setSoloMujeres} etiqueta="Solo mujeres" />
+            <Interruptor
+              activo={soloMujeres}
+              alCambiar={setSoloMujeres}
+              etiqueta="Solo mujeres"
+              descripcion="Únicamente mujeres podrán pedir puesto en este viaje."
+            />
           </View>
-          {/* Las dos condiciones del carro que todo el mundo pregunta antes de
-              subirse. Por defecto no se fuma y no van mascotas, que es lo que
-              se espera si nadie dijo nada. */}
           <View style={estilos.interruptorSeparado}>
             <Interruptor
               activo={aceptaMascotas}
               alCambiar={setAceptaMascotas}
               etiqueta="Acepto mascotas"
+              descripcion="En su bolso o con correa."
             />
           </View>
           <View style={estilos.interruptorSeparado}>
-            <Interruptor activo={sePuedeFumar} alCambiar={setSePuedeFumar} etiqueta="Se puede fumar" />
+            <Interruptor
+              activo={sePuedeFumar}
+              alCambiar={setSePuedeFumar}
+              etiqueta="Se puede fumar"
+              descripcion="Apagado, nadie fuma en el carro."
+            />
           </View>
         </View>
       </ScrollView>
