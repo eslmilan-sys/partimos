@@ -9,8 +9,8 @@
  * teléfono, que es el que va a salir.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -28,9 +28,8 @@ import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
-import { tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
+import { TRACK_MICRO, familia, color, espacio, radio, sombra } from '@/ui/tokens';
 
 type Paso = 1 | 2 | 3;
 
@@ -102,6 +101,18 @@ export default function Registro() {
           </Pressable>
           <Text style={estilos.epigrafeCampo}>{`Paso ${paso} de 3`}</Text>
         </View>
+
+        {/* El avance se VE, no solo se lee: tres segmentos, los hechos en
+            tinta plena. En la cuenta creada, los tres. */}
+        <View style={estilos.avance}>
+          {[1, 2, 3].map((n) => (
+            <View
+              key={n}
+              style={[estilos.segmento, (hecha || n <= paso) && estilos.segmentoHecho]}
+            />
+          ))}
+        </View>
+
         <Text style={estilos.titular}>
           {hecha ? 'Revisa tu ' : paso === 1 ? 'Tu ' : paso === 2 ? 'Elige una ' : '¿Cómo te '}
           <Text style={estilos.titularFuerte}>
@@ -278,7 +289,6 @@ function PasoNombre({
 
       <View style={{ marginTop: 18 }}>
         <Boton
-         
           desactivado={!nombre.trim() || !apellido.trim() || creando}
           alPulsar={alCrear}
         >
@@ -312,7 +322,6 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
 
-
   cabecera: { paddingHorizontal: espacio.gutter },
   circulo: {
     width: 40,
@@ -331,49 +340,33 @@ const estilos = StyleSheet.create({
     color: color.campoTexto,
     fontFamily: familia,
   },
-  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 14, },
-  titularFuerte: { fontWeight: '600' },
+  avance: { flexDirection: 'row', gap: 6, marginTop: 16 },
+  segmento: { flex: 1, height: 3, borderRadius: 2, backgroundColor: color.ink200 },
+  segmentoHecho: { backgroundColor: color.ink900 },
+
+  /** Dos tintas, como todo titular del sistema: el arranque velado, el
+      sustantivo en tinta plena. */
+  titular: {
+    fontSize: 24,
+    lineHeight: 29,
+    letterSpacing: -0.72,
+    fontWeight: '700',
+    color: color.ink400,
+    fontFamily: familia,
+    marginTop: 14,
+  },
+  titularFuerte: { color: color.ink900 },
 
   cuerpo: { flex: 1, paddingHorizontal: espacio.gutter, paddingTop: 26 },
   hoja: {
     backgroundColor: color.blanco,
     borderRadius: radio.hoja,
     padding: 22,
-    shadowColor: 'rgb(120,10,30)',
-    shadowOpacity: 0.28,
-    shadowRadius: 40,
-    shadowOffset: { width: 0, height: 18 },
-    elevation: 6,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    ...sombra.l,
   },
 
-  filaTelefono: { flexDirection: 'row', gap: 9 },
-  prefijo: {
-    width: 96,
-    height: 58,
-    borderWidth: 1.5,
-    borderColor: color.bordePorDefecto,
-    borderRadius: radio.control,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  prefijoTexto: { fontSize: 15.5, lineHeight: 23.2, fontWeight: '500', color: color.ink700, fontFamily: familia },
-  campo: {
-    flex: 1,
-    height: 58,
-    borderWidth: 1.5,
-    borderColor: color.bordePorDefecto,
-    borderRadius: radio.control,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  entradaGrande: {
-    fontSize: 18, lineHeight: 26.1,
-    fontWeight: '500',
-    color: color.ink900,
-    fontFamily: familia,
-    ...tabular,
-    outlineStyle: 'none',
-  } as never,
   hechaTitulo: {
     fontSize: 17,
     lineHeight: 23,
@@ -383,34 +376,8 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   ayuda: { fontSize: 13.5, lineHeight: 20, color: color.ink600, marginTop: 16, fontFamily: familia },
-  ayudaCorta: { flex: 1, fontSize: 13.5, lineHeight: 19.57, color: color.ink600, fontFamily: familia, ...tabular },
   legal: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, marginTop: 12, textAlign: 'center', fontFamily: familia },
 
-  casillas: { flexDirection: 'row', gap: 10 },
-  casilla: {
-    flex: 1,
-    height: 74,
-    borderRadius: radio.cuadrado,
-    borderWidth: 1.5,
-    backgroundColor: color.blanco,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  casillaTexto: {
-    fontSize: 33, lineHeight: 49.3,
-    fontWeight: '600',
-    letterSpacing: -1.02,
-    color: color.ink900,
-    fontFamily: familia,
-    ...tabular,
-  },
-  cursor: { width: 2, height: 30, backgroundColor: color.rojo500 },
-  entradaInvisible: { position: 'absolute', opacity: 0, height: 1, width: 1 },
-  error: { marginTop: 12, fontSize: 12.5, lineHeight: 18.125, color: color.rojo700, fontFamily: familia },
-
-  filaReenvio: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 16 },
-  enlace: { fontSize: 12, lineHeight: 17, fontWeight: '500', color: color.rojo700, fontFamily: familia },
-  reenviar: { fontSize: 13.5, lineHeight: 19.57, color: color.ink500, marginTop: 10, fontFamily: familia, ...tabular },
 
   loQueSigue: { marginTop: 16, gap: 10 },
   loQueSigueTitulo: {

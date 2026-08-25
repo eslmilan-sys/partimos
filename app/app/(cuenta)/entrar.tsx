@@ -140,7 +140,7 @@ export default function Entrar() {
           <Text style={estilos.titulo}>
             {'Bienvenido a'}
             {'\n'}
-            {'Partimos'}
+            <Text style={estilos.tituloFuerte}>Partimos</Text>
           </Text>
           <Text style={estilos.bajada}>Entra para reservar tu puesto o publicar tu viaje.</Text>
         </View>
@@ -261,14 +261,16 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /** Dos tintas: el saludo velado, la marca en tinta plena. */
   titulo: {
     fontSize: 28,
     lineHeight: 33,
     fontWeight: '700',
     letterSpacing: -0.84,
-    color: color.ink900,
+    color: color.ink400,
     fontFamily: familia,
   },
+  tituloFuerte: { color: color.ink900 },
   bajada: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
 
   sociales: { paddingTop: 20, paddingHorizontal: espacio.gutter, gap: 10 },
@@ -311,7 +313,7 @@ const estilos = StyleSheet.create({
   },
 
   campos: { paddingTop: 20, paddingHorizontal: espacio.gutter, gap: 14 },
-  olvide: { alignSelf: 'flex-start' },
+  olvide: { alignSelf: 'flex-end' },
   olvideTexto: {
     fontSize: 13,
     lineHeight: 18,

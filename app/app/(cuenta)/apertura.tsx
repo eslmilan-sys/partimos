@@ -15,9 +15,10 @@
  * ella sin arrastrarse a medias por la pantalla.
  *
  * Las tres fotografías las trajo el dueño en alta resolución (25-08): la
- * bahía de Panamá de noche, dos amigos en el carro por la autopista, y la
- * carretera desde el aire. Son imágenes de banco — a licenciar antes de
- * cualquier lanzamiento, como la de «¿Vas a manejar?».
+ * calzada sobre el mar turquesa desde el aire — el agua hace juego con la
+ * tinta sarcelle de la marca —, la autopista entre el verde, y dos amigos
+ * en el carro. Son imágenes de banco — a licenciar antes de cualquier
+ * lanzamiento, como la de «¿Vas a manejar?».
  *
  * `useWindowDimensions` responde CERO durante el prerender del export
  * estático (se vio en un iPhone el 24-08): el ancho se MIDE con `onLayout`
@@ -38,7 +39,7 @@ import { color, espacio, familia, zonaDeToque } from '@/ui/tokens';
 const LAMINAS = [
   {
     clave: 'beneficio',
-    foto: require('../../assets/apertura-ciudad.jpg'),
+    foto: require('../../assets/apertura-costa.jpg'),
     ceja: 'Compartir gastos',
     titulo: 'Muévete mejor,',
     tituloFuerte: 'viajando juntos',
@@ -182,8 +183,8 @@ export default function Apertura() {
         pointerEvents="none"
       />
       <LinearGradient
-        colors={['rgba(10,39,49,0)', 'rgba(10,39,49,.52)', 'rgba(10,39,49,.9)']}
-        locations={[0, 0.42, 1]}
+        colors={['rgba(10,39,49,0)', 'rgba(10,39,49,.28)', 'rgba(10,39,49,.72)', 'rgba(10,39,49,.97)']}
+        locations={[0, 0.3, 0.62, 1]}
         style={estilos.veloAbajo}
         pointerEvents="none"
       />
@@ -200,7 +201,7 @@ export default function Apertura() {
           accessibilityRole="button"
           accessibilityLabel="Saltar la presentación"
           onPress={() => router.replace('/(pasajero)')}
-          style={[zonaDeToque, estilos.saltarZona]}
+          style={estilos.saltarZona}
         >
           <Text style={estilos.saltar}>Saltar</Text>
         </Pressable>
@@ -270,7 +271,7 @@ const estilos = StyleSheet.create({
   },
 
   veloArriba: { position: 'absolute', top: 0, left: 0, right: 0, height: 130 },
-  veloAbajo: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 380 },
+  veloAbajo: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 430 },
 
   filaMarca: {
     paddingTop: 10,
@@ -289,12 +290,22 @@ const estilos = StyleSheet.create({
     color: color.blanco,
     fontFamily: familia,
   },
-  saltarZona: { paddingHorizontal: 6 },
+  /** Una pastilla de tinta helada: sobre foto, un texto suelto se pierde. */
+  saltarZona: {
+    height: 32,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    backgroundColor: 'rgba(10,39,49,.34)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.22)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   saltar: {
     fontSize: 13,
     lineHeight: 18,
     fontWeight: '600',
-    color: 'rgba(255,255,255,.92)',
+    color: 'rgba(255,255,255,.95)',
     fontFamily: familia,
   },
 
@@ -305,7 +316,7 @@ const estilos = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingHorizontal: espacio.gutter,
-    paddingBottom: 18,
+    paddingBottom: 20,
   },
 
   puntos: { flexDirection: 'row', gap: 6, marginBottom: 14 },
