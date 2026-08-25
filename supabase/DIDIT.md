@@ -96,7 +96,7 @@ Edge Functions → Secrets, cinq lignes :
 DIDIT_API_KEY=…              (console Didit → API Keys)
 DIDIT_WEBHOOK_SECRET=…       (console Didit → Webhooks → signing secret)
 DIDIT_WORKFLOW_ID=d27705d1-9975-4ea2-8df2-3f8be47ff34f
-SITE_URL=https://eslmilan-sys.github.io/test/partimos
+SITE_URL=https://eslmilan-sys.github.io/partimos/app/
 SITE_ORIGIN=https://eslmilan-sys.github.io
 ```
 
@@ -111,7 +111,7 @@ supabase secrets set \
   DIDIT_API_KEY="..." \
   DIDIT_WORKFLOW_ID="d27705d1-9975-4ea2-8df2-3f8be47ff34f" \
   DIDIT_WEBHOOK_SECRET="..." \
-  SITE_URL="https://eslmilan-sys.github.io/test/partimos" \
+  SITE_URL="https://eslmilan-sys.github.io/partimos/app/" \
   SITE_ORIGIN="https://eslmilan-sys.github.io"
 
 supabase functions deploy didit-start

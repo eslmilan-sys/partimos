@@ -56,7 +56,10 @@ export async function estadoDeCedula(perfilId: string): Promise<EstadoDeCedula> 
 
 /** Los tres pasos de `6d`, con lo que pasa y lo que no sale de aquí. */
 export const PASOS_DE_LA_CEDULA: { titulo: string; detalle: string }[] = [
-  { titulo: 'Mandaste tu cédula', detalle: 'al proveedor certificado, no a nosotros' },
+  /* En pasado decía «Mandaste tu cédula» cuando todavía no se había mandado
+     nada — el primer paso es el que está POR hacer. En infinitivo vale para
+     los dos momentos. */
+  { titulo: 'Mandas tu cédula', detalle: 'al proveedor certificado, no a nosotros' },
   { titulo: 'Confirma que es real', detalle: 'suele tomar unos minutos' },
   { titulo: 'Recibimos dos cosas', detalle: 'si pasó o no, y una referencia' },
 ];

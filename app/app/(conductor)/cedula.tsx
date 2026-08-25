@@ -9,13 +9,24 @@
  * que esperar, y el tercer paso enseña por escrito el límite de lo que entra.
  *
  * Verificarse es obligatorio para conducir, así que el pie no ofrece ningún
- * atajo para publicar: la única acción es volver a mirar el estado. Los dos
- * beneficios de abajo son la razón de esperar, y nunca un distintivo que
- * separe a unos conductores de otros.
+ * atajo para publicar. Los dos beneficios de abajo son la razón de esperar, y
+ * nunca un distintivo que separe a unos conductores de otros.
+ *
+ * **EL BOTÓN NO LLAMABA A NADIE (arreglado el 25-08-2026).** La pantalla
+ * escribía sola una fila `pending` al montarse —«mandaste tu cédula»— y el
+ * único botón volvía a leer ese estado inventado. `abrirVerificacion()`, que
+ * es quien llama de verdad a `didit-start`, no la usaba ninguna pantalla:
+ * código muerto. Resultado medido en el teléfono del dueño: «En revisión»
+ * para siempre, sin que Didit hubiera visto jamás una cédula.
+ *
+ * Ahora el pie cambia con el estado: sin dossier abierto **se abre uno** y el
+ * teléfono sale al recorrido de Didit; con uno en curso se vuelve a mirar.
+ * En simulado no hay a quién llamar, así que la demo conserva el paseo de
+ * antes — es lo que enseña la línea de tiempo sin base detrás.
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
@@ -31,6 +42,7 @@ import {
   estadoDeCedula,
   pedirVerificacion,
 } from '@/servicios/seguridad';
+import { abrirVerificacion } from '@/servicios/identidad';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
@@ -50,6 +62,9 @@ const DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 /** `--arena-700` del traspaso: el ámbar de lo que está en curso. `@/ui/tokens`
  *  trae la arena clara pero no su tinta, y no se tocan los tokens desde aquí. */
 const ARENA_700 = '#8A5A24';
+
+/** Sin base real no hay función Edge a la que llamar: la demo se pasea sola. */
+const SIMULADO = (process.env.EXPO_PUBLIC_FUENTE ?? 'simulado') !== 'supabase';
 
 /** Hasta dónde llegó la verificación, en pasos de `PASOS_DE_LA_CEDULA`. Que la
  *  respuesta sea «no» también es haberla recibido: ahí la línea está completa. */
@@ -72,6 +87,7 @@ export default function Cedula() {
   const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<EstadoDeCedula | null>(null);
+  const [abriendo, setAbriendo] = useState(false);
 
   const decir = useDecir();
 
@@ -101,13 +117,54 @@ export default function Cedula() {
     });
   }, [yo, decir]);
 
+  /**
+   * EMPEZAR DE VERDAD. `abrirVerificacion` pide a `didit-start` una sesión
+   * ligada a esta cuenta y devuelve la dirección del recorrido alojado. Tres
+   * finales, y los tres se dicen:
+   *
+   * - ligada: se sale al recorrido y el veredicto vuelve solo, por el webhook;
+   * - suelta: los secretos de Didit no están puestos todavía, así que la
+   *   sesión no sabe de quién es — se avisa en vez de fingir que cuenta;
+   * - ya verificada: no se manda a nadie a verificarse dos veces.
+   */
+  const empezar = useCallback(async () => {
+    if (!yo || abriendo) return;
+    setAbriendo(true);
+    try {
+      if (SIMULADO) {
+        await pedirVerificacion(yo);
+        mirar();
+        decir('En la demo la verificación se simula. En la app real sales al proveedor.');
+        return;
+      }
+      const r = await abrirVerificacion('cedula');
+      if ('error' in r) {
+        decir(
+          r.error === 'ya-verificado'
+            ? 'Tu cédula ya está verificada. Puedes publicar.'
+            : 'No se pudo abrir la verificación. Prueba otra vez.',
+        );
+        mirar();
+        return;
+      }
+      if (!r.ligada) {
+        decir('La verificación todavía no está conectada a las cuentas. Escríbenos desde Ayuda.');
+        return;
+      }
+      if (Platform.OS === 'web') window.location.assign(r.url);
+      else await Linking.openURL(r.url);
+    } catch {
+      decir('No se pudo abrir la verificación. Revisa la conexión.');
+    } finally {
+      setAbriendo(false);
+    }
+  }, [yo, abriendo, mirar, decir]);
+
   useEffect(() => {
-    if (!yo) return;
-    // Llegar aquí es haber mandado la cédula al proveedor: se abre la
-    // verificación —si ya existe, devuelve la que hay— y de ahí en adelante
-    // esta pantalla sólo lee.
-    pedirVerificacion(yo).then(mirar);
-  }, [yo, mirar]);
+    // SOLO LEE. Antes escribía una fila `pending` al montarse: bastaba con
+    // abrir la pantalla para «haber mandado la cédula», que es mentira.
+    mirar();
+  }, [mirar]);
 
   if (!datos) return <Cargando />;
 
@@ -226,10 +283,30 @@ export default function Cedula() {
       </View>
 
       <View style={estilos.pie}>
-        <Boton alPulsar={mirarYDecir}>
-          Ver el estado otra vez
-        </Boton>
-        <Text style={estilos.notaPie}>Se hace una sola vez.</Text>
+        {datos.estado === 'pendiente' ? (
+          <>
+            <Boton desactivado={abriendo} alPulsar={empezar}>
+              {abriendo ? 'Abriendo…' : 'Verificar mi cédula'}
+            </Boton>
+            <Text style={estilos.notaPie}>Se hace una sola vez, y toma unos minutos.</Text>
+          </>
+        ) : datos.estado === 'rechazada' ? (
+          <>
+            <Boton desactivado={abriendo} alPulsar={empezar}>
+              {abriendo ? 'Abriendo…' : 'Intentar otra vez'}
+            </Boton>
+            <Text style={estilos.notaPie}>Con buena luz y el documento completo en el marco.</Text>
+          </>
+        ) : (
+          <>
+            <Boton alPulsar={mirarYDecir}>Ver el estado otra vez</Boton>
+            <Text style={estilos.notaPie}>
+              {datos.estado === 'verificada'
+                ? 'Ya puedes publicar viajes.'
+                : 'Te avisamos en cuanto llegue el resultado.'}
+            </Text>
+          </>
+        )}
       </View>
     </View>
   );
