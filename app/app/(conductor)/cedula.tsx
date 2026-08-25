@@ -26,7 +26,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
@@ -173,9 +173,14 @@ export default function Cedula() {
 
   return (
     <View style={estilos.pantalla}>
-      <CampoRojo altura={214} />
-
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA. Antes el cuerpo era un `flex: 1` con
+          `overflow: 'hidden'` y un hueco de 152 al pie: en un teléfono el
+          segundo beneficio quedaba CORTADO por el borde y no había forma de
+          llegar a él. Visto en el teléfono del dueño el 25-08. */}
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        <CampoRojo altura={214} />
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaCabecera}>
@@ -202,61 +207,52 @@ export default function Cedula() {
           <View style={estilos.filaEstado}>
             <Text style={estilos.estado}>Estado</Text>
             <View style={[estilos.insignia, { backgroundColor: insignia.fondo }]}>
-              {/* Fuera del flujo para que la caja del texto quede centrada en
-                  la pastilla, como en el traspaso. */}
               <View style={[estilos.insigniaPunto, { backgroundColor: insignia.tinta }]} />
-              <Text style={[estilos.insigniaTexto, { color: insignia.tinta }]}>{datos.etiqueta}</Text>
+              <Text style={[estilos.insigniaTexto, { color: insignia.tinta }]}>
+                {datos.etiqueta}
+              </Text>
             </View>
           </View>
 
-          {PASOS_DE_LA_CEDULA.map((paso, i) => {
-            const hecho = i < hasta;
-            const enCurso = i === hasta;
-            const ultimo = i === PASOS_DE_LA_CEDULA.length - 1;
+          {/* LA FRISE. Cada paso dibuja su riel; el punto, su halo y la línea
+              salen del MISMO centro (`CENTRO`), así que no hay forma de que
+              se desalineen. Antes el halo iba en `top: 0` absoluto y el
+              primer paso llevaba `paddingTop: 16` — y la posición absoluta
+              no cuenta el relleno del padre, así que el halo aparecía
+              flotando 16 px por ENCIMA de su punto. La línea, además, tenía
+              dos alturas escritas a mano (36 y 20) que no seguían a nada. */}
+          <View style={estilos.pasos}>
+            {PASOS_DE_LA_CEDULA.map((paso, i) => {
+              const hecho = i < hasta;
+              const enCurso = i === hasta;
+              const ultimo = i === PASOS_DE_LA_CEDULA.length - 1;
 
-            return (
-              <View
-                key={paso.titulo}
-                style={[estilos.paso, i === 0 && { paddingTop: 16 }, !ultimo && { paddingBottom: 14 }]}
-              >
-                {ultimo ? null : (
-                  <View
-                    style={[
-                      estilos.linea,
-                      { top: i === 0 ? 36 : 20 },
-                      hecho && { backgroundColor: color.rojo300 },
-                    ]}
-                  />
-                )}
-                {/* El halo del paso en curso: en React Native no hay `spread`,
-                    así que va detrás, fuera del flujo. */}
-                {enCurso ? <View style={estilos.halo} /> : null}
-                <View
-                  style={[
-                    estilos.marca,
-                    (hecho || enCurso) && { backgroundColor: color.rojo500, borderWidth: 0 },
-                  ]}
-                />
-                <View style={estilos.pasoTexto}>
-                  <Text
-                    style={[
-                      estilos.pasoTitulo,
-                      enCurso && { fontWeight: '500' },
-                      !hecho && !enCurso && { color: color.ink600 },
-                    ]}
-                  >
-                    {paso.titulo}
-                  </Text>
-                  {/* El renglón lleva la interlínea del cuerpo (15/21.75) y el
-                      detalle va dentro: así el texto pequeño se sienta sobre la
-                      misma línea base que en el diseño. */}
-                  <Text style={estilos.renglon}>
+              return (
+                <View key={paso.titulo} style={estilos.paso}>
+                  <View style={estilos.riel}>
+                    {ultimo ? null : (
+                      <View style={[estilos.rielLinea, hecho && estilos.rielLineaHecha]} />
+                    )}
+                    {enCurso ? <View style={estilos.halo} /> : null}
+                    <View
+                      style={[estilos.punto, (hecho || enCurso) && estilos.puntoVivo]}
+                    />
+                  </View>
+                  <View style={[estilos.pasoTexto, ultimo && { paddingBottom: 0 }]}>
+                    <Text
+                      style={[
+                        estilos.pasoTitulo,
+                        !hecho && !enCurso && estilos.pasoTituloPorVenir,
+                      ]}
+                    >
+                      {paso.titulo}
+                    </Text>
                     <Text style={estilos.pasoDetalle}>{paso.detalle}</Text>
-                  </Text>
+                  </View>
                 </View>
-              </View>
-            );
-          })}
+              );
+            })}
+          </View>
         </View>
 
         <View style={estilos.nota}>
@@ -281,6 +277,7 @@ export default function Cedula() {
           ))}
         </View>
       </View>
+      </ScrollView>
 
       <View style={estilos.pie}>
         {datos.estado === 'pendiente' ? (
@@ -355,148 +352,168 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /* Números limpios. Los de antes —27/30,24 con −1,176 de tracking— venían
+     de calcar una maqueta píxel a píxel: un cuerpo de 27 con interlínea 30
+     aprieta las dos líneas hasta tocarse, y ese tracking cierra las letras.
+     La escala del sistema es 26/31. */
   titular: {
-    fontSize: 27,
-    lineHeight: 30.24,
-    letterSpacing: -1.176,
-    fontWeight: '400',
+    fontSize: 26,
+    lineHeight: 31,
+    letterSpacing: -0.9,
+    fontWeight: '700',
     color: color.ink400,
     marginTop: 14,
     fontFamily: familia,
   },
-  titularFuerte: {
-    fontSize: 27,
-    lineHeight: 30.24,
-    letterSpacing: -1.176,
-    fontWeight: '600',
-    color: color.ink900,
-    fontFamily: familia,
+  titularFuerte: { color: color.ink900 },
+
+  /* Sin `flex: 1` ni `overflow: 'hidden'`: quien desplaza es el ScrollView.
+     El hueco de abajo deja sitio al pie fijo. */
+  cuerpo: { paddingTop: 22, paddingHorizontal: espacio.gutter, paddingBottom: 130 },
+
+  tarjeta: {
+    backgroundColor: color.blanco,
+    borderRadius: radio.hoja,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    ...sombra.hoja,
   },
-
-  cuerpo: { flex: 1, overflow: 'hidden', paddingTop: 26, paddingHorizontal: espacio.gutter, paddingBottom: 152 },
-
-  // `--radius-sheet` son 28 px; `radio.hoja` se quedó en 26.
-  tarjeta: { backgroundColor: color.blanco, borderRadius: 28, padding: 20, ...sombra.hoja },
 
   filaEstado: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingBottom: 16,
+    paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: color.bordeSutil,
   },
   estado: {
     flex: 1,
-    fontSize: 15.5,
-    lineHeight: 23.925,
-    letterSpacing: -0.33,
-    fontWeight: '500',
+    fontSize: 15,
+    lineHeight: 21,
+    letterSpacing: -0.3,
+    fontWeight: '600',
     color: color.ink900,
     fontFamily: familia,
   },
+  /* El punto iba en absoluto con un `paddingLeft: 12` en el texto para
+     dejarle sitio: dos números que tenían que cuadrar a mano. Una fila con
+     su hueco hace lo mismo y no se descuadra. */
   insignia: {
     height: 28,
     borderRadius: radio.pastilla,
     paddingHorizontal: 11,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
-  insigniaPunto: {
-    position: 'absolute',
-    left: 11,
-    top: 11,
-    width: 6,
-    height: 6,
-    borderRadius: radio.pastilla,
-    opacity: 0.85,
-  },
+  insigniaPunto: { width: 6, height: 6, borderRadius: 3 },
   insigniaTexto: {
-    paddingLeft: 12,
     fontSize: 12.5,
-    lineHeight: 18.125,
-    letterSpacing: -0.0625,
-    fontWeight: '500',
+    lineHeight: 17,
+    fontWeight: '600',
     fontFamily: familia,
   },
 
-  paso: { flexDirection: 'row', gap: 14, position: 'relative' },
-  linea: {
+  /* EL RIEL. Todo sale de un centro: el punto mide 10 y su centro cae a 11
+     del borde de arriba —la mitad de la primera línea de texto, 15/21—, el
+     halo se centra ahí mismo, y la línea arranca justo debajo del punto y
+     baja 3 px más allá del renglón para tocar el punto siguiente. */
+  pasos: { paddingTop: 14 },
+  paso: { flexDirection: 'row', gap: 12 },
+  riel: { width: 22, alignItems: 'center' },
+  rielLinea: {
     position: 'absolute',
-    left: 4.5,
-    bottom: 0,
+    top: 19,
+    bottom: -3,
     width: 1.5,
-    backgroundColor: color.bordePorDefecto,
+    borderRadius: 1,
+    backgroundColor: color.ink200,
   },
+  rielLineaHecha: { backgroundColor: color.rojo300 },
   halo: {
     position: 'absolute',
-    left: -5,
     top: 0,
-    width: 20,
-    height: 20,
-    borderRadius: radio.pastilla,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: color.rojo100,
   },
-  marca: {
+  punto: {
+    marginTop: 6,
     width: 10,
     height: 10,
-    marginTop: 5,
-    borderRadius: radio.pastilla,
+    borderRadius: 5,
     backgroundColor: color.blanco,
     borderWidth: 2,
     borderColor: color.ink200,
   },
-  pasoTexto: { flex: 1 },
+  puntoVivo: { backgroundColor: color.rojo500, borderColor: color.rojo500 },
+  pasoTexto: { flex: 1, paddingBottom: 16 },
   pasoTitulo: {
-    fontSize: 15.5,
-    lineHeight: 22.475,
-    letterSpacing: -0.279,
-    fontWeight: '400',
+    fontSize: 15,
+    lineHeight: 21,
+    letterSpacing: -0.25,
+    fontWeight: '600',
     color: color.ink900,
     fontFamily: familia,
   },
-  renglon: { fontSize: 15.5, lineHeight: 21.75, color: color.ink500, fontFamily: familia },
-  pasoDetalle: { fontSize: 12.5, lineHeight: 18.125, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  pasoTituloPorVenir: { fontWeight: '500', color: color.ink500 },
+  pasoDetalle: {
+    marginTop: 2,
+    fontSize: 13,
+    lineHeight: 18,
+    color: color.ink500,
+    fontFamily: familia,
+  },
 
   nota: {
-    marginTop: 12,
+    marginTop: espacio.entreTarjetas,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: 11,
     backgroundColor: color.azul50,
     borderWidth: 1,
     borderColor: color.azul100,
     borderRadius: radio.l,
-    paddingVertical: 15,
-    paddingHorizontal: 17,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
   notaIcono: { width: 19, height: 19, marginTop: 1 },
   notaTexto: {
     flex: 1,
-    fontSize: 13.5,
-    lineHeight: 19.575,
-    fontWeight: '400',
+    fontSize: 13,
+    lineHeight: 19,
     color: color.ink700,
     fontFamily: familia,
   },
 
-  beneficios: { paddingTop: 22, paddingHorizontal: 4 },
-  beneficio: { flexDirection: 'row', alignItems: 'baseline', gap: 14, paddingVertical: 13 },
+  /* Los beneficios en su propia hoja blanca, como todo lo demás: sueltos
+     sobre el lienzo parecían texto olvidado al final de la pantalla. */
+  beneficios: {
+    marginTop: espacio.entreTarjetas,
+    backgroundColor: color.blanco,
+    borderRadius: radio.hoja,
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 4,
+    ...sombra.s,
+  },
+  beneficio: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 12 },
   beneficioPartido: { borderBottomWidth: 1, borderBottomColor: color.bordeSutil },
   numero: {
-    width: 20,
-    fontSize: 14,
-    lineHeight: 20.3,
-    fontWeight: '600',
+    width: 18,
+    fontSize: 13.5,
+    lineHeight: 20,
+    fontWeight: '700',
     color: color.rojo600,
     fontFamily: familia,
     ...tabular,
   },
   beneficioTexto: {
     flex: 1,
-    fontSize: 15.5,
-    lineHeight: 21.75,
-    fontWeight: '400',
+    fontSize: 15,
+    lineHeight: 20,
     color: color.ink900,
     fontFamily: familia,
   },
@@ -512,18 +529,18 @@ const estilos = StyleSheet.create({
     borderTopColor: color.bordeSutil,
     paddingTop: 16,
     paddingHorizontal: espacio.gutter,
-    paddingBottom: 28,
-    shadowColor: '#14141A',
-    shadowOpacity: 0.18,
-    shadowRadius: 30,
+    paddingBottom: 26,
+    /* La tinta del sistema, no un gris azulado suelto. */
+    shadowColor: '#0A2731',
+    shadowOpacity: 0.1,
+    shadowRadius: 28,
     shadowOffset: { width: 0, height: -10 },
     elevation: 10,
   },
   notaPie: {
     textAlign: 'center',
     fontSize: 12.5,
-    lineHeight: 18.125,
-    fontWeight: '400',
+    lineHeight: 17,
     color: color.ink500,
     fontFamily: familia,
   },
