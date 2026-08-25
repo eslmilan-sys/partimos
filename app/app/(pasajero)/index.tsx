@@ -351,7 +351,7 @@ export default function Inicio() {
           </View>
         </View>
 
-        {/* El CTA: rojo, 54, con su lupa y la sombra del acento. */}
+        {/* El CTA: rojo, 52 — dominante sin ser una losa — con su lupa. */}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Buscar viajes"
@@ -374,7 +374,7 @@ export default function Inicio() {
           style={estilos.confianza}
         >
           <Escudo tamano={13} tinta={color.inkIcono} />
-          <Text style={estilos.confianzaTexto}>Solo conductores con cédula verificada</Text>
+          <Text style={estilos.confianzaTexto}>Conductores con cédula verificada</Text>
         </Pressable>
       </View>
 
@@ -413,7 +413,7 @@ export default function Inicio() {
                     {FOTOS[r.foto] ? (
                       <Image source={FOTOS[r.foto]} style={estilos.foto} resizeMode="cover" />
                     ) : (
-                      <DibujoDelSitio slug={r.foto} tamano={36} />
+                      <DibujoDelSitio slug={r.foto} tamano={44} />
                     )}
                   </View>
                   <View style={estilos.cuerpoFavorita}>
@@ -822,8 +822,8 @@ const estilos = StyleSheet.create({
   divisorVertical: { width: 1, height: 20, backgroundColor: 'rgba(10,39,49,.09)' },
 
   cta: {
-    marginTop: 12,
-    height: 54,
+    marginTop: 14,
+    height: 52,
     borderRadius: radio.boton,
     backgroundColor: color.rojo500,
     flexDirection: 'row',
@@ -842,7 +842,7 @@ const estilos = StyleSheet.create({
   },
 
   confianza: {
-    paddingTop: 10,
+    paddingTop: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -858,7 +858,7 @@ const estilos = StyleSheet.create({
   },
 
   /* ------------------------------------------------------ Las secciones */
-  seccion: { paddingTop: 16 },
+  seccion: { paddingTop: 26 },
   cabeceraSeccion: {
     paddingHorizontal: espacio.gutter,
     flexDirection: 'row',
@@ -911,30 +911,33 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  tiraFavoritas: { flexDirection: 'row', gap: 12, paddingHorizontal: espacio.gutter, paddingTop: 10 },
+  tiraFavoritas: { flexDirection: 'row', gap: 12, paddingHorizontal: espacio.gutter, paddingTop: 12 },
+  /**
+   * LA TARJETA DE DESTINO, vertical: la fotografía arriba a todo lo ancho,
+   * el texto debajo. La horizontal — foto de 52 a la izquierda, texto al
+   * lado — leía como un RESULTADO de búsqueda, no como un destino que
+   * descubrir (25-08). 150 de ancho para que a 390 px se vean dos enteras
+   * y el asomo de la tercera, que es lo que invita a deslizar. Radio 16,
+   * de la escala fija — el 20-22 sugerido no existe en el sistema.
+   */
   tarjetaFavorita: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 8,
+    width: 150,
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: 'rgba(10,39,49,.09)',
     borderRadius: radio.control,
+    overflow: 'hidden',
     ...sombra.s,
   },
-  /** 52, al radio 8: la superficie anidada resta el padding de la madre. */
   miniatura: {
-    width: 52,
-    height: 52,
-    borderRadius: radio.anidado,
-    overflow: 'hidden',
+    width: '100%',
+    height: 100,
     backgroundColor: color.sand200,
     alignItems: 'center',
     justifyContent: 'center',
   },
   foto: { width: '100%', height: '100%' },
-  cuerpoFavorita: { paddingRight: 6 },
+  cuerpoFavorita: { paddingHorizontal: 12, paddingTop: 9, paddingBottom: 12 },
   filaDesde: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   desdeFavorita: {
     fontSize: 11,
@@ -945,11 +948,12 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   destinoFavorita: {
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: '600',
-    letterSpacing: -0.48,
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '700',
+    letterSpacing: -0.43,
     color: color.ink900,
+    marginTop: 1,
     fontFamily: familia,
   },
   /** Un chiffre comparable d'une carte à l'autre : chiffres tabulaires. */
@@ -959,7 +963,7 @@ const estilos = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: -0.12,
     color: color.ink600,
-    marginTop: 1,
+    marginTop: 3,
     fontFamily: familia,
     ...tabular,
   },

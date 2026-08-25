@@ -126,7 +126,7 @@ export function Comentar() {
         onPress={() => setAbierta(true)}
         style={({ pressed }) => [estilos.ancla, pressed ? estilos.anclaPulsada : null]}
       >
-        <Chat tamano={17} tinta="#fff" />
+        <Chat tamano={15} tinta="#fff" />
         {anunciando ? (
           <Animated.View
             style={{
@@ -256,11 +256,14 @@ const estilos = StyleSheet.create({
     top: '52%',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-    height: 40,
-    paddingLeft: 11,
-    paddingRight: 9,
-    opacity: 0.94,
+    gap: 6,
+    /* Más chica y más callada (25-08): es una salida de emergencia del
+       test, no un elemento de navegación — no tiene que competir con lo
+       que la pantalla enseña. */
+    height: 34,
+    paddingLeft: 10,
+    paddingRight: 8,
+    opacity: 0.85,
     borderTopLeftRadius: radio.control,
     borderBottomLeftRadius: radio.control,
     backgroundColor: color.ink900,
