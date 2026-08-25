@@ -134,7 +134,7 @@ export default function Resultados() {
           sePuedeFumar: v.allows_smoking,
           conductor: {
             nombre: `${v.first_name ?? ''} ${v.last_initial ?? ''}`.trim(),
-            calificacion: v.driver_rating ?? 0,
+            calificacion: v.driver_rating,
             carro: `${v.model ?? ''} ${v.color ?? ''}`.trim(),
           },
           canal: NOMBRE_DEL_CANAL.yappy_app,

@@ -16,16 +16,18 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useVolver } from '@/ui/salidas';
 
 import { etiquetaDeMaletero, notaDeEquipaje } from '@/dominio/equipaje';
+import type { Lugar } from '@/dominio/lugar';
 import { type ReservaPreparada, pedirPuesto, prepararReserva } from '@/servicios/reservas';
 import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
-import { Boton, Campo, Epigrafe, Pastilla, Stepper } from '@/ui/controles';
+import { Boton, Epigrafe, Interruptor, Pastilla } from '@/ui/controles';
+import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { tabular } from '@/ui/dinero';
 import { diaCorto, hora } from '@/ui/fechas';
-import { Atras, Maleta } from '@/ui/iconos';
+import { Atras, Lupa, Maleta } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 const VIAJE_DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
@@ -46,8 +48,12 @@ export default function Reservar() {
      siempre, y en blanco no hay ni por dónde salir. */
   const [noEsta, setNoEsta] = useState(false);
   const [direccion, setDireccion] = useState('Vía Argentina, Riba Smith');
-  const [mochilas, setMochilas] = useState(1);
-  const [maletas, setMaletas] = useState(1);
+  /** Una pregunta, no dos contadores: ¿llevas maleta? La mochila va
+      contigo siempre y no se cuenta (pedido el 25-08). */
+  const [conMaleta, setConMaleta] = useState(false);
+  /** El punto elegido del buscador — con sus coordenadas si las trajo. */
+  const [buscandoPunto, setBuscandoPunto] = useState(false);
+  const [puntoElegido, setPuntoElegido] = useState<Lugar | null>(null);
   const [pidiendo, setPidiendo] = useState(false);
 
   useEffect(() => {
@@ -58,7 +64,7 @@ export default function Reservar() {
   if (!datos) return <Cargando />;
 
   // Si el conductor no lleva maletas, no hay maleta que contar.
-  const maletasReales = datos.aceptaMaletas ? maletas : 0;
+  const maletasReales = datos.aceptaMaletas && conMaleta ? 1 : 0;
 
   return (
     <View style={estilos.pantalla}>
@@ -115,15 +121,26 @@ export default function Reservar() {
             </View>
           </View>
 
-          <View style={{ marginTop: 14 }}>
-            <Campo
-              valor={direccion}
-              alEscribir={setDireccion}
-              marcador="Calle, edificio o referencia"
-              ayuda={`${datos.conductor} lo aprueba junto con el puesto.`}
-              etiquetaAccesible="Tu dirección de recogida"
-            />
-          </View>
+          {/* El campo ABRE EL BUSCADOR — el mismo motor de publicar, con el
+              catálogo entero («ph metric» encuentra el PH). Antes era un
+              campo suelto: se tecleaba y nada se proponía (visto en el
+              teléfono, 25-08). Lo escrito a mano sigue valiendo: el
+              buscador ofrece «usar tal cual». */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Elegir tu punto de recogida"
+            onPress={() => setBuscandoPunto(true)}
+            style={({ pressed }) => [estilos.campoPunto, pressed && { backgroundColor: color.lavadoChip }]}
+          >
+            <Lupa tamano={16} tinta={color.ink400} grueso={2} />
+            <Text
+              style={[estilos.campoPuntoTexto, !direccion && { color: color.ink400 }]}
+              numberOfLines={1}
+            >
+              {direccion || 'Calle, edificio o referencia'}
+            </Text>
+          </Pressable>
+          <Text style={estilos.ayudaPunto}>{`${datos.conductor} lo aprueba junto con el puesto.`}</Text>
         </View>
 
         <View style={estilos.tarjetaEquipaje}>
@@ -140,37 +157,16 @@ export default function Reservar() {
             </Pastilla>
           </View>
 
-          <View style={{ marginTop: 12 }}>
-            <View style={estilos.filaStepper}>
-              <Text style={estilos.etiquetaStepper}>
-                Mochila
-                <Text style={estilos.etiquetaApagada}> · va contigo</Text>
-              </Text>
-              <Stepper
-                valor={mochilas}
-                alCambiar={setMochilas}
-                min={0}
-                max={2}
-                etiquetaAccesible="Mochilas"
+          {datos.aceptaMaletas ? (
+            <View style={{ marginTop: 8 }}>
+              <Interruptor
+                activo={conMaleta}
+                alCambiar={setConMaleta}
+                etiqueta="Llevo maleta"
+                descripcion="Va al maletero. La mochila va contigo y no se cuenta."
               />
             </View>
-
-            {datos.aceptaMaletas ? (
-              <View style={estilos.filaStepper}>
-                <Text style={estilos.etiquetaStepper}>
-                  Maleta
-                  <Text style={estilos.etiquetaApagada}> · al maletero</Text>
-                </Text>
-                <Stepper
-                  valor={maletas}
-                  alCambiar={setMaletas}
-                  min={0}
-                  max={2}
-                  etiquetaAccesible="Maletas"
-                />
-              </View>
-            ) : null}
-          </View>
+          ) : null}
 
           <View style={estilos.nota}>
             <Maleta tamano={14} />
@@ -180,6 +176,17 @@ export default function Reservar() {
           </View>
         </View>
       </ScrollView>
+
+      <BuscadorDeLugar
+        abierto={buscandoPunto}
+        titulo="Tu punto de recogida"
+        alElegir={(l: Lugar) => {
+          setPuntoElegido(l);
+          setDireccion(l.nombre);
+          setBuscandoPunto(false);
+        }}
+        alCerrar={() => setBuscandoPunto(false)}
+      />
 
       <View style={estilos.pie}>
         <View style={estilos.filaPrecio}>
@@ -203,7 +210,7 @@ export default function Reservar() {
               const puesto = await pedirPuesto(
                 viajeId,
                 { direccionPropia: direccion },
-                { mochilas, maletas: maletasReales },
+                { mochilas: 1, maletas: maletasReales },
                 { pasajeroId: yo },
               );
               // `7b` cobra sobre una reserva concreta: sin este identificador el
@@ -226,6 +233,34 @@ export default function Reservar() {
 }
 
 const estilos = StyleSheet.create({
+  campoPunto: {
+    marginTop: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    height: 52,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    borderRadius: radio.control,
+    backgroundColor: color.blanco,
+  },
+  campoPuntoTexto: {
+    flex: 1,
+    minWidth: 0,
+    fontSize: 15.5,
+    lineHeight: 21,
+    fontWeight: '500',
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  ayudaPunto: {
+    marginTop: 8,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: color.ink600,
+    fontFamily: familia,
+  },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,

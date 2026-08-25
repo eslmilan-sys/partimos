@@ -25,6 +25,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { Avatar } from './controles';
+import { Estrella } from './iconos';
 import { cifraRedonda, formatearDineroRedondo, tabular } from './dinero';
 import { familia, color, pulsado, radio } from './tokens';
 
@@ -94,6 +95,16 @@ export function TarjetaDeViaje({
    */
   plano?: boolean;
 }) {
+  /**
+   * LA INSIGNIA DEL CONDUCTOR — calculada, no escrita a mano (invariante 7):
+   * «Top conductor» con 4,8 o más; «Nuevo» sin calificación todavía. Entre
+   * las dos, nada: una insignia tibia no dice nada.
+   */
+  const nota =
+    viaje.conductor.calificacion && viaje.conductor.calificacion > 0
+      ? viaje.conductor.calificacion
+      : null;
+  const insignia = nota == null ? 'Nuevo' : nota >= 4.8 ? 'Top conductor' : null;
   // 1–2 cupos van en acento profundo: es lo que queda por decidir rápido.
   const pocos = viaje.puestosLibres <= 2;
   const masUnDia = cruzaMedianoche(viaje.salida, viaje.llegada);
@@ -186,14 +197,31 @@ export function TarjetaDeViaje({
           </Svg>
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={estilos.nombre} numberOfLines={1}>
-            {viaje.conductor.nombre}
-          </Text>
-          <Text style={estilos.meta} numberOfLines={1}>
-            {`★ ${viaje.conductor.calificacion?.toFixed(1) ?? 'Nuevo'}${
-              viaje.viajesHechos ? ` · ${viaje.viajesHechos} viajes` : ` · ${viaje.conductor.carro}`
-            }`}
-          </Text>
+          <View style={estilos.filaNombre}>
+            <Text style={estilos.nombre} numberOfLines={1}>
+              {viaje.conductor.nombre}
+            </Text>
+            {insignia ? (
+              <View style={[estilos.insignia, insignia === 'Top conductor' && estilos.insigniaTop]}>
+                <Text
+                  style={[
+                    estilos.insigniaTexto,
+                    insignia === 'Top conductor' && estilos.insigniaTopTexto,
+                  ]}
+                >
+                  {insignia}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+          <View style={estilos.filaMeta}>
+            {nota != null ? <Estrella tamano={11} tinta={color.oro500} /> : null}
+            <Text style={estilos.meta} numberOfLines={1}>
+              {nota != null
+                ? `${nota.toFixed(1)}${viaje.viajesHechos ? ` · ${viaje.viajesHechos} viajes` : ` · ${viaje.conductor.carro}`}`
+                : viaje.conductor.carro}
+            </Text>
+          </View>
         </View>
         <View style={estilos.pilaPrecio}>
           <View style={estilos.filaPrecio}>
@@ -295,14 +323,17 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  rail: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 3 },
+  rail: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 5 },
   aro: { width: 7, height: 7, borderRadius: 4, borderWidth: 2, borderColor: color.inkIcono },
+  /* Un trazo continuo y fino: los guiones del borde «dashed» salían como
+     tacos desiguales en el teléfono (25-08). El aro y la punta roja se
+     quedan — son la firma del sistema (invariante 1); lo que cambia es el
+     camino entre los dos. */
   railLinea: {
     flex: 1,
-    height: 0,
-    borderBottomWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: 'rgba(10,39,49,.22)',
+    height: 1.25,
+    borderRadius: 1,
+    backgroundColor: 'rgba(10,39,49,.16)',
   },
   duracion: { fontSize: 10, lineHeight: 13, fontWeight: '500', color: color.ink600, fontFamily: familia, ...tabular },
   paradas: { fontSize: 10, lineHeight: 13, fontWeight: '400', color: color.ink400, fontFamily: familia },
@@ -336,7 +367,19 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
+  filaNombre: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  filaMeta: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 1 },
   meta: { fontSize: 11, lineHeight: 15, fontWeight: '400', color: color.ink600, fontFamily: familia, ...tabular },
+  insignia: {
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 7,
+    backgroundColor: color.lavadoChip,
+  },
+  insigniaTexto: { fontSize: 9.5, lineHeight: 13, fontWeight: '600', color: color.ink600, fontFamily: familia },
+  /** El oro del sistema — el mismo de las estrellas — en su tinte al 16 %. */
+  insigniaTop: { backgroundColor: 'rgba(224,168,60,.16)' },
+  insigniaTopTexto: { color: color.esperaTinta },
 
   pilaPrecio: { alignItems: 'flex-end', gap: 2 },
   filaPrecio: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
