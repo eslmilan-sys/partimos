@@ -521,3 +521,63 @@ export async function actualizarReserva(
   reservas[i] = { ...reservas[i], ...cambios, updated_at: new Date().toISOString() };
   return reservas[i];
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   EL HISTORIAL DE DANIELA — dos viajes que ya pasaron.
+
+   La pestaña «Historial» de Mis viajes existía y salía siempre vacía:
+   parecía una persona que nunca ha viajado, y quien prueba no podía ver
+   ni el comprobante ni la pantalla de calificar. Dos viajes hechos, con
+   su reserva completada, alcanzan para recorrer todo eso.
+   ══════════════════════════════════════════════════════════════════════ */
+
+const historico = (
+  sufijo: string,
+  corredorSlug: string,
+  haceDias: number,
+  etiquetaOrigen: string,
+  etiquetaDestino: string,
+  aporteCentavos: number,
+) => {
+  const c = corredores.find((x) => x.slug === corredorSlug)!;
+  const sale = haceMinutos(haceDias * 1440);
+  const llega = haceMinutos(haceDias * 1440 - (c.typical_duration_min ?? 120));
+  const viajeId = `88888888-8888-4888-8888-88888888880${sufijo}`;
+
+  viajes.push({
+    ...viajes[0],
+    id: viajeId,
+    corridor_id: c.id,
+    departure_at: sale,
+    arrival_estimate_at: llega,
+    price_cents: aporteCentavos,
+    status: 'completed',
+    completed_at: llega,
+    published_at: haceMinutos(haceDias * 1440 + 2880),
+    created_at: haceMinutos(haceDias * 1440 + 2880),
+    origin_label: etiquetaOrigen,
+    destination_label: etiquetaDestino,
+    destination_city_id: ciudadDe(etiquetaDestino, CIUDAD_PANAMA_ID),
+  });
+
+  reservas.push(
+    reservaBase({
+      id: `77777777-7777-4777-8777-7777777777${sufijo}0`,
+      trip_id: viajeId,
+      passenger_id: DANIELA_ID,
+      status: 'completed',
+      unit_price_cents: aporteCentavos,
+      service_fee_cents: Math.round(aporteCentavos * 0.05),
+      total_cents: aporteCentavos + Math.round(aporteCentavos * 0.05),
+      confirmed_at: haceMinutos(haceDias * 1440 + 1440),
+      completed_at: llega,
+      created_at: haceMinutos(haceDias * 1440 + 2000),
+      boarding_code: '7301',
+      arrival_code: '5648',
+      maletas: 1,
+    }),
+  );
+};
+
+historico('1', 'panama-chitre', 9, 'Albrook · Terminal', 'Chitré · Parque Unión', 600);
+historico('2', 'panama-coronado', 23, 'Costa del Este', 'Coronado · entrada', 500);

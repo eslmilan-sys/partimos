@@ -28,9 +28,10 @@ import { useVolver } from '@/ui/salidas';
 import { ciudadYPunto, soloCiudad } from '@/dominio/comoSeLlama';
 import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
+import { reservasDelViaje } from '@/servicios/reservas';
 import { useSesion } from '@/servicios/sesion';
 import { ciudadesDelViaje, obtenerViaje, paradasDelViaje, slugDestinoDe } from '@/servicios/viajes';
-import type { TripStop, ViajeFila } from '@/tipos';
+import type { ReservaFila, TripStop, ViajeFila } from '@/tipos';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando, Hueso } from '@/ui/Cargando';
 import { Bandera, motivoDe } from '@/ui/CampoRojo';
@@ -54,8 +55,11 @@ import {
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
-/** Sin sesión que preguntar —solo en simulado—. En producción la pide `1c`. */
-const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
+/** Sin sesión que preguntar —solo en simulado—. En producción la pide `1c`.
+ *  Daniela, la MISMA persona que encarna «Mis viajes»: llegar desde su lista
+ *  a un detalle que la tome por otra hacía que su propia reserva no se
+ *  reconociera y la barra le ofreciera pedirse un segundo puesto. */
+const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 export default function DetalleDelViaje() {
   const router = useRouter();
@@ -77,6 +81,13 @@ export default function DetalleDelViaje() {
   const [viaje, setViaje] = useState<ViajeFila | null>(null);
   const [paradas, setParadas] = useState<TripStop[]>([]);
   /**
+   * MI RESERVA EN ESTE VIAJE, si la hay. Quien llega desde «Mis viajes» ya
+   * tiene su puesto: ofrecerle «Pedir mi puesto» era pedirse un segundo
+   * asiento en el mismo carro (visto en el teléfono, 24-08). La barra le
+   * ofrece SU reserva, con el verbo de su estado.
+   */
+  const [miReserva, setMiReserva] = useState<ReservaFila | null>(null);
+  /**
    * `undefined` es «todavía no lo he preguntado», `null` es «pregunté y no
    * está». Tratarlos igual hacía que durante un instante —y en una red lenta,
    * durante varios— la tarjeta dijera «Todavía sin calificaciones» y «Carro
@@ -88,6 +99,21 @@ export default function DetalleDelViaje() {
     obtenerViaje(viajeId).then(setViaje);
     paradasDelViaje(viajeId).then(setParadas);
   }, [viajeId]);
+
+  useEffect(() => {
+    if (!yo) return;
+    reservasDelViaje(viajeId)
+      .then((filas) =>
+        setMiReserva(
+          filas.find(
+            (r) =>
+              r.passenger_id === yo &&
+              (r.status === 'pending' || r.status === 'confirmed' || r.status === 'completed'),
+          ) ?? null,
+        ),
+      )
+      .catch(() => setMiReserva(null));
+  }, [yo, viajeId]);
 
   useEffect(() => {
     if (!viaje) return;
@@ -362,6 +388,31 @@ export default function DetalleDelViaje() {
             ]}
           >
             <Text style={estilos.ctaTexto}>Administrar mi viaje</Text>
+            <Avanza tamano={19} tinta="#fff" />
+          </Pressable>
+        ) : miReserva ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ver mi reserva"
+            onPress={() =>
+              router.push(
+                miReserva.status === 'completed'
+                  ? { pathname: '/(pasajero)/comprobante', params: { reserva: miReserva.id } }
+                  : { pathname: '/(pasajero)/llegada', params: { reserva: miReserva.id } },
+              )
+            }
+            style={({ pressed }) => [
+              estilos.cta,
+              { backgroundColor: pressed ? color.ink800 : color.ink900 },
+            ]}
+          >
+            <Text style={estilos.ctaTexto}>
+              {miReserva.status === 'completed'
+                ? 'Viaje hecho · ver comprobante'
+                : miReserva.status === 'confirmed'
+                  ? 'Tu puesto está confirmado'
+                  : 'Tu puesto está pedido'}
+            </Text>
             <Avanza tamano={19} tinta="#fff" />
           </Pressable>
         ) : (

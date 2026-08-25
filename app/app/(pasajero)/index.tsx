@@ -21,6 +21,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useRouter } from 'expo-router';
 
 import { bandeja } from '@/servicios/avisos';
+import { enviarComentario } from '@/servicios/comentarios';
 import { perfilResumido } from '@/servicios/perfiles';
 import { useMiId } from '@/servicios/sesion';
 import { aDondeSeVaDesde, ciudadesDeSalida, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
@@ -42,7 +43,7 @@ import { Avatar } from '@/ui/controles';
 import { PuntaDeFlecha } from '@/ui/TarjetaDeViaje';
 import { cifraRedonda, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, diaLargo, hora } from '@/ui/fechas';
-import { Calendario, Campana, Carro, Cerrar, Escudo, Intercambio, Lupa, Marca, Persona } from '@/ui/iconos';
+import { Calendario, Campana, Carro, Cerrar, Escudo, Intercambio, Lupa, Marca, Persona, Estrella } from '@/ui/iconos';
 import { familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -102,6 +103,8 @@ const DESDE_POR_DEFECTO: Lugar = {
   lng: -79.5199,
 };
 
+const FOTO_MANEJAR = require('../../assets/manejar.webp');
+
 /** Sin sesión que preguntar —solo en simulado—: la persona del recorrido. */
 const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 
@@ -121,6 +124,23 @@ export default function Inicio() {
   const [eligiendo, setEligiendo] = useState<'cuando' | 'pasajeros' | null>(null);
   /** El banner de manejar se puede cerrar; vuelve al abrir de nuevo. */
   const [sinBanner, setSinBanner] = useState(false);
+
+  /** Las estrellas de «¿qué tal va la app?» — una vez por visita. */
+  const [notaTocada, setNotaTocada] = useState<number | null>(null);
+  const [notaPuesta, setNotaPuesta] = useState(false);
+  const calificarApp = (n: number) => {
+    setNotaTocada(n);
+    /* A la misma mesa que el botón Cuéntame; si el buzón no está —sin red,
+       por ejemplo— la nota se pierde sin romper nada, que para una
+       calificación de prueba es lo correcto. */
+    enviarComentario({
+      pantalla: '/',
+      clase: null,
+      texto: `Calificación de la app: ${n} de 5`,
+      quien: yo,
+    }).catch(() => {});
+    setTimeout(() => setNotaPuesta(true), 350);
+  };
 
   useEffect(() => {
     rutasPopulares().then(setRutas);
@@ -509,15 +529,24 @@ export default function Inicio() {
           </View>
         ) : null}
 
-        {/* La bannière del conductor: la otra mitad del producto, dicha una
-            vez, con su salida. «recuperas», jamás «ganas» — regla R5. */}
+        {/* La tarjeta del conductor: la otra mitad del producto, con su
+            fotografía (pedida por el dueño el 25-08). «recuperas», jamás
+            «ganas» — regla R5. */}
         {gancho && !sinBanner ? (
           <View style={estilos.seccion}>
-            <View style={estilos.banner}>
-              <View style={estilos.bannerIcono}>
-                <Carro tamano={26} tinta={color.rojo700} grueso={1.6} />
+            <View style={estilos.manejarTarjeta}>
+              <View style={estilos.manejarMarco}>
+                <Image source={FOTO_MANEJAR} style={estilos.manejarFoto} resizeMode="cover" />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Cerrar este aviso"
+                  onPress={() => setSinBanner(true)}
+                  style={estilos.manejarCerrar}
+                >
+                  <Cerrar tamano={14} tinta={color.ink700} />
+                </Pressable>
               </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
+              <View style={estilos.manejarCuerpo}>
                 <Text style={estilos.bannerTitulo}>¿Vas a manejar?</Text>
                 <Text style={estilos.bannerTexto}>
                   {`Comparte tu viaje y recuperas hasta ${formatearDineroRedondo(gancho.recuperasCentavos)} llevando ${enLetra(gancho.puestos)} puestos a ${gancho.destino}.`}
@@ -531,17 +560,46 @@ export default function Inicio() {
                   <Text style={estilos.bannerBotonTexto}>Publicar mi viaje</Text>
                 </Pressable>
               </View>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Cerrar este aviso"
-                onPress={() => setSinBanner(true)}
-                style={estilos.bannerCerrar}
-              >
-                <Cerrar tamano={14} tinta={color.inkIcono} />
-              </Pressable>
             </View>
           </View>
         ) : null}
+
+        {/* Cómo va la app — para la fase de prueba entre conocidos. Las
+            estrellas escriben en la misma mesa que el botón Cuéntame; el
+            texto largo sigue viviendo allí. */}
+        <View style={estilos.seccion}>
+          <View style={estilos.notaTarjeta}>
+            <Text style={estilos.bannerTitulo}>¿Qué tal va la app?</Text>
+            {notaPuesta ? (
+              <Text style={estilos.bannerTexto}>
+                Gracias. Nos sirve de verdad — si algo se ve raro, cuéntalo con el
+                botón de la burbuja.
+              </Text>
+            ) : (
+              <>
+                <Text style={estilos.bannerTexto}>
+                  Una estrella dice poco, cinco dicen mucho. Toca la tuya.
+                </Text>
+                <View style={estilos.filaEstrellas}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Pressable
+                      key={n}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Calificar con ${n} de 5`}
+                      onPress={() => calificarApp(n)}
+                      style={({ pressed }) => [estilos.estrella, pressed && pulsado.boton]}
+                    >
+                      <Estrella
+                        tamano={26}
+                        tinta={n <= (notaTocada ?? 0) ? color.oro500 : color.ink300}
+                      />
+                    </Pressable>
+                  ))}
+                </View>
+              </>
+            )}
+          </View>
+        </View>
       </ScrollView>
 
       <Pestanas valor="Buscar" insignias={{ Mensajes: sinLeer > 0 ? sinLeer : undefined }} />
@@ -980,24 +1038,46 @@ const estilos = StyleSheet.create({
   },
 
   /* ---------------------------------------------- La bannière de manejar */
-  banner: {
+  /** La tarjeta del conductor: la fotografía arriba, el argumento debajo. */
+  manejarTarjeta: {
     marginHorizontal: espacio.gutter,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    padding: 16,
-    backgroundColor: 'rgba(225,33,59,.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(225,33,59,.14)',
-    borderRadius: radio.l,
-  },
-  bannerIcono: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
     backgroundColor: color.blanco,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    overflow: 'hidden',
+  },
+  manejarMarco: { height: 148 },
+  manejarFoto: { width: '100%', height: '100%' },
+  manejarCerrar: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255,255,255,.88)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  manejarCuerpo: { padding: 16 },
+  /** Las estrellas de la fase de prueba. */
+  notaTarjeta: {
+    marginHorizontal: espacio.gutter,
+    padding: 16,
+    backgroundColor: color.blanco,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+  },
+  filaEstrellas: { flexDirection: 'row', gap: 6, marginTop: 12 },
+  estrella: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: color.lavadoChip,
   },
   bannerTitulo: {
     fontSize: 15,
