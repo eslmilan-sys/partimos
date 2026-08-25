@@ -8,15 +8,16 @@
  *
  * La estructura nueva es la del patrón que él mismo trajo de ejemplo,
  * traducida al v6: la fotografía ocupa TODA la pantalla y desliza; abajo,
- * FIJA, una hoja blanca (radio 24, como toda hoja) con el título en dos
- * tintas, la copia, los puntos de progreso, el CTA rojo y las dos salidas
- * calladas. Solo la foto se mueve; el texto cambia con ella sin arrastrarse
- * a medias por la pantalla.
+ * FIJO, el texto de la lámina EN BLANCO SOBRE LA FOTO, asentado por un velo
+ * de tinta profundo — la hoja blanca de la primera versión se fue el mismo
+ * 25-08 («make the white background transparent»), y con ella el radio que
+ * cortaba raro contra el borde. Solo la foto se mueve; el texto cambia con
+ * ella sin arrastrarse a medias por la pantalla.
  *
- * Las tres fotografías las eligió el dueño (25-08): la bahía de Panamá al
- * atardecer, la ciudad desde el agua, y la gente dándose la mano en el
- * carro. La tercera es imagen de banco — a licenciar antes de cualquier
- * lanzamiento, como la de «¿Vas a manejar?».
+ * Las tres fotografías las trajo el dueño en alta resolución (25-08): la
+ * bahía de Panamá de noche, dos amigos en el carro por la autopista, y la
+ * carretera desde el aire. Son imágenes de banco — a licenciar antes de
+ * cualquier lanzamiento, como la de «¿Vas a manejar?».
  *
  * `useWindowDimensions` responde CERO durante el prerender del export
  * estático (se vio en un iPhone el 24-08): el ancho se MIDE con `onLayout`
@@ -32,12 +33,12 @@ import { useRouter } from 'expo-router';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Boton } from '@/ui/controles';
 import { Marca } from '@/ui/iconos';
-import { color, espacio, familia, radio, sombra, zonaDeToque } from '@/ui/tokens';
+import { color, espacio, familia, zonaDeToque } from '@/ui/tokens';
 
 const LAMINAS = [
   {
     clave: 'beneficio',
-    foto: require('../../assets/apertura-bahia.jpg'),
+    foto: require('../../assets/apertura-ciudad.jpg'),
     ceja: 'Compartir gastos',
     titulo: 'Muévete mejor,',
     tituloFuerte: 'viajando juntos',
@@ -45,7 +46,7 @@ const LAMINAS = [
   },
   {
     clave: 'encontrar',
-    foto: require('../../assets/apertura-skyline.jpg'),
+    foto: require('../../assets/apertura-carretera.jpg'),
     ceja: 'Buscar y reservar',
     titulo: 'Encuentra un viaje',
     tituloFuerte: 'que encaje contigo',
@@ -53,7 +54,7 @@ const LAMINAS = [
   },
   {
     clave: 'confianza',
-    foto: require('../../assets/apertura-carro.png'),
+    foto: require('../../assets/apertura-carro.jpg'),
     ceja: 'Cédula verificada',
     titulo: 'Comparte el camino',
     tituloFuerte: 'con confianza',
@@ -181,8 +182,8 @@ export default function Apertura() {
         pointerEvents="none"
       />
       <LinearGradient
-        colors={['rgba(10,39,49,0)', 'rgba(10,39,49,.16)', 'rgba(10,39,49,.5)']}
-        locations={[0, 0.45, 1]}
+        colors={['rgba(10,39,49,0)', 'rgba(10,39,49,.52)', 'rgba(10,39,49,.9)']}
+        locations={[0, 0.42, 1]}
         style={estilos.veloAbajo}
         pointerEvents="none"
       />
@@ -205,9 +206,9 @@ export default function Apertura() {
         </Pressable>
       </View>
 
-      {/* La hoja fija de abajo: el texto de la lámina en curso, los puntos,
-          el CTA y las salidas. Solo la foto desliza. */}
-      <View style={estilos.hoja}>
+      {/* El pie fijo: los puntos, el texto de la lámina en curso, el CTA y
+          las salidas — en blanco, directamente sobre el velo. */}
+      <View style={estilos.pie}>
         <View style={estilos.puntos}>
           {LAMINAS.map((l, i) => (
             <View key={l.clave} style={[estilos.punto, i === enCual && estilos.puntoActivo]} />
@@ -269,7 +270,7 @@ const estilos = StyleSheet.create({
   },
 
   veloArriba: { position: 'absolute', top: 0, left: 0, right: 0, height: 130 },
-  veloAbajo: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 300 },
+  veloAbajo: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 380 },
 
   filaMarca: {
     paddingTop: 10,
@@ -297,55 +298,60 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  /** La hoja de abajo: blanca, radio 24, con la sombra alta del sistema. */
-  hoja: {
+  /** El pie: sin carta, sin radio — el velo de tinta ES el fondo. */
+  pie: {
     position: 'absolute',
-    left: 12,
-    right: 12,
-    bottom: 12,
-    backgroundColor: color.blanco,
-    borderRadius: radio.hoja,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 14,
-    ...sombra.l,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: espacio.gutter,
+    paddingBottom: 18,
   },
 
-  puntos: { flexDirection: 'row', gap: 6, marginBottom: 12 },
-  punto: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.ink200 },
-  puntoActivo: { width: 20, backgroundColor: color.rojo500 },
+  puntos: { flexDirection: 'row', gap: 6, marginBottom: 14 },
+  punto: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,.38)' },
+  /** El punto activo es blanco: el rojo se guarda para el único CTA. */
+  puntoActivo: { width: 20, backgroundColor: color.blanco },
 
   /** La ceja editorial: pequeña, en versales, con su tracking de rótulo. */
   ceja: {
-    fontSize: 10.5,
+    fontSize: 11,
     lineHeight: 14,
     fontWeight: '600',
-    letterSpacing: 1.4,
+    letterSpacing: 1.6,
     textTransform: 'uppercase',
-    color: color.ink500,
-    marginBottom: 6,
+    color: 'rgba(255,255,255,.72)',
+    marginBottom: 7,
     fontFamily: familia,
+    textShadowColor: 'rgba(10,39,49,.4)',
+    textShadowRadius: 8,
   },
-  /** El título en dos tintas, como el Inicio: la primera línea apagada. */
+  /** El título en dos tintas sobre foto: la primera línea velada, la
+      segunda en blanco pleno. Más grande que sobre carta: aquí respira. */
   titulo: {
-    fontSize: 25,
-    lineHeight: 30,
+    fontSize: 29,
+    lineHeight: 34,
     fontWeight: '700',
-    letterSpacing: -0.75,
-    color: color.ink400,
+    letterSpacing: -0.87,
+    color: 'rgba(255,255,255,.72)',
     fontFamily: familia,
+    textShadowColor: 'rgba(10,39,49,.4)',
+    textShadowRadius: 12,
   },
-  tituloFuerte: { color: color.ink900 },
+  tituloFuerte: { color: color.blanco },
   copia: {
-    marginTop: 8,
-    fontSize: 14,
-    lineHeight: 20,
-    color: color.ink500,
+    marginTop: 9,
+    fontSize: 14.5,
+    lineHeight: 21,
+    color: 'rgba(255,255,255,.85)',
+    maxWidth: 320,
     fontFamily: familia,
+    textShadowColor: 'rgba(10,39,49,.4)',
+    textShadowRadius: 8,
   },
 
   salidas: {
-    marginTop: 10,
+    marginTop: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -355,8 +361,8 @@ const estilos = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     fontWeight: '600',
-    color: color.rojo700,
+    color: 'rgba(255,255,255,.92)',
     fontFamily: familia,
   },
-  salidaSeparador: { color: color.ink300, fontSize: 13 },
+  salidaSeparador: { color: 'rgba(255,255,255,.45)', fontSize: 13 },
 });
