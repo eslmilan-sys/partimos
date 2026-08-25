@@ -283,7 +283,7 @@ const estilos = StyleSheet.create({
     lineHeight: 30.24,
     letterSpacing: -1.176,
     fontWeight: '400',
-    color: color.blanco,
+    color: color.ink400,
     marginTop: 14,
     fontFamily: familia,
   },
@@ -292,7 +292,7 @@ const estilos = StyleSheet.create({
     lineHeight: 30.24,
     letterSpacing: -1.176,
     fontWeight: '600',
-    color: color.blanco,
+    color: color.ink900,
     fontFamily: familia,
   },
 

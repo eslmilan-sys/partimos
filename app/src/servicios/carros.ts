@@ -14,6 +14,9 @@ import type { Vehicle } from '@/tipos';
 
 import { nuevoId } from './_id';
 import { fuente } from './_fuente';
+import { supabase } from './_fuente/supabase/cliente';
+
+const SIMULADO = (process.env.EXPO_PUBLIC_FUENTE ?? 'simulado') !== 'supabase';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -60,7 +63,10 @@ export function borradorInicial(): BorradorDeCarro {
     modelo,
     anio: '2019',
     color: 'Gris',
-    placa: 'AB-1234',
+    /* VACÍA. Estuvo precargada con «AB-1234» y en el teléfono parecía que la
+       app ya conocía la placa — se vio el 25-08. Un dato que identifica al
+       carro lo escribe su dueño, no el formulario. */
+    placa: '',
     puestos: puestosDe(modelo),
     foto: null,
   };
@@ -89,6 +95,33 @@ export function resumen(b: BorradorDeCarro): Resumen {
     linea: `${b.marca} ${b.modelo} ${b.color.toLowerCase()}`,
     detalle: `${placaTapada(b.placa)} · ${b.anio} · ${b.puestos} puestos`,
   };
+}
+
+/**
+ * LA FOTO, DE VERDAD. La pantalla entrega lo que salió de la cámara o de la
+ * galería, ya reducido; esto decide dónde vive:
+ *
+ * - En simulado no hay dónde subirla y no hace falta: el `data:` URI que
+ *   llega de vista sirve tal cual como foto en memoria.
+ * - Contra la base real sube al bucket `carros` (migración 0038), en la
+ *   carpeta del dueño — la política de storage exige que el primer tramo del
+ *   camino sea el `auth.uid()` de quien sube. Se guarda la URL pública, que
+ *   es lo que cualquier pantalla puede pintar sin pedir permiso.
+ */
+export async function subirFotoDelCarro(
+  duenoId: string,
+  datos: Blob,
+  vista: string,
+): Promise<string> {
+  if (SIMULADO) return vista;
+
+  const camino = `${duenoId}/${nuevoId()}.jpg`;
+  const { error } = await supabase.storage
+    .from('carros')
+    .upload(camino, datos, { contentType: 'image/jpeg' });
+  if (error) throw new Error('No se pudo subir la foto. Revisa la conexión y prueba otra vez.');
+
+  return supabase.storage.from('carros').getPublicUrl(camino).data.publicUrl;
 }
 
 export function sePuedeGuardar(b: BorradorDeCarro): boolean {
