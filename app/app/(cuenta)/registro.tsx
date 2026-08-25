@@ -29,7 +29,7 @@ import { Campo } from '@/ui/Campo';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
 import { Atras } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio, sombra } from '@/ui/tokens';
+import { TRACK_MICRO, familia, color, espacio, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
 type Paso = 1 | 2 | 3;
 
@@ -166,6 +166,22 @@ export default function Registro() {
             <Paso numero="1" texto="Pides tu puesto y el conductor acepta" />
             <Paso numero="2" texto="Verificas tu cédula cuando quieras publicar" />
           </View>
+        ) : null}
+
+        {/* La cuenta se pide al pedir puesto, no al abrir la app: mirar los
+            viajes nunca exige registrarse, y esta puerta lo dice aquí mismo. */}
+        {!hecha ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Mirar los viajes sin cuenta"
+            onPress={() => router.replace('/(pasajero)')}
+            style={[zonaDeToque, estilos.mirar]}
+          >
+            <Text style={estilos.mirarTexto}>
+              {'¿Solo echando un vistazo? '}
+              <Text style={estilos.mirarFuerte}>Mirar los viajes</Text>
+            </Text>
+          </Pressable>
         ) : null}
       </View>
     </View>
@@ -378,6 +394,10 @@ const estilos = StyleSheet.create({
   ayuda: { fontSize: 13.5, lineHeight: 20, color: color.ink600, marginTop: 16, fontFamily: familia },
   legal: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, marginTop: 12, textAlign: 'center', fontFamily: familia },
 
+
+  mirar: { marginTop: 20, alignSelf: 'center' },
+  mirarTexto: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  mirarFuerte: { color: color.rojo600, fontWeight: '600' },
 
   loQueSigue: { marginTop: 16, gap: 10 },
   loQueSigueTitulo: {
