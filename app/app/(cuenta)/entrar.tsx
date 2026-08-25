@@ -3,9 +3,12 @@
  *
  * **La foto del atardecer se fue con el sistema anterior.** El usuario pidió
  * las pantallas de entrada tal como las dibuja el archivo de diseño: fondo
- * claro, la teja roja con la marca, «Bienvenido a Partimos», lo social
- * primero — porque es el camino sin fricción —, el correo después, y abajo
- * lo legal con la puerta a crear cuenta.
+ * claro, la teja roja con la marca, «Bienvenido a Partimos» — y desde el
+ * 25-08, EL CORREO PRIMERO y lo social debajo del separador: el dueño trajo
+ * el patrón de referencia y todas las cuentas reales son de correo, así que
+ * el camino más usado va arriba. Abajo lo legal con la puerta a crear
+ * cuenta. «Recordarme» guarda el correo en este navegador (solo el correo,
+ * nunca la contraseña) y lo deja puesto la próxima vez.
  *
  * **Google y Apple, no Facebook.** El canevas dibuja Facebook, pero el único
  * OAuth cableado en `servicios/cuenta.ts` es `entrarCon('google' | 'apple')`.
@@ -19,7 +22,7 @@
  * `servicios/cuenta.ts`.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
@@ -41,6 +44,9 @@ import { Boton } from '@/ui/controles';
 import { Marca } from '@/ui/iconos';
 import { color, espacio, familia, pulsado, radio, zonaDeToque } from '@/ui/tokens';
 
+/** Dónde vive el correo recordado en este navegador. */
+const RECUERDO = 'partimos.correo.recordado';
+
 /* ---------------------------------------------------------------- Glifos */
 
 function Sobre({ tinta = color.ink400 }: { tinta?: string }) {
@@ -57,6 +63,14 @@ function Candado({ tinta = color.ink400 }: { tinta?: string }) {
     <Svg viewBox="0 0 24 24" width={18} height={18} fill="none">
       <Path d="M5.5 10.5h13v9h-13z" stroke={tinta} strokeWidth={1.6} strokeLinejoin="round" />
       <Path d="M8.5 10.5V7.8a3.5 3.5 0 017 0v2.7" stroke={tinta} strokeWidth={1.6} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function Palomita() {
+  return (
+    <Svg viewBox="0 0 12 12" width={11} height={11} fill="none">
+      <Path d="M2 6.2 4.8 9 10 3.4" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }
@@ -107,6 +121,21 @@ export default function Entrar() {
   const [clave, setClave] = useState('');
   const [quePaso, setQuePaso] = useState<string | null>(null);
   const [entrando, setEntrando] = useState(false);
+  const [recordar, setRecordar] = useState(false);
+
+  /* El correo recordado se pone solo al abrir. SOLO el correo: la
+     contraseña no se guarda nunca — recordarla en claro sería regalarla. */
+  useEffect(() => {
+    try {
+      const guardado = globalThis.localStorage?.getItem(RECUERDO);
+      if (guardado) {
+        setCorreo(guardado);
+        setRecordar(true);
+      }
+    } catch {
+      /* sin almacén no hay recuerdo, y no pasa nada */
+    }
+  }, []);
 
   const listo = correoValido(correo) && contrasenaValida(clave);
 
@@ -116,8 +145,15 @@ export default function Entrar() {
     setQuePaso(null);
     const r = await entrarConCuenta(correo, clave);
     setEntrando(false);
-    if (r.ok) router.replace('/(pasajero)');
-    else setQuePaso(QUE_PASO[r.motivo]);
+    if (r.ok) {
+      try {
+        if (recordar) globalThis.localStorage?.setItem(RECUERDO, correo.trim());
+        else globalThis.localStorage?.removeItem(RECUERDO);
+      } catch {
+        /* nada */
+      }
+      router.replace('/(pasajero)');
+    } else setQuePaso(QUE_PASO[r.motivo]);
   };
 
   return (
@@ -145,38 +181,7 @@ export default function Entrar() {
           <Text style={estilos.bajada}>Entra para reservar tu puesto o publicar tu viaje.</Text>
         </View>
 
-        {/* Lo social primero: los dos proveedores que de verdad funcionan. */}
-        <View style={estilos.sociales}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Continuar con Google"
-            onPress={async () => {
-              if (!(await entrarCon('google'))) setQuePaso(SIN_PROVEEDOR('Google'));
-            }}
-            style={({ pressed }) => [estilos.social, pressed && pulsado.boton]}
-          >
-            <LogoGoogle />
-            <Text style={estilos.socialTexto}>Continuar con Google</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Continuar con Apple"
-            onPress={async () => {
-              if (!(await entrarCon('apple'))) setQuePaso(SIN_PROVEEDOR('Apple'));
-            }}
-            style={({ pressed }) => [estilos.social, pressed && pulsado.boton]}
-          >
-            <LogoApple />
-            <Text style={estilos.socialTexto}>Continuar con Apple</Text>
-          </Pressable>
-        </View>
-
-        <View style={estilos.separador}>
-          <View style={estilos.raya} />
-          <Text style={estilos.oTexto}>O con correo</Text>
-          <View style={estilos.raya} />
-        </View>
-
+        {/* El correo primero: es el camino de todas las cuentas reales. */}
         <View style={estilos.campos}>
           <Campo
             etiqueta="Correo"
@@ -198,20 +203,68 @@ export default function Entrar() {
             glifo={<Candado />}
           />
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Olvidé mi contraseña"
-            onPress={() => router.push('/(ayuda)')}
-            style={[estilos.olvide, zonaDeToque]}
-          >
-            <Text style={estilos.olvideTexto}>¿Olvidaste tu contraseña?</Text>
-          </Pressable>
+          {/* Recordarme a la izquierda, el olvido a la derecha: la fila
+              entera es de la contraseña que acaba de pasar. */}
+          <View style={estilos.filaRecuerdo}>
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: recordar }}
+              accessibilityLabel="Recordar mi correo en este navegador"
+              onPress={() => setRecordar((v) => !v)}
+              style={[estilos.recuerdo, zonaDeToque]}
+            >
+              <View style={[estilos.casilla, recordar && estilos.casillaMarcada]}>
+                {recordar ? <Palomita /> : null}
+              </View>
+              <Text style={estilos.recuerdoTexto}>Recordarme</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Olvidé mi contraseña"
+              onPress={() => router.push('/(ayuda)')}
+              style={zonaDeToque}
+            >
+              <Text style={estilos.olvideTexto}>¿Olvidaste tu contraseña?</Text>
+            </Pressable>
+          </View>
 
           {quePaso ? <Aviso>{quePaso}</Aviso> : null}
 
           <Boton desactivado={!listo || entrando} alPulsar={enviar}>
             {entrando ? 'Entrando…' : 'Iniciar sesión'}
           </Boton>
+        </View>
+
+        <View style={estilos.separador}>
+          <View style={estilos.raya} />
+          <Text style={estilos.oTexto}>O continuar con</Text>
+          <View style={estilos.raya} />
+        </View>
+
+        {/* Lo social debajo: los dos proveedores que de verdad funcionan. */}
+        <View style={estilos.sociales}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Continuar con Google"
+            onPress={async () => {
+              if (!(await entrarCon('google'))) setQuePaso(SIN_PROVEEDOR('Google'));
+            }}
+            style={({ pressed }) => [estilos.social, pressed && pulsado.boton]}
+          >
+            <LogoGoogle />
+            <Text style={estilos.socialTexto}>Google</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Continuar con Apple"
+            onPress={async () => {
+              if (!(await entrarCon('apple'))) setQuePaso(SIN_PROVEEDOR('Apple'));
+            }}
+            style={({ pressed }) => [estilos.social, pressed && pulsado.boton]}
+          >
+            <LogoApple />
+            <Text style={estilos.socialTexto}>Apple</Text>
+          </Pressable>
         </View>
 
         {/* La acción antes que la nota al pie: crear cuenta es una puerta,
@@ -273,8 +326,9 @@ const estilos = StyleSheet.create({
   tituloFuerte: { color: color.ink900 },
   bajada: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
 
-  sociales: { paddingTop: 20, paddingHorizontal: espacio.gutter, gap: 10 },
+  sociales: { paddingTop: 16, paddingHorizontal: espacio.gutter, flexDirection: 'row', gap: 10 },
   social: {
+    flex: 1,
     height: 52,
     borderRadius: 18,
     backgroundColor: color.blanco,
@@ -313,7 +367,33 @@ const estilos = StyleSheet.create({
   },
 
   campos: { paddingTop: 20, paddingHorizontal: espacio.gutter, gap: 14 },
-  olvide: { alignSelf: 'flex-end' },
+
+  filaRecuerdo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: -2,
+  },
+  recuerdo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  /** La casilla marcada es roja como el interruptor encendido: mismo verbo. */
+  casilla: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: color.ink200,
+    backgroundColor: color.blanco,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  casillaMarcada: { backgroundColor: color.rojo500, borderColor: color.rojo500 },
+  recuerdoTexto: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    color: color.ink700,
+    fontFamily: familia,
+  },
   olvideTexto: {
     fontSize: 13,
     lineHeight: 18,
