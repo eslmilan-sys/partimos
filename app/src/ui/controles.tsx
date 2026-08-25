@@ -73,6 +73,15 @@ type InterruptorProps = {
   descripcion?: string;
 };
 
+/**
+ * DOS PISOS, NO DOS COLUMNAS. La descripción vivía en la columna de al lado
+ * del toggle, así que CADA renglón suyo perdía el ancho de la pista más el
+ * hueco (~64 px) — por eso «Únicamente mujeres podrán pedir puesto en este
+ * viaje» se partía en dos líneas con medio card libre a la derecha. El
+ * toggle solo tiene que reservar sitio junto al TÍTULO: arriba va la fila
+ * título + pista, y debajo la descripción a TODO el ancho de la tarjeta.
+ * El título pide una sola línea; la pista no se encoge nunca.
+ */
 export function Interruptor({ activo, alCambiar, etiqueta, descripcion }: InterruptorProps) {
   return (
     <Pressable
@@ -80,15 +89,17 @@ export function Interruptor({ activo, alCambiar, etiqueta, descripcion }: Interr
       accessibilityState={{ checked: activo }}
       accessibilityLabel={etiqueta}
       onPress={() => alCambiar(!activo)}
-      style={[estilos.interruptorFila, { alignItems: descripcion ? 'flex-start' : 'center' }]}
+      style={estilos.interruptorBloque}
     >
-      <View style={{ flex: 1 }}>
-        <Text style={estilos.interruptorEtiqueta}>{etiqueta}</Text>
-        {descripcion ? <Text style={estilos.interruptorDescripcion}>{descripcion}</Text> : null}
+      <View style={estilos.interruptorFila}>
+        <Text style={estilos.interruptorEtiqueta} numberOfLines={1}>
+          {etiqueta}
+        </Text>
+        <View style={[estilos.pista, { backgroundColor: activo ? color.rojo500 : color.ink200 }]}>
+          <View style={[estilos.pulgar, { transform: [{ translateX: activo ? 18 : 0 }] }]} />
+        </View>
       </View>
-      <View style={[estilos.pista, { backgroundColor: activo ? color.rojo500 : color.ink200 }]}>
-        <View style={[estilos.pulgar, { transform: [{ translateX: activo ? 18 : 0 }] }]} />
-      </View>
+      {descripcion ? <Text style={estilos.interruptorDescripcion}>{descripcion}</Text> : null}
     </Pressable>
   );
 }
@@ -414,10 +425,35 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontVariant: ['tabular-nums'], fontFamily: familia },
 
-  interruptorFila: { flexDirection: 'row', gap: 16, minHeight: 30 },
-  interruptorEtiqueta: { fontSize: 15.5, lineHeight: 21.75, fontWeight: '500', color: color.ink900, fontFamily: familia },
-  interruptorDescripcion: { fontSize: 13.5, lineHeight: 18.2, color: color.ink600, marginTop: 2, fontFamily: familia },
-  pista: { width: 48, height: 30, borderRadius: radio.pastilla, padding: 3, justifyContent: 'center' },
+  interruptorBloque: { width: '100%' },
+  /** Título y pista, centrados entre sí; el título cede, la pista jamás. */
+  interruptorFila: { flexDirection: 'row', alignItems: 'center', gap: 16, minHeight: 30 },
+  interruptorEtiqueta: {
+    flex: 1,
+    minWidth: 0,
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: '600',
+    letterSpacing: -0.24,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  /** A TODO el ancho, con aire propio: 13/19 y la tinta de meta. */
+  interruptorDescripcion: {
+    marginTop: 4,
+    fontSize: 13,
+    lineHeight: 19,
+    color: color.ink500,
+    fontFamily: familia,
+  },
+  pista: {
+    width: 48,
+    height: 30,
+    flexShrink: 0,
+    borderRadius: radio.pastilla,
+    padding: 3,
+    justifyContent: 'center',
+  },
   pulgar: {
     width: 24,
     height: 24,

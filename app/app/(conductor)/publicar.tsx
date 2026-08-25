@@ -625,7 +625,7 @@ export default function Publicar() {
               activo={soloMujeres}
               alCambiar={setSoloMujeres}
               etiqueta="Solo mujeres"
-              descripcion="Únicamente mujeres podrán pedir puesto en este viaje."
+              descripcion="Únicamente mujeres podrán pedir puesto."
             />
           </View>
           <View style={estilos.interruptorSeparado}>
