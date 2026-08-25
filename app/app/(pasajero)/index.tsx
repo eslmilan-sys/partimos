@@ -242,10 +242,13 @@ export default function Inicio() {
         </View>
       </View>
 
-      {/* El título en dos tintas, como el v6: la pregunta y su eco apagado. */}
+      {/* El título en dos tintas y en DOS LÍNEAS fijas: es lo primero que se
+          lee al abrir, y a 22 en una sola línea competía con la fila de marca
+          en vez de mandar. El salto va escrito, no dejado al ancho del
+          teléfono — así la pregunta y su eco caen siempre igual. */}
       <View style={estilos.filaTitulo}>
-        <Text style={estilos.titulo} numberOfLines={2}>
-          {'¿Para dónde '}
+        <Text style={estilos.titulo}>
+          {'¿Para dónde\n'}
           <Text style={estilos.tituloApagado}>partimos hoy?</Text>
         </Text>
       </View>
@@ -704,12 +707,12 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  filaTitulo: { paddingTop: 14, paddingHorizontal: espacio.gutter },
+  filaTitulo: { paddingTop: 18, paddingHorizontal: espacio.gutter },
   titulo: {
-    fontSize: 22,
-    lineHeight: 26,
-    fontWeight: '600',
-    letterSpacing: -0.77,
+    fontSize: 30,
+    lineHeight: 35,
+    fontWeight: '700',
+    letterSpacing: -1.05,
     color: color.ink900,
     fontFamily: familia,
   },
@@ -717,7 +720,7 @@ const estilos = StyleSheet.create({
   tituloApagado: { color: '#8FA6AD' },
 
   /* --------------------------------------------- La tarjeta de búsqueda */
-  zonaBusqueda: { paddingTop: 16, paddingHorizontal: espacio.gutter },
+  zonaBusqueda: { paddingTop: 20, paddingHorizontal: espacio.gutter },
   tarjetaBusqueda: {
     backgroundColor: color.blanco,
     borderWidth: 1,
@@ -860,7 +863,12 @@ const estilos = StyleSheet.create({
   /* ------------------------------------------------------ Las secciones */
   seccion: { paddingTop: 26 },
   cabeceraSeccion: {
-    paddingHorizontal: espacio.gutter,
+    paddingLeft: espacio.gutter,
+    /* Un poco más de aire a la derecha que a la izquierda: la pestaña
+       plegada de «Cuéntame» vive pegada a ese borde y le comía la última
+       letra a «Ver todos» (visto a 390). Cuando el test acabe y la pestaña
+       se retire, esto vuelve a `espacio.gutter`. */
+    paddingRight: espacio.gutter + 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
