@@ -1,87 +1,71 @@
 /**
- * Apertura — el onboarding de tres láminas del canevas (11b · 11c · 11d),
- * vestido con el Sistema v6.
+ * Apertura — el onboarding de tres láminas, a FOTOGRAFÍA COMPLETA.
  *
- * Lo que pidió el usuario, literal: al abrir la app, **un deslizador de tres
- * láminas con el botón debajo**. Cada lámina es la del archivo: el beneficio,
- * encontrar, la confianza. Debajo, fijos, los puntos y el botón — «Continuar»
- * en las dos primeras, «Crear cuenta» en la última — y las dos salidas
- * calladas: entrar, o mirar los viajes sin cuenta, que es el recorrido que el
- * producto entero defiende (se busca primero, la cuenta llega después).
+ * Rediseñada el 25-08-2026, con carta blanca del dueño. La versión
+ * anterior enseñaba una «prueba de interfaz» — dos filas de viaje de
+ * mentira y un botón «Reservar puesto» que parecía de verdad — y el dueño
+ * la señaló: una maqueta que parece real es una trampa para quien prueba.
  *
- * Las láminas 2 y 3 no llevan fotografía sino una **prueba de interfaz**,
- * como en el canevas: dos filas de viaje reales en miniatura, y la tarjeta de
- * confianza con la cédula verificada. La 3 dice «cédula verificada» y no
- * «cédula y licencia» como el canevas: solo la cédula pasa por Didit hoy, y
- * esta pantalla no promete lo que el producto no hace.
+ * La estructura nueva es la del patrón que él mismo trajo de ejemplo,
+ * traducida al v6: la fotografía ocupa TODA la pantalla y desliza; abajo,
+ * FIJA, una hoja blanca (radio 24, como toda hoja) con el título en dos
+ * tintas, la copia, los puntos de progreso, el CTA rojo y las dos salidas
+ * calladas. Solo la foto se mueve; el texto cambia con ella sin arrastrarse
+ * a medias por la pantalla.
+ *
+ * Las tres fotografías las eligió el dueño (25-08): la bahía de Panamá al
+ * atardecer, la ciudad desde el agua, y la gente dándose la mano en el
+ * carro. La tercera es imagen de banco — a licenciar antes de cualquier
+ * lanzamiento, como la de «¿Vas a manejar?».
+ *
+ * `useWindowDimensions` responde CERO durante el prerender del export
+ * estático (se vio en un iPhone el 24-08): el ancho se MIDE con `onLayout`
+ * y hasta conocerlo no se dibuja el deslizador.
  */
 
 import { useEffect, useRef, useState } from 'react';
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import Svg, { Path } from 'react-native-svg';
 
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
-import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
-import { tabular } from '@/ui/dinero';
 import { Marca } from '@/ui/iconos';
-import { PuntaDeFlecha } from '@/ui/TarjetaDeViaje';
 import { color, espacio, familia, radio, sombra, zonaDeToque } from '@/ui/tokens';
-
-const FOTO_CARRETERA = require('../../assets/david.jpeg');
 
 const LAMINAS = [
   {
     clave: 'beneficio',
-    titulo: 'Muévete mejor,\nviajando juntos',
+    foto: require('../../assets/apertura-bahia.jpg'),
+    titulo: 'Muévete mejor,',
+    tituloFuerte: 'viajando juntos',
     copia: 'Comparte el carro con gente que va a tu mismo destino y divide la gasolina.',
   },
   {
     clave: 'encontrar',
-    titulo: 'Encuentra un viaje\nque encaje contigo',
+    foto: require('../../assets/apertura-skyline.jpg'),
+    titulo: 'Encuentra un viaje',
+    tituloFuerte: 'que encaje contigo',
     copia: 'Busca por ruta y hora, compara aportes y reserva tu puesto en segundos.',
   },
   {
     clave: 'confianza',
-    titulo: 'Comparte el camino\ncon confianza',
+    foto: require('../../assets/apertura-carro.png'),
+    titulo: 'Comparte el camino',
+    tituloFuerte: 'con confianza',
     copia: 'Cédula verificada, reseñas reales y chat dentro de la app.',
   },
 ] as const;
 
-/** Las dos filas de viaje de la lámina 2, las del canevas. */
-const VIAJES_DE_MUESTRA = [
-  { horas: '14:30 → 20:15', destino: 'David', quien: 'Ricardo M. · 2 cupos', precio: '18' },
-  { horas: '16:00 → 19:40', destino: 'Santiago', quien: 'Yariela C. · 1 cupo', precio: '16' },
-];
-
 export default function Apertura() {
   const router = useRouter();
-  /* Una lámina mide lo que el marco — pero MEDIDO, no preguntado a la
-     ventana. `useWindowDimensions` responde CERO durante el prerender del
-     export estático: las tres láminas quedaban congeladas a ancho cero en
-     el HTML publicado, y el teléfono enseñaba las letras apiladas en
-     vertical (visto en un iPhone el 24-08). Con `onLayout` el ancho llega
-     del marco ya puesto en página, sea cual sea la ventana, y hasta
-     entonces las láminas no se dibujan: un fotograma en blanco, nunca uno
-     roto. */
   const [ancho, setAncho] = useState(0);
   const [enCual, setEnCual] = useState(0);
   const tira = useRef<ScrollView>(null);
 
-  /* «Ya la vi» se escribe cuando la apertura de verdad se montó — no cuando
-     el índice DECIDIÓ mandarte aquí. Escribirlo durante el render del índice
-     era un efecto en pleno render: dos renders seguidos se contradecían y el
-     export estático se quedaba a medio camino. La llave es la que lee
-     `app/index.tsx`. */
+  /* «Ya la vi» se escribe cuando la apertura de verdad se montó — la llave
+     que lee `app/index.tsx` para no repetir el paseo en la misma sesión. */
   useEffect(() => {
     try {
       globalThis.sessionStorage?.setItem('partimos.apertura.vista', '1');
@@ -100,133 +84,91 @@ export default function Apertura() {
     tira.current?.scrollTo({ x: (enCual + 1) * ancho, animated: true });
   };
 
+  const lamina = LAMINAS[enCual];
+
   return (
     <View
       style={estilos.pantalla}
       onLayout={(e) => setAncho(Math.min(e.nativeEvent.layout.width, espacio.marco))}
     >
-      <CampoRojo altura={400} />
-      <BarraDeEstado />
+      {/* La fotografía, a pantalla completa, deslizante. */}
+      {ancho > 0 ? (
+        <ScrollView
+          ref={tira}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={ancho}
+          decelerationRate="fast"
+          scrollEventThrottle={16}
+          onScroll={(e) => {
+            const cual = Math.round(e.nativeEvent.contentOffset.x / ancho);
+            if (cual !== enCual && cual >= 0 && cual < LAMINAS.length) setEnCual(cual);
+          }}
+          style={StyleSheet.absoluteFill}
+        >
+          {LAMINAS.map((l) => (
+            <Image
+              key={l.clave}
+              source={l.foto}
+              style={{ width: ancho, height: '100%' }}
+              resizeMode="cover"
+            />
+          ))}
+        </ScrollView>
+      ) : null}
 
-      {/* La fila de marca, con la salida de quien ya conoce esto. */}
+      {/* Los dos velos de tinta: uno arriba para que la marca se lea sobre
+          cualquier cielo, otro abajo para asentar la hoja. La tinta es la
+          del sistema, no un negro cualquiera. */}
+      <LinearGradient
+        colors={['rgba(10,39,49,.45)', 'rgba(10,39,49,0)']}
+        style={estilos.veloArriba}
+        pointerEvents="none"
+      />
+      <LinearGradient
+        colors={['rgba(10,39,49,0)', 'rgba(10,39,49,.35)']}
+        style={estilos.veloAbajo}
+        pointerEvents="none"
+      />
+
+      <BarraDeEstado tono="claro" />
+
+      {/* La marca y la salida de quien ya conoce esto, en blanco sobre el velo. */}
       <View style={estilos.filaMarca}>
         <View style={estilos.marca}>
-          <Marca tamano={21} />
+          <Marca tamano={21} tinta="#fff" />
           <Text style={estilos.marcaTexto}>partimos</Text>
         </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Saltar la presentación"
           onPress={() => router.replace('/(pasajero)')}
-          style={[zonaDeToque, { paddingHorizontal: 6 }]}
+          style={[zonaDeToque, estilos.saltarZona]}
         >
           <Text style={estilos.saltar}>Saltar</Text>
         </Pressable>
       </View>
 
-      {/* El deslizador: tres láminas, una pantalla cada una. No se dibuja
-          hasta conocer el ancho — ver el comentario de arriba. */}
-      {ancho === 0 ? (
-        <View style={{ flex: 1 }} />
-      ) : (
-      <ScrollView
-        ref={tira}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={ancho}
-        decelerationRate="fast"
-        scrollEventThrottle={16}
-        onScroll={(e) => {
-          const cual = Math.round(e.nativeEvent.contentOffset.x / ancho);
-          if (cual !== enCual && cual >= 0 && cual < LAMINAS.length) setEnCual(cual);
-        }}
-        style={{ flex: 1 }}
-      >
-        {/* Lámina 1 · el beneficio: la carretera, de verdad. */}
-        <View style={[estilos.lamina, { width: ancho }]}>
-          <View style={estilos.visual}>
-            <Image source={FOTO_CARRETERA} style={estilos.foto} resizeMode="cover" />
-          </View>
-          <Text style={estilos.titulo}>{LAMINAS[0].titulo}</Text>
-          <Text style={estilos.copia}>{LAMINAS[0].copia}</Text>
-        </View>
-
-        {/* Lámina 2 · encontrar: la prueba de interfaz, dos filas de viaje. */}
-        <View style={[estilos.lamina, { width: ancho }]}>
-          <View style={[estilos.visual, estilos.visualClaro]}>
-            {VIAJES_DE_MUESTRA.map((v) => (
-              <View key={v.destino} style={estilos.filaMuestra}>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <View style={estilos.filaHoras}>
-                    <Text style={[estilos.horasMuestra, tabular]}>{v.horas}</Text>
-                    <PuntaDeFlecha tamano={7} />
-                    <Text style={estilos.destinoMuestra}>{v.destino}</Text>
-                  </View>
-                  <Text style={estilos.quienMuestra}>{v.quien}</Text>
-                </View>
-                <View style={estilos.filaPrecioMuestra}>
-                  <Text style={estilos.unidadMuestra}>B/</Text>
-                  <Text style={[estilos.precioMuestra, tabular]}>{v.precio}</Text>
-                </View>
-              </View>
-            ))}
-            <View style={estilos.botonMuestra}>
-              <Text style={estilos.botonMuestraTexto}>Reservar puesto</Text>
-            </View>
-          </View>
-          <Text style={estilos.titulo}>{LAMINAS[1].titulo}</Text>
-          <Text style={estilos.copia}>{LAMINAS[1].copia}</Text>
-        </View>
-
-        {/* Lámina 3 · la confianza: la tarjeta del conductor verificado. */}
-        <View style={[estilos.lamina, { width: ancho }]}>
-          <View style={[estilos.visual, estilos.visualClaro, { justifyContent: 'center' }]}>
-            <View style={estilos.tarjetaConfianza}>
-              <View style={estilos.filaConductor}>
-                <View style={estilos.retratoMuestra}>
-                  <Text style={estilos.retratoMuestraTexto}>RM</Text>
-                  <Svg width={16} height={16} viewBox="0 0 16 16" fill="none" style={estilos.marcaVerificado}>
-                    <Path
-                      d="M8 14.6a6.6 6.6 0 1 0 0-13.2 6.6 6.6 0 0 0 0 13.2Z"
-                      fill={color.rojo500}
-                      stroke={color.blanco}
-                      strokeWidth={2.2}
-                    />
-                    <Path
-                      d="m5.2 8.2 2 2 3.6-4"
-                      stroke="#fff"
-                      strokeWidth={1.9}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
-                </View>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={estilos.nombreMuestra}>Ricardo M.</Text>
-                  <Text style={[estilos.quienMuestra, tabular]}>★ 4.9 · 128 viajes</Text>
-                </View>
-              </View>
-              <View style={estilos.chipCedula}>
-                <Text style={estilos.chipCedulaTexto}>Cédula verificada</Text>
-              </View>
-            </View>
-          </View>
-          <Text style={estilos.titulo}>{LAMINAS[2].titulo}</Text>
-          <Text style={estilos.copia}>{LAMINAS[2].copia}</Text>
-        </View>
-      </ScrollView>
-      )}
-
-      {/* Debajo, fijos: los puntos, el botón, y las dos salidas calladas. */}
-      <View style={estilos.pie}>
+      {/* La hoja fija de abajo: el texto de la lámina en curso, los puntos,
+          el CTA y las salidas. Solo la foto desliza. */}
+      <View style={estilos.hoja}>
         <View style={estilos.puntos}>
           {LAMINAS.map((l, i) => (
             <View key={l.clave} style={[estilos.punto, i === enCual && estilos.puntoActivo]} />
           ))}
         </View>
 
-        <Boton alPulsar={avanzar}>{ultima ? 'Crear cuenta' : 'Continuar'}</Boton>
+        <Text style={estilos.titulo}>
+          {lamina.titulo}
+          {'\n'}
+          <Text style={estilos.tituloFuerte}>{lamina.tituloFuerte}</Text>
+        </Text>
+        <Text style={estilos.copia}>{lamina.copia}</Text>
+
+        <View style={{ marginTop: 18 }}>
+          <Boton alPulsar={avanzar}>{ultima ? 'Crear cuenta' : 'Continuar'}</Boton>
+        </View>
 
         <View style={estilos.salidas}>
           <Pressable
@@ -251,16 +193,21 @@ export default function Apertura() {
 }
 
 const estilos = StyleSheet.create({
+  /** Tinta detrás de todo: si una foto tarda, el hueco es del sistema. */
   pantalla: {
     flex: 1,
-    backgroundColor: color.sand100,
+    backgroundColor: color.ink900,
     maxWidth: espacio.marco,
     width: '100%',
     alignSelf: 'center',
+    overflow: 'hidden',
   },
 
+  veloArriba: { position: 'absolute', top: 0, left: 0, right: 0, height: 130 },
+  veloAbajo: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 220 },
+
   filaMarca: {
-    paddingTop: 8,
+    paddingTop: 10,
     paddingLeft: espacio.gutter,
     paddingRight: 14,
     flexDirection: 'row',
@@ -273,177 +220,56 @@ const estilos = StyleSheet.create({
     lineHeight: 24,
     fontWeight: '600',
     letterSpacing: -0.67,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  saltar: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '500',
-    color: color.ink500,
-    fontFamily: familia,
-  },
-
-  lamina: { paddingHorizontal: espacio.gutter, paddingTop: 16 },
-  /** El visual de la lámina: una tarjeta grande al radio 24. */
-  visual: {
-    height: 340,
-    borderRadius: radio.l,
-    overflow: 'hidden',
-    backgroundColor: color.sand200,
-    marginBottom: 20,
-    ...sombra.s,
-  },
-  visualClaro: {
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderColor: color.bordeSutil,
-    padding: 16,
-    gap: 12,
-  },
-  foto: { width: '100%', height: '100%' },
-
-  titulo: {
-    fontSize: 28,
-    lineHeight: 34,
-    fontWeight: '700',
-    letterSpacing: -0.84,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  copia: {
-    marginTop: 10,
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '400',
-    color: color.ink500,
-    maxWidth: 300,
-    fontFamily: familia,
-  },
-
-  /* La prueba de interfaz de la lámina 2. */
-  filaMuestra: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 14,
-    borderRadius: radio.control,
-    backgroundColor: color.sand100,
-    borderWidth: 1,
-    borderColor: color.bordeSutil,
-  },
-  filaHoras: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  horasMuestra: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '600',
-    letterSpacing: -0.3,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  destinoMuestra: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '500',
-    color: color.ink700,
-    fontFamily: familia,
-  },
-  quienMuestra: {
-    marginTop: 2,
-    fontSize: 11,
-    lineHeight: 15,
-    fontWeight: '400',
-    color: color.ink600,
-    fontFamily: familia,
-  },
-  filaPrecioMuestra: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  unidadMuestra: { fontSize: 11, lineHeight: 14, fontWeight: '500', color: color.ink600, fontFamily: familia },
-  precioMuestra: {
-    fontSize: 19,
-    lineHeight: 23,
-    fontWeight: '600',
-    letterSpacing: -0.57,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  /** El botón de la maqueta: se ve, no se pulsa — la lámina entera avanza. */
-  botonMuestra: {
-    marginTop: 'auto',
-    height: 48,
-    borderRadius: radio.control,
-    backgroundColor: color.rojo500,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...sombra.cta,
-  },
-  botonMuestraTexto: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '600',
     color: color.blanco,
     fontFamily: familia,
   },
-
-  /* La tarjeta de confianza de la lámina 3. */
-  tarjetaConfianza: {
-    borderRadius: radio.l,
-    backgroundColor: color.sand100,
-    borderWidth: 1,
-    borderColor: color.bordeSutil,
-    padding: 16,
-    gap: 14,
-  },
-  filaConductor: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  retratoMuestra: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: color.ink100,
-    borderWidth: 1,
-    borderColor: 'rgba(10,39,49,.10)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  retratoMuestraTexto: {
-    fontSize: 14,
+  saltarZona: { paddingHorizontal: 6 },
+  saltar: {
+    fontSize: 13,
     lineHeight: 18,
     fontWeight: '600',
-    letterSpacing: 0.28,
-    color: color.ink700,
-    fontFamily: familia,
-  },
-  marcaVerificado: { position: 'absolute', right: -3, bottom: -3 },
-  nombreMuestra: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '600',
-    letterSpacing: -0.22,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  chipCedula: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 9,
-    backgroundColor: color.hechoFondo,
-  },
-  chipCedulaTexto: {
-    fontSize: 10,
-    lineHeight: 14,
-    fontWeight: '600',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    color: color.hechoTinta,
+    color: 'rgba(255,255,255,.92)',
     fontFamily: familia,
   },
 
-  /* El pie fijo: puntos, botón, salidas. */
-  pie: { paddingHorizontal: espacio.gutter, paddingBottom: 16, gap: 14 },
-  puntos: { flexDirection: 'row', gap: 6, justifyContent: 'center' },
-  punto: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.ink300 },
-  puntoActivo: { width: 18, backgroundColor: color.rojo500 },
+  /** La hoja de abajo: blanca, radio 24, con la sombra alta del sistema. */
+  hoja: {
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    bottom: 12,
+    backgroundColor: color.blanco,
+    borderRadius: radio.hoja,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 14,
+    ...sombra.l,
+  },
+
+  puntos: { flexDirection: 'row', gap: 6, marginBottom: 12 },
+  punto: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.ink200 },
+  puntoActivo: { width: 20, backgroundColor: color.rojo500 },
+
+  /** El título en dos tintas, como el Inicio: la primera línea apagada. */
+  titulo: {
+    fontSize: 25,
+    lineHeight: 30,
+    fontWeight: '700',
+    letterSpacing: -0.75,
+    color: color.ink400,
+    fontFamily: familia,
+  },
+  tituloFuerte: { color: color.ink900 },
+  copia: {
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 20,
+    color: color.ink500,
+    fontFamily: familia,
+  },
+
   salidas: {
+    marginTop: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -452,9 +278,9 @@ const estilos = StyleSheet.create({
   salida: {
     fontSize: 13,
     lineHeight: 18,
-    fontWeight: '500',
+    fontWeight: '600',
     color: color.rojo700,
     fontFamily: familia,
   },
-  salidaSeparador: { fontSize: 13, color: color.ink400, fontFamily: familia },
+  salidaSeparador: { color: color.ink300, fontSize: 13 },
 });
