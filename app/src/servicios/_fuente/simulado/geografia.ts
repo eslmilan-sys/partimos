@@ -4,6 +4,7 @@
  * vuelven idénticas y nada de arriba se entera.
  */
 
+import { paradasEnElCamino } from '@/dominio/enElCamino';
 import type { City, Corridor } from '@/tipos';
 
 export const CIUDAD_PANAMA_ID = '6a6a7413-08f3-4902-9378-62847a9856bd';
@@ -432,15 +433,46 @@ export const corredores: Corridor[] = [
 ];
 
 /**
- * Las paradas que una ruta ofrece, en orden. El diseño de `5c` las nombra una
+ * Las paradas que una ruta ofrece, EN ORDEN. El diseño de `5c` las nombra una
  * a una al añadirlas («Añadir Aguadulce»), nunca dice «añadir parada».
- * En producción salen de `pickup_points` cruzado con la geometría del corredor.
+ *
+ * **Se calculan, ya no se escriben.** Había una sola lista a mano —la de
+ * Panamá → Chitré— y las otras cinco rutas no ofrecían ninguna. Ahora sale
+ * de la misma regla que usa la fuente real (`paradasEnElCamino`), así que
+ * las seis se portan igual y la demo enseña lo que enseñará la app.
+ *
+ * Que la regla acierta se prueba solo: con estas mismas coordenadas devuelve
+ * exactamente La Chorrera, Penonomé, Aguadulce y Divisa para Panamá →
+ * Chitré — las cuatro que estaban escritas a mano aquí.
  */
-export const paradasDeLaRuta: Record<string, { ciudad: string; etiqueta: string; minutos: number }[]> = {
-  'panama-chitre': [
-    { ciudad: 'La Chorrera', etiqueta: 'La Chorrera', minutos: 45 },
-    { ciudad: 'Penonomé', etiqueta: 'Penonomé', minutos: 110 },
-    { ciudad: 'Aguadulce', etiqueta: 'Aguadulce', minutos: 140 },
-    { ciudad: 'Divisa', etiqueta: 'Divisa', minutos: 165 },
-  ],
-};
+export const paradasDeLaRuta: Record<
+  string,
+  { ciudad: string; etiqueta: string; fraccion: number }[]
+> = Object.fromEntries(
+  corredores.map((c) => {
+    const salida = ciudades.find((x) => x.id === c.origin_city_id);
+    const llegada = ciudades.find((x) => x.id === c.destination_city_id);
+    if (!salida || !llegada || salida.lat == null || salida.lng == null || llegada.lat == null || llegada.lng == null) return [c.slug, []];
+    /* Una ciudad sin coordenadas no se puede situar, así que no se ofrece:
+       adivinar dónde cae sería peor que no proponerla. */
+    const candidatas = ciudades.filter(
+      (x): x is City & { lat: number; lng: number } =>
+        x.lat != null &&
+        x.lng != null &&
+        x.id !== c.origin_city_id &&
+        x.id !== c.destination_city_id,
+    );
+    return [
+      c.slug,
+      paradasEnElCamino(
+      { lat: salida.lat, lng: salida.lng },
+      { lat: llegada.lat, lng: llegada.lng },
+      candidatas,
+    ).map((p) => ({
+        ciudad: p.name,
+        etiqueta: p.name,
+        fraccion: p.fraccion,
+      })),
+    ];
+  }),
+);

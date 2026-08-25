@@ -498,9 +498,13 @@ export async function prepararPublicacion(
     topeCentavos: topeDeRuta(costoDeReferencia),
     // el conductor nunca se ofrece a sí mismo: los puestos del carro menos el suyo
     puestosMaximos: Math.max(1, carro.seats_total - 1),
+    /* La fuente da a qué FRACCIÓN del trayecto cae cada parada; los minutos
+       salen aquí, donde se conoce la duración. Así una parada al 60 % de un
+       viaje de tres horas cae a las 1 h 48, y no en un número escrito a mano
+       que deja de valer en cuanto cambia la ruta. */
     paradasOfrecidas: (fuente.paradasDeLaRuta[corredorSlug] ?? []).map((p) => ({
       nombre: p.etiqueta,
-      minutos: p.minutos,
+      minutos: Math.round(p.fraccion * duracionMin),
     })),
   });
 }

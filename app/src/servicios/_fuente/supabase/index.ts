@@ -20,6 +20,7 @@ import type {
   AvisoPendiente,
 } from '@/tipos';
 
+import { paradasEnElCamino } from '@/dominio/enElCamino';
 import { A_CUALQUIER_HORA, etiquetaDeRutina } from '@/dominio/rutinas';
 
 import { supabase } from './cliente';
@@ -85,7 +86,7 @@ export const placasCompletas: Record<string, string> = {};
 export const yappyDelConductor: Record<string, string> = {};
 
 /** Las paradas intermedias de cada ruta, sacadas de `pickup_points`. */
-export const paradasDeLaRuta: Record<string, { ciudad: string; etiqueta: string; minutos: number }[]> = {};
+export const paradasDeLaRuta: Record<string, { ciudad: string; etiqueta: string; fraccion: number }[]> = {};
 
 /* ── La carga ────────────────────────────────────────────────────────────── */
 
@@ -291,19 +292,50 @@ async function cargarCategorias() {
   for (const c of data ?? []) categorias.push({ ...c, consumo_l_100km: (c as { l_100km?: number }).l_100km ?? 8 });
 }
 
+/**
+ * Las paradas de cada corredor.
+ *
+ * **Repartía el país entero.** Cogía TODOS los `pickup_points` activos y los
+ * ofrecía en TODAS las rutas, quitando sólo los dos extremos: publicando
+ * Panamá → Chitré salía «parar en David», 400 km al oeste. Visto en el
+ * teléfono del dueño el 25-08-2026. Ahora la geometría decide —
+ * `paradasEnElCamino`, probada con las coordenadas de la semilla.
+ *
+ * **Y son CIUDADES, no terminales.** El punto exacto lo propone el pasajero
+ * y lo acepta el conductor (regla 4); el conductor sólo dice por qué
+ * ciudades pasa. Eso además saca de la interfaz los seis nombres de
+ * terminal de la semilla, que `PRODUCT.md` prohíbe como sitio de encuentro.
+ */
 async function cargarParadasDeRuta() {
-  const { data } = await supabase
-    .from('pickup_points')
-    .select('name, description, city_id, cities(name)')
-    .eq('is_active', true);
+  const donde = new Map(ciudades.map((c) => [c.id, c]));
   for (const c of corredores) {
-    paradasDeLaRuta[c.slug] = (data ?? [])
-      .filter((p) => p.city_id !== c.origin_city_id && p.city_id !== c.destination_city_id)
-      .map((p) => ({
-        ciudad: (p.cities as { name: string } | null)?.name ?? p.name,
-        etiqueta: p.name,
-        minutos: 0,
-      }));
+    const salida = donde.get(c.origin_city_id);
+    const llegada = donde.get(c.destination_city_id);
+    if (!salida || !llegada || salida.lat == null || salida.lng == null || llegada.lat == null || llegada.lng == null) {
+      paradasDeLaRuta[c.slug] = [];
+      continue;
+    }
+    /* Una ciudad sin coordenadas no se puede situar, así que no se ofrece:
+       adivinar dónde cae sería peor que no proponerla. */
+    const candidatas = ciudades.filter(
+      (x): x is City & { lat: number; lng: number } =>
+        x.lat != null &&
+        x.lng != null &&
+        x.id !== c.origin_city_id &&
+        x.id !== c.destination_city_id,
+    );
+    paradasDeLaRuta[c.slug] = paradasEnElCamino(
+      { lat: salida.lat, lng: salida.lng },
+      { lat: llegada.lat, lng: llegada.lng },
+      candidatas,
+    ).map((p) => ({
+      ciudad: p.name,
+      etiqueta: p.name,
+      /* La FRACCIÓN del trayecto, no minutos: quien sabe cuánto dura el
+         viaje es el servicio, y ahí se convierte. Guardar minutos aquí
+         obligaría a esta capa a conocer la duración de cada corredor. */
+      fraccion: p.fraccion,
+    }));
   }
 }
 

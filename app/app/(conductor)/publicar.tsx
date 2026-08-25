@@ -474,17 +474,18 @@ export default function Publicar() {
             </Pressable>
           </View>
 
+          {/* El límite se ve SIEMPRE —«0 de 2»—, no sólo al chocar con él.
+              Y «Añadir todas» aparece cuando de verdad caben todas: antes
+              pedía que la ruta ofreciera como mucho dos paradas, así que con
+              tres o cuatro candidatas no salía nunca. */}
           <View style={estilos.filaParadasTitulo}>
             <Epigrafe>Dónde paras en el camino</Epigrafe>
-            {porElegir.length > 1 && paradas + porElegir.length <= MAX_INTERMEDIAS ? (
+            <Text style={estilos.cuentaParadas}>{`${paradas} de ${MAX_INTERMEDIAS}`}</Text>
+            {porElegir.length > 1 && porElegir.length <= MAX_INTERMEDIAS - paradas ? (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Añadir todas las paradas"
-                onPress={() =>
-                  setElegidas(
-                    datos.paradasOfrecidas.map((_, i) => i).slice(0, MAX_INTERMEDIAS),
-                  )
-                }
+                onPress={() => setElegidas((xs) => [...xs, ...porElegir.map((p) => p.indice)])}
                 style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
               >
                 <Text style={estilos.cambiar}>Añadir todas</Text>
@@ -526,31 +527,51 @@ export default function Publicar() {
             </View>
           </View>
 
-          {/* Cada parada que la ruta ofrece y aún no llevas, elegible por sí
-              misma: se puede parar en la segunda SIN parar en la primera. */}
-          {hayHueco
-            ? porElegir.map((p) => (
-                <Pressable
-                  key={p.indice}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Añadir ${p.nombre}`}
-                  onPress={() =>
-                    setElegidas((xs) =>
-                      xs.length < MAX_INTERMEDIAS ? [...xs, p.indice] : xs,
-                    )
-                  }
-                  style={({ pressed }) => [estilos.anadir, pressed && estilos.eleccionPulsada]}
-                >
-                  <Mas tinta={color.azul700} />
-                  <Text style={estilos.anadirTexto}>{`Añadir ${p.nombre}`}</Text>
-                </Pressable>
-              ))
-            : porElegir.length > 0 ? (
-                <Text style={estilos.notaParadas}>
-                  Máximo dos paradas por viaje: cuatro puntos de recogida es el
-                  límite del producto.
-                </Text>
-              ) : null}
+          {/* PASTILLAS, no filas. La ruta ofrece hasta doce ciudades y sólo
+              caben dos: doce renglones a lo ancho obligaban a desplazar la
+              pantalla entera para ver el camino. En pastillas, EN EL ORDEN
+              EN QUE SE PASAN, el conductor lee su ruta de un vistazo y toca
+              la que quiere. Con el cupo lleno no desaparecen —esconderlas
+              dejaba la pantalla sin explicación—: se apagan. */}
+          {porElegir.length > 0 ? (
+            <>
+              <View style={estilos.pastillas}>
+                {porElegir.map((p) => (
+                  <Pressable
+                    key={p.indice}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Añadir ${p.nombre}`}
+                    disabled={!hayHueco}
+                    onPress={() =>
+                      setElegidas((xs) => (xs.length < MAX_INTERMEDIAS ? [...xs, p.indice] : xs))
+                    }
+                    style={({ pressed }) => [
+                      estilos.pastilla,
+                      !hayHueco && estilos.pastillaLlena,
+                      pressed && estilos.eleccionPulsada,
+                    ]}
+                  >
+                    <Mas tamano={13} tinta={hayHueco ? color.azul700 : color.ink300} />
+                    <Text
+                      style={[estilos.pastillaTexto, !hayHueco && estilos.pastillaTextoLleno]}
+                      numberOfLines={1}
+                    >
+                      {p.nombre}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <Text style={estilos.notaParadas}>
+                {hayHueco
+                  ? 'En el orden en que las pasas. El punto exacto lo acuerdas con cada pasajero.'
+                  : 'Ya llevas dos paradas, el máximo del viaje: con la salida y la llegada son cuatro puntos de recogida. Quita una para cambiarla.'}
+              </Text>
+            </>
+          ) : (
+            <Text style={estilos.notaParadas}>
+              Esta ruta no pasa por ninguna otra ciudad de la lista.
+            </Text>
+          )}
         </View>
 
         {/* El aporte, con el degradado que cierra la tarjeta */}
@@ -796,6 +817,37 @@ const estilos = StyleSheet.create({
   },
   separadorHoja: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 14 },
 
+  cuentaParadas: {
+    marginLeft: 8,
+    fontSize: 11.5,
+    lineHeight: 15,
+    fontWeight: '600',
+    color: color.ink500,
+    fontFamily: familia,
+  },
+  pastillas: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
+  pastilla: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    height: 34,
+    paddingLeft: 9,
+    paddingRight: 12,
+    borderRadius: radio.ficha,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    backgroundColor: color.blanco,
+  },
+  pastillaLlena: { opacity: 0.5 },
+  pastillaTexto: {
+    fontSize: 13.5,
+    lineHeight: 18,
+    fontWeight: '500',
+    letterSpacing: -0.14,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  pastillaTextoLleno: { color: color.ink400 },
   filaParadasTitulo: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
   notaParadas: {
     marginTop: 8,
