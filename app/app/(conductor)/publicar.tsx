@@ -612,7 +612,7 @@ export default function Publicar() {
             dice con todas sus letras. */}
         <View style={estilos.tarjetaInterruptores}>
           <Epigrafe>Condiciones del viaje</Epigrafe>
-          <View style={{ paddingTop: 6 }}>
+          <View style={estilos.interruptorPrimero}>
             <Interruptor
               activo={aceptaMaletas}
               alCambiar={setAceptaMaletas}
@@ -909,14 +909,18 @@ const estilos = StyleSheet.create({
     borderColor: color.bordeSutil,
     borderRadius: radio.l,
     paddingHorizontal: 18,
-    paddingTop: 4,
-    paddingBottom: 8,
+    paddingTop: 10,
+    paddingBottom: 2,
   },
+  /* La misma distancia del texto a la línea por ARRIBA y por ABAJO: antes
+     el filete llevaba 9 debajo y nada encima, y quedaba pegado al renglón
+     anterior — se veía sobre todo junto a «Solo mujeres» (25-08). */
   interruptorSeparado: {
-    paddingTop: 9,
+    paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
   },
+  interruptorPrimero: { paddingTop: 8, paddingBottom: 12 },
 
   pie: {
     paddingHorizontal: espacio.gutter,
