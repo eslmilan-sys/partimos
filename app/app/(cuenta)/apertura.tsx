@@ -24,7 +24,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -38,6 +38,7 @@ const LAMINAS = [
   {
     clave: 'beneficio',
     foto: require('../../assets/apertura-bahia.jpg'),
+    ceja: 'Compartir gastos',
     titulo: 'Muévete mejor,',
     tituloFuerte: 'viajando juntos',
     copia: 'Comparte el carro con gente que va a tu mismo destino y divide la gasolina.',
@@ -45,6 +46,7 @@ const LAMINAS = [
   {
     clave: 'encontrar',
     foto: require('../../assets/apertura-skyline.jpg'),
+    ceja: 'Buscar y reservar',
     titulo: 'Encuentra un viaje',
     tituloFuerte: 'que encaje contigo',
     copia: 'Busca por ruta y hora, compara aportes y reserva tu puesto en segundos.',
@@ -52,6 +54,7 @@ const LAMINAS = [
   {
     clave: 'confianza',
     foto: require('../../assets/apertura-carro.png'),
+    ceja: 'Cédula verificada',
     titulo: 'Comparte el camino',
     tituloFuerte: 'con confianza',
     copia: 'Cédula verificada, reseñas reales y chat dentro de la app.',
@@ -63,6 +66,32 @@ export default function Apertura() {
   const [ancho, setAncho] = useState(0);
   const [enCual, setEnCual] = useState(0);
   const tira = useRef<ScrollView>(null);
+
+  /**
+   * TRES MOVIMIENTOS, todos con la Animated de siempre (nada nuevo que
+   * cargar): la fotografía va a MEDIO paso del dedo — parallaxe — para que
+   * el deslizamiento tenga profundidad; respira un zoom lentísimo de nueve
+   * segundos — una foto quieta parece un póster, una que respira parece un
+   * lugar —; y el texto de la hoja entra con un suspiro (260 ms, 8 px)
+   * cuando cambia la lámina, en vez de dar un golpe seco.
+   */
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const respiracion = useRef(new Animated.Value(0)).current;
+  const suspiro = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(respiracion, { toValue: 1, duration: 9000, useNativeDriver: false }),
+        Animated.timing(respiracion, { toValue: 0, duration: 9000, useNativeDriver: false }),
+      ]),
+    ).start();
+  }, [respiracion]);
+
+  useEffect(() => {
+    suspiro.setValue(0);
+    Animated.timing(suspiro, { toValue: 1, duration: 260, useNativeDriver: false }).start();
+  }, [enCual, suspiro]);
 
   /* «Ya la vi» se escribe cuando la apertura de verdad se montó — la llave
      que lee `app/index.tsx` para no repetir el paseo en la misma sesión. */
@@ -91,9 +120,9 @@ export default function Apertura() {
       style={estilos.pantalla}
       onLayout={(e) => setAncho(Math.min(e.nativeEvent.layout.width, espacio.marco))}
     >
-      {/* La fotografía, a pantalla completa, deslizante. */}
+      {/* La fotografía, a pantalla completa, deslizante — con parallaxe. */}
       {ancho > 0 ? (
-        <ScrollView
+        <Animated.ScrollView
           ref={tira}
           horizontal
           pagingEnabled
@@ -101,21 +130,46 @@ export default function Apertura() {
           snapToInterval={ancho}
           decelerationRate="fast"
           scrollEventThrottle={16}
-          onScroll={(e) => {
-            const cual = Math.round(e.nativeEvent.contentOffset.x / ancho);
-            if (cual !== enCual && cual >= 0 && cual < LAMINAS.length) setEnCual(cual);
-          }}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+            useNativeDriver: false,
+            listener: (e: { nativeEvent: { contentOffset: { x: number } } }) => {
+              const cual = Math.round(e.nativeEvent.contentOffset.x / ancho);
+              if (cual !== enCual && cual >= 0 && cual < LAMINAS.length) setEnCual(cual);
+            },
+          })}
           style={StyleSheet.absoluteFill}
         >
-          {LAMINAS.map((l) => (
-            <Image
-              key={l.clave}
-              source={l.foto}
-              style={{ width: ancho, height: '100%' }}
-              resizeMode="cover"
-            />
+          {LAMINAS.map((l, i) => (
+            <View key={l.clave} style={{ width: ancho, height: '100%', overflow: 'hidden' }}>
+              <Animated.Image
+                source={l.foto}
+                resizeMode="cover"
+                style={{
+                  /* Un cuarto más ancha que su marco: es el margen que la
+                     parallaxe gasta sin enseñar nunca un borde. */
+                  width: ancho * 1.3,
+                  height: '100%',
+                  marginLeft: -ancho * 0.15,
+                  transform: [
+                    {
+                      translateX: scrollX.interpolate({
+                        inputRange: [(i - 1) * ancho, i * ancho, (i + 1) * ancho],
+                        outputRange: [ancho * 0.14, 0, -ancho * 0.14],
+                        extrapolate: 'clamp',
+                      }),
+                    },
+                    {
+                      scale: respiracion.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 1.06],
+                      }),
+                    },
+                  ],
+                }}
+              />
+            </View>
           ))}
-        </ScrollView>
+        </Animated.ScrollView>
       ) : null}
 
       {/* Los dos velos de tinta: uno arriba para que la marca se lea sobre
@@ -127,7 +181,8 @@ export default function Apertura() {
         pointerEvents="none"
       />
       <LinearGradient
-        colors={['rgba(10,39,49,0)', 'rgba(10,39,49,.35)']}
+        colors={['rgba(10,39,49,0)', 'rgba(10,39,49,.16)', 'rgba(10,39,49,.5)']}
+        locations={[0, 0.45, 1]}
         style={estilos.veloAbajo}
         pointerEvents="none"
       />
@@ -159,12 +214,22 @@ export default function Apertura() {
           ))}
         </View>
 
-        <Text style={estilos.titulo}>
-          {lamina.titulo}
-          {'\n'}
-          <Text style={estilos.tituloFuerte}>{lamina.tituloFuerte}</Text>
-        </Text>
-        <Text style={estilos.copia}>{lamina.copia}</Text>
+        <Animated.View
+          style={{
+            opacity: suspiro,
+            transform: [
+              { translateY: suspiro.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) },
+            ],
+          }}
+        >
+          <Text style={estilos.ceja}>{lamina.ceja}</Text>
+          <Text style={estilos.titulo}>
+            {lamina.titulo}
+            {'\n'}
+            <Text style={estilos.tituloFuerte}>{lamina.tituloFuerte}</Text>
+          </Text>
+          <Text style={estilos.copia}>{lamina.copia}</Text>
+        </Animated.View>
 
         <View style={{ marginTop: 18 }}>
           <Boton alPulsar={avanzar}>{ultima ? 'Crear cuenta' : 'Continuar'}</Boton>
@@ -204,7 +269,7 @@ const estilos = StyleSheet.create({
   },
 
   veloArriba: { position: 'absolute', top: 0, left: 0, right: 0, height: 130 },
-  veloAbajo: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 220 },
+  veloAbajo: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 300 },
 
   filaMarca: {
     paddingTop: 10,
@@ -250,6 +315,17 @@ const estilos = StyleSheet.create({
   punto: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.ink200 },
   puntoActivo: { width: 20, backgroundColor: color.rojo500 },
 
+  /** La ceja editorial: pequeña, en versales, con su tracking de rótulo. */
+  ceja: {
+    fontSize: 10.5,
+    lineHeight: 14,
+    fontWeight: '600',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    color: color.ink500,
+    marginBottom: 6,
+    fontFamily: familia,
+  },
   /** El título en dos tintas, como el Inicio: la primera línea apagada. */
   titulo: {
     fontSize: 25,
