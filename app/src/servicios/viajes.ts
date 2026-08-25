@@ -514,8 +514,10 @@ export type BorradorDePublicacion = {
   desde?: Lugar | null;
   hacia?: Lugar | null;
   salida: string;
-  /** Cuántas paradas de las ofrecidas van incluidas, en orden. */
-  paradas: number;
+  /** Los ÍNDICES de las paradas ofrecidas que van incluidas — «[0, 2]» dice
+      cuáles, no cuántas: se puede parar en la segunda sin parar en la
+      primera (25-08-2026). Máximo dos entran al viaje. */
+  paradas: number[];
   puestos: number;
   /** null = usar el calculado. */
   aporteCentavos: number | null;
@@ -626,7 +628,11 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
    * las que el conductor dejó puestas, en su orden. Máximo cuatro puntos de
    * recogida por viaje, que es la regla del producto.
    */
-  const intermedias = preparada.paradasOfrecidas.slice(0, Math.min(borrador.paradas, 2));
+  const intermedias = [...borrador.paradas]
+    .sort((a, b) => a - b)
+    .slice(0, 2)
+    .map((i) => preparada.paradasOfrecidas[i])
+    .filter(Boolean);
   const salidaMs = new Date(borrador.salida).getTime();
   const enPunto = (min: number) => new Date(salidaMs + min * 60_000).toISOString();
 

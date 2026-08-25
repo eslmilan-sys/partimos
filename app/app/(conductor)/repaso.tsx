@@ -75,7 +75,13 @@ export default function Repaso() {
   const [publicando, setPublicando] = useState(false);
   const [quePaso, setQuePaso] = useState<string | null>(null);
 
-  const paradas = Number(p.paradas ?? 0);
+  /* Los índices de las paradas elegidas — «0,2» — no una cuenta. */
+  const indicesParadas = (p.paradas ?? '')
+    .split(',')
+    .map(Number)
+    .filter((n) => Number.isInteger(n) && n >= 0)
+    .slice(0, 2);
+  const paradas = indicesParadas.length;
   const puestos = Number(p.puestos ?? 3);
   const aporteElegido = p.aporte ? Number(p.aporte) : null;
 
@@ -107,7 +113,7 @@ export default function Repaso() {
   const cuenta = repartoDelCosto(datos.costoCentavos, aporte, puestos);
   const salida = new Date(datos.salida);
   const llegada = mas(salida, datos.duracionMin + paradas * MINUTOS_POR_PARADA);
-  const enMedio = datos.paradasOfrecidas.slice(0, Math.min(paradas, 2));
+  const enMedio = indicesParadas.map((i) => datos.paradasOfrecidas[i]).filter(Boolean);
 
   const condiciones: { texto: string; icono: React.ReactNode }[] = [
     {
@@ -262,7 +268,7 @@ export default function Repaso() {
                 desde: libre?.desde ?? null,
                 hacia: libre?.hacia ?? null,
                 salida: p.salida,
-                paradas,
+                paradas: indicesParadas,
                 puestos,
                 aporteCentavos: aporteElegido,
                 aceptaMaletas: !!p.maletas,

@@ -99,7 +99,13 @@ export default function Publicar() {
   const [eligiendo, setEligiendo] = useState<'dia' | 'hora' | null>(null);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
   const [cedula, setCedula] = useState<EstadoDeCedula | null>(null);
-  const [paradas, setParadas] = useState(2);
+  /**
+   * LAS PARADAS ELEGIDAS, por índice — no un contador. Con el contador solo
+   * se podía añadir «la siguiente»: quien quería parar en Penonomé pero NO
+   * en La Chorrera no tenía cómo decirlo (pedido el 25-08). Máximo dos:
+   * cuatro puntos de recogida por viaje es regla del producto.
+   */
+  const [elegidas, setElegidas] = useState<number[]>([]);
   const [puestos, setPuestos] = useState(3);
   const [aporteElegido, setAporteElegido] = useState<number | null>(null);
   const [aceptaMaletas, setAceptaMaletas] = useState(true);
@@ -131,7 +137,7 @@ export default function Publicar() {
     setRuta(slug);
     if (!slug) setDatos(null);
     setAporteElegido(null);
-    setParadas(0);
+    setElegidas([]);
     setRutaGuardada(false);
   }, [desde, hacia]);
 
@@ -231,8 +237,9 @@ export default function Publicar() {
                   {desde.nombre}
                 </Text>
               </View>
-              <Avanza />
+              <Avanza tinta={color.ink300} />
             </Pressable>
+            <View style={estilos.filete} />
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Voy a ${hacia.nombre}. Cambiar`}
@@ -245,7 +252,7 @@ export default function Publicar() {
                   {hacia.nombre}
                 </Text>
               </View>
-              <Avanza />
+              <Avanza tinta={color.ink300} />
             </Pressable>
 
             <View style={estilos.separadorHoja} />
@@ -320,8 +327,16 @@ export default function Publicar() {
 
   const origen = origenDelAporte(aporteElegido, aporte, datos.topeCentavos);
   const salida = new Date(datos.salida);
-  const paradasVisibles = datos.paradasOfrecidas.slice(0, paradas);
-  const siguienteParada = datos.paradasOfrecidas[paradas];
+  const MAX_INTERMEDIAS = 2;
+  const enOrden = [...elegidas].sort((a, b) => a - b).slice(0, MAX_INTERMEDIAS);
+  const paradas = enOrden.length;
+  const paradasVisibles = enOrden
+    .map((i) => ({ indice: i, ...datos.paradasOfrecidas[i] }))
+    .filter((p) => p.nombre != null);
+  const porElegir = datos.paradasOfrecidas
+    .map((p, i) => ({ indice: i, ...p }))
+    .filter((p) => !enOrden.includes(p.indice));
+  const hayHueco = paradas < MAX_INTERMEDIAS;
 
   // Cada parada cuesta unos minutos; la llegada se mueve con ellas.
   const llegada = hora(mas(salida, datos.duracionMin + paradas * MINUTOS_POR_PARADA));
@@ -359,14 +374,16 @@ export default function Publicar() {
       >
         {/* La hoja blanca que monta sobre el borde del campo */}
         <View style={estilos.hoja}>
-          {/* De dónde sales y a dónde vas, en dos campos de verdad: la lista
-              de corredores sigue debajo de las sugerencias, pero un punto que
-              la lista no trae también se puede elegir — y calcular. */}
+          {/* De dónde sales y a dónde vas — FILAS con filete, no burbujas con
+              borde: cuatro rectángulos delineados casi tocándose leían como
+              un formulario ruidoso (visto en el teléfono, 25-08). Es el mismo
+              lenguaje de la tarjeta de búsqueda del Inicio: la tarjeta ya es
+              el contorno, dentro solo hacen falta líneas de pelo. */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Salgo de ${desde?.nombre ?? ''}. Cambiar`}
             onPress={() => setBuscandoLugar('desde')}
-            style={estilos.eleccion}
+            style={({ pressed }) => [estilos.eleccion, pressed && estilos.eleccionPulsada]}
           >
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={estilos.eleccionEtiqueta}>Salgo de</Text>
@@ -374,13 +391,14 @@ export default function Publicar() {
                 {desde?.nombre ?? ''}
               </Text>
             </View>
-            <Avanza />
+            <Avanza tinta={color.ink300} />
           </Pressable>
+          <View style={estilos.filete} />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Voy a ${hacia?.nombre ?? ''}. Cambiar`}
             onPress={() => setBuscandoLugar('hacia')}
-            style={estilos.eleccion}
+            style={({ pressed }) => [estilos.eleccion, pressed && estilos.eleccionPulsada]}
           >
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={estilos.eleccionEtiqueta}>Voy a</Text>
@@ -388,15 +406,20 @@ export default function Publicar() {
                 {hacia?.nombre ?? ''}
               </Text>
             </View>
-            <Avanza />
+            <Avanza tinta={color.ink300} />
           </Pressable>
+          <View style={estilos.filete} />
 
           <View style={estilos.filaEleccion}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Día: ${diaCorto(salida)}. Cambiar`}
               onPress={() => setEligiendo('dia')}
-              style={[estilos.eleccion, estilos.eleccionMitad]}
+              style={({ pressed }) => [
+                estilos.eleccion,
+                estilos.eleccionMitad,
+                pressed && estilos.eleccionPulsada,
+              ]}
             >
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.eleccionEtiqueta}>Día</Text>
@@ -404,19 +427,24 @@ export default function Publicar() {
                   {diaCorto(salida)}
                 </Text>
               </View>
-              <Avanza />
+              <Avanza tinta={color.ink300} />
             </Pressable>
+            <View style={estilos.fileteVertical} />
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Hora: ${horaSalida}. Cambiar`}
               onPress={() => setEligiendo('hora')}
-              style={[estilos.eleccion, estilos.eleccionMitad]}
+              style={({ pressed }) => [
+                estilos.eleccion,
+                estilos.eleccionMitad,
+                pressed && estilos.eleccionPulsada,
+              ]}
             >
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.eleccionEtiqueta}>Hora</Text>
                 <Text style={[estilos.eleccionValor, tabular]}>{horaSalida}</Text>
               </View>
-              <Avanza />
+              <Avanza tinta={color.ink300} />
             </Pressable>
           </View>
 
@@ -446,8 +474,22 @@ export default function Publicar() {
             </Pressable>
           </View>
 
-          <View style={{ marginTop: 12 }}>
+          <View style={estilos.filaParadasTitulo}>
             <Epigrafe>Dónde paras en el camino</Epigrafe>
+            {porElegir.length > 1 && paradas + porElegir.length <= MAX_INTERMEDIAS ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Añadir todas las paradas"
+                onPress={() =>
+                  setElegidas(
+                    datos.paradasOfrecidas.map((_, i) => i).slice(0, MAX_INTERMEDIAS),
+                  )
+                }
+                style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
+              >
+                <Text style={estilos.cambiar}>Añadir todas</Text>
+              </Pressable>
+            ) : null}
           </View>
 
           <View style={estilos.recorrido}>
@@ -467,7 +509,7 @@ export default function Publicar() {
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`Quitar ${p.nombre}`}
-                  onPress={() => setParadas((n) => Math.max(0, n - 1))}
+                  onPress={() => setElegidas((xs) => xs.filter((i) => i !== p.indice))}
                   style={estilos.quitar}
                 >
                   <View style={estilos.quitarCirculo}>
@@ -484,17 +526,31 @@ export default function Publicar() {
             </View>
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            disabled={!siguienteParada}
-            onPress={() => setParadas((n) => Math.min(datos.paradasOfrecidas.length, n + 1))}
-            style={estilos.anadir}
-          >
-            <Mas tinta={siguienteParada ? color.azul700 : color.ink400} />
-            <Text style={[estilos.anadirTexto, !siguienteParada && { color: color.ink500 }]}>
-              {siguienteParada ? `Añadir ${siguienteParada.nombre}` : 'No hay más paradas en esta ruta'}
-            </Text>
-          </Pressable>
+          {/* Cada parada que la ruta ofrece y aún no llevas, elegible por sí
+              misma: se puede parar en la segunda SIN parar en la primera. */}
+          {hayHueco
+            ? porElegir.map((p) => (
+                <Pressable
+                  key={p.indice}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Añadir ${p.nombre}`}
+                  onPress={() =>
+                    setElegidas((xs) =>
+                      xs.length < MAX_INTERMEDIAS ? [...xs, p.indice] : xs,
+                    )
+                  }
+                  style={({ pressed }) => [estilos.anadir, pressed && estilos.eleccionPulsada]}
+                >
+                  <Mas tinta={color.azul700} />
+                  <Text style={estilos.anadirTexto}>{`Añadir ${p.nombre}`}</Text>
+                </Pressable>
+              ))
+            : porElegir.length > 0 ? (
+                <Text style={estilos.notaParadas}>
+                  Máximo dos paradas por viaje: cuatro puntos de recogida es el
+                  límite del producto.
+                </Text>
+              ) : null}
         </View>
 
         {/* El aporte, con el degradado que cierra la tarjeta */}
@@ -539,12 +595,13 @@ export default function Publicar() {
             />
           </View>
 
+          {/* La cifra del costo una sola vez: repetirla al final de la misma
+              frase — «B/30,94 … de B/30,94» — era leerla dos veces sin
+              aprender nada nuevo. */}
           <Text style={estilos.cuenta}>
-            {`Gasolina y peajes: ${formatearDinero(cuenta.costoCentavos)}. Con ${puestos} ${
+            {`Gasolina y peajes: ${formatearDinero(cuenta.costoCentavos)} · con ${puestos} ${
               puestos === 1 ? 'puesto recuperas' : 'puestos recuperas'
-            } ${formatearDinero(cuenta.recuperasCentavos)}${
-              cuenta.cubreElViaje ? ' y cubres el viaje.' : ` de ${formatearDinero(cuenta.costoCentavos)}.`
-            }`}
+            } ${formatearDinero(cuenta.recuperasCentavos)}${cuenta.cubreElViaje ? ' y cubres el viaje' : ''}.`}
           </Text>
         </View>
 
@@ -605,7 +662,9 @@ export default function Publicar() {
                 ...aParams(desde, 'o'),
                 ...aParams(hacia, 'd'),
                 salida: salidaISO,
-                paradas: String(paradas),
+                /* Los ÍNDICES elegidos, no una cuenta: «0,2» dice qué
+                   paradas van, no cuántas. */
+                paradas: enOrden.join(','),
                 puestos: String(puestos),
                 aporte: aporteElegido == null ? '' : String(aporteElegido),
                 maletas: aceptaMaletas ? '1' : '',
@@ -691,29 +750,45 @@ const estilos = StyleSheet.create({
     elevation: 6,
   },
 
+  /**
+   * Una FILA de la hoja, no una burbuja: la tarjeta ya es el contorno, y
+   * dentro los campos se separan con filetes de pelo — el lenguaje de la
+   * tarjeta de búsqueda del Inicio. Cuatro rectángulos con borde a 9 px
+   * unos de otros leían como ruido.
+   */
   eleccion: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    height: 58,
-    paddingHorizontal: 14,
-    borderRadius: radio.control,
-    borderWidth: 1.5,
-    borderColor: color.bordePorDefecto,
+    height: 56,
+    paddingHorizontal: 2,
+    borderRadius: radio.anidado,
   },
+  eleccionPulsada: { backgroundColor: color.lavadoChip },
   eleccionMitad: { flex: 1, minWidth: 0 },
-  filaEleccion: { flexDirection: 'row', gap: 9, marginTop: 9 },
+  filaEleccion: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  /** El filete horizontal entre filas y el vertical entre Día y Hora. */
+  filete: { height: 1, backgroundColor: color.divisor },
+  fileteVertical: { width: 1, height: 34, backgroundColor: color.divisor },
   eleccionEtiqueta: { fontSize: 11.5, lineHeight: 16, color: color.ink500, fontFamily: familia },
   eleccionValor: {
-    fontSize: 15.5,
+    fontSize: 16,
     lineHeight: 22,
     fontWeight: '600',
-    letterSpacing: -0.23,
+    letterSpacing: -0.24,
     color: color.ink900,
     fontFamily: familia,
   },
-  separadorHoja: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 16 },
+  separadorHoja: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 14 },
 
+  filaParadasTitulo: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+  notaParadas: {
+    marginTop: 8,
+    fontSize: 12,
+    lineHeight: 17,
+    color: color.ink500,
+    fontFamily: familia,
+  },
   filaCarro: {
     flexDirection: 'row',
     alignItems: 'center',
