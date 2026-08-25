@@ -26,6 +26,7 @@
 
 import { useRef, useState } from 'react';
 import {
+  Dimensions,
   Image,
   Modal,
   Platform,
@@ -50,6 +51,7 @@ import {
   cambiarMarca,
   cambiarModelo,
   catalogo,
+  categoriaDe,
   guardarCarro,
   puestosDe,
   resumen,
@@ -60,14 +62,16 @@ import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe, Stepper } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
-import { Atras, Carro } from '@/ui/iconos';
+import { Atras } from '@/ui/iconos';
 import { color, espacio, familia, interlinea, pulsado, radio, sombra, texto } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
-/** Qué hoja de opciones está abierta, si alguna. */
-type Eligiendo = 'marca' | 'modelo' | 'anio' | null;
+/** Qué lista está abierta, y DÓNDE cae la fila que la abrió. */
+type Eligiendo = 'marca' | 'modelo' | 'anio';
+type Sitio = { x: number; y: number; ancho: number; alto: number };
+type Menu = { cual: Eligiendo; sitio: Sitio };
 
 export default function RegistrarCarro() {
   const router = useRouter();
@@ -77,10 +81,15 @@ export default function RegistrarCarro() {
   const decir = useDecir();
   const [faltaLaFoto, setFaltaLaFoto] = useState(false);
   const [guardando, setGuardando] = useState(false);
-  const [eligiendo, setEligiendo] = useState<Eligiendo>(null);
+  const [menu, setMenu] = useState<Menu | null>(null);
   /** El archivo reducido, listo para subir al guardar. La vista previa va en
       `borrador.foto` como `data:` URI — así la tarjeta la enseña al momento. */
   const laFoto = useRef<Blob | null>(null);
+
+  /* El menú se abre DONDE se tocó, no al pie de la pantalla: la fila mide
+     su sitio en la ventana y la lista cae pegada a ella. Si abajo no cabe,
+     sube y se apoya en el borde de arriba de la misma fila. */
+  const abrirMenu = (cual: Eligiendo, sitio: Sitio) => setMenu({ cual, sitio });
 
   const cat = catalogo(borrador.marca);
   const elegido = cat.colores.find((c) => c.nombre === borrador.color) ?? cat.colores[0];
@@ -155,30 +164,33 @@ export default function RegistrarCarro() {
     }
   };
 
-  /** Lo que la hoja abierta enseña y hace. */
-  const hoja =
-    eligiendo === 'marca'
+  /** Lo que la lista abierta enseña y hace. */
+  const lista =
+    menu?.cual === 'marca'
       ? {
-          titulo: 'La marca',
           opciones: cat.marcas,
           puesta: borrador.marca,
           elegir: (m: string) => setBorrador((b) => cambiarMarca(b, m)),
         }
-      : eligiendo === 'modelo'
+      : menu?.cual === 'modelo'
         ? {
-            titulo: 'El modelo',
             opciones: cat.modelos,
             puesta: borrador.modelo,
             elegir: (m: string) => setBorrador((b) => cambiarModelo(b, m)),
           }
-        : eligiendo === 'anio'
+        : menu?.cual === 'anio'
           ? {
-              titulo: 'El año',
               opciones: cat.anios,
               puesta: borrador.anio,
               elegir: (a: string) => setBorrador((b) => ({ ...b, anio: a })),
             }
           : null;
+
+  /* Dónde cae la lista. `alto` se estima por las opciones —una fila mide
+     46— con su techo; si no cabe debajo, se ancla arriba de la fila. */
+  const ventana = Dimensions.get('window');
+  const altoLista = lista ? Math.min(lista.opciones.length * 46 + 10, 300) : 0;
+  const cabeDebajo = menu ? menu.sitio.y + menu.sitio.alto + altoLista + 16 < ventana.height : true;
 
   return (
     <View style={estilos.pantalla}>
@@ -210,17 +222,18 @@ export default function RegistrarCarro() {
           <FilaQueElige
             etiqueta="Marca"
             valor={borrador.marca}
-            alPulsar={() => setEligiendo('marca')}
+            primera
+            alPulsar={(sitio) => abrirMenu('marca', sitio)}
           />
           <FilaQueElige
             etiqueta="Modelo"
             valor={borrador.modelo}
-            alPulsar={() => setEligiendo('modelo')}
+            alPulsar={(sitio) => abrirMenu('modelo', sitio)}
           />
           <FilaQueElige
             etiqueta="Año"
             valor={borrador.anio}
-            alPulsar={() => setEligiendo('anio')}
+            alPulsar={(sitio) => abrirMenu('anio', sitio)}
           />
 
           <View style={[estilos.fila, estilos.filaColor]}>
@@ -259,22 +272,26 @@ export default function RegistrarCarro() {
 
         {/* ── La placa y los puestos, cada cual con su fila ───────────── */}
         <View style={[estilos.hoja, estilos.hojaSegunda]}>
-          <View style={[estilos.fila, estilos.filaPrimera]}>
-            <View style={estilos.bloque}>
-              <Epigrafe>Placa</Epigrafe>
-              <TextInput
-                value={borrador.placa}
-                onChangeText={(v) => setBorrador((b) => ({ ...b, placa: v.toUpperCase() }))}
-                placeholder="AB-1234"
-                placeholderTextColor={color.ink300}
-                autoCapitalize="characters"
-                autoCorrect={false}
-                maxLength={8}
-                accessibilityLabel="La placa del carro"
-                style={estilos.entradaPlaca}
-              />
-            </View>
-            <Text style={estilos.notaLado}>Solo guardamos{'\n'}sus últimos 3</Text>
+          {/* La placa se ESCRIBE, y tiene que parecerlo: un texto suelto
+              sobre la hoja no se lee como campo — el dueño no supo dónde
+              tocar (25-08). Ahora es una caja con su borde, como todo
+              campo del sistema. */}
+          <View style={[estilos.fila, estilos.filaPrimera, estilos.filaPlaca]}>
+            <Epigrafe>Placa</Epigrafe>
+            <TextInput
+              value={borrador.placa}
+              onChangeText={(v) => setBorrador((b) => ({ ...b, placa: v.toUpperCase() }))}
+              placeholder="AB-1234"
+              placeholderTextColor={color.ink300}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              maxLength={8}
+              accessibilityLabel="La placa del carro"
+              style={estilos.entradaPlaca}
+            />
+            <Text style={estilos.notaCampo}>
+              Guardamos solo sus tres últimos. La placa entera vive en la foto.
+            </Text>
           </View>
 
           <View style={estilos.fila}>
@@ -331,8 +348,8 @@ export default function RegistrarCarro() {
 
         {/* ── El resumen, que se arma solo ────────────────────────────── */}
         <View style={[estilos.tarjeta, estilos.tarjetaResumen]}>
-          <View style={[estilos.cuadroCarro, { backgroundColor: elegido.muestra }]}>
-            <Carro tamano={18} tinta={color.ink700} />
+          <View style={estilos.cuadroCarro}>
+            <Silueta forma={categoriaDe(borrador.modelo)} tinta={elegido.muestra} />
           </View>
           <View style={estilos.bloque}>
             <View style={estilos.linea0}>
@@ -352,41 +369,53 @@ export default function RegistrarCarro() {
         <Text style={estilos.notaPie}>Puedes tener más de uno y elegir al publicar.</Text>
       </View>
 
-      {/* ── La hoja de opciones: se abre, se toca, se cierra ──────────── */}
-      <Modal
-        visible={hoja != null}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setEligiendo(null)}
-      >
-        <Pressable style={estilos.fondoHoja} onPress={() => setEligiendo(null)} />
-        <View style={estilos.hojaDeOpciones}>
-          <View style={estilos.asa} />
-          <Text style={estilos.tituloHoja}>{hoja?.titulo}</Text>
-          <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-            {hoja?.opciones.map((opcion) => {
-              const puesta = opcion === hoja.puesta;
-              return (
-                <Pressable
-                  key={opcion}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: puesta }}
-                  onPress={() => {
-                    hoja.elegir(opcion);
-                    setEligiendo(null);
-                  }}
-                  style={({ pressed }) => [estilos.opcion, pressed && pulsado.celda]}
-                >
-                  <Text style={[estilos.opcionTexto, puesta && estilos.opcionPuesta]}>
-                    {opcion}
-                  </Text>
-                  {puesta ? <Palomita /> : null}
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
+      {/* ── La lista, anclada a la fila que la abrió ──────────────── */}
+      <Modal visible={menu != null} animationType="fade" transparent onRequestClose={() => setMenu(null)}>
+        <Pressable style={estilos.fondoMenu} onPress={() => setMenu(null)} />
+        {menu && lista ? (
+          <View
+            style={[
+              estilos.menu,
+              {
+                left: menu.sitio.x,
+                width: menu.sitio.ancho,
+                maxHeight: altoLista,
+                ...(cabeDebajo
+                  ? { top: menu.sitio.y + menu.sitio.alto + 6 }
+                  : { top: Math.max(12, menu.sitio.y - altoLista - 6) }),
+              },
+            ]}
+          >
+            <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+              {lista.opciones.map((opcion, i) => {
+                const puesta = opcion === lista.puesta;
+                return (
+                  <Pressable
+                    key={opcion}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: puesta }}
+                    onPress={() => {
+                      lista.elegir(opcion);
+                      setMenu(null);
+                    }}
+                    style={({ pressed }) => [
+                      estilos.opcion,
+                      i === 0 && estilos.opcionPrimera,
+                      pressed && pulsado.celda,
+                    ]}
+                  >
+                    <Text style={[estilos.opcionTexto, puesta && estilos.opcionPuesta]}>
+                      {opcion}
+                    </Text>
+                    {puesta ? <Palomita /> : null}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        ) : null}
       </Modal>
+
     </View>
   );
 }
@@ -416,19 +445,30 @@ async function reducir(archivo: File): Promise<{ datos: Blob; vista: string }> {
 function FilaQueElige({
   etiqueta,
   valor,
+  primera = false,
   alPulsar,
 }: {
   etiqueta: string;
   valor: string;
-  alPulsar: () => void;
+  /** La de arriba no estrena línea: la hoja ya tiene su borde. */
+  primera?: boolean;
+  alPulsar: (sitio: { x: number; y: number; ancho: number; alto: number }) => void;
 }) {
+  const caja = useRef<View>(null);
   return (
     <Pressable
+      ref={caja}
       accessibilityRole="button"
       accessibilityLabel={etiqueta}
       accessibilityValue={{ text: valor }}
-      onPress={alPulsar}
-      style={({ pressed }) => [estilos.fila, pressed && pulsado.celda]}
+      onPress={() =>
+        caja.current?.measureInWindow((x, y, ancho, alto) => alPulsar({ x, y, ancho, alto }))
+      }
+      style={({ pressed }) => [
+        estilos.fila,
+        primera && estilos.filaPrimera,
+        pressed && pulsado.celda,
+      ]}
     >
       <View style={estilos.bloque}>
         <Epigrafe>{etiqueta}</Epigrafe>
@@ -466,6 +506,31 @@ function Palomita() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </Svg>
+  );
+}
+
+/**
+ * LA SILUETA, POR CARROCERÍA.
+ *
+ * Una fotografía de cada modelo no se puede enviar: las de los fabricantes
+ * y las de los bancos de imágenes tienen dueño, y son cientos de modelos.
+ * Lo que sí distingue de un vistazo es la FORMA — un hatchback no se
+ * confunde con una SUV —, y el catálogo ya sabe la categoría de cada
+ * modelo. Dibujada aquí, es nuestra, y se tiñe del color elegido.
+ */
+function Silueta({ forma, tinta }: { forma: 'economy' | 'standard' | 'suv'; tinta: string }) {
+  const cuerpo =
+    forma === 'suv'
+      ? 'M4 15c0-2 .8-3.3 2.4-3.9L12 9l3.4-4.2C16.3 3.7 17.5 3 19 3h9.6c1.6 0 2.8.7 3.7 1.9L35.6 9l5 1.6C42.4 11.3 44 12.9 44 15v3.3c0 .6-.4 1-1 1h-2.3a4.4 4.4 0 0 0-8.8 0H16.1a4.4 4.4 0 0 0-8.8 0H5c-.6 0-1-.4-1-1V15Z'
+      : forma === 'economy'
+        ? 'M5 16.2c0-1.9.8-3.1 2.3-3.7l5.4-2 3.2-3.6C16.8 5.7 18 5.1 19.4 5.1h7c1.4 0 2.5.5 3.4 1.5l4 4.5 3.4 1.1c1.6.6 2.8 1.8 2.8 3.7v2.4c0 .6-.4 1-1 1h-2.2a4.4 4.4 0 0 0-8.8 0H16.1a4.4 4.4 0 0 0-8.8 0H6c-.6 0-1-.4-1-1v-1.6Z'
+        : 'M4 16.4c0-2 .7-3.3 2.3-3.9l6-2.2 3.3-3.3C16.6 5.9 17.8 5.3 19.3 5.3h9c1.6 0 2.6.5 3.5 1.5l3.4 3.8 5.4 1.4C43 12.6 44 14 44 16.4v2.2c0 .6-.4 1-1 1h-2.3a4.4 4.4 0 0 0-8.8 0H16.1a4.4 4.4 0 0 0-8.8 0H5c-.6 0-1-.4-1-1v-2.2Z';
+  return (
+    <Svg viewBox="0 0 48 24" width={44} height={22} fill="none">
+      <Path d={cuerpo} fill={tinta} />
+      <Circle cx={11.7} cy={19.3} r={3} fill={color.ink900} opacity={0.34} />
+      <Circle cx={35.9} cy={19.3} r={3} fill={color.ink900} opacity={0.34} />
     </Svg>
   );
 }
@@ -537,22 +602,28 @@ const estilos = StyleSheet.create({
   linea: { flexDirection: 'row', marginTop: 3 },
   valor: { ...texto.tituloTarjeta, color: color.ink900, ...tabular },
 
-  /** La placa se escribe: campo de verdad, en mayúsculas, con su marcador. */
+  filaPlaca: { flexDirection: 'column', alignItems: 'stretch', gap: 0 },
+  /** La placa se escribe: caja con borde, como todo campo del sistema. */
   entradaPlaca: {
-    marginTop: 3,
+    marginTop: 8,
+    height: 52,
+    borderRadius: radio.control,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    backgroundColor: color.blanco,
+    paddingHorizontal: 14,
     ...texto.tituloTarjeta,
     color: color.ink900,
     fontFamily: familia,
     letterSpacing: 0.5,
     ...tabular,
-    paddingVertical: 2,
     outlineStyle: 'none',
   } as never,
-  notaLado: {
-    fontSize: 11.5,
-    lineHeight: 15,
+  notaCampo: {
+    marginTop: 7,
+    fontSize: 12,
+    lineHeight: 17,
     color: color.ink500,
-    textAlign: 'right',
     fontFamily: familia,
   },
   notaFila: {
@@ -694,13 +765,12 @@ const estilos = StyleSheet.create({
     gap: 12,
   },
   cuadroCarro: {
-    width: 34,
-    height: 34,
+    width: 56,
+    height: 40,
     borderRadius: radio.cuadrado,
+    backgroundColor: color.sand100,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(38,35,43,0.12)',
   },
   lineaResumen: { ...texto.fila, color: color.ink900 },
   detalleResumen: {
@@ -728,44 +798,27 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  /* ── La hoja de opciones ── */
-  fondoHoja: { flex: 1, backgroundColor: 'rgba(10,39,49,.4)' },
-  hojaDeOpciones: {
+  /* ── La lista anclada ── */
+  fondoMenu: { flex: 1, backgroundColor: 'rgba(10,39,49,.18)' },
+  menu: {
+    position: 'absolute',
     backgroundColor: color.blanco,
-    borderTopLeftRadius: radio.hoja,
-    borderTopRightRadius: radio.hoja,
-    paddingHorizontal: 20,
-    paddingBottom: 26,
-    maxWidth: espacio.marco,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  asa: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: color.ink200,
-    marginTop: 10,
-    marginBottom: 12,
-  },
-  tituloHoja: {
-    fontSize: 17,
-    lineHeight: 23,
-    fontWeight: '600',
-    letterSpacing: -0.26,
-    color: color.ink900,
-    fontFamily: familia,
-    marginBottom: 6,
+    borderRadius: radio.m,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    paddingHorizontal: 14,
+    overflow: 'hidden',
+    ...sombra.l,
   },
   opcion: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 13,
+    height: 46,
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
   },
+  opcionPrimera: { borderTopWidth: 0 },
   opcionTexto: {
     fontSize: 15,
     lineHeight: 21,

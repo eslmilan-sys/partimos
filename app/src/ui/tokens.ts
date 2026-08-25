@@ -293,7 +293,16 @@ export const sombra = {
   },
 } as const;
 
-export const TRACK_MICRO = 0.1;
+/**
+ * EL TRACKING DE LAS VERSALES. Era 0.1 —un 10 % del cuerpo, 1,1 px a los
+ * 11— y el dueño lo señaló el 25-08 en su teléfono: «PUESTOS QUE OFRECES»
+ * se leía como letras sueltas, no como una palabra. Las versales pequeñas
+ * necesitan algo de aire para no apelmazarse, pero un 10 % es de cartel,
+ * no de rótulo de campo. 0.045 las mantiene abiertas y juntas a la vez, y
+ * como todo el sistema sale de aquí, cambia en las cuarenta y cuatro
+ * llamadas de golpe.
+ */
+export const TRACK_MICRO = 0.045;
 export const trackMicro = (tamano: number) => tamano * TRACK_MICRO;
 
 /**
@@ -344,7 +353,8 @@ export const texto = {
     fontSize: 11,
     lineHeight: 15,
     fontWeight: '600' as const,
-    letterSpacing: 1.43,
+    /* 1.43 era el 13 % del cuerpo: demasiado. Ver TRACK_MICRO. */
+    letterSpacing: 0.5,
     textTransform: 'uppercase' as const,
     ...conFuente,
   },

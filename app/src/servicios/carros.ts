@@ -50,6 +50,11 @@ export function catalogo(marca?: string): Catalogo {
   };
 }
 
+/** La carrocería del modelo — la usa la silueta del resumen. */
+export function categoriaDe(modelo: string): 'economy' | 'standard' | 'suv' {
+  return fuente.categoriaDe(modelo);
+}
+
 /** Los puestos que ofrece el modelo, ya sin el del conductor. */
 export function puestosDe(modelo: string): number {
   return fuente.PUESTOS_POR_MODELO[modelo] ?? fuente.PUESTOS_POR_DEFECTO;
@@ -82,10 +87,19 @@ export function cambiarModelo(borrador: BorradorDeCarro, modelo: string): Borrad
   return { ...borrador, modelo, puestos: puestosDe(modelo) };
 }
 
-/** «AB-••••» — la placa entera sólo la ve quien va a subirse. */
+/**
+ * «•••777» — sólo los tres últimos, que es lo único que la base guarda.
+ *
+ * Antes partía por el guion y enseñaba el prefijo: con «JS66777», escrita
+ * sin guion, el prefijo ERA la placa entera y el resumen la publicaba
+ * completa bajo un texto que prometía lo contrario. Visto en el teléfono
+ * del dueño el 25-08. Ahora no hay nada que partir: se cuenta desde el
+ * final, que es de donde salen los `plate_last3`.
+ */
 export function placaTapada(placa: string): string {
-  const [prefijo] = placa.split('-');
-  return `${prefijo}-••••`;
+  const limpia = placa.replace(/[^A-Za-z0-9]/g, '');
+  if (!limpia) return '';
+  return `••• ${limpia.slice(-3).toUpperCase()}`;
 }
 
 export type Resumen = { linea: string; detalle: string };

@@ -888,7 +888,7 @@ const estilos = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
     fontWeight: '600',
-    letterSpacing: 1.43,
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
     color: color.ink500,
     fontFamily: familia,

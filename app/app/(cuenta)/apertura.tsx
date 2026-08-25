@@ -343,7 +343,7 @@ const estilos = StyleSheet.create({
     fontSize: 11,
     lineHeight: 14,
     fontWeight: '600',
-    letterSpacing: 1.6,
+    letterSpacing: 0.7,
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,.72)',
     marginBottom: 7,

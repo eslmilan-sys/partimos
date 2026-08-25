@@ -260,7 +260,7 @@ const estilos = StyleSheet.create({
     fontSize: 10,
     lineHeight: 14,
     fontWeight: '600',
-    letterSpacing: 1.1,
+    letterSpacing: 0.45,
     textTransform: 'uppercase',
     color: color.rojo800,
     fontFamily: familia,
