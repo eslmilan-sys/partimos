@@ -72,18 +72,71 @@ function Adelante() {
   );
 }
 
+/**
+ * Ayuda sin ningún viaje del que hablar. Casi todo esta pantalla cuelga de
+ * un viaje —«sobre un viaje», sus preguntas, su chat—, y sin él no queda
+ * nada que enseñar; pero girar no es una respuesta.
+ */
+function SinViaje({ alVolver, alEscribir }: { alVolver: () => void; alEscribir: () => void }) {
+  return (
+    <View style={estilos.pantalla}>
+      <BarraDeEstado />
+      <CampoRojo altura={206} />
+      <View style={estilos.cabecera}>
+        <View style={estilos.filaVolver}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={alVolver}
+            style={estilos.circulo}
+          >
+            <Atras />
+          </Pressable>
+        </View>
+        <Text style={estilos.titular}>
+          {'Aquí te '}
+          <Text style={texto.titularFuerte}>ayudamos</Text>
+        </Text>
+      </View>
+      <View style={estilos.vacio}>
+        <Text style={estilos.vacioTexto}>
+          Todavía no tienes ningún viaje del que hablar. Cuando hagas uno, aquí
+          aparecen sus preguntas y desde dónde escribirnos.
+        </Text>
+        <View style={{ marginTop: 18 }}>
+          <Boton alPulsar={alEscribir}>Ir a mi perfil</Boton>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 export default function Ayuda() {
   const router = useRouter();
   const volver = useVolver();
   const { reserva } = useLocalSearchParams<{ reserva?: string }>();
   const reservaId = reserva ?? DEL_RECORRIDO;
   const [viaje, setViaje] = useState<ViajeDeAyuda | null>(null);
+  /* «Todavía no sé» y «no hay ninguno» son cosas distintas, y confundirlas
+     dejaba la pantalla girando PARA SIEMPRE a quien no tiene viajes — es
+     decir, a todo el que acaba de registrarse. Visto el 25-08. */
+  const [buscando, setBuscando] = useState(true);
 
   useEffect(() => {
-    viajeDeAyuda(reservaId).then(setViaje);
+    let vivo = true;
+    setBuscando(true);
+    viajeDeAyuda(reservaId).then((v) => {
+      if (!vivo) return;
+      setViaje(v);
+      setBuscando(false);
+    });
+    return () => {
+      vivo = false;
+    };
   }, [reservaId]);
 
-  if (!viaje) return <Cargando />;
+  if (buscando) return <Cargando />;
+  if (!viaje) return <SinViaje alVolver={volver} alEscribir={() => router.push('/(cuenta)/cuenta')} />;
 
   return (
     <View style={estilos.pantalla}>
@@ -213,6 +266,13 @@ export default function Ayuda() {
 }
 
 const estilos = StyleSheet.create({
+  vacio: { paddingHorizontal: espacio.gutter, paddingTop: 26 },
+  vacioTexto: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: color.ink600,
+    fontFamily: familia,
+  },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,

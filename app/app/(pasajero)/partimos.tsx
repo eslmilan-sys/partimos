@@ -61,7 +61,10 @@ export default function MensajeDePartimos() {
       titulo: 'Mira cómo te cuidamos',
       texto: 'Cédula verificada fuera de aquí, chat que queda escrito, y el 911 a un toque.',
       icono: <Escudo tamano={20} tinta={color.rojo600} />,
-      alPulsar: () => router.push('/(ayuda)/reportar'),
+      /* NO a `reportar`: ese formulario habla de UN viaje y quien acaba de
+         registrarse no tiene ninguno, así que la pantalla se quedaba
+         girando para siempre. Y tampoco era lo que la fila promete. */
+      alPulsar: () => router.push('/(ayuda)/seguridad'),
     },
   ];
 

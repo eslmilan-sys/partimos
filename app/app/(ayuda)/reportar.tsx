@@ -87,13 +87,56 @@ export default function Reportar() {
   const reservaId = reserva ?? DEL_RECORRIDO;
   const yo = useMiId(YO_DEL_RECORRIDO);
   const [datos, setDatos] = useState<DatosParaLlamar | null>(null);
+  /* `datosParaLlamar` LANZA si la reserva no existe, y quien acaba de
+     registrarse no tiene ninguna: la promesa se rompía, `setDatos` no se
+     llamaba nunca y la pantalla giraba para siempre. Visto el 25-08. */
+  const [sinViaje, setSinViaje] = useState(false);
   const [motivo, setMotivo] = useState(MOTIVOS_DE_REPORTE[0].clave);
   const [bloquear, setBloquear] = useState(true);
   const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
-    datosParaLlamar(reservaId).then(setDatos);
+    let vivo = true;
+    datosParaLlamar(reservaId)
+      .then((d) => vivo && setDatos(d))
+      .catch(() => vivo && setSinViaje(true));
+    return () => {
+      vivo = false;
+    };
   }, [reservaId]);
+
+  /* Sin viaje del que hablar no hay nada que reportar, pero la emergencia
+     sigue valiendo: es lo único de esta pantalla que no depende de nadie. */
+  if (sinViaje) {
+    return (
+      <View style={estilos.pantalla}>
+        <BarraDeEstado />
+        <CampoRojo altura={206} />
+        <View style={estilos.cabecera}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => volver()}
+            style={estilos.circulo}
+          >
+            <Atras />
+          </Pressable>
+          <Text style={estilos.titular}>
+            {'Reportar '}
+            <Text style={texto.titularFuerte}>algo</Text>
+          </Text>
+        </View>
+        <View style={{ paddingHorizontal: espacio.gutter, paddingTop: 24 }}>
+          <Text style={estilos.sinViajeTexto}>
+            {`Todavía no tienes un viaje del que hablar. Si estás en peligro ahora, llama al ${EMERGENCIAS} — ${EMERGENCIAS_QUIEN}.`}
+          </Text>
+          <View style={{ marginTop: 18 }}>
+            <Boton alPulsar={() => router.push('/(ayuda)/seguridad')}>Ver cómo te cuidamos</Boton>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   if (!datos) return <Cargando />;
 
@@ -240,6 +283,7 @@ export default function Reportar() {
 }
 
 const estilos = StyleSheet.create({
+  sinViajeTexto: { fontSize: 15, lineHeight: 22, color: color.ink600, fontFamily: familia },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
