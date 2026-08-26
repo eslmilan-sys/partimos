@@ -63,7 +63,7 @@ const CLASES: { valor: Clase; etiqueta: string }[] = [
  * pas quelque chose (constaté sur téléphone : elle mordait le champ CORREO).
  * Et un testeur commente le produit, pas le formulaire de connexion.
  */
-const SIN_ANCLA = /^\/(apertura|bienvenida|entrar|registro|acceso|puerta)/;
+const SIN_ANCLA = /^\/(apertura|bienvenida|entrar|registro|puerta)/;
 
 export function Comentar() {
   const pantalla = usePathname();

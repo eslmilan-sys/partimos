@@ -31,17 +31,16 @@ import Svg, { Path } from 'react-native-svg';
 
 import {
   QUE_PASO,
-  SIN_PROVEEDOR,
   contrasenaValida,
   correoValido,
   entrar as entrarConCuenta,
-  entrarCon,
 } from '@/servicios/cuenta';
 import { Aviso } from '@/ui/Aviso';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
+import { EntrarCon } from '@/ui/EntrarCon';
 import { Marca } from '@/ui/iconos';
 import { color, espacio, familia, pulsado, radio, zonaDeToque } from '@/ui/tokens';
 
@@ -72,56 +71,6 @@ function Palomita() {
   return (
     <Svg viewBox="0 0 12 12" width={11} height={11} fill="none">
       <Path d="M2 6.2 4.8 9 10 3.4" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
-}
-
-/** La G de Google, en sus cuatro colores oficiales. */
-function LogoGoogle() {
-  return (
-    <Svg width={20} height={20} viewBox="0 0 20 20">
-      <Path
-        d="M19.6 10.23c0-.68-.06-1.36-.18-2.03H10v3.85h5.38a4.6 4.6 0 0 1-2 3.02v2.5h3.24c1.89-1.74 2.98-4.3 2.98-7.34Z"
-        fill="#4285F4"
-      />
-      <Path
-        d="M10 20c2.7 0 4.96-.89 6.62-2.42l-3.24-2.51c-.9.61-2.05.96-3.38.96-2.6 0-4.8-1.75-5.59-4.1H1.07v2.59A10 10 0 0 0 10 20Z"
-        fill="#34A853"
-      />
-      <Path d="M4.41 11.93a5.99 5.99 0 0 1 0-3.83V5.5H1.07a10 10 0 0 0 0 9l3.34-2.57Z" fill="#FBBC05" />
-      <Path
-        d="M10 3.98c1.47 0 2.79.5 3.82 1.5l2.87-2.87A10 10 0 0 0 1.07 5.5l3.34 2.6C5.2 5.73 7.4 3.98 10 3.98Z"
-        fill="#EA4335"
-      />
-    </Svg>
-  );
-}
-
-/** La f de Facebook en su círculo azul oficial (#1877F2). */
-function LogoFacebook() {
-  return (
-    <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
-      <Path
-        d="M20 10a10 10 0 1 0-11.56 9.88v-6.99H5.9V10h2.54V7.8c0-2.5 1.49-3.89 3.77-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V10h2.78l-.45 2.89h-2.33v6.99A10 10 0 0 0 20 10Z"
-        fill="#1877F2"
-      />
-    </Svg>
-  );
-}
-
-/**
- * La manzana, negra, para el botón blanco. La versión clara del botón de
- * Apple es oficial de sus guías — y así la única losa oscura de la pantalla
- * deja de competir con el CTA: en el v6 la superficie de tinta es de
- * Filtros y de Publicar, no de un proveedor.
- */
-function LogoApple() {
-  return (
-    <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
-      <Path
-        d="M13.9 10.6c0-2 1.6-3 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7-.6 0-1.6-.7-2.6-.7-1.3 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.5 2.1 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0 0-2.1-.8-2.1-3.1ZM11.9 4.4c.5-.7.9-1.6.8-2.6-.8 0-1.7.6-2.3 1.2-.5.6-.9 1.6-.8 2.5.9.1 1.8-.4 2.3-1.1Z"
-        fill="#000"
-      />
     </Svg>
   );
 }
@@ -248,37 +197,7 @@ export default function Entrar() {
           </Boton>
         </View>
 
-        <View style={estilos.separador}>
-          <View style={estilos.raya} />
-          <Text style={estilos.oTexto}>O continuar con</Text>
-          <View style={estilos.raya} />
-        </View>
-
-        {/* Lo social debajo. Con tres proveedores los nombres escritos ya no
-            caben en la fila sin apretarse: van los logos solos — «O continuar
-            con» encima ya dice qué son, y el nombre completo vive en el
-            rótulo de accesibilidad de cada uno. */}
-        <View style={estilos.sociales}>
-          {(
-            [
-              ['google', 'Google', <LogoGoogle key="g" />],
-              ['facebook', 'Facebook', <LogoFacebook key="f" />],
-              ['apple', 'Apple', <LogoApple key="a" />],
-            ] as const
-          ).map(([quien, nombre, logo]) => (
-            <Pressable
-              key={quien}
-              accessibilityRole="button"
-              accessibilityLabel={`Continuar con ${nombre}`}
-              onPress={async () => {
-                if (!(await entrarCon(quien))) setQuePaso(SIN_PROVEEDOR(nombre));
-              }}
-              style={({ pressed }) => [estilos.social, pressed && pulsado.boton]}
-            >
-              {logo}
-            </Pressable>
-          ))}
-        </View>
+        <EntrarCon alFallar={setQuePaso} />
 
         {/* La acción antes que la nota al pie: crear cuenta es una puerta,
             lo legal es una letra pequeña. */}
@@ -339,36 +258,6 @@ const estilos = StyleSheet.create({
   tituloFuerte: { color: color.ink900 },
   bajada: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
 
-  sociales: { paddingTop: 16, paddingHorizontal: espacio.gutter, flexDirection: 'row', gap: 10 },
-  social: {
-    flex: 1,
-    height: 52,
-    borderRadius: 18,
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderColor: color.bordePorDefecto,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  separador: {
-    paddingTop: 20,
-    paddingHorizontal: espacio.gutter,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  raya: { flex: 1, height: 1, backgroundColor: color.ink200 },
-  oTexto: {
-    fontSize: 10,
-    lineHeight: 14,
-    fontWeight: '500',
-    letterSpacing: 0.9,
-    textTransform: 'uppercase',
-    color: color.ink600,
-    fontFamily: familia,
-  },
 
   campos: { paddingTop: 20, paddingHorizontal: espacio.gutter, gap: 14 },
 

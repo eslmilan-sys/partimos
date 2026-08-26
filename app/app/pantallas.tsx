@@ -30,7 +30,6 @@ const TABLEROS: { nombre: string; pantallas: Pantalla[] }[] = [
       { id: '1c', titulo: 'La puerta', ruta: '/(cuenta)/puerta' },
       { id: '4b–4d', titulo: 'Registro', ruta: '/(cuenta)/registro' },
       { id: '4e', titulo: 'Entrar', ruta: '/(cuenta)/entrar' },
-      { id: '14e', titulo: 'Entrar · versión larga', ruta: '/(cuenta)/acceso' },
     ],
   },
   {

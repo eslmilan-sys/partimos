@@ -28,6 +28,7 @@ import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
+import { EntrarCon } from '@/ui/EntrarCon';
 import { Atras } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
@@ -159,6 +160,19 @@ export default function Registro() {
             />
           )}
         </View>
+
+        {/* ABRIR CUENTA CON GOOGLE, FACEBOOK O APPLE — en el primer paso, que
+            es donde se decide. Esta pantalla ofrecía SOLO el correo, en tres
+            pasos, como si no hubiera otra forma: quien venía de `entrar` —
+            donde los tres botones sí estaban— pulsaba «Regístrate» y los
+            perdía de vista. Visto por el dueño el 26-08-2026.
+
+            No hace falta pantalla aparte: en OAuth abrir cuenta y entrar son
+            el mismo gesto — si no existe, se crea. Por eso el rótulo dice
+            «O abre tu cuenta con» y no «continuar»: aquí se está creando. */}
+        {paso === 1 && !hecha ? (
+          <EntrarCon alFallar={setError} titulo="O abre tu cuenta con" />
+        ) : null}
 
         {paso === 3 && !hecha ? (
           <View style={estilos.loQueSigue}>

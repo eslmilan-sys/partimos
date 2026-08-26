@@ -7,11 +7,11 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { SIN_PROVEEDOR, correoValido, entrarCon } from '@/servicios/cuenta';
+import { correoValido } from '@/servicios/cuenta';
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
 import { useSesion } from '@/servicios/sesion';
 import { Aviso } from '@/ui/Aviso';
@@ -19,16 +19,13 @@ import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
+import { EntrarCon } from '@/ui/EntrarCon';
 import { tabular } from '@/ui/dinero';
 import { Escudo } from '@/ui/iconos';
 import { diaLargo, hora } from '@/ui/fechas';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 /** Los dos que dibuja el traspaso. El nombre se escribe una vez, no dos. */
-const OTROS = [
-  { quien: 'google', nombre: 'Google' },
-  { quien: 'apple', nombre: 'Apple' },
-] as const;
 
 /** Sin sesión que preguntar —solo en simulado—: la persona del recorrido. */
 const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
@@ -142,20 +139,11 @@ export default function Puerta() {
           {quePaso ? <Aviso>{quePaso}</Aviso> : null}
         </View>
 
-        <View style={estilos.otrasEntradas}>
-          {OTROS.map(({ quien, nombre }) => (
-            <Pressable
-              key={quien}
-              accessibilityRole="button"
-              onPress={async () => {
-                if (!(await entrarCon(quien))) setQuePaso(SIN_PROVEEDOR(nombre));
-              }}
-              style={estilos.botonQuieto}
-            >
-              <Text style={estilos.botonQuietoTexto}>{nombre}</Text>
-            </Pressable>
-          ))}
-        </View>
+        {/* La MISMA fila que `entrar` y `registro`, del mismo archivo. Aquí
+            había una copia con solo Google y Apple —sin Facebook, con los
+            nombres escritos en vez de los logos—: tres pantallas de cuenta,
+            tres filas distintas. La hoja ya trae su aire, así que margen 0. */}
+        <EntrarCon alFallar={setQuePaso} margen={0} />
       </View>
     </View>
   );
@@ -277,20 +265,4 @@ const estilos = StyleSheet.create({
   filaPromesa: { flexDirection: 'row', alignItems: 'center', gap: 10, justifyContent: 'center' },
   promesa: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
 
-  otrasEntradas: {
-    borderTopWidth: 1,
-    borderTopColor: color.bordeSutil,
-    paddingTop: 16,
-    flexDirection: 'row',
-    gap: 9,
-  },
-  botonQuieto: {
-    flex: 1,
-    height: 40,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.sand200,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  botonQuietoTexto: { fontSize: 14, lineHeight: 20.3, fontWeight: '600', letterSpacing: -0.14, color: color.ink900, fontFamily: familia },
 });
