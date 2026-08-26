@@ -657,16 +657,23 @@ function CurvaDeRuta() {
     <Svg width={26} height={64} viewBox="0 0 26 64" fill="none" style={estilos.curva}>
       {/* L'anneau du départ : creux, comme sur chaque carte. */}
       <Circle cx={6} cy={7} r={3.4} stroke={color.inkIcono} strokeWidth={1.9} fill="none" />
-      {/* Le trait descend droit, puis s'ouvre vers la destination. */}
+      {/* Le trait descend droit, puis s'ouvre vers la destination. La courbe
+          se termine SOUS la pointe (15,4 ; 52,2) : le triangle la recouvre,
+          il n'y a donc plus de blanc entre les deux. */}
       <Path
-        d="M6 13.5v22c0 8.5 3.5 13 11 14.5"
+        d="M6 12.6V38c0 9 2.6 13.2 9.4 14.2"
         stroke={color.ink300}
-        strokeWidth={1.9}
+        strokeWidth={2}
         strokeLinecap="round"
         fill="none"
       />
-      {/* La pointe rouge : le rouge dit la destination, et rien d'autre. */}
-      <Path d="M15.4 45.6 21.6 50.2 15 54Z" fill={color.rojo500} />
+      {/* La pointe rouge : le rouge dit la destination, et rien d'autre.
+          Elle est ALIGNÉE SUR LA TANGENTE de la courbe (8,4° — calculé, pas
+          estimé) et reprend les proportions de `PuntaDeFlecha` : 6,4 de long
+          pour 7,2 de base. Avant, c'était un triangle dessiné à part, posé à
+          côté de la fin du trait et pointant dans une autre direction — il se
+          lisait comme un éclat rouge détaché, pas comme une flèche. */}
+      <Path d="M16.7 48.7 22.5 53.2 15.7 55.9Z" fill={color.rojo500} />
     </Svg>
   );
 }

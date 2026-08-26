@@ -85,6 +85,30 @@ export default function TuCuenta() {
     icono: React.ReactNode;
     alPulsar: () => void;
   }[] = [
+    /**
+     * EL ORDEN Y LA PODA — pedido del dueño el 26-08-2026: «keep it
+     * pertinent and optimize it. Ajustes should be on top».
+     *
+     * Ajustes estaba EL ÚLTIMO de diez filas, debajo del pliegue, y era lo
+     * que más se busca de esta lista. Ahora abre.
+     *
+     * Y se fueron tres filas que no aportaban un camino nuevo:
+     *   · «Mis viajes» y «Publicar un viaje» son LA BARRA DE ABAJO, visible
+     *     en esta misma pantalla — la pestaña Viajes va a `misviajes` y el
+     *     «+» a `publicar`, exactamente lo que hacían estas dos filas.
+     *   · «Cómo funciona» y «Ayuda y contacto» abrían LA MISMA pantalla,
+     *     `/(ayuda)`. Dos rótulos, un destino.
+     *
+     * Y una que iba al sitio equivocado: «Seguridad» abría `reportar` — la
+     * denuncia de un incidente—, no lo que su nombre promete. Ahora se
+     * llama por lo que es y lleva a «Cómo te cuidamos», que empieza por el
+     * botón de llamar a emergencias.
+     */
+    {
+      etiqueta: 'Ajustes',
+      icono: <Documento />,
+      alPulsar: () => router.push('/(cuenta)/ajustes'),
+    },
     {
       etiqueta: 'Verificación',
       valor: datos.cedula,
@@ -104,39 +128,19 @@ export default function TuCuenta() {
       alPulsar: () => router.push('/(pasajero)/metodos'),
     },
     {
-      etiqueta: 'Mis viajes',
-      icono: <Ruta />,
-      alPulsar: () => router.push('/(conductor)/misviajes'),
-    },
-    {
       etiqueta: 'Lo que recuperas',
       icono: <Billete />,
       alPulsar: () => router.push('/(conductor)/aportes'),
     },
     {
-      etiqueta: 'Publicar un viaje',
-      icono: <Mas tamano={20} tinta={color.ink600} />,
-      alPulsar: () => router.push('/(conductor)/publicar'),
-    },
-    {
-      etiqueta: 'Cómo funciona',
-      icono: <Brujula />,
-      alPulsar: () => router.push('/(ayuda)'),
-    },
-    {
-      etiqueta: 'Seguridad',
+      etiqueta: 'Cómo te cuidamos',
       icono: <Escudo tamano={20} tinta={color.ink600} />,
-      alPulsar: () => router.push('/(ayuda)/reportar'),
+      alPulsar: () => router.push('/(ayuda)/seguridad'),
     },
     {
       etiqueta: 'Ayuda y contacto',
       icono: <Ayuda tamano={20} />,
       alPulsar: () => router.push('/(ayuda)'),
-    },
-    {
-      etiqueta: 'Ajustes',
-      icono: <Documento />,
-      alPulsar: () => router.push('/(cuenta)/ajustes'),
     },
   ];
 
@@ -164,7 +168,16 @@ export default function TuCuenta() {
             <Text style={estilos.nombre} numberOfLines={1}>
               {`${datos.nombre} ${datos.apellido}`.trim()}
             </Text>
-            <Text style={estilos.desde}>{`En Partimos desde ${datos.desde}`}</Text>
+            {/* LOS KILÓMETROS, JUNTO AL NOMBRE. Estaban en la fila de tres
+                cifras, con el mismo peso que el dinero — y no son dinero:
+                son lo que has recorrido acompañado, que es la única cifra
+                de esta pantalla que se puede presumir. Aquí valen; en una
+                columna al lado de un balboa, competían. Con cero se calla:
+                «0 km juntos» no le dice nada a quien acaba de entrar. */}
+            <Text style={estilos.desde}>
+              {`En Partimos desde ${datos.desde}`}
+              {datos.kilometros > 0 ? ` · ${conMiles(datos.kilometros)} km juntos` : ''}
+            </Text>
           </View>
         </View>
 
@@ -214,29 +227,32 @@ export default function TuCuenta() {
 
         {solapa === 'ti' ? (
           <>
-            <View style={estilos.tarjeta}>
-              <View style={estilos.cifras}>
-                <View style={estilos.cifra}>
-                  <Text style={estilos.cifraEtiqueta}>Aportado</Text>
-                  <Text style={estilos.cifraValor}>
-                    {formatearDineroRedondo(datos.aportadoCentavos)}
-                  </Text>
-                </View>
-                <View style={estilos.cifra}>
-                  <Text style={estilos.cifraEtiqueta}>Recuperado</Text>
+            {/* UNA CIFRA, NO TRES. «Aportado» se va por pedido del dueño
+                (26-08-2026) y la razón se sostiene sola: puestas juntas, lo
+                que pusiste y lo que recuperaste se leen como un balance —
+                como si hubiera un saldo a favor o en contra. Y no lo hay:
+                aquí nadie gana. Lo que queda es lo único que el conductor
+                necesita saber, y ahora ABRE su detalle en vez de quedarse
+                como un adorno. */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Lo que has recuperado, ${formatearDineroRedondo(datos.recuperadoCentavos)}. Ver viaje por viaje`}
+              onPress={() => router.push('/(conductor)/aportes')}
+              style={({ pressed }) => [estilos.tarjeta, pressed && estilos.pulsada]}
+            >
+              <View style={estilos.filaRecuperado}>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={estilos.cifraEtiqueta}>Lo que has recuperado</Text>
                   <Text style={estilos.cifraValor}>
                     {formatearDineroRedondo(datos.recuperadoCentavos)}
                   </Text>
                 </View>
-                <View style={estilos.cifra}>
-                  <Text style={estilos.cifraEtiqueta}>Km juntos</Text>
-                  <Text style={estilos.cifraValor}>{conMiles(datos.kilometros)}</Text>
-                </View>
+                <Avanza />
               </View>
               <Text style={estilos.nadieGana}>
                 Nadie gana dinero con esto: unos ponen y otros recuperan.
               </Text>
-            </View>
+            </Pressable>
 
             <Pressable
               accessibilityRole="button"
@@ -402,8 +418,8 @@ const estilos = StyleSheet.create({
     borderColor: color.bordeSutil,
     padding: 20,
   },
-  cifras: { flexDirection: 'row' },
-  cifra: { flex: 1 },
+  /* Una sola cifra: la fila es ella y el chevrón que la abre. */
+  filaRecuperado: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   cifraEtiqueta: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, fontFamily: familia },
   cifraValor: {
     fontSize: 22,

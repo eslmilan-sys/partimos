@@ -121,9 +121,17 @@ export async function pedirVerificacion(perfilId: string): Promise<IdentityVerif
 
 /* ----------------------------------------------------------- Reportar */
 
-/** El número de emergencias de Panamá. Va primero, siempre. */
-export const EMERGENCIAS = '104';
-export const EMERGENCIAS_QUIEN = 'Policía Nacional';
+/**
+ * El número de emergencias de Panamá. Va primero, siempre.
+ *
+ * **Era el 104 y está corregido a 911** (dueño, 26-08-2026). El 104 es una
+ * línea de la Policía Nacional; el 911 es el SUME, el sistema único, y manda
+ * policía, ambulancia o bomberos según lo que pase. Quien abre esta pantalla
+ * no está en condiciones de elegir a quién llamar — se le da el número que
+ * cubre las tres cosas.
+ */
+export const EMERGENCIAS = '911';
+export const EMERGENCIAS_QUIEN = 'Policía, ambulancia y bomberos';
 
 export type MotivoDeReporte = { clave: string; etiqueta: string; severidad: number };
 

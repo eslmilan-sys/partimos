@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { type Href, useRouter } from 'expo-router';
@@ -96,6 +96,17 @@ export default function Ajustes() {
     <View style={estilos.pantalla}>
       <CampoRojo altura={196} />
       <BarraDeEstado />
+
+      {/* TODA LA PANTALLA DESLIZA — y hasta hoy NO DESLIZABA NADA. Esta era
+          la única pantalla larga de la app sin `ScrollView`: la tarjeta de
+          «Dinero y cuenta» y el «Cerrar sesión» quedaban cortados contra el
+          borde de abajo, sin forma de llegar a ellos. En un teléfono corto,
+          cerrar sesión era imposible. Visto por el dueño el 26-08-2026. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 28 }}
+        showsVerticalScrollIndicator={false}
+      >
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaVolver}>
@@ -220,6 +231,7 @@ export default function Ajustes() {
           <Text style={estilos.cerrarTexto}>{salida.filas[0].etiqueta}</Text>
         </Pressable>
       </View>
+      </ScrollView>
     </View>
   );
 }
