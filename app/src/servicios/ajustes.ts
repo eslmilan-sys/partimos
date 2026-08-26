@@ -89,7 +89,10 @@ export async function ajustes(perfilId: string): Promise<GrupoDeAjustes[]> {
     {
       titulo: 'Avisos',
       filas: [
-        { etiqueta: 'Avisos', valor: 'Los tres activos', ruta: '/(avisos)/permiso' },
+        /* Decía «Los tres activos» — contaba tres interruptores que no
+           existen ya, y que nunca encendieron nada. La fila lleva a la
+           bandeja, que es donde los avisos están de verdad. */
+        { etiqueta: 'Mis avisos', ruta: '/(avisos)/avisos' },
         { etiqueta: 'Rutas guardadas', valor: `${avisando} avisando`, ruta: '/(pasajero)/rutas' },
       ],
     },

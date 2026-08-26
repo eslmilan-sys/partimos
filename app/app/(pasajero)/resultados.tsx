@@ -40,6 +40,7 @@ import {
 } from '@/servicios/viajes';
 import { nombreDeCiudad, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { guardarRutaBuscada } from '@/servicios/rutas';
+import { preferencias } from '@/servicios/preferencias';
 import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
@@ -47,7 +48,7 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { Boton } from '@/ui/controles';
 import { cifraRedonda, tabular } from '@/ui/dinero';
-import { diaCorto, diaLargo, hora } from '@/ui/fechas';
+import { duracionEntre as duracion, diaCorto, diaLargo, hora } from '@/ui/fechas';
 import { Atras, Avanza, Campana, Cerrar, Filtros as IconoFiltros } from '@/ui/iconos';
 import { AroDeOrigen, PuntaDeFlecha, TarjetaDeViaje, type ViajeEnTarjeta } from '@/ui/TarjetaDeViaje';
 import { familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/ui/tokens';
@@ -95,7 +96,13 @@ export default function Resultados() {
   const destino = ruta?.destino ?? DESTINO_POR_DEFECTO;
   const yo = useMiId('22222222-2222-4222-8222-222222222222');
   const [guardada, setGuardada] = useState(false);
-  const [filtros, setFiltros] = useState<Filtros>({});
+  /* «Solo mujeres» de los ajustes ENTRA aquí. Era un interruptor que no
+     filtraba nada: se encendía en `8a` y la búsqueda seguía enseñando todos
+     los carros. Ahora arranca puesto, y se puede quitar por viaje desde la
+     fila de filtros como cualquier otro. */
+  const [filtros, setFiltros] = useState<Filtros>(() =>
+    preferencias().soloMujeres ? { soloMujeres: true } : {},
+  );
   const [hojaAbierta, setHojaAbierta] = useState(false);
   const [eligiendoDia, setEligiendoDia] = useState(false);
   const [viajes, setViajes] = useState<ViajeEnTarjeta[]>([]);
@@ -859,13 +866,6 @@ function cuandoTexto(dia: string | null): string {
   return diaCorto(`${dia}T12:00:00-05:00`);
 }
 
-function duracion(salida: string, llegada: string | null): string {
-  if (!llegada) return '';
-  const minutos = Math.round((new Date(llegada).getTime() - new Date(salida).getTime()) / 60_000);
-  const h = Math.floor(minutos / 60);
-  const m = minutos % 60;
-  return m === 0 ? `${h} h` : `${h} h ${m}`;
-}
 
 /* ----------------------------------------------------------------- Estilos */
 

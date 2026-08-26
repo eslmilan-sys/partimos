@@ -36,7 +36,7 @@ import { Cargando, Hueso } from '@/ui/Cargando';
 import { Bandera, motivoDe } from '@/ui/CampoRojo';
 import { Avatar, Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { diaLargo, hora } from '@/ui/fechas';
+import { diaLargo, enHoras, hora } from '@/ui/fechas';
 import {
   Asiento,
   Atras,
@@ -180,7 +180,7 @@ export default function DetalleDelViaje() {
             <View style={estilos.filaTitular}>
               <Text style={estilos.titular}>
                 <Text style={estilos.titularFuerte}>{hora(viaje.departure_at)}</Text>
-                {minutos > 0 ? ` · ${Math.floor(minutos / 60)} h ${minutos % 60}` : ''}
+                {minutos > 0 ? ` · ${enHoras(minutos)}` : ''}
               </Text>
               {/* El aporte va en el campo, junto a la hora: es lo primero que
                   se mira y en la hoja se quedaba en un rincón vacío. */}
@@ -744,7 +744,17 @@ const estilos = StyleSheet.create({
     borderTopColor: color.bordeSutil,
   },
   tiraItem: {
-    minHeight: espacio.tap, flex: 1, alignItems: 'center', gap: 6 },
+    minHeight: espacio.tap,
+    flex: 1,
+    /* SIN ESTO EL TEXTO SE CORTABA. Un hijo flexible no baja de su ancho de
+       contenido por defecto, así que «Ayuda si algo pasa» —la más larga de
+       las tres— desbordaba la columna y se veía «Ayuda si algo pa». Con
+       `minWidth: 0` la columna puede encoger y el texto pasa a dos líneas.
+       Visto en el teléfono del dueño el 26-08-2026. */
+    minWidth: 0,
+    alignItems: 'center',
+    gap: 6,
+  },
   tiraTexto: {
     fontSize: 11.5,
     lineHeight: 16,

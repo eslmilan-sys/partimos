@@ -24,7 +24,7 @@ import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Interruptor, Pastilla, Stepper } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { hora } from '@/ui/fechas';
+import { enHoras, hora } from '@/ui/fechas';
 import { Maleta } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
@@ -161,11 +161,6 @@ export default function Puestos() {
   );
 }
 
-function enHoras(minutos: number): string {
-  const h = Math.floor(minutos / 60);
-  const m = minutos % 60;
-  return m === 0 ? `${h} h` : `${h} h ${m}`;
-}
 
 const estilos = StyleSheet.create({
   pantalla: {

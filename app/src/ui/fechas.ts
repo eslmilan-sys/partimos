@@ -101,3 +101,24 @@ export function diaSemana(d: Date | string): string {
   const s = soloDia.format(new Date(d));
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
+/**
+ * «6 h», «6 h 30» — una duración en minutos, dicha como se dice.
+ *
+ * **Vivía escrita cuatro veces.** Tres copias correctas —`resultados`,
+ * `puestos`, `destino`— y una cuarta, en el detalle del viaje, que se había
+ * escrito sin el caso de los minutos en cero: Panamá → David salía como
+ * «6 h 0». Lo vio el dueño en su teléfono (26-08-2026). Una duración se
+ * formatea en un sitio, como el dinero.
+ */
+export function enHoras(minutos: number): string {
+  const h = Math.floor(minutos / 60);
+  const m = minutos % 60;
+  return m === 0 ? `${h} h` : `${h} h ${m}`;
+}
+
+/** La duración entre dos instantes, ya dicha. Vacía si no hay llegada. */
+export function duracionEntre(salida: string, llegada: string | null): string {
+  if (!llegada) return '';
+  return enHoras(Math.round((new Date(llegada).getTime() - new Date(salida).getTime()) / 60_000));
+}

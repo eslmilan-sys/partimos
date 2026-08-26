@@ -32,7 +32,7 @@ import { Cargando } from '@/ui/Cargando';
 import { Pestanas } from '@/ui/Pestanas';
 import { Insignia, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { diaAbrev, diaCorto, hora } from '@/ui/fechas';
+import { duracionEntre as duracion, diaAbrev, diaCorto, enHoras, hora } from '@/ui/fechas';
 import { Atras, Estrella, Maleta } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
@@ -220,16 +220,6 @@ function Detallada({ viaje, alPulsar }: { viaje: ViajeEnResultados; alPulsar: ()
 
 const mayuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-function enHoras(minutos: number): string {
-  const h = Math.floor(minutos / 60);
-  const m = minutos % 60;
-  return m === 0 ? `${h} h` : `${h} h ${m}`;
-}
-
-function duracion(salida: string, llegada: string | null): string {
-  if (!llegada) return '';
-  return enHoras(Math.round((new Date(llegada).getTime() - new Date(salida).getTime()) / 60_000));
-}
 
 function categoria(code: string | null): string {
   return code === 'suv' ? 'SUV' : code === 'economy' ? 'Económico' : 'Estándar';

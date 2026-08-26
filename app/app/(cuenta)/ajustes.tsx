@@ -28,6 +28,12 @@ import { useVolver } from '@/ui/salidas';
 
 import { type Cuenta, type GrupoDeAjustes, ajustes, cuenta } from '@/servicios/ajustes';
 import { salir } from '@/servicios/cuenta';
+import {
+  type Preferencias,
+  POR_DEFECTO,
+  guardarPreferencia,
+  preferencias,
+} from '@/servicios/preferencias';
 import { type EstadoDeCedula, estadoDeCedula } from '@/servicios/seguridad';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -49,7 +55,6 @@ const RADIO_HOJA = 28;
  * el texto es de interfaz y el sí o el no viven en la pantalla hasta que
  * `servicios/ajustes` tenga dónde escribirlos.
  */
-const AVISOS = ['Alguien publica mi ruta', 'Mensajes del conductor', 'Recordatorio 1 h antes'];
 const SOLO_MUJERES = {
   etiqueta: 'Solo mujeres',
   descripcion: 'Solo verás carros con conductoras y pasajeras.',
@@ -57,8 +62,6 @@ const SOLO_MUJERES = {
 const COMPARTIR_LLEGADA = 'Compartir mi llegada';
 
 /** La línea que resume la tarjeta va detrás de los interruptores, no delante. */
-const CUANTOS = ['Ninguno activo', 'Uno activo', 'Dos activos', 'Los tres activos'];
-
 /** El relleno que el traspaso da a cada fila de «Dinero y cuenta». */
 const RELLENO_DINERO = [10, 11, 11];
 
@@ -70,9 +73,9 @@ export default function Ajustes() {
   const [quien, setQuien] = useState<Cuenta | null>(null);
   const [cedula, setCedula] = useState<EstadoDeCedula | null>(null);
 
-  const [avisosActivos, setAvisosActivos] = useState([true, true, true]);
-  const [soloMujeres, setSoloMujeres] = useState(false);
-  const [compartirLlegada, setCompartirLlegada] = useState(true);
+  /* Guardadas de verdad: se leen al abrir y se escriben al tocarlas. */
+  const [prefs, setPrefs] = useState<Preferencias>(POR_DEFECTO);
+  useEffect(() => setPrefs(preferencias()), []);
 
   useEffect(() => {
     if (!yo) return;
@@ -88,9 +91,6 @@ export default function Ajustes() {
   // El servicio promete los cuatro grupos en este orden, y ese orden es la
   // pantalla: cambiarlo allí cambia esto, que es lo que queremos.
   const [avisos, viaje, dinero, salida] = grupos;
-
-  const alternarAviso = (i: number) =>
-    setAvisosActivos((a) => a.map((v, j) => (j === i ? !v : v)));
 
   return (
     <View style={estilos.pantalla}>
@@ -116,21 +116,31 @@ export default function Ajustes() {
 
       <View style={estilos.cuerpo}>
         {/* La hoja de avisos monta sobre el campo rojo: sombra teñida, sin borde. */}
+        {/* LOS TRES INTERRUPTORES DE AVISOS SE FUERON. Prometían elegir qué
+            te llega al teléfono y no había —ni hay— canal de envío: no
+            podían apagar ni encender nada, y volvían a su sitio al
+            recargar. En su lugar, las dos filas que SÍ llevan a algo, que
+            son las que el servicio ya daba. Vuelven cuando el envío exista. */}
         <View style={estilos.hoja}>
           <Text style={estilos.epigrafe}>{avisos.titulo}</Text>
-          <Text style={estilos.resumen}>
-            {CUANTOS[avisosActivos.filter(Boolean).length]}
-          </Text>
+          <Text style={estilos.resumen}>Todo lo de tus viajes, en la bandeja</Text>
 
-          {AVISOS.map((etiqueta, i) => (
-            <FilaDePalanca
-              key={etiqueta}
-              etiqueta={etiqueta}
-              activa={avisosActivos[i]}
-              alCambiar={() => alternarAviso(i)}
-              ultima={i === AVISOS.length - 1}
-            />
-          ))}
+          {avisos.filas.map((fila, i) => {
+            const ultima = i === avisos.filas.length - 1;
+            return (
+              <Pressable
+                key={fila.etiqueta}
+                accessibilityRole="button"
+                accessibilityLabel={fila.valor ? `${fila.etiqueta}, ${fila.valor}` : fila.etiqueta}
+                onPress={fila.ruta ? () => router.push(fila.ruta as Href) : undefined}
+                style={[estilos.filaDato, { paddingTop: 11, paddingBottom: ultima ? 0 : 11 }]}
+              >
+                <Text style={estilos.filaDatoEtiqueta}>{fila.etiqueta}</Text>
+                {fila.valor ? <Text style={estilos.filaDatoValor}>{fila.valor}</Text> : null}
+                <Adelante />
+              </Pressable>
+            );
+          })}
         </View>
 
         <View style={estilos.tarjeta}>
@@ -139,13 +149,15 @@ export default function Ajustes() {
           <FilaDePalanca
             etiqueta={SOLO_MUJERES.etiqueta}
             descripcion={SOLO_MUJERES.descripcion}
-            activa={soloMujeres}
-            alCambiar={() => setSoloMujeres((v) => !v)}
+            activa={prefs.soloMujeres}
+            alCambiar={() => setPrefs(guardarPreferencia('soloMujeres', !prefs.soloMujeres))}
           />
           <FilaDePalanca
             etiqueta={COMPARTIR_LLEGADA}
-            activa={compartirLlegada}
-            alCambiar={() => setCompartirLlegada((v) => !v)}
+            activa={prefs.compartirLlegada}
+            alCambiar={() =>
+              setPrefs(guardarPreferencia('compartirLlegada', !prefs.compartirLlegada))
+            }
             ultima
           />
         </View>
