@@ -45,6 +45,33 @@ const MESES = [
   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
 ];
 
+/**
+ * La frase que acompaña la cifra — y que ANTES MENTÍA.
+ *
+ * Estaba escrita entera, fija, sin mirar los números: con cero viajes y cero
+ * puestos seguía diciendo «la gasolina de agosto te sale casi cubierta». El
+ * dueño lo vio en su pantalla el 26-08-2026, con un B/0 encima.
+ *
+ * Y «casi cubierta» no era solo falso ahí: no se calculaba en ningún caso —
+ * para decirlo habría que comparar lo recuperado con lo que costó la
+ * gasolina, y esta función no tiene ni lo uno ni lo otro. Una afirmación
+ * lleva su razón (invariante 7 del v6) o no se escribe.
+ *
+ * Ahora dice lo que sabe: cuántos viajes, cuántos puestos, y QUÉ ES esa
+ * cifra — lo recuperado, no lo ganado, que es la regla 1 del producto.
+ */
+function resumenDe(viajes: number, puestos: number, tramo: Tramo, mes: string): string {
+  const cuando = tramo === 'mes' ? `de ${mes}` : 'de tus viajes';
+  if (viajes === 0) {
+    return tramo === 'mes'
+      ? `Todavía nadie ha viajado contigo en ${mes}.`
+      : 'Todavía nadie ha viajado contigo.';
+  }
+  const conViajes = `${viajes} ${viajes === 1 ? 'viaje' : 'viajes'}`;
+  const conPuestos = `${puestos} ${puestos === 1 ? 'puesto' : 'puestos'}`;
+  return `${conViajes}, ${conPuestos}. Es lo que has recuperado de la gasolina ${cuando}.`;
+}
+
 export async function aportes(conductorId: string, tramo: Tramo = 'mes'): Promise<Aportes> {
   const ahora = new Date();
   const desde = new Date(ahora.getFullYear(), ahora.getMonth(), 1).toISOString();
@@ -61,7 +88,7 @@ export async function aportes(conductorId: string, tramo: Tramo = 'mes'): Promis
     tramo,
     totalCentavos: total,
     periodo: tramo === 'mes' ? MESES[ahora.getMonth()] : 'todo',
-    resumen: `${suyas.length} ${suyas.length === 1 ? 'viaje' : 'viajes'}, ${puestos} ${puestos === 1 ? 'puesto' : 'puestos'}. La gasolina de ${MESES[ahora.getMonth()]} te sale casi cubierta.`,
+    resumen: resumenDe(suyas.length, puestos, tramo, MESES[ahora.getMonth()]),
     viajes: suyas.map((e) => ({
       id: String(e.id),
       ruta: e.description.split(' · ')[0],

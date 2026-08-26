@@ -1,9 +1,14 @@
 /**
  * `10b` Lo que te han aportado.
  *
- * «Aportado», no «ganado». El titular no va solo: al lado del total está la
- * frase que le da sentido —«la gasolina de junio te sale casi cubierta»—,
- * porque un número grande sin esa línea se lee como un sueldo, y no lo es.
+ * «Aportado», no «ganado». El titular no va solo: debajo va la frase que le
+ * da sentido —«3 viajes, 5 puestos. Es lo que has recuperado de la gasolina
+ * de agosto»—, porque un número grande sin esa línea se lee como un sueldo,
+ * y no lo es.
+ *
+ * Esa frase decía «la gasolina te sale casi cubierta» pasara lo que pasara,
+ * también con un B/0 y cero viajes encima. Se calcula desde el 26-08-2026;
+ * el porqué está en `servicios/aportes.ts`.
  *
  * El brillo cálido de la tarjeta es el mismo de las tarjetas de aporte: es la
  * única celebración que el producto se permite, y es tibia a propósito.
@@ -126,13 +131,25 @@ export default function AportesPantalla() {
             <Text style={estilos.donde}>{datos.donde}</Text>
             <Text style={estilos.cadaCuando}>{datos.cadaCuando}</Text>
           </View>
+          {/* «CAMBIAR» LLEVABA AL SITIO EQUIVOCADO. Esta tarjeta dice por
+              dónde te LLEGA el dinero, y el enlace abría `9a`, la pantalla
+              del PASAJERO para elegir cómo PAGA — con las tarifas de cada
+              método, que el conductor no paga. Rol equivocado, pregunta
+              equivocada, y de paso una cifra que asusta sin motivo.
+
+              A dónde debería ir no existe todavía: no hay pantalla para el
+              Yappy del conductor, ni columna donde guardarlo (`CLAUDE.md`,
+              divergencias). Así que no se finge un ajuste que no hay — se
+              ofrece el único camino real, que es escribirnos. Y en tinta:
+              el rojo tiene cuatro sentidos y «cambiar un dato» no es
+              ninguno (invariante 4). */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Cambiar por dónde te llega"
-            onPress={() => router.push('/(pasajero)/metodos')}
+            accessibilityLabel="Este no es mi Yappy, escribirles"
+            onPress={() => router.push('/(ayuda)')}
             style={zonaDeToque}
           >
-            <Text style={estilos.cambiar}>Cambiar</Text>
+            <Text style={estilos.cambiar}>¿No es tuyo?</Text>
           </Pressable>
         </View>
       </View>
@@ -303,8 +320,9 @@ const estilos = StyleSheet.create({
   cambiar: {
     fontSize: 12,
     lineHeight: 17,
-    fontWeight: '500',
-    color: color.rojo700,
+    fontWeight: '600',
+    // Tinta, no rojo: el rojo agita, y esto es un enlace de apoyo.
+    color: color.azul700,
     fontFamily: familia,
   },
 });
