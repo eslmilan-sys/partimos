@@ -33,9 +33,10 @@ l'ancien dépôt a fini avec trois copies du site et personne pour savoir
 laquelle était vivante.
 
 **2 · Les règles métier sont décidées, pas suggérées.** Le calcul de l'apport,
-le plafond de la route, les quatre règles de remboursement et le modèle de
-bagages sont dans `PRODUCT.md`. Si quelque chose semble devoir marcher
-autrement, **dis-le avant de le changer**.
+le plafond de la route et les quatre règles de remboursement sont dans
+`PRODUCT.md`. Si quelque chose semble devoir marcher autrement, **dis-le avant
+de le changer**. *(Le modèle de bagages, lui, a été retranché le 25-08-2026 —
+voir plus bas.)*
 
 **3 · Le design est une référence, pas une source.** Les `.dc.html` de
 `diseno/` s'ouvrent dans un navigateur et se recréent dans la pile du dossier
@@ -187,3 +188,14 @@ parler :
   recherche trouve ces trajets par leurs villes (miroir du LEFT JOIN 0031).
 - **Il n'y a pas de table `notifications`.** Les avis du design existent comme
   type dans l'app, en attendant la migration.
+- **Le bagage se décide à la demande, plus à la publication** (tranché par
+  l'utilisateur le 25-08-2026). Le conducteur ne déclare plus rien à l'avance :
+  le passager dit ce qu'il emporte — **rien, un sac, une valise** — et le
+  conducteur voit ce mot dans la demande et accepte ou refuse, du même geste
+  qu'il accepte la place. Trois options et pas une de plus : compter les
+  valises était une comptabilité de coffre que personne n'allait tenir. La
+  règle vit dans `app/src/dominio/equipaje.ts`, avec ses tests. `trips.accepts_luggage`
+  devient vestigial (la colonne reste, plus personne ne la lit) ; les colonnes
+  `bookings.mochilas` / `maletas` de la 0026 servent de pont, donc pas de
+  migration. Le prix n'est pas touché : l'apport sort de l'essence et des
+  péages, le bagage n'y entre ni ne se facture.
