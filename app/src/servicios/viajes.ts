@@ -689,6 +689,22 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
   const salidaMs = new Date(borrador.salida).getTime();
   const enPunto = (min: number) => new Date(salidaMs + min * 60_000).toISOString();
 
+  /**
+   * TRES COLUMNAS QUE NO EXISTEN TUMBABAN LA PUBLICACIÓN ENTERA.
+   *
+   * Aquí se escribían `lat`, `lng` y `place_id` — siempre en nulo, nadie las
+   * leía nunca— y `trip_stops` no las tiene: no las tuvo en la 0001 ni se
+   * añadieron después. Contra el simulado no pasaba nada, porque son objetos
+   * en memoria; contra la base real, PostgREST devolvía «Could not find the
+   * 'lat' column of 'trip_stops' in the schema cache» y **el viaje se quedaba
+   * publicado sin una sola parada**. Visto en el teléfono del dueño el
+   * 26-08-2026, con el viaje ya escrito y el error debajo del botón.
+   *
+   * El tipo de vuelta va ANOTADO a propósito: `TripStop` sale del esquema, y
+   * sin la anotación un `.map` infiere su propia forma y TypeScript deja
+   * pasar las columnas de más. Con ella, inventar una columna es un error de
+   * compilación y no un fallo en producción.
+   */
   const deLaRuta: TripStop[] = [
     { etiqueta: preparada.origen, minutos: 0, tipo: 'origin' as const },
     ...intermedias.map((p) => ({ etiqueta: p.nombre, minutos: p.minutos, tipo: 'waypoint' as const })),
@@ -697,7 +713,7 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
       minutos: preparada.duracionMin + intermedias.length * 5,
       tipo: 'destination' as const,
     },
-  ].map((p, i) => ({
+  ].map((p, i): TripStop => ({
     id: nuevoId(),
     trip_id: viaje.id,
     pickup_point_id: null,
@@ -705,9 +721,6 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
     sequence: i,
     kind: p.tipo,
     scheduled_at: enPunto(p.minutos),
-    lat: null,
-    lng: null,
-    place_id: null,
     created_at: ahora,
   }));
 
