@@ -7,10 +7,10 @@
  * sale la cifra: calculado, lo pusiste tú, o tope de la ruta.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
 
@@ -98,6 +98,35 @@ export default function Publicar() {
   const [horaSalida, setHoraSalida] = useState('06:00');
   const [eligiendo, setEligiendo] = useState<'dia' | 'hora' | null>(null);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
+  /**
+   * VOLVER TIENE QUE VOLVER A MIRAR.
+   *
+   * «Falta registrar tu carro» manda a `carro`, y `useVolver` hace
+   * `router.back()`: esta pantalla NO se desmonta, sigue viva detrás. Sus
+   * efectos dependen de la ruta y la hora —nada de eso cambió al registrar
+   * el carro—, así que al volver seguía enseñando el `datos` de antes y
+   * pedía el carro OTRA VEZ, aunque estuviera guardado. Medido en el
+   * teléfono del dueño el 25-08.
+   *
+   * Este contador sube cada vez que la pantalla VUELVE al frente —no la
+   * primera— y entra en las dependencias: volver es preguntar de nuevo.
+   *
+   * En web la pantalla se remonta al volver, así que allí ya se preguntaba
+   * de nuevo; esto es para el teléfono, donde sigue viva detrás. Medido con
+   * una sonda el 25-08: sin saltar la primera vez, montar preparaba dos
+   * veces seguidas.
+   */
+  const [vueltas, setVueltas] = useState(0);
+  const yaSeMonto = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (!yaSeMonto.current) {
+        yaSeMonto.current = true;
+        return;
+      }
+      setVueltas((n) => n + 1);
+    }, []),
+  );
   const [cedula, setCedula] = useState<EstadoDeCedula | null>(null);
   /**
    * LAS PARADAS ELEGIDAS, por índice — no un contador. Con el contador solo
@@ -154,7 +183,7 @@ export default function Publicar() {
     )
       .then(setDatos)
       .catch(() => setDatos(null));
-  }, [yo, ruta, salidaISO, desde, hacia]);
+  }, [yo, ruta, salidaISO, desde, hacia, vueltas]);
 
   const calculado = useMemo(
     () => (datos ? aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos) : 0),

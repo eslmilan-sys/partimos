@@ -81,6 +81,16 @@ export default function RegistrarCarro() {
   const decir = useDecir();
   const [faltaLaFoto, setFaltaLaFoto] = useState(false);
   const [guardando, setGuardando] = useState(false);
+  /**
+   * EL FALLO SE QUEDA EN PANTALLA.
+   *
+   * Guardar iba a un aviso pasajero: si la subida de la foto fallaba —el
+   * cubo `carros` de la 0038 sin crear, por ejemplo— el carro NO se
+   * guardaba, el aviso se iba solo, y el formulario quedaba idéntico. Desde
+   * fuera parecía que había funcionado. Ahora el motivo se queda escrito
+   * junto al botón hasta que se vuelve a intentar.
+   */
+  const [fallo, setFallo] = useState<string | null>(null);
   const [menu, setMenu] = useState<Menu | null>(null);
   /** El archivo reducido, listo para subir al guardar. La vista previa va en
       `borrador.foto` como `data:` URI — así la tarjeta la enseña al momento. */
@@ -148,17 +158,23 @@ export default function RegistrarCarro() {
     const falta = queFalta();
     if (falta || !yo) {
       setFaltaLaFoto(!borrador.foto);
+      /* También lo que falta se queda escrito: un aviso que se va solo
+         deja el formulario idéntico y parece que guardó. */
+      setFallo(falta);
       decir(falta);
       return;
     }
     setGuardando(true);
+    setFallo(null);
     try {
       let foto = borrador.foto as string;
       if (laFoto.current) foto = await subirFotoDelCarro(yo, laFoto.current, foto);
       await guardarCarro(yo, { ...borrador, foto });
       volver();
     } catch (e) {
-      decir(e instanceof Error ? e.message : 'No se pudo guardar. Prueba otra vez.');
+      const porque = e instanceof Error ? e.message : 'No se pudo guardar. Prueba otra vez.';
+      setFallo(porque);
+      decir(porque);
     } finally {
       setGuardando(false);
     }
@@ -363,10 +379,17 @@ export default function RegistrarCarro() {
       </ScrollView>
 
       <View style={estilos.pie}>
+        {fallo ? (
+          <View style={estilos.fallo}>
+            <Text style={estilos.falloTexto}>{fallo}</Text>
+          </View>
+        ) : null}
         <Boton desactivado={guardando} alPulsar={guardar}>
-          {guardando ? 'Guardando…' : 'Guardar el carro'}
+          {guardando ? 'Guardando…' : fallo ? 'Intentar otra vez' : 'Guardar el carro'}
         </Boton>
-        <Text style={estilos.notaPie}>Puedes tener más de uno y elegir al publicar.</Text>
+        <Text style={estilos.notaPie}>
+          {fallo ? 'Nada se perdió: lo que escribiste sigue aquí.' : 'Puedes tener más de uno y elegir al publicar.'}
+        </Text>
       </View>
 
       {/* ── La lista, anclada a la fila que la abrió ──────────────── */}
@@ -788,6 +811,20 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
+  },
+  fallo: {
+    marginBottom: 12,
+    backgroundColor: color.rojo100,
+    borderRadius: radio.m,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+  falloTexto: {
+    fontSize: 13.5,
+    lineHeight: 19,
+    fontWeight: '500',
+    color: color.rojo700,
+    fontFamily: familia,
   },
   notaPie: {
     textAlign: 'center',
