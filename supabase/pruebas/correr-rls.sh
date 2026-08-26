@@ -20,7 +20,11 @@ psql -d postgres -q -c "drop database if exists $PGDATABASE;" -c "create databas
 for f in "$aqui/10-rls.sql" \
          "$aqui/../migrations/0039_la_rls_que_faltaba.sql" \
          "$aqui/11-pruebas-rls.sql"; do
-  psql -d "$PGDATABASE" -v ON_ERROR_STOP=1 -q -f "$f" 2>&1 | grep -E "ok |FALLA" || true
+  salida=$(psql -d "$PGDATABASE" -v ON_ERROR_STOP=1 -q -f "$f" 2>&1) && bien=1 || bien=0
+  echo "$salida" | grep -E "ok |FALLA" || true
+  if [ "$bien" -ne 1 ] || echo "$salida" | grep -q FALLA; then
+    echo "— FALLÓ en $(basename "$f") —"; exit 1
+  fi
 done
 
 echo "— todo verde —"

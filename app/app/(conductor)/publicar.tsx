@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
 
@@ -26,6 +26,7 @@ import {
   estimarRuta,
   rutasPublicables,
 } from '@/servicios/viajes';
+import { plantillaDeViaje } from '@/servicios/panel';
 import { aDondeSeVaDesde, ciudadesDeSalida } from '@/servicios/lugares';
 import { guardarRutaBuscada } from '@/servicios/rutas';
 import { type EstadoDeCedula, estadoDeCedula } from '@/servicios/seguridad';
@@ -150,13 +151,32 @@ export default function Publicar() {
   }, [yo]);
 
 
+  /**
+   * PUBLICAR DE NUEVO. `?deViaje=<id>` llega del panel — «Para repetir» — y
+   * rellena el formulario con aquel viaje: la ruta a nivel de ciudad, la
+   * hora a la que saliste y los puestos que ofreciste. La fecha nace en hoy
+   * y el punto exacto se vuelve a elegir: es lo único que cambia de una
+   * semana a otra. Dos toques en vez del formulario entero.
+   */
+  const { deViaje } = useLocalSearchParams<{ deViaje?: string }>();
   useEffect(() => {
-    if (rutas.length === 0 || desde || hacia) return;
+    if (!deViaje) return;
+    plantillaDeViaje(deViaje).then((t) => {
+      if (!t) return;
+      setDesde(t.origen);
+      setHacia(t.destino);
+      setHoraSalida(t.hora);
+      setPuestos(t.puestos);
+    });
+  }, [deViaje]);
+
+  useEffect(() => {
+    if (rutas.length === 0 || desde || hacia || deViaje) return;
     const primera = rutas[0];
     setRuta(primera.slug);
     setDesde(lugarDeCiudad(primera.origen, primera.origenSlug));
     setHacia(lugarDeCiudad(primera.destino, primera.destinoSlug));
-  }, [rutas, desde, hacia]);
+  }, [rutas, desde, hacia, deViaje]);
 
   /** El par elegido manda: corredor abierto si casa, ruta libre si no. */
   const estimacion = desde && hacia ? estimarRuta(desde, hacia, puestos) : null;

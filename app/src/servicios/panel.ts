@@ -12,6 +12,7 @@
  */
 
 import { soloPunto } from '@/dominio/comoSeLlama';
+import type { Lugar } from '@/dominio/lugar';
 import type { ViajeFila } from '@/tipos';
 
 import { fuente } from './_fuente';
@@ -51,6 +52,106 @@ export async function viajesPublicados(conductorId: string): Promise<ViajePublic
 export async function viajePublicado(viajeId: string): Promise<ViajePublicado | null> {
   const v = fuente.viajes.find((x) => x.id === viajeId);
   return demora(v ? comoPublicado(v) : null);
+}
+
+/* --------------------------------------------- 10a · repetir un viaje */
+
+/**
+ * Un viaje que ya pasó, contado con lo justo para querer repetirlo.
+ *
+ * El interurbano de verdad es semanal — se baja a Chitré el viernes, se
+ * vuelve el domingo — y hasta ahora los viajes hechos del conductor no
+ * salían EN NINGUNA pantalla: repetir uno era rellenar el formulario
+ * entero otra vez, de memoria.
+ */
+export type ViajeHecho = {
+  id: string;
+  cuando: string;
+  origen: string;
+  destino: string;
+  aporteCentavos: number;
+  puestosVendidos: number;
+};
+
+export async function viajesHechos(conductorId: string, cuantos = 4): Promise<ViajeHecho[]> {
+  const ahora = Date.now();
+  const hechos = fuente.viajes
+    .filter(
+      (v) =>
+        v.driver_id === conductorId &&
+        (v.status === 'completed' ||
+          (v.status === 'published' && new Date(v.departure_at).getTime() < ahora)),
+    )
+    .sort((a, b) => b.departure_at.localeCompare(a.departure_at));
+
+  /* La misma ruta hecha cuatro veces es UNA fila: se repite la ruta, no la
+     fecha. Se queda la más reciente de cada par origen → destino. */
+  const vistos = new Set<string>();
+  const unicos = hechos.filter((v) => {
+    const par = `${ciudadOrigen(v)}→${ciudadDestino(v)}`;
+    if (vistos.has(par)) return false;
+    vistos.add(par);
+    return true;
+  });
+
+  return demora(
+    unicos.slice(0, cuantos).map((v) => ({
+      id: v.id,
+      cuando: v.departure_at,
+      origen: ciudadOrigen(v),
+      destino: ciudadDestino(v),
+      aporteCentavos: v.price_cents,
+      puestosVendidos: fuente.reservas.filter(
+        (r) => r.trip_id === v.id && (r.status === 'confirmed' || r.status === 'completed'),
+      ).length,
+    })),
+  );
+}
+
+/** Lo que `publicar` necesita para salir ya rellenado con un viaje de antes. */
+export type PlantillaDeViaje = {
+  origen: Lugar;
+  destino: Lugar;
+  /** «HH:MM» en hora de Panamá — la hora a la que saliste aquella vez. */
+  hora: string;
+  puestos: number;
+};
+
+/**
+ * El viaje viejo convertido en plantilla. A nivel de CIUDAD adrede: el
+ * punto exacto se vuelve a elegir en el formulario — es lo único que de
+ * verdad cambia de una semana a otra —, y la fecha nace en hoy.
+ */
+export async function plantillaDeViaje(viajeId: string): Promise<PlantillaDeViaje | null> {
+  const v = fuente.viajes.find((x) => x.id === viajeId);
+  if (!v) return demora(null);
+
+  const lugarDe = (cityId: string | null, etiqueta: string | null): Lugar | null => {
+    const ciudad = fuente.ciudades.find((c) => c.id === cityId);
+    if (!ciudad) return null;
+    return {
+      nombre: ciudad.name,
+      citySlug: ciudad.slug,
+      tipo: 'ciudad',
+      fuente: 'propia',
+      contexto: ciudad.province ?? 'Panamá',
+      lat: ciudad.lat,
+      lng: ciudad.lng,
+    };
+  };
+
+  const origen = lugarDe(v.origin_city_id, v.origin_label);
+  const destino = lugarDe(v.destination_city_id, v.destination_label);
+  if (!origen || !destino) return demora(null);
+
+  const hora = new Intl.DateTimeFormat('es-PA', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'America/Panama',
+  }).format(new Date(v.departure_at));
+
+  return demora({ origen, destino, hora, puestos: v.seats_offered });
 }
 
 function comoPublicado(v: ViajeFila): ViajePublicado {

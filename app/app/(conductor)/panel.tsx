@@ -20,7 +20,12 @@ import { useDecir } from '@/ui/Nota';
 import { DIJO, compartir } from '@/ui/salidas';
 import Svg, { Path } from 'react-native-svg';
 
-import { type ViajePublicado, viajesPublicados } from '@/servicios/panel';
+import {
+  type ViajeHecho,
+  type ViajePublicado,
+  viajesHechos,
+  viajesPublicados,
+} from '@/servicios/panel';
 import { perfilResumido } from '@/servicios/perfiles';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -38,11 +43,13 @@ export default function Panel() {
   const router = useRouter();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [viajes, setViajes] = useState<ViajePublicado[]>([]);
+  const [hechos, setHechos] = useState<ViajeHecho[]>([]);
   const [nombre, setNombre] = useState<string | null>(null);
 
   useEffect(() => {
     if (!yo) return;
     viajesPublicados(yo).then(setViajes);
+    viajesHechos(yo).then(setHechos);
     perfilResumido(yo).then((p) => setNombre(p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : null));
   }, [yo]);
 
@@ -76,6 +83,44 @@ export default function Panel() {
         {resto.map((v) => (
           <Proximo key={v.id} viaje={v} router={router} />
         ))}
+
+        {/* PARA REPETIR. El interurbano de verdad es semanal — a Chitré el
+            viernes, de vuelta el domingo — y los viajes hechos no salían en
+            ninguna pantalla: repetir uno era rellenar el formulario entero
+            de memoria. Una ruta hecha, una fila; tocarla abre publicar ya
+            rellenado y solo queda ponerle fecha. */}
+        {hechos.length > 0 ? (
+          <View style={estilos.repetir}>
+            <Text style={estilos.repetirTitulo}>Para repetir</Text>
+            {hechos.map((h, i) => (
+              <Pressable
+                key={h.id}
+                accessibilityRole="button"
+                accessibilityLabel={`Publicar de nuevo ${h.origen} a ${h.destino}`}
+                onPress={() =>
+                  router.push({ pathname: '/(conductor)/publicar', params: { deViaje: h.id } })
+                }
+                style={({ pressed }) => [
+                  estilos.filaRepetir,
+                  i > 0 && estilos.filaRepetirSigue,
+                  pressed && { backgroundColor: color.lavadoChip },
+                ]}
+              >
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={estilos.repetirRuta} numberOfLines={1}>
+                    {`${h.origen} → ${h.destino}`}
+                  </Text>
+                  <Text style={estilos.repetirMeta}>
+                    {`${diaAbrev(h.cuando)} ${hora(h.cuando)} · ${
+                      h.puestosVendidos === 1 ? '1 puesto vendido' : `${h.puestosVendidos} puestos vendidos`
+                    }`}
+                  </Text>
+                </View>
+                <Text style={estilos.repetirAccion}>Publicar de nuevo</Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
 
         <Text style={estilos.pieTexto}>Puedes editar un viaje mientras nadie haya asegurado su puesto.</Text>
       </View>
@@ -436,6 +481,58 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
+  repetir: {
+    backgroundColor: color.blanco,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    paddingVertical: 6,
+    marginTop: 14,
+  },
+  repetirTitulo: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '600',
+    letterSpacing: TRACK_MICRO,
+    textTransform: 'uppercase',
+    color: color.ink500,
+    fontFamily: familia,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  filaRepetir: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+  },
+  filaRepetirSigue: {
+    borderTopWidth: 1,
+    borderTopColor: color.bordeSutil,
+  },
+  repetirRuta: {
+    fontSize: 14.5,
+    lineHeight: 20,
+    fontWeight: '500',
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  repetirMeta: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: color.ink600,
+    fontFamily: familia,
+    ...tabular,
+  },
+  repetirAccion: {
+    fontSize: 13,
+    lineHeight: 18.85,
+    fontWeight: '600',
+    color: color.azul700,
+    fontFamily: familia,
+  },
   pieTexto: {
     fontSize: 12.5,
     lineHeight: 18.75,

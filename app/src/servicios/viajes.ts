@@ -209,6 +209,74 @@ export async function paradasDelViaje(viajeId: string): Promise<TripStop[]> {
   return demora(fuente.paradas.filter((p) => p.trip_id === viajeId).sort((a, b) => a.sequence - b.sequence));
 }
 
+/** Un punto del recorrido situado de verdad, para dibujarlo donde está. */
+export type PuntoSituado = {
+  nombre: string;
+  lat: number;
+  lng: number;
+  tipo: 'origen' | 'parada' | 'destino';
+};
+
+/** «penonomé» === «Penonome»: los acentos no deciden si una ciudad existe. */
+const llano = (s: string) =>
+  s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+
+/**
+ * El recorrido de un viaje CON SUS COORDENADAS — lo que el plano necesita.
+ *
+ * La salida y la llegada salen de las coordenadas del viaje mismo (ruta
+ * libre, 0022) o de su ciudad. Las paradas intermedias se sitúan por el
+ * nombre de ciudad de su rótulo; la que no se deja situar no se dibuja —
+ * adivinar dónde cae sería peor—, y la lista escrita debajo la sigue
+ * enseñando completa. Con menos de dos puntos situables no hay plano.
+ */
+export async function puntosDelRecorrido(viajeId: string): Promise<PuntoSituado[]> {
+  const v = fuente.viajes.find((x) => x.id === viajeId);
+  if (!v) return demora([], 0);
+
+  const deCiudad = (id: string | null) => {
+    const c = fuente.ciudades.find((x) => x.id === id);
+    return c && c.lat != null && c.lng != null ? { nombre: c.name, lat: c.lat, lng: c.lng } : null;
+  };
+  const porNombre = (nombre: string) => {
+    const c = fuente.ciudades.find((x) => llano(x.name) === llano(nombre));
+    return c && c.lat != null && c.lng != null ? { lat: c.lat, lng: c.lng } : null;
+  };
+
+  const origen =
+    v.origin_lat != null && v.origin_lng != null
+      ? { nombre: soloCiudad(undefined, v.origin_label), lat: v.origin_lat, lng: v.origin_lng }
+      : deCiudad(v.origin_city_id);
+  const destino =
+    v.destination_lat != null && v.destination_lng != null
+      ? { nombre: soloCiudad(undefined, v.destination_label), lat: v.destination_lat, lng: v.destination_lng }
+      : deCiudad(v.destination_city_id);
+  if (!origen || !destino) return demora([], 0);
+
+  const paradas = fuente.paradas
+    .filter((p) => p.trip_id === viajeId)
+    .sort((a, b) => a.sequence - b.sequence);
+
+  const intermedios: PuntoSituado[] = [];
+  for (const p of paradas.slice(1, -1)) {
+    const nombre = (p.custom_label ?? '').split(' · ')[0];
+    const sitio = porNombre(nombre);
+    // la parada que repite un extremo tampoco se dibuja dos veces
+    if (!sitio || llano(nombre) === llano(origen.nombre) || llano(nombre) === llano(destino.nombre))
+      continue;
+    intermedios.push({ nombre, ...sitio, tipo: 'parada' });
+  }
+
+  return demora(
+    [
+      { ...origen, tipo: 'origen' as const },
+      ...intermedios,
+      { ...destino, tipo: 'destino' as const },
+    ],
+    0,
+  );
+}
+
 /* ------------------------------------------------------------------ *
  * Inicio — pantalla `3a`
  * ------------------------------------------------------------------ */

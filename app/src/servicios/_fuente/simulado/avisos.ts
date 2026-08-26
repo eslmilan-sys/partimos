@@ -46,8 +46,10 @@ export const avisos: AvisoPendiente[] = [
     kind: 'solicitud_recibida',
     title: 'Rosa I. pidió puesto',
     body: 'Hace 20 min · expira en 1 h 10',
-    action_label: null,
-    action_route: null,
+    // Si hay acción, va dentro del aviso (regla 2): sin esto, la fila sembrada
+    // suprimía al derivado —que sí la traía— y el aviso quedaba sin puerta.
+    action_label: 'Ver la solicitud',
+    action_route: '/(conductor)/solicitudes?viaje=55555555-5555-4555-8555-555555555555',
     booking_id: '77777777-7777-4777-8777-777777777702',
     trip_id: '55555555-5555-4555-8555-555555555555',
     read_at: null,

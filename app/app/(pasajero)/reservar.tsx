@@ -24,14 +24,16 @@ import {
 } from '@/dominio/equipaje';
 import type { Lugar } from '@/dominio/lugar';
 import { type ReservaPreparada, pedirPuesto, prepararReserva } from '@/servicios/reservas';
+import { type PuntoSituado, puntosDelRecorrido } from '@/servicios/viajes';
 import { useMiId } from '@/servicios/sesion';
+import { RutaEnMapa } from '@/ui/RutaEnMapa';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe, Interruptor, Pastilla } from '@/ui/controles';
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
-import { tabular } from '@/ui/dinero';
+import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, hora } from '@/ui/fechas';
 import { Atras, Lupa, Maleta } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio, pulsado } from '@/ui/tokens';
@@ -63,10 +65,12 @@ export default function Reservar() {
   /** El punto elegido del buscador — con sus coordenadas si las trajo. */
   const [buscandoPunto, setBuscandoPunto] = useState(false);
   const [puntoElegido, setPuntoElegido] = useState<Lugar | null>(null);
+  const [puntosDelPlano, setPuntosDelPlano] = useState<PuntoSituado[]>([]);
   const [pidiendo, setPidiendo] = useState(false);
 
   useEffect(() => {
     prepararReserva(viajeId).then(setDatos).catch(() => setNoEsta(true));
+    puntosDelRecorrido(viajeId).then(setPuntosDelPlano);
   }, [viajeId]);
 
   if (noEsta) return <NoEsta />;
@@ -150,6 +154,25 @@ export default function Reservar() {
             </Text>
           </Pressable>
           <Text style={estilos.ayudaPunto}>{`${datos.conductor} lo aprueba junto con el puesto.`}</Text>
+
+          {/* EL PLANO responde la pregunta que el «+4 min» dejaba abstracta:
+              ¿mi punto le queda de camino? La ruta con su geografía real, y
+              tu punto dibujado AL LADO de la línea — no sobre ella, que el
+              conductor todavía no ha dicho que sí. Solo aparece cuando el
+              punto elegido trae coordenadas: dibujarlo adivinado sería
+              mentir sobre lo único que este plano sabe decir. */}
+          {puntosDelPlano.length >= 2 && puntoElegido?.lat != null && puntoElegido?.lng != null ? (
+            <View style={{ marginTop: 12 }}>
+              <RutaEnMapa
+                puntos={puntosDelPlano}
+                tuyo={{
+                  nombre: puntoElegido.nombre,
+                  lat: puntoElegido.lat,
+                  lng: puntoElegido.lng,
+                }}
+              />
+            </View>
+          ) : null}
         </View>
 
         <View style={estilos.tarjetaEquipaje}>
@@ -206,12 +229,12 @@ export default function Reservar() {
       />
 
       <View style={estilos.pie}>
+        {/* «8 $ por plaza» era de antes del sistema: el dinero se escribe
+            B/8 —un solo sitio formatea (ui/dinero)— y aquí nadie dice
+            «plaza»: es un puesto, como en todas las demás pantallas. */}
         <View style={estilos.filaPrecio}>
-          <Text style={estilos.precio}>
-            {String(Math.round(datos.aporteCentavos / 100))}
-            <Text style={estilos.precioSimbolo}> $</Text>
-          </Text>
-          <Pastilla estilo={{ marginBottom: 6 }}>por plaza</Pastilla>
+          <Text style={[estilos.precio, tabular]}>{formatearDineroRedondo(datos.aporteCentavos)}</Text>
+          <Pastilla estilo={{ marginBottom: 6 }}>por puesto</Pastilla>
         </View>
 
         <Boton
@@ -441,6 +464,5 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  precioSimbolo: { fontSize: 17, lineHeight: 15.3, fontWeight: '500' },
   notaPie: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.12, color: color.ink500, marginTop: 10, fontFamily: familia },
 });

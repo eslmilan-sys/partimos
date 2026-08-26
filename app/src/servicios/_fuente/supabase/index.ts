@@ -54,19 +54,12 @@ export const libro: LedgerEntry[] = [];
 export const reportesDeNoShow: NoShowReport[] = [];
 
 /**
- * **No hay tabla `notifications`, y los avisos igual existen.**
- *
- * El traspaso dice que un aviso es un hecho del viaje contado a tiempo, no una
- * fila que alguien tiene que acordarse de escribir. Los hechos ya están en la
- * base: una reserva confirmada es «te aceptaron», una pendiente en tu viaje es
- * «alguien pidió puesto», una liberada es «te aportaron». Así que la bandeja
- * se deriva de lo que ya se ha cargado, en vez de salir vacía —que es lo que
- * hacía, y por eso al pasajero no le llegaba nunca que el conductor le había
- * aceptado—.
- *
- * Lo que esto no puede hacer es sonar en el teléfono con la app cerrada: eso
- * sí necesita tabla y un envío. Cuando exista, `derivarAvisos` se cambia por
- * un `traer('notifications', avisos)` y ninguna pantalla se entera.
+ * La tabla `notifications` EXISTE desde la migración 0040: la escriben los
+ * triggers de `bookings` y `trips`, cada quien lee la suya, y del UPDATE
+ * solo se concede `read_at`. Aquí se trae por la vía tolerante — si la
+ * migración no ha corrido todavía, la lista queda vacía y la bandeja vive
+ * de la derivación de los hechos (`servicios/avisos.ts`), que era lo único
+ * que había antes. Nada se rompe por el orden en que se aplique.
  */
 export const avisos: AvisoPendiente[] = [];
 
@@ -159,112 +152,13 @@ export function cargar(): Promise<void> {
       cargarParadasDeRuta(),
     ]);
     calcularReputacion();
-    derivarAvisos();
+    /* Los avisos escritos, si la tabla ya está. Después de las reservas a
+       propósito: la bandeja los junta con lo derivado y dedupe por hecho. */
+    await traerSiSePuede<AvisoPendiente>('notifications', avisos);
   })();
   return enCurso;
 }
 
-/**
- * Los avisos, sacados de los hechos que ya se cargaron.
- *
- * Se derivan para las dos partes de cada reserva —el pasajero y el
- * conductor—; `bandeja(perfilId)` se queda con los de quien mira. No hace
- * falta filtrar por sesión aquí: las políticas ya hicieron ese trabajo, y lo
- * que está en `reservas` es lo que puedo ver porque soy parte.
- */
-function derivarAvisos() {
-  avisos.length = 0;
-  const nombreDe = (id: string) => {
-    const p = perfiles.find((x) => x.id === id);
-    return p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : 'Alguien';
-  };
-  const cuando = (v: ViajeFila | undefined) => {
-    if (!v) return '';
-    const t = new Date(v.departure_at);
-    const hhmm = new Intl.DateTimeFormat('es-PA', {
-      hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Panama',
-    }).format(t);
-    const ruta = `${(v.origin_label ?? '').split(' · ')[0]} → ${(v.destination_label ?? '').split(' · ')[0]}`;
-    return `${hhmm} · ${ruta}`;
-  };
-  const poner = (a: AvisoPendiente) => avisos.push(a);
-
-  for (const r of reservas) {
-    const viaje = viajes.find((v) => v.id === r.trip_id);
-    if (!viaje) continue;
-    const base = { booking_id: r.id, trip_id: r.trip_id, read_at: null as string | null };
-
-    // — lo que le toca saber al pasajero —
-    if (r.status === 'confirmed') {
-      poner({
-        ...base,
-        id: `av-aceptada-${r.id}`,
-        profile_id: r.passenger_id,
-        kind: 'solicitud_aceptada',
-        title: `${nombreDe(viaje.driver_id).split(' ')[0]} aceptó tu puesto`,
-        body: cuando(viaje),
-        action_label: 'Ver código',
-        action_route: `/(pasajero)/codigo?reserva=${r.id}`,
-        created_at: r.confirmed_at ?? r.updated_at,
-      });
-    }
-    if (r.status === 'cancelled_driver') {
-      poner({
-        ...base,
-        id: `av-cancelada-${r.id}`,
-        profile_id: r.passenger_id,
-        kind: 'viaje_cancelado',
-        title: `${nombreDe(viaje.driver_id).split(' ')[0]} no puede llevarte`,
-        body: cuando(viaje),
-        action_label: 'Buscar otro',
-        action_route: '/(pasajero)',
-        created_at: r.cancelled_at ?? r.updated_at,
-      });
-    }
-    if (r.status === 'completed' && !resenas.some((x) => x.booking_id === r.id && x.author_id === r.passenger_id)) {
-      poner({
-        ...base,
-        id: `av-califica-${r.id}`,
-        profile_id: r.passenger_id,
-        kind: 'califica_tu',
-        title: `Califica a ${nombreDe(viaje.driver_id)}`,
-        body: cuando(viaje),
-        action_label: 'Calificar',
-        action_route: `/(pasajero)/calificar?reserva=${r.id}`,
-        created_at: r.completed_at ?? r.updated_at,
-      });
-    }
-
-    // — lo que le toca saber al conductor —
-    if (r.status === 'pending') {
-      poner({
-        ...base,
-        id: `av-pidio-${r.id}`,
-        profile_id: viaje.driver_id,
-        kind: 'solicitud_recibida',
-        title: `${nombreDe(r.passenger_id)} pidió puesto`,
-        body: cuando(viaje),
-        action_label: 'Ver la solicitud',
-        action_route: `/(conductor)/solicitudes?viaje=${r.trip_id}`,
-        created_at: r.created_at,
-      });
-    }
-    if (r.released_at) {
-      const aporte = r.unit_price_cents * r.seats;
-      poner({
-        ...base,
-        id: `av-aporte-${r.id}`,
-        profile_id: viaje.driver_id,
-        kind: 'aporte_recibido',
-        title: `Te aportaron ${aporte % 100 === 0 ? aporte / 100 : (aporte / 100).toFixed(2)} $`,
-        body: cuando(viaje),
-        action_label: null,
-        action_route: null,
-        created_at: r.released_at,
-      });
-    }
-  }
-}
 
 /**
  * `routines` guarda los días y la hora; «Viernes por la tarde» y el
@@ -372,12 +266,9 @@ export const guardarViaje = (v: ViajeFila) => insertar('trips', v, viajes);
  * vacía: sin `trip_stops` no hay ni de dónde sale ni dónde termina.
  */
 export const guardarParada = (p: TripStop) => insertar('trip_stops', p, paradas);
-export const guardarReserva = async (r: ReservaFila) => {
-  const guardada = await insertar('bookings', r, reservas);
-  // el conductor tiene que enterarse de que le pidieron puesto
-  derivarAvisos();
-  return guardada;
-};
+/* El trigger de 0040 escribe el aviso del conductor en la base; la copia en
+   memoria de `reservas` basta para que la bandeja lo derive al instante. */
+export const guardarReserva = (r: ReservaFila) => insertar('bookings', r, reservas);
 export const guardarPago = (p: Payment) => insertar('payments', p, pagos);
 export const guardarCancelacion = (c: Cancellation) => insertar('cancellations', c, cancelaciones);
 export const guardarReembolso = (r: Refund) => insertar('refunds', r, reembolsos);
@@ -447,8 +338,8 @@ export async function actualizarReserva(id: string, cambios: Partial<ReservaFila
   const i = reservas.findIndex((r) => r.id === id);
   if (i >= 0) reservas[i] = data as ReservaFila;
   /* Aceptar, rechazar y cerrar cambian lo que la otra parte tiene que saber:
-     los avisos se vuelven a derivar del hecho nuevo. */
-  derivarAvisos();
+     el trigger de 0040 le escribe su aviso, y la bandeja de este lado lo
+     deriva del hecho recién copiado en `reservas`. */
   return data as ReservaFila;
 }
 
@@ -462,14 +353,23 @@ export async function actualizarPago(id: string, cambios: Partial<Payment>): Pro
 }
 
 /**
- * Leído se queda en memoria: los avisos son derivados, no filas, así que no
- * hay dónde escribir la marca. Se nota al recargar, y es preferible a que
- * tocar un aviso no haga nada.
+ * Leído se escribe donde vive el aviso. Una fila de `notifications` guarda
+ * su `read_at` en la base — es la ÚNICA columna que la 0040 concede — y así
+ * la marca sobrevive a la recarga. Si el aviso no está aquí es un derivado
+ * sin fila: se devuelve null y `servicios/avisos.ts` lo apunta en memoria.
+ * Si la base rechaza la marca (la migración sin correr), la memoria basta:
+ * leer no es un hecho que justifique tumbar nada.
  */
 export async function marcarAvisoLeido(id: string): Promise<AvisoPendiente | null> {
   const i = avisos.findIndex((a) => a.id === id);
   if (i < 0) return null;
-  avisos[i] = { ...avisos[i], read_at: new Date().toISOString() };
+  const ahora = new Date().toISOString();
+  avisos[i] = { ...avisos[i], read_at: ahora };
+  try {
+    await tabla('notifications').update({ read_at: ahora }).eq('id', id).select().single();
+  } catch {
+    /* en memoria ya quedó */
+  }
   return avisos[i];
 }
 
@@ -479,6 +379,11 @@ export async function marcarTodosLeidos(perfilId: string): Promise<number> {
   for (let i = 0; i < avisos.length; i += 1) {
     if (avisos[i].profile_id === perfilId && !avisos[i].read_at) {
       avisos[i] = { ...avisos[i], read_at: ahora };
+      try {
+        await tabla('notifications').update({ read_at: ahora }).eq('id', avisos[i].id).select().single();
+      } catch {
+        /* en memoria ya quedó */
+      }
       n += 1;
     }
   }

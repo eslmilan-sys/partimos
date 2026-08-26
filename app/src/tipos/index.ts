@@ -84,7 +84,9 @@ export type AvisoPendiente = {
     | 'te_calificaron'
     | 'califica_tu'
     | 'viaje_cancelado'
-    | 'reembolso_enviado';
+    | 'reembolso_enviado'
+    /** El recordatorio de salida — derivado del reloj, no escrito (0040). */
+    | 'sales_pronto';
   title: string;
   body: string;
   /** La acción que el aviso lleva dentro: aceptar sin abrir la app es la clave. */

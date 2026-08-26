@@ -186,8 +186,14 @@ parler :
   estimés par coordonnées × 1,65 (facteur MESURÉ sur Panamá–Chitré :
   151 km à vol d'oiseau, 250 par la route), péages inconnus à zéro. La
   recherche trouve ces trajets par leurs villes (miroir du LEFT JOIN 0031).
-- **Il n'y a pas de table `notifications`.** Les avis du design existent comme
-  type dans l'app, en attendant la migration.
+- **La table `notifications` existe depuis la 0040** (26-08-2026) : les avis
+  s'écrivent par triggers sur `bookings`/`trips`, chacun lit les siens, et
+  seul `read_at` se marque depuis le client. La bandeja de l'app JOINT ces
+  lignes écrites aux avis **dérivés des faits** (`app/src/dominio/avisar.ts`) —
+  le rappel de départ n'est pas un événement mais un état de l'horloge, et
+  c'est la dérivation qui le porte. Dédoublonnage par (kind, booking_id).
+  Ce qui manque encore : l'envoi push téléphone fermé (besoin d'un cron pour
+  le rappel et d'un canal d'envoi).
 - **Le bagage se décide à la demande, plus à la publication** (tranché par
   l'utilisateur le 25-08-2026). Le conducteur ne déclare plus rien à l'avance :
   le passager dit ce qu'il emporte — **rien, un sac, une valise** — et le
