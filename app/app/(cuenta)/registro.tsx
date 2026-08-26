@@ -182,6 +182,25 @@ export default function Registro() {
           </View>
         ) : null}
 
+        {/* LA PUERTA DE VUELTA. `entrar` ofrece «¿No tienes cuenta?
+            Regístrate», y aquí no había nada en el otro sentido: quien ya
+            tenía cuenta y caía en el registro solo podía retroceder con el
+            botón del navegador. El camino iba en una sola dirección.
+            Visto por el dueño el 26-08-2026. */}
+        {!hecha ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ya tengo cuenta, entrar"
+            onPress={() => router.replace('/(cuenta)/entrar')}
+            style={[zonaDeToque, estilos.mirar]}
+          >
+            <Text style={estilos.mirarTexto}>
+              {'¿Ya tienes cuenta? '}
+              <Text style={estilos.mirarFuerte}>Entra</Text>
+            </Text>
+          </Pressable>
+        ) : null}
+
         {/* La cuenta se pide al pedir puesto, no al abrir la app: mirar los
             viajes nunca exige registrarse, y esta puerta lo dice aquí mismo. */}
         {!hecha ? (
@@ -189,11 +208,11 @@ export default function Registro() {
             accessibilityRole="button"
             accessibilityLabel="Mirar los viajes sin cuenta"
             onPress={() => router.replace('/(pasajero)')}
-            style={[zonaDeToque, estilos.mirar]}
+            style={[zonaDeToque, estilos.vistazo]}
           >
-            <Text style={estilos.mirarTexto}>
+            <Text style={estilos.vistazoTexto}>
               {'¿Solo echando un vistazo? '}
-              <Text style={estilos.mirarFuerte}>Mirar los viajes</Text>
+              <Text style={estilos.vistazoFuerte}>Mirar los viajes</Text>
             </Text>
           </Pressable>
         ) : null}
@@ -412,6 +431,14 @@ const estilos = StyleSheet.create({
   mirar: { marginTop: 20, alignSelf: 'center' },
   mirarTexto: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
   mirarFuerte: { color: color.rojo600, fontWeight: '600' },
+
+  /* «Mirar los viajes» queda DEBAJO de «Entra» y más callado: entrar es una
+     puerta de cuenta como esta pantalla, y mirar sin cuenta es la salida.
+     Su enlace va en tinta — dos rojos seguidos compiten, y el rojo aquí ya
+     lo lleva «Entra», que es el espejo de «Regístrate» en la otra. */
+  vistazo: { marginTop: 10, alignSelf: 'center' },
+  vistazoTexto: { fontSize: 13, lineHeight: 19, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  vistazoFuerte: { color: color.ink900, fontWeight: '600' },
 
   loQueSigue: { marginTop: 16, gap: 10 },
   loQueSigueTitulo: {
