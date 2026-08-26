@@ -42,14 +42,9 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
-import { type Lugar, libre, normalizar } from '@/dominio/lugar';
+import { type Lugar, normalizar } from '@/dominio/lugar';
 import { HAY_BUSQUEDA, type Punto, buscarEnTodas, situar } from '@/servicios/geobusqueda';
-import {
-  MINIMO_PARA_BUSCAR,
-  ciudadesConocidas,
-  ciudadesQueCasan,
-  olvidarSesion,
-} from '@/servicios/lugares';
+import { MINIMO_PARA_BUSCAR, ciudadesQueCasan, olvidarSesion } from '@/servicios/lugares';
 
 import { Cerrar, Lupa, Pin } from './iconos';
 import { TRACK_MICRO, color, espacio, familia, interlinea, radio } from './tokens';
@@ -224,32 +219,21 @@ export function BuscadorDeLugar({
             </Pressable>
           ))}
 
-          {/* LO QUE ESCRIBISTE, SIEMPRE ELEGIBLE. Va al final: primero lo que
-              alguna base conoce, y debajo tu propia palabra, que es un punto
-              de encuentro tan válido como cualquier otro. */}
-          {!enBlanco && !loQueSeEnseña.some((d) => normalizar(d.nombre) === normalizar(q)) ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Usar «${q}» tal cual`}
-              onPress={() => alElegir(libre(ciudadesConocidas(), q, null))}
-              style={({ pressed }) => [estilos.fila, pressed && { backgroundColor: color.sand200 }]}
-            >
-              <View style={estilos.icono}>
-                <Pin tamano={15} tinta={color.ink400} />
-              </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={estilos.nombre} numberOfLines={1}>
-                  {q}
-                </Text>
-                <Text style={estilos.contexto}>Usarlo tal cual</Text>
-              </View>
-            </Pressable>
-          ) : null}
+          {/* «USARLO TAL CUAL» SE FUE — pedido por el dueño el 26-08-2026:
+              «une adresse ne s'invente pas».
 
-          {!enBlanco && !buscando && loQueSeEnseña.length === 0 && !HAY_BUSQUEDA ? (
+              Ofrecía elegir lo tecleado como si fuera un sitio, viniera de
+              donde viniera: bastaba escribir cuatro letras para tener un
+              punto de recogida. Y ese punto es lo que otra persona lee para
+              saber dónde plantarse a las cinco de la mañana. Un sitio que
+              ninguna base conoce no se puede situar, ni medir el desvío, ni
+              encontrar; sólo parece un dato. Ahora se elige de la lista o no
+              se elige. */}
+          {!enBlanco && !buscando && loQueSeEnseña.length === 0 ? (
             <Text style={estilos.nada}>
-              Por ahora solo buscamos entre las ciudades que servimos. Puedes escribir tu punto y
-              usarlo tal cual.
+              {HAY_BUSQUEDA
+                ? `No encontramos «${q}». Prueba con el nombre del sitio o de la calle — el punto tiene que existir para que quien te recoja lo encuentre.`
+                : 'Por ahora solo conocemos las ciudades que servimos y sus puntos. Busca por el nombre de la ciudad.'}
             </Text>
           ) : null}
         </ScrollView>

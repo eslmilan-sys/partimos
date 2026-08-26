@@ -133,8 +133,12 @@ export default function Reservar() {
           {/* El campo ABRE EL BUSCADOR — el mismo motor de publicar, con el
               catálogo entero («ph metric» encuentra el PH). Antes era un
               campo suelto: se tecleaba y nada se proponía (visto en el
-              teléfono, 25-08). Lo escrito a mano sigue valiendo: el
-              buscador ofrece «usar tal cual». */}
+              teléfono, 25-08).
+
+              Y desde el 26-08 lo tecleado YA NO VALE por sí solo: el punto
+              se elige de la lista o no se elige. Aquí es donde más importa —
+              esta línea es la que otra persona lee para saber dónde
+              plantarse a las cinco de la mañana. */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Elegir tu punto de recogida"
@@ -146,7 +150,7 @@ export default function Reservar() {
               style={[estilos.campoPuntoTexto, !direccion && { color: color.ink400 }]}
               numberOfLines={1}
             >
-              {direccion || 'Calle, edificio o referencia'}
+              {direccion || 'Busca tu punto de recogida'}
             </Text>
           </Pressable>
           <Text style={estilos.ayudaPunto}>{`${datos.conductor} lo aprueba junto con el puesto.`}</Text>
