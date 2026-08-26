@@ -12,7 +12,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { useVolver } from '@/ui/salidas';
+import { DIJO, compartir, useVolver } from '@/ui/salidas';
+import { useDecir } from '@/ui/Nota';
 
 import {
   type ResumenDeSolicitudes,
@@ -37,6 +38,7 @@ type Recibo = { nombre: string; aporteCentavos: number };
 
 export default function Solicitudes() {
   const router = useRouter();
+  const decir = useDecir();
   const volver = useVolver('/(conductor)/panel');
   const { viaje } = useLocalSearchParams<{ viaje?: string }>();
   const viajeId = viaje ?? DEL_RECORRIDO;
@@ -76,6 +78,7 @@ export default function Solicitudes() {
   };
 
   const aceptadas = Object.entries(recibos);
+  const quedan = Math.max(0, datos.puestosOfrecidos - datos.puestosVendidos);
   const sinSolicitudes = datos.solicitudes.length === 0 && aceptadas.length === 0;
   // quien acaba de aceptarse ya se ve arriba como recibo: no se repite abajo
   const yaVanContigo = datos.confirmados.filter((c) => !recibos[c.reservaId]);
@@ -223,11 +226,34 @@ export default function Solicitudes() {
           </View>
         ))}
 
+        {/* ESPERAR NO ES LA ÚNICA OPCIÓN. El vacío decía «te avisamos» y ahí
+            terminaba: la pantalla pedía paciencia sin dar nada que hacer. Lo
+            que de verdad llena un carro es que la gente sepa que sale, así
+            que el vacío ofrece exactamente eso — compartirlo. */}
         {sinSolicitudes ? (
           <View style={estilos.vacio}>
+            <Text style={estilos.vacioTitulo}>Sin solicitudes por ahora.</Text>
             <Text style={estilos.vacioTexto}>
-              Sin solicitudes por ahora. Te avisamos en cuanto alguien pida puesto.
+              {`Te avisamos en cuanto alguien pida puesto. Mientras tanto, ${
+                quedan === 1 ? 'queda 1 puesto' : `quedan ${quedan} puestos`
+              }: pásalo por el grupo y se llena antes.`}
             </Text>
+            <View style={{ marginTop: 14 }}>
+              <Boton
+                tono="blanco"
+                tamano="md"
+                ancho
+                alPulsar={() =>
+                  compartir(
+                    `${datos.viaje.origen} → ${datos.viaje.destino} · ${cuando(datos.viaje.salida)} · ${
+                      quedan === 1 ? 'queda 1 puesto' : `quedan ${quedan} puestos`
+                    } · lo publiqué en Partimos`,
+                  ).then((c) => decir(DIJO[c]))
+                }
+              >
+                Compartir el viaje
+              </Boton>
+            </View>
           </View>
         ) : null}
 
@@ -388,6 +414,14 @@ const estilos = StyleSheet.create({
     borderColor: color.bordePorDefecto,
     borderRadius: radio.l,
     padding: 20,
+  },
+  vacioTitulo: {
+    fontSize: 15.5,
+    lineHeight: 21.75,
+    fontWeight: '500',
+    color: color.ink900,
+    fontFamily: familia,
+    marginBottom: 4,
   },
   vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink600, fontFamily: familia },
 

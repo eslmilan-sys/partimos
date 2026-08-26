@@ -24,7 +24,7 @@ import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { CampoRojo, DibujoDelSitio } from '@/ui/CampoRojo';
 import { Pestanas } from '@/ui/Pestanas';
-import { Avatar, Epigrafe } from '@/ui/controles';
+import { Avatar, Boton, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { hora } from '@/ui/fechas';
 import { Atras, Avanza, Estrella } from '@/ui/iconos';
@@ -90,11 +90,31 @@ export default function SalenPronto() {
 
       <View style={estilos.cuerpo}>
         {salidas.length === 0 ? (
+          /* UN VACÍO CON PUERTA. Decía «busca por ruta y día, o publica el
+             tuyo» y no daba ninguna de las dos: el consejo y el botón
+             estaban en pantallas distintas. Ahora la frase y la acción son
+             la misma cosa — buscar arriba, porque quien llega aquí es
+             pasajero; publicar debajo, en voz baja, por si no lo es. */
           <View style={estilos.vacio}>
             <Text style={estilos.vacioTitulo}>Nadie sale en las próximas doce horas.</Text>
             <Text style={estilos.vacioTexto}>
-              Busca por ruta y día, o publica el tuyo si eres quien maneja.
+              Casi todo se publica con un día de anticipación. Di a dónde vas y mira los
+              próximos días.
             </Text>
+            <View style={{ marginTop: 14 }}>
+              <Boton tamano="md" ancho alPulsar={() => router.replace('/')}>
+                Buscar por ruta y día
+              </Boton>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Publicar mi viaje"
+              onPress={() => router.push('/(conductor)/publicar')}
+              style={estilos.vacioEnlace}
+            >
+              <Text style={estilos.vacioEnlaceTexto}>¿Manejas tú? Publica el tuyo</Text>
+              <Avanza tamano={14} tinta={color.ink500} />
+            </Pressable>
           </View>
         ) : (
           [...porFranja.entries()].map(([franja, deLaFranja], i) => (
@@ -268,4 +288,18 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink600, fontFamily: familia },
+  vacioEnlace: {
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  vacioEnlaceTexto: {
+    fontSize: 13.5,
+    lineHeight: 20,
+    fontWeight: '500',
+    color: color.ink500,
+    fontFamily: familia,
+  },
 });

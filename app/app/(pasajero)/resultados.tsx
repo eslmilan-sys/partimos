@@ -20,7 +20,7 @@
  * justifica — calculada de los datos, no escrita a mano (7).
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
@@ -34,6 +34,7 @@ import {
   type Filtros,
   type Orden,
   buscarViajes,
+  viajesPorDia,
   diaEnPanama,
   proximoDiaConViajes,
 } from '@/servicios/viajes';
@@ -47,7 +48,7 @@ import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { Boton } from '@/ui/controles';
 import { cifraRedonda, tabular } from '@/ui/dinero';
 import { diaCorto, diaLargo, hora } from '@/ui/fechas';
-import { Atras, Campana, Cerrar, Filtros as IconoFiltros } from '@/ui/iconos';
+import { Atras, Avanza, Campana, Cerrar, Filtros as IconoFiltros } from '@/ui/iconos';
 import { AroDeOrigen, PuntaDeFlecha, TarjetaDeViaje, type ViajeEnTarjeta } from '@/ui/TarjetaDeViaje';
 import { familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
@@ -101,6 +102,43 @@ export default function Resultados() {
   const [agotados, setAgotados] = useState<ViajeAgotado[]>([]);
   const [dia, setDia] = useState<string | null>(null);
   const [cargando, setCargando] = useState(true);
+  /**
+   * CUÁNTOS HAY CADA DÍA.
+   *
+   * Cambiar de día se podía, pero A CIEGAS: se elegía una fecha del
+   * calendario sin saber si había algo, y el vacío decía «mira otro día»
+   * sin decir cuál. Con la cuenta al lado, elegir deja de ser adivinar —
+   * y cuando hoy está vacío, se ve de un vistazo dónde SÍ hay.
+   */
+  const [porDia, setPorDia] = useState<{ dia: string; cuantos: number }[]>([]);
+
+  /* Dónde cae cada día dentro de la tira, para poder traerlo a la vista. */
+  const tira = useRef<ScrollView>(null);
+  const xDeDia = useRef<Record<string, number>>({});
+  /** Veinte de aire a la izquierda: el día elegido no se pega al borde. */
+  const aLaVista = useCallback((x: number, suave: boolean) => {
+    tira.current?.scrollTo({ x: Math.max(0, x - 20), animated: suave });
+  }, []);
+
+  /**
+   * ELEGIR DÍA ES CAMBIAR LA BÚSQUEDA, no la etiqueta.
+   *
+   * `dia` es estado derivado: lo escribe `buscar()` al final, leyendo
+   * `ruta.dia`. Tocarlo directamente cambiaba el rótulo de la cabecera y
+   * dejaba la lista como estaba. Lo que manda es `ruta`, que es de lo que
+   * `buscar` depende — es lo que hace el calendario desde siempre.
+   */
+  const elegirDia = useCallback((cual: string) => {
+    setRuta((r) => (r ? { ...r, dia: cual } : r));
+  }, []);
+
+  /* Elegir un día desde fuera de la tira —el calendario, o «hay 3 mañana»
+     del vacío— también la mueve: si no, se cambia el día y la tira sigue
+     enseñando el lunes. */
+  useEffect(() => {
+    const x = xDeDia.current[dia ?? diaEnPanama(new Date())];
+    if (x != null) aLaVista(x, true);
+  }, [dia, aLaVista]);
 
   const buscar = useCallback(async () => {
     if (!ruta) return;
@@ -110,6 +148,7 @@ export default function Resultados() {
     const fecha = ruta.dia ?? (await proximoDiaConViajes(origen, destino));
     setDia(fecha);
     const encontrados = await buscarViajes(origen, destino, fecha, filtros);
+    viajesPorDia(origen, destino).then(setPorDia);
     const todos = encontrados
       .map(
         (v): ViajeEnTarjeta => ({
@@ -178,6 +217,10 @@ export default function Resultados() {
   const cuerpoRuta = tamanoDeRuta(etiquetaDestino);
   const cuantosFiltrosPuestos = cuantosFiltros(filtros);
   const activos = filtrosActivos(filtros);
+  /** Los días próximos que SÍ tienen algo, sin contar el que se está viendo. */
+  const otrosDias = porDia
+    .filter((d) => d.cuantos > 0 && d.dia !== (dia ?? diaEnPanama(new Date())))
+    .slice(0, 3);
 
   const guardarAlerta = async () => {
     if (!yo) {
@@ -282,15 +325,76 @@ export default function Resultados() {
           <Chevron />
         </Pressable>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Día: ${cuandoTexto(dia)}. Cambiar`}
-          onPress={() => setEligiendoDia(true)}
-          style={({ pressed }) => [estilos.chipClaro, pressed && { backgroundColor: color.lavadoChip }]}
-        >
-          <Text style={estilos.chipClaroTexto}>{cuandoTexto(dia)}</Text>
-        </Pressable>
       </View>
+
+      {/* LA TIRA DE DÍAS, con su cuenta. Los días sin nada se ven apagados
+          pero NO se esconden: saber que el jueves está vacío es tan útil
+          como saber que el viernes tiene tres. */}
+      {porDia.length > 0 ? (
+        <ScrollView
+          ref={tira}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={estilos.tiraDias}
+        >
+          {porDia.map((d) => {
+            const puesto = (dia ?? diaEnPanama(new Date())) === d.dia;
+            const vacio = d.cuantos === 0;
+            return (
+              <Pressable
+                key={d.dia}
+                /* La tira cubre una semana y no cabe entera: si el día
+                   elegido es el sábado, hay que arrastrarla para verlo.
+                   Se apunta dónde cae cada uno y se lleva solo. */
+                onLayout={(e) => {
+                  xDeDia.current[d.dia] = e.nativeEvent.layout.x;
+                  if (puesto) aLaVista(e.nativeEvent.layout.x, false);
+                }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: puesto }}
+                accessibilityLabel={`${cuandoTexto(d.dia)}, ${
+                  vacio ? 'sin viajes' : d.cuantos === 1 ? '1 viaje' : `${d.cuantos} viajes`
+                }`}
+                onPress={() => elegirDia(d.dia)}
+                style={({ pressed }) => [
+                  estilos.diaTira,
+                  puesto && estilos.diaTiraPuesto,
+                  pressed && { backgroundColor: color.lavadoChip },
+                ]}
+              >
+                <Text style={[estilos.diaTiraNombre, puesto && estilos.diaTiraNombrePuesto]}>
+                  {cuandoTexto(d.dia)}
+                </Text>
+                <Text
+                  style={[
+                    estilos.diaTiraCuenta,
+                    puesto && estilos.diaTiraCuentaPuesta,
+                    vacio && !puesto && estilos.diaTiraCuentaVacia,
+                  ]}
+                >
+                  {vacio ? '—' : String(d.cuantos)}
+                </Text>
+              </Pressable>
+            );
+          })}
+          {/* La tira cubre una semana; más allá, el calendario. Antes esto
+              era un chip «Hoy» al lado de los filtros, que decía lo mismo
+              que el primer día de la tira. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Elegir otra fecha"
+            onPress={() => setEligiendoDia(true)}
+            style={({ pressed }) => [
+              estilos.diaTira,
+              estilos.diaTiraOtra,
+              pressed && { backgroundColor: color.lavadoChip },
+            ]}
+          >
+            <Text style={estilos.diaTiraNombre}>Otra</Text>
+            <Text style={[estilos.diaTiraCuenta, estilos.diaTiraCuentaVacia]}>fecha</Text>
+          </Pressable>
+        </ScrollView>
+      ) : null}
 
       {/* Los filtros aplicados, retirables uno a uno — también cuando son
           ellos los que dejaron la lista vacía. */}
@@ -348,8 +452,34 @@ export default function Resultados() {
                 ? 'Nadie ha publicado esta ruta con los filtros aplicados. Quita alguno o mira otro día.'
                 : ruta.pasajeros > 1
                   ? `Nadie lleva ${ruta.pasajeros} puestos juntos ese día. Prueba con menos puestos o con otro día.`
-                  : 'Nadie sale ese día. Mira otro día, o guarda la ruta y te avisamos.'}
+                  : 'Nadie sale ese día.'}
             </Text>
+
+            {/* «MIRA OTRO DÍA» AHORA DICE CUÁL. El texto lo aconsejaba desde
+                siempre y no daba ninguna puerta: había que volver, abrir el
+                calendario y adivinar. Con la cuenta por día ya sabemos dónde
+                sí hay, así que se ofrece — hasta tres, los más cercanos. */}
+            {otrosDias.length > 0 ? (
+              <View style={estilos.otrosDias}>
+                {otrosDias.map((d) => (
+                  <Pressable
+                    key={d.dia}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Ver los ${d.cuantos} de ${cuandoTexto(d.dia)}`}
+                    onPress={() => elegirDia(d.dia)}
+                    style={({ pressed }) => [
+                      estilos.otroDia,
+                      pressed && { backgroundColor: color.lavadoChip },
+                    ]}
+                  >
+                    <Text style={estilos.otroDiaTexto}>
+                      {`${d.cuantos === 1 ? 'Hay 1' : `Hay ${d.cuantos}`} ${cuandoTexto(d.dia).toLowerCase()}`}
+                    </Text>
+                    <Avanza tamano={15} />
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
           </View>
         ) : (
           <View style={{ gap: 16 }}>
@@ -861,6 +991,61 @@ const estilos = StyleSheet.create({
     color: color.ink700,
     fontFamily: familia,
   },
+
+  otrosDias: { marginTop: 16, alignSelf: 'stretch', gap: 8 },
+  otroDia: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 48,
+    paddingHorizontal: 16,
+    borderRadius: radio.control,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    backgroundColor: color.blanco,
+  },
+  otroDiaTexto: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '600',
+    color: color.ink900,
+    fontFamily: familia,
+  },
+
+  tiraDias: { paddingHorizontal: espacio.gutter, paddingTop: 12, gap: 8 },
+  diaTira: {
+    minWidth: 62,
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: radio.control,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    backgroundColor: color.blanco,
+  },
+  /* El día elegido va en tinta, no en rojo: elegir un día no es una acción
+     primaria, y el rojo tiene sus cuatro sentidos (invariante 4). */
+  diaTiraPuesto: { backgroundColor: color.ink900, borderColor: color.ink900 },
+  diaTiraNombre: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '600',
+    color: color.ink600,
+    fontFamily: familia,
+  },
+  diaTiraNombrePuesto: { color: 'rgba(255,255,255,.82)' },
+  diaTiraCuenta: {
+    marginTop: 2,
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: '700',
+    color: color.ink900,
+    fontFamily: familia,
+    ...tabular,
+  },
+  diaTiraCuentaPuesta: { color: color.blanco },
+  diaTiraCuentaVacia: { color: color.ink300, fontWeight: '500' },
+  diaTiraOtra: { borderStyle: 'dashed', justifyContent: 'center' },
 
   filaAplicados: { paddingTop: 12 },
   tiraAplicados: {

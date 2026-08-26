@@ -99,7 +99,6 @@ export async function buscarViajes(
     )
     .filter((v) => v.status === 'published')
     .filter((v) => diaEnPanama(v.departure_at) === fecha)
-    .filter((v) => (filtros.aceptaMaletas ? v.accepts_luggage : true))
     .filter((v) => (filtros.aceptaMascotas ? v.allows_pets : true))
     .filter((v) => (filtros.soloMujeres ? v.gender_preference === 'women_only' : true))
     .filter((v) => (filtros.yappy ? v.accepts_yappy_direct : true))
@@ -137,6 +136,56 @@ export async function proximoDiaConViajes(
     .sort();
 
   return demora(dias[0] ?? hoy, 0);
+}
+
+/**
+ * CUÁNTOS VIAJES HAY CADA DÍA, para los próximos días.
+ *
+ * **Por qué existe.** La pantalla de resultados deja cambiar de día, pero
+ * a ciegas: se elige una fecha del calendario sin saber si hay algo. Y
+ * cuando no hay nada, el vacío decía «mira otro día» sin decir CUÁL. Con
+ * esto la tira de días lleva su cuenta, y elegir deja de ser adivinar.
+ *
+ * Cuenta lo mismo que `buscarViajes` enseña —publicados, con puesto libre,
+ * de esa ruta— para que el número de la tira no prometa más de lo que la
+ * lista va a dar.
+ */
+export async function viajesPorDia(
+  origen: string,
+  destino: string,
+  desde = new Date(),
+  cuantosDias = 7,
+): Promise<{ dia: string; cuantos: number }[]> {
+  const corredor = corredorDe(origen, destino);
+  const idOrigen = fuente.ciudades.find((c) => c.slug === origen)?.id ?? null;
+  const idDestino = fuente.ciudades.find((c) => c.slug === destino)?.id ?? null;
+
+  const dias = Array.from({ length: cuantosDias }, (_, i) => {
+    const d = new Date(desde);
+    d.setDate(d.getDate() + i);
+    return diaEnPanama(d);
+  });
+
+  if (!corredor && (!idOrigen || !idDestino)) {
+    return demora(dias.map((dia) => ({ dia, cuantos: 0 })), 0);
+  }
+
+  const delaRuta = fuente.viajes
+    .filter(
+      (v) =>
+        (corredor != null && v.corridor_id === corredor.id) ||
+        (v.origin_city_id === idOrigen && v.destination_city_id === idDestino),
+    )
+    .filter((v) => v.status === 'published')
+    .filter((v) => v.seats_offered > contarVendidos(v.id));
+
+  return demora(
+    dias.map((dia) => ({
+      dia,
+      cuantos: delaRuta.filter((v) => diaEnPanama(v.departure_at) === dia).length,
+    })),
+    0,
+  );
 }
 
 export async function obtenerViaje(viajeId: string): Promise<ViajeFila | null> {

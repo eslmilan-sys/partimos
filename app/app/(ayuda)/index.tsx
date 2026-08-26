@@ -77,7 +77,7 @@ function Adelante() {
  * un viaje —«sobre un viaje», sus preguntas, su chat—, y sin él no queda
  * nada que enseñar; pero girar no es una respuesta.
  */
-function SinViaje({ alVolver, alEscribir }: { alVolver: () => void; alEscribir: () => void }) {
+function SinViaje({ alVolver, alCuidado }: { alVolver: () => void; alCuidado: () => void }) {
   return (
     <View style={estilos.pantalla}>
       <BarraDeEstado />
@@ -103,8 +103,13 @@ function SinViaje({ alVolver, alEscribir }: { alVolver: () => void; alEscribir: 
           Todavía no tienes ningún viaje del que hablar. Cuando hagas uno, aquí
           aparecen sus preguntas y desde dónde escribirnos.
         </Text>
+        {/* LA ACCIÓN ERA LA EQUIVOCADA. Decía «Ir a mi perfil» —y la prop se
+            llamaba `alEscribir`, que era una tercera cosa—: quien abre AYUDA
+            sin viaje no viene a mirarse el perfil. Lo único que de verdad
+            ayuda sin tener viaje es saber cómo te cuidamos, y esa pantalla
+            existe. */}
         <View style={{ marginTop: 18 }}>
-          <Boton alPulsar={alEscribir}>Ir a mi perfil</Boton>
+          <Boton alPulsar={alCuidado}>Mira cómo te cuidamos</Boton>
         </View>
       </View>
     </View>
@@ -136,7 +141,8 @@ export default function Ayuda() {
   }, [reservaId]);
 
   if (buscando) return <Cargando />;
-  if (!viaje) return <SinViaje alVolver={volver} alEscribir={() => router.push('/(cuenta)/cuenta')} />;
+  if (!viaje)
+    return <SinViaje alVolver={volver} alCuidado={() => router.push('/(ayuda)/seguridad')} />;
 
   return (
     <View style={estilos.pantalla}>
