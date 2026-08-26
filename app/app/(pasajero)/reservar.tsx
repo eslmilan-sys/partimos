@@ -24,9 +24,7 @@ import {
 } from '@/dominio/equipaje';
 import type { Lugar } from '@/dominio/lugar';
 import { type ReservaPreparada, pedirPuesto, prepararReserva } from '@/servicios/reservas';
-import { type PuntoSituado, puntosDelRecorrido } from '@/servicios/viajes';
 import { useMiId } from '@/servicios/sesion';
-import { RutaEnMapa } from '@/ui/RutaEnMapa';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
@@ -65,12 +63,10 @@ export default function Reservar() {
   /** El punto elegido del buscador — con sus coordenadas si las trajo. */
   const [buscandoPunto, setBuscandoPunto] = useState(false);
   const [puntoElegido, setPuntoElegido] = useState<Lugar | null>(null);
-  const [puntosDelPlano, setPuntosDelPlano] = useState<PuntoSituado[]>([]);
   const [pidiendo, setPidiendo] = useState(false);
 
   useEffect(() => {
     prepararReserva(viajeId).then(setDatos).catch(() => setNoEsta(true));
-    puntosDelRecorrido(viajeId).then(setPuntosDelPlano);
   }, [viajeId]);
 
   if (noEsta) return <NoEsta />;
@@ -154,25 +150,6 @@ export default function Reservar() {
             </Text>
           </Pressable>
           <Text style={estilos.ayudaPunto}>{`${datos.conductor} lo aprueba junto con el puesto.`}</Text>
-
-          {/* EL PLANO responde la pregunta que el «+4 min» dejaba abstracta:
-              ¿mi punto le queda de camino? La ruta con su geografía real, y
-              tu punto dibujado AL LADO de la línea — no sobre ella, que el
-              conductor todavía no ha dicho que sí. Solo aparece cuando el
-              punto elegido trae coordenadas: dibujarlo adivinado sería
-              mentir sobre lo único que este plano sabe decir. */}
-          {puntosDelPlano.length >= 2 && puntoElegido?.lat != null && puntoElegido?.lng != null ? (
-            <View style={{ marginTop: 12 }}>
-              <RutaEnMapa
-                puntos={puntosDelPlano}
-                tuyo={{
-                  nombre: puntoElegido.nombre,
-                  lat: puntoElegido.lat,
-                  lng: puntoElegido.lng,
-                }}
-              />
-            </View>
-          ) : null}
         </View>
 
         <View style={estilos.tarjetaEquipaje}>

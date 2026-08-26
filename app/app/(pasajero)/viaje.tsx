@@ -29,15 +29,7 @@ import { ciudadYPunto, soloCiudad } from '@/dominio/comoSeLlama';
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { reservasDelViaje } from '@/servicios/reservas';
 import { useSesion } from '@/servicios/sesion';
-import {
-  type PuntoSituado,
-  ciudadesDelViaje,
-  obtenerViaje,
-  paradasDelViaje,
-  puntosDelRecorrido,
-  slugDestinoDe,
-} from '@/servicios/viajes';
-import { RutaEnMapa } from '@/ui/RutaEnMapa';
+import { ciudadesDelViaje, obtenerViaje, paradasDelViaje, slugDestinoDe } from '@/servicios/viajes';
 import type { ReservaFila, TripStop, ViajeFila } from '@/tipos';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando, Hueso } from '@/ui/Cargando';
@@ -87,7 +79,6 @@ export default function DetalleDelViaje() {
 
   const [viaje, setViaje] = useState<ViajeFila | null>(null);
   const [paradas, setParadas] = useState<TripStop[]>([]);
-  const [puntosDelPlano, setPuntosDelPlano] = useState<PuntoSituado[]>([]);
   /**
    * MI RESERVA EN ESTE VIAJE, si la hay. Quien llega desde «Mis viajes» ya
    * tiene su puesto: ofrecerle «Pedir mi puesto» era pedirse un segundo
@@ -106,7 +97,6 @@ export default function DetalleDelViaje() {
   useEffect(() => {
     obtenerViaje(viajeId).then(setViaje);
     paradasDelViaje(viajeId).then(setParadas);
-    puntosDelRecorrido(viajeId).then(setPuntosDelPlano);
   }, [viajeId]);
 
   useEffect(() => {
@@ -208,15 +198,6 @@ export default function DetalleDelViaje() {
         <View style={estilos.hoja}>
           <View style={estilos.tarjeta}>
             <Epigrafe>Ruta del viaje</Epigrafe>
-            {/* EL PLANO, CON LA GEOGRAFÍA DE VERDAD. La lista dice el orden;
-                el plano dice DÓNDE — que es lo que decide si algo te queda de
-                camino. Cada punto está proyectado desde sus coordenadas: si
-                Penonomé sale entre Panamá y Chitré es porque ahí está. */}
-            {puntosDelPlano.length >= 2 ? (
-              <View style={{ marginTop: 12, marginBottom: 4 }}>
-                <RutaEnMapa puntos={puntosDelPlano} />
-              </View>
-            ) : null}
             <View style={estilos.recorrido}>
               <View style={estilos.linea} />
               {paradas.map((p, i) => {
