@@ -10,11 +10,12 @@
  * cuenta. «Recordarme» guarda el correo en este navegador (solo el correo,
  * nunca la contraseña) y lo deja puesto la próxima vez.
  *
- * **Google y Apple, no Facebook.** El canevas dibuja Facebook, pero el único
- * OAuth cableado en `servicios/cuenta.ts` es `entrarCon('google' | 'apple')`.
- * Un botón que no lleva a ningún sitio es un control muerto — la clase de
- * defecto que `app/README.md` cuenta uno a uno — así que se dibujan los dos
- * que funcionan.
+ * **Google, Facebook y Apple.** Facebook estuvo fuera a propósito —su botón
+ * no llevaba a ningún sitio, y un control muerto es la clase de defecto que
+ * `app/README.md` cuenta uno a uno— hasta que el dueño lo pidió y se cableó
+ * de verdad (26-08-2026). Los tres pasan por `entrarCon`: si el proveedor
+ * no está activado en Supabase, la pantalla lo dice en vez de quedarse
+ * quieta.
  *
  * **Correo y contraseña**, no el código que dibuja el canevas: no hay
  * proveedor de SMS contratado y las cuentas que existen son de correo. Es la
@@ -91,6 +92,18 @@ function LogoGoogle() {
       <Path
         d="M10 3.98c1.47 0 2.79.5 3.82 1.5l2.87-2.87A10 10 0 0 0 1.07 5.5l3.34 2.6C5.2 5.73 7.4 3.98 10 3.98Z"
         fill="#EA4335"
+      />
+    </Svg>
+  );
+}
+
+/** La f de Facebook en su círculo azul oficial (#1877F2). */
+function LogoFacebook() {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
+      <Path
+        d="M20 10a10 10 0 1 0-11.56 9.88v-6.99H5.9V10h2.54V7.8c0-2.5 1.49-3.89 3.77-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V10h2.78l-.45 2.89h-2.33v6.99A10 10 0 0 0 20 10Z"
+        fill="#1877F2"
       />
     </Svg>
   );
@@ -241,30 +254,30 @@ export default function Entrar() {
           <View style={estilos.raya} />
         </View>
 
-        {/* Lo social debajo: los dos proveedores que de verdad funcionan. */}
+        {/* Lo social debajo. Con tres proveedores los nombres escritos ya no
+            caben en la fila sin apretarse: van los logos solos — «O continuar
+            con» encima ya dice qué son, y el nombre completo vive en el
+            rótulo de accesibilidad de cada uno. */}
         <View style={estilos.sociales}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Continuar con Google"
-            onPress={async () => {
-              if (!(await entrarCon('google'))) setQuePaso(SIN_PROVEEDOR('Google'));
-            }}
-            style={({ pressed }) => [estilos.social, pressed && pulsado.boton]}
-          >
-            <LogoGoogle />
-            <Text style={estilos.socialTexto}>Google</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Continuar con Apple"
-            onPress={async () => {
-              if (!(await entrarCon('apple'))) setQuePaso(SIN_PROVEEDOR('Apple'));
-            }}
-            style={({ pressed }) => [estilos.social, pressed && pulsado.boton]}
-          >
-            <LogoApple />
-            <Text style={estilos.socialTexto}>Apple</Text>
-          </Pressable>
+          {(
+            [
+              ['google', 'Google', <LogoGoogle key="g" />],
+              ['facebook', 'Facebook', <LogoFacebook key="f" />],
+              ['apple', 'Apple', <LogoApple key="a" />],
+            ] as const
+          ).map(([quien, nombre, logo]) => (
+            <Pressable
+              key={quien}
+              accessibilityRole="button"
+              accessibilityLabel={`Continuar con ${nombre}`}
+              onPress={async () => {
+                if (!(await entrarCon(quien))) setQuePaso(SIN_PROVEEDOR(nombre));
+              }}
+              style={({ pressed }) => [estilos.social, pressed && pulsado.boton]}
+            >
+              {logo}
+            </Pressable>
+          ))}
         </View>
 
         {/* La acción antes que la nota al pie: crear cuenta es una puerta,
@@ -339,15 +352,6 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
   },
-  socialTexto: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '600',
-    letterSpacing: -0.15,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-
   separador: {
     paddingTop: 20,
     paddingHorizontal: espacio.gutter,

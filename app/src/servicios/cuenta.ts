@@ -130,17 +130,18 @@ export async function olvideLaContrasena(correo: string): Promise<boolean> {
 }
 
 /**
- * Entrar con Google o con Apple.
+ * Entrar con Google, Facebook o Apple.
  *
- * **No es una maqueta.** El traspaso dibuja los dos botones y hasta ahora no
+ * **No es una maqueta.** El traspaso dibuja los botones y hasta ahora no
  * hacían nada; esto los conecta de verdad. El día que el proveedor esté
  * activado en el proyecto Supabase funcionan sin tocar una línea, y mientras
  * no lo esté la pantalla lo dice —«todavía no está activado»— en vez de
  * quedarse quieta, que es lo que no se podía distinguir de una app rota.
+ * (Facebook entró el 26-08-2026, pedido por el dueño.)
  *
  * Vuelve a la misma dirección de la que salió, igual que el correo.
  */
-export async function entrarCon(quien: 'google' | 'apple'): Promise<boolean> {
+export async function entrarCon(quien: 'google' | 'facebook' | 'apple'): Promise<boolean> {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: quien,
     options: { redirectTo: volverA() },
