@@ -15,7 +15,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
 
-import { etiquetaDeMaletero, notaDeEquipaje } from '@/dominio/equipaje';
+import {
+  type Equipaje,
+  COMO_LO_DICE,
+  EQUIPAJES,
+  aFilas,
+  decideElMaletero,
+} from '@/dominio/equipaje';
 import type { Lugar } from '@/dominio/lugar';
 import { type ReservaPreparada, pedirPuesto, prepararReserva } from '@/servicios/reservas';
 import { useMiId } from '@/servicios/sesion';
@@ -28,7 +34,7 @@ import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { tabular } from '@/ui/dinero';
 import { diaCorto, hora } from '@/ui/fechas';
 import { Atras, Lupa, Maleta } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
+import { TRACK_MICRO, familia, color, espacio, radio, pulsado } from '@/ui/tokens';
 
 const VIAJE_DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 /** Sin sesión que preguntar —solo en simulado—. En producción la pide `1c`. */
@@ -50,7 +56,10 @@ export default function Reservar() {
   const [direccion, setDireccion] = useState('Vía Argentina, Riba Smith');
   /** Una pregunta, no dos contadores: ¿llevas maleta? La mochila va
       contigo siempre y no se cuenta (pedido el 25-08). */
-  const [conMaleta, setConMaleta] = useState(false);
+  /* El pasajero DICE lo que lleva; el conductor decide cuando le llegue la
+     solicitud. Antes el viaje traía un booleano y esta pantalla se adaptaba
+     a él — decidido en abstracto meses antes. Cambiado el 25-08-2026. */
+  const [equipaje, setEquipaje] = useState<Equipaje>('bolso');
   /** El punto elegido del buscador — con sus coordenadas si las trajo. */
   const [buscandoPunto, setBuscandoPunto] = useState(false);
   const [puntoElegido, setPuntoElegido] = useState<Lugar | null>(null);
@@ -64,7 +73,7 @@ export default function Reservar() {
   if (!datos) return <Cargando />;
 
   // Si el conductor no lleva maletas, no hay maleta que contar.
-  const maletasReales = datos.aceptaMaletas && conMaleta ? 1 : 0;
+
 
   return (
     <View style={estilos.pantalla}>
@@ -144,34 +153,42 @@ export default function Reservar() {
         </View>
 
         <View style={estilos.tarjetaEquipaje}>
-          <View style={estilos.filaTitulo}>
-            <View style={{ flex: 1 }}>
-              <Epigrafe>Equipaje</Epigrafe>
-            </View>
-            <Pastilla
-              tamano="m"
-              fondo={datos.aceptaMaletas ? color.azul100 : color.sand200}
-              tinta={datos.aceptaMaletas ? color.azul700 : color.ink700}
-            >
-              {etiquetaDeMaletero(datos.aceptaMaletas)}
-            </Pastilla>
-          </View>
+          <Epigrafe>Qué llevo</Epigrafe>
 
-          {datos.aceptaMaletas ? (
-            <View style={{ marginTop: 8 }}>
-              <Interruptor
-                activo={conMaleta}
-                alCambiar={setConMaleta}
-                etiqueta="Llevo maleta"
-                descripcion="Va al maletero. La mochila va contigo y no se cuenta."
-              />
-            </View>
-          ) : null}
+          {/* Tres opciones y no más: contar maletas era una contabilidad de
+              maletero que nadie iba a llevar. Lo que cambia la respuesta del
+              conductor es si algo va al maletero o no. */}
+          <View style={estilos.opciones}>
+            {EQUIPAJES.map((cual) => {
+              const puesto = cual === equipaje;
+              return (
+                <Pressable
+                  key={cual}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: puesto }}
+                  accessibilityLabel={COMO_LO_DICE[cual].titulo}
+                  onPress={() => setEquipaje(cual)}
+                  style={({ pressed }) => [
+                    estilos.opcion,
+                    puesto && estilos.opcionPuesta,
+                    pressed && pulsado.celda,
+                  ]}
+                >
+                  <Text style={[estilos.opcionTitulo, puesto && estilos.opcionTituloPuesto]}>
+                    {COMO_LO_DICE[cual].titulo}
+                  </Text>
+                  <Text style={estilos.opcionDetalle}>{COMO_LO_DICE[cual].detalle}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
 
           <View style={estilos.nota}>
             <Maleta tamano={14} />
             <Text style={estilos.notaTexto}>
-              {notaDeEquipaje(datos.aceptaMaletas, maletasReales, datos.conductor)}
+              {decideElMaletero(equipaje)
+                ? `${datos.conductor} ve tu maleta en la solicitud y decide si le cabe.`
+                : `${datos.conductor} lo ve en la solicitud. Un bolso va contigo y nunca estorba.`}
             </Text>
           </View>
         </View>
@@ -210,7 +227,7 @@ export default function Reservar() {
               const puesto = await pedirPuesto(
                 viajeId,
                 { direccionPropia: direccion },
-                { mochilas: 1, maletas: maletasReales },
+                equipaje,
                 { pasajeroId: yo },
               );
               // `7b` cobra sobre una reserva concreta: sin este identificador el
@@ -339,6 +356,34 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   paradaHora: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
+
+  opciones: { marginTop: 12, gap: 8 },
+  opcion: {
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    borderRadius: radio.control,
+    backgroundColor: color.blanco,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+  /* La elegida se marca con la tinta, no con el rojo: elegir equipaje no es
+     una acción primaria, y el rojo tiene sus cuatro sentidos (invariante 4). */
+  opcionPuesta: { borderColor: color.ink900, borderWidth: 1.5 },
+  opcionTitulo: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '500',
+    color: color.ink700,
+    fontFamily: familia,
+  },
+  opcionTituloPuesto: { fontWeight: '700', color: color.ink900 },
+  opcionDetalle: {
+    marginTop: 2,
+    fontSize: 12.5,
+    lineHeight: 17,
+    color: color.ink500,
+    fontFamily: familia,
+  },
 
   tarjetaEquipaje: {
     marginHorizontal: espacio.gutter,

@@ -19,7 +19,6 @@ import { useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
 
-import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import {
   type ResumenDeRuta,
   type ViajeEnResultados,
@@ -188,7 +187,7 @@ function Detallada({ viaje, alPulsar }: { viaje: ViajeEnResultados; alPulsar: ()
       <View style={estilos.filaEquipaje}>
         <Maleta tamano={13} />
         <Text style={estilos.equipaje}>
-          {`${etiquetaDeMaletero(viaje.accepts_luggage)}${soloMujeres ? ' · solo mujeres' : ''}`}
+          {soloMujeres ? 'Solo mujeres' : 'Cédula verificada'}
         </Text>
       </View>
 

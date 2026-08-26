@@ -5,7 +5,7 @@
  * (ver `solicitudes.ts`).
  */
 
-import type { Equipaje } from '@/dominio/equipaje';
+import { type Equipaje, aFilas } from '@/dominio/equipaje';
 import { type CanalDePago, tarifaDeServicio } from '@/dominio/tarifas';
 import type { ReservaFila } from '@/tipos';
 
@@ -31,8 +31,6 @@ export type ReservaPreparada = {
   /** La primera parada de la ruta, de donde arranca el carro. */
   origen: { etiqueta: string; hora: string };
   aporteCentavos: number;
-  /** El booleano del conductor. El formulario entero depende de él. */
-  aceptaMaletas: boolean;
   /** Lo que el punto del pasajero le añade al conductor. */
   minutosDeDesvio: number;
 };
@@ -56,7 +54,6 @@ export async function prepararReserva(viajeId: string): Promise<ReservaPreparada
       hora: origen?.scheduled_at ?? viaje.departure_at,
     },
     aporteCentavos: viaje.price_cents,
-    aceptaMaletas: viaje.accepts_luggage,
     // Sin mapas de verdad el desvío es una estimación fija; ver «lo que es
     // ingeniería» en el traspaso.
     minutosDeDesvio: 4,
@@ -75,9 +72,9 @@ export async function pedirPuesto(
   const viaje = fuente.viajes.find((v) => v.id === viajeId);
   if (!viaje) throw new Error(`No existe el viaje ${viajeId}`);
 
-  if (!viaje.accepts_luggage && equipaje.maletas > 0) {
-    throw new Error('Este viaje no lleva maletas');
-  }
+  /* Ya no hay nada que rechazar aquí: el conductor ve el equipaje en la
+     solicitud y decide entonces (25-08-2026). Antes esto tiraba un error si
+     el viaje traía el booleano en falso. */
 
   const canal = opciones.canal ?? 'yappy_app';
   const puestos = 1;
@@ -130,8 +127,7 @@ export async function pedirPuesto(
     expires_at: new Date(ahora.getTime() + HORAS_PARA_RESPONDER * 3600_000).toISOString(),
     detour_minutes: null,
     released_at: null,
-    mochilas: equipaje.mochilas,
-    maletas: equipaje.maletas,
+    ...aFilas(equipaje),
   };
 
   return demora(await fuente.guardarReserva(reserva));

@@ -152,9 +152,15 @@ export default function Solicitudes() {
               ) : null}
             </View>
 
-            <View style={estilos.filaEquipaje}>
-              <Maleta />
-              <Text style={estilos.equipaje}>{s.equipaje}</Text>
+            {/* EL EQUIPAJE, DICHO ANTES DE DECIDIR. El pasajero declara lo
+                que lleva y el conductor responde a eso — no a un booleano
+                que puso meses antes (25-08-2026). La maleta se destaca
+                porque es lo único que puede no caber; un bolso no. */}
+            <View style={[estilos.filaEquipaje, s.vaAlMaletero && estilos.filaMaletero]}>
+              <Maleta tinta={s.vaAlMaletero ? color.esperaTinta : color.ink600} />
+              <Text style={[estilos.equipaje, s.vaAlMaletero && estilos.equipajeMaletero]}>
+                {s.equipaje}
+              </Text>
               <Text style={estilos.aporte}>{formatearDineroRedondo(s.aporteCentavos)}</Text>
             </View>
 
@@ -316,6 +322,16 @@ const estilos = StyleSheet.create({
   punto: { flex: 1, fontSize: 13.5, lineHeight: 19.57, fontWeight: '500', letterSpacing: -0.2, color: color.ink900, fontFamily: familia },
   desvio: { fontSize: 13.5, lineHeight: 19.57, color: color.ink500, fontFamily: familia, ...tabular },
 
+  /* Cuando algo va al maletero, la fila se enciende en ámbar: es una
+     espera de respuesta, no una alarma — el rojo tiene sus cuatro sentidos. */
+  filaMaletero: {
+    backgroundColor: color.arena100,
+    borderRadius: radio.anidado,
+    paddingHorizontal: 10,
+    marginHorizontal: -10,
+    paddingVertical: 8,
+  },
+  equipajeMaletero: { color: color.esperaTinta, fontWeight: '600' },
   filaEquipaje: { flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 10 },
   equipaje: { flex: 1, fontSize: 13.5, lineHeight: 19.57, color: color.ink700, fontFamily: familia },
   aporte: { fontSize: 19, lineHeight: 27.55, fontWeight: '700', letterSpacing: -0.67, color: color.ink900, fontFamily: familia, ...tabular },

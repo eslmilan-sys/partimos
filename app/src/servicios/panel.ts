@@ -12,7 +12,6 @@
  */
 
 import { soloPunto } from '@/dominio/comoSeLlama';
-import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import type { ViajeFila } from '@/tipos';
 
 import { fuente } from './_fuente';
@@ -34,7 +33,6 @@ export type ViajePublicado = {
   puestosVendidos: number;
   puestosOfrecidos: number;
   aporteCentavos: number;
-  maletas: string;
   /** Solicitudes sin responder, con la que expira antes. */
   solicitudes: number;
   expiraLaPrimera: string | null;
@@ -74,7 +72,6 @@ function comoPublicado(v: ViajeFila): ViajePublicado {
     puestosVendidos: vendidos,
     puestosOfrecidos: v.seats_offered,
     aporteCentavos: v.price_cents,
-    maletas: etiquetaDeMaletero(v.accepts_luggage),
     solicitudes: pendientes.length,
     expiraLaPrimera: pendientes[0]?.expires_at ?? null,
     editable: reservas.every((r) => r.status !== 'confirmed'),
@@ -208,7 +205,7 @@ function comoPuesto(r: (typeof fuente.reservas)[number]): PuestoMio | null {
 /* -------------------------------------------------- 14d · editar */
 
 export type CampoEditable = {
-  clave: 'hora' | 'ruta' | 'puestos' | 'maletas' | 'mujeres';
+  clave: 'hora' | 'ruta' | 'puestos' | 'mujeres';
   etiqueta: string;
   valor: string;
   /** Cerrado por alguien que ya pagó, con el motivo escrito. */
@@ -254,7 +251,6 @@ export async function prepararEdicion(viajeId: string): Promise<Edicion> {
         valor: `${viaje.seats_offered} · ${pagados.length} vendido${pagados.length === 1 ? '' : 's'}`,
         cerrado: false,
       },
-      { clave: 'maletas', etiqueta: 'Acepto maletas', valor: viaje.accepts_luggage ? 'Sí' : 'No', cerrado: false },
       {
         clave: 'mujeres',
         etiqueta: 'Solo mujeres',
@@ -269,24 +265,14 @@ export async function prepararEdicion(viajeId: string): Promise<Edicion> {
   });
 }
 
-/**
- * Apagar «acepto maletas» cuando alguien reservó **con** maleta es el caso que
- * el traspaso pinta en rojo: no es un ajuste, es dejar en tierra el equipaje de
- * alguien que ya pagó.
- */
-export function equipajeEnConflicto(viajeId: string, aceptaMaletas: boolean): string | null {
-  if (aceptaMaletas) return null;
-  const con = fuente.reservas.filter(
-    (r) => r.trip_id === viajeId && r.status === 'confirmed' && r.maletas > 0,
-  );
-  if (!con.length) return null;
-  const quien = fuente.perfiles.find((p) => p.id === con[0].passenger_id);
-  return `${quien?.first_name ?? 'Alguien'} reservó con maleta. Si lo apagas, se queda sin sitio para ella.`;
-}
+/* `equipajeEnConflicto` se retiró el 25-08-2026: el conflicto que vigilaba
+   —apagar «acepto maletas» con alguien ya reservado con una— no puede
+   ocurrir, porque el viaje ya no declara nada. El conductor decide sobre
+   cada solicitud, una por una, viendo lo que esa persona lleva. */
 
 export async function guardarEdicion(
   viajeId: string,
-  cambios: { puestos?: number; maletas?: boolean; mujeres?: boolean },
+  cambios: { puestos?: number; mujeres?: boolean },
 ): Promise<ViajeFila> {
   const i = fuente.viajes.findIndex((v) => v.id === viajeId);
   if (i < 0) throw new Error(`No existe el viaje ${viajeId}`);
@@ -294,7 +280,6 @@ export async function guardarEdicion(
   fuente.viajes[i] = {
     ...fuente.viajes[i],
     seats_offered: cambios.puestos ?? fuente.viajes[i].seats_offered,
-    accepts_luggage: cambios.maletas ?? fuente.viajes[i].accepts_luggage,
     gender_preference:
       cambios.mujeres === undefined
         ? fuente.viajes[i].gender_preference

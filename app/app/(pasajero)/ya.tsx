@@ -4,7 +4,7 @@
  * Es la pantalla de quien no planifica: está en la terminal y quiere subirse a
  * algo que sale ya. Por eso el titular es la hora y no el destino, y la
  * primera tarjeta trae todo lo que hace falta para decidir sin abrir nada más:
- * cuánto falta, cuánto cuesta, cuántos puestos, si acepta maletas y quién
+ * cuánto falta, cuánto cuesta, cuántos puestos y quién
  * maneja.
  *
  * «Actualizado hace 20 s» no es un adorno: en esta pantalla el dato caduca en
@@ -17,7 +17,6 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { useRouter } from 'expo-router';
 
-import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { type ViajeEnResultados, buscarViajes, proximoDiaConViajes } from '@/servicios/viajes';
 import { CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -104,7 +103,7 @@ export default function Ya() {
               <View style={estilos.filaEquipaje}>
                 <Maleta tamano={13} />
                 <Text style={estilos.equipaje}>
-                  {`${etiquetaDeMaletero(primero.accepts_luggage)} · una por pasajero`}
+                  {'Dices qué llevas al pedir el puesto'}
                 </Text>
               </View>
 

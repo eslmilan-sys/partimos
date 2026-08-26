@@ -12,7 +12,7 @@
  */
 
 import { NOMBRE_DEL_CANAL, TARIFA_PCT, tarifaDeServicio } from '@/dominio/tarifas';
-import { resumenDeEquipaje } from '@/dominio/equipaje';
+import { deFilas, resumenCorto } from '@/dominio/equipaje';
 
 import { fuente } from './_fuente';
 import { formatearDineroRedondo } from '@/ui/dinero';
@@ -157,7 +157,7 @@ export async function comprobante(reservaId: string): Promise<Comprobante> {
       },
       {
         etiqueta: 'Puestos',
-        valor: `${reserva.seats} · ${resumenDeEquipaje({ mochilas: reserva.mochilas, maletas: reserva.maletas }).toLowerCase()}`,
+        valor: `${reserva.seats} · ${resumenCorto(deFilas({ mochilas: reserva.mochilas, maletas: reserva.maletas }))}`,
       },
       { etiqueta: 'Referencia', valor: reserva.boarding_code ?? reserva.id.slice(0, 8) },
     ],

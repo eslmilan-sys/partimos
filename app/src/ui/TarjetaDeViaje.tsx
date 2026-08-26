@@ -42,7 +42,6 @@ export type ViajeEnTarjeta = {
   destino: string;
   destinoPunto?: string;
   llegada: string;
-  equipaje: 'Acepta maletas' | 'Solo mochila';
   aceptaMascotas: boolean;
   sePuedeFumar: boolean;
   conductor: { nombre: string; calificacion: number | null; carro: string };

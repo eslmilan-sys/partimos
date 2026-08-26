@@ -7,7 +7,7 @@
  * apagadas y decir quién las cerró explica el producto en una línea: cuando
  * alguien paga, deja de ser tu viaje sólo tuyo.
  *
- * Apagar «acepto maletas» con alguien que ya reservó con maleta se avisa en
+ * El equipaje ya no se edita aquí: lo dice el pasajero y lo decide el
  * **rojo**, porque no es un ajuste: es dejar en tierra el equipaje de alguien
  * que ya pagó.
  */
@@ -20,7 +20,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useVolver } from '@/ui/salidas';
 import Svg, { Path, Rect } from 'react-native-svg';
 
-import { type Edicion, equipajeEnConflicto, guardarEdicion, prepararEdicion } from '@/servicios/panel';
+import { type Edicion, guardarEdicion, prepararEdicion } from '@/servicios/panel';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -40,7 +40,6 @@ export default function Editar() {
   const viajeId = viaje ?? DEL_RECORRIDO;
   const [datos, setDatos] = useState<Edicion | null>(null);
   const [puestos, setPuestos] = useState(3);
-  const [maletas, setMaletas] = useState(true);
   const [mujeres, setMujeres] = useState(false);
 
   useEffect(() => {
@@ -48,7 +47,6 @@ export default function Editar() {
       setDatos(e);
       const p = e.campos.find((c) => c.clave === 'puestos');
       setPuestos(Number(p?.valor.split(' ')[0] ?? 3));
-      setMaletas(e.campos.find((c) => c.clave === 'maletas')?.valor === 'Sí');
       setMujeres(e.campos.find((c) => c.clave === 'mujeres')?.valor === 'Sí');
     });
   }, [viajeId]);
@@ -57,7 +55,7 @@ export default function Editar() {
 
   const cerrados = datos.campos.filter((c) => c.cerrado);
   const vendidos = datos.campos.find((c) => c.clave === 'puestos')?.valor.split('· ')[1] ?? '';
-  const conflicto = equipajeEnConflicto(viajeId, maletas);
+  const conflicto: string | null = null;
 
   return (
     <View style={estilos.pantalla}>
@@ -132,7 +130,6 @@ export default function Editar() {
           </View>
 
           <View style={estilos.filaInterruptor}>
-            <Interruptor activo={maletas} alCambiar={setMaletas} etiqueta="Acepto maletas" />
           </View>
 
           <View style={estilos.filaInterruptorUltima}>
@@ -177,7 +174,7 @@ export default function Editar() {
         <Boton
          
           alPulsar={async () => {
-            await guardarEdicion(viajeId, { puestos, maletas, mujeres });
+            await guardarEdicion(viajeId, { puestos, mujeres });
             volver();
           }}
         >

@@ -29,7 +29,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useVolver } from '@/ui/salidas';
 
 import { soloCiudad, soloPunto } from '@/dominio/comoSeLlama';
-import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 import {
   type Filtros,
@@ -129,7 +128,6 @@ export default function Resultados() {
           destino: soloCiudad(v.destination_city, v.destination_label),
           destinoPunto: soloPunto(v.destination_city, v.destination_label),
           llegada: v.arrival_estimate_at ? hora(v.arrival_estimate_at) : '',
-          equipaje: etiquetaDeMaletero(v.accepts_luggage),
           aceptaMascotas: v.allows_pets,
           sePuedeFumar: v.allows_smoking,
           conductor: {
@@ -589,10 +587,12 @@ function Esqueleto() {
 
 /* ------------------------------------------------------------- Los filtros */
 
-type ClaveDeFiltro = 'aceptaMaletas' | 'aceptaMascotas' | 'soloMujeres' | 'yappy';
+/* «Acepta maletas» se fue con el booleano del conductor: ya no hay nada que
+   filtrar, porque el viaje no lo declara — lo decide al recibir cada
+   solicitud (25-08-2026). */
+type ClaveDeFiltro = 'aceptaMascotas' | 'soloMujeres' | 'yappy';
 
 const ETIQUETAS: Record<ClaveDeFiltro, string> = {
-  aceptaMaletas: 'Acepta maletas',
   aceptaMascotas: 'Con mascota',
   soloMujeres: 'Solo mujeres',
   yappy: 'Yappy',

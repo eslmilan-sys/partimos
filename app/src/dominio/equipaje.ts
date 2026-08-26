@@ -1,53 +1,77 @@
 /**
- * El modelo de equipaje, a propósito simple.
+ * El modelo de equipaje — REHECHO EL 25-08-2026 por decisión del dueño.
  *
- * El conductor pone un booleano al publicar (`5c`). El formulario del pasajero
- * se adapta a ese booleano (`7a`). No hay contabilidad de espacio de maletero.
- * La mochila siempre viaja con el pasajero y nunca cuenta.
+ * **Antes.** El conductor ponía un booleano al publicar («acepto maletas») y
+ * el formulario del pasajero se adaptaba a él. Tenía dos defectos: obligaba a
+ * decidir en abstracto, meses antes de saber quién pide puesto y con qué; y
+ * al pasajero le daba una puerta cerrada sin que nadie la hubiera mirado.
+ *
+ * **Ahora.** El pasajero DICE lo que lleva, y el conductor lo ve en la
+ * solicitud y decide entonces — con la misma mano con la que ya acepta o
+ * rechaza el puesto. Ninguna pantalla nueva: la decisión ya existía, sólo
+ * le faltaba el dato.
+ *
+ * Tres cosas y no más. Contar maletas era una contabilidad de maletero que
+ * nadie iba a llevar, y «pequeño o grande» es lo que de verdad cambia la
+ * respuesta: un bolso va en el asiento y nunca estorba; una maleta va al
+ * maletero y ahí sí puede no caber.
+ *
+ * **El precio no lo toca.** El aporte sale de la gasolina y los peajes
+ * divididos entre los ocupantes (R1, R3); el equipaje no entra en el cálculo
+ * ni puede cobrarse aparte. Este archivo no devuelve dinero, a propósito.
  */
 
-export type Equipaje = {
-  /** Va contigo en el asiento. Siempre permitida. */
-  mochilas: number;
-  /** Va al maletero. Solo si el conductor las acepta. */
-  maletas: number;
+/** Lo que el pasajero declara al pedir puesto. */
+export type Equipaje = 'nada' | 'bolso' | 'maleta';
+
+export const EQUIPAJES: Equipaje[] = ['nada', 'bolso', 'maleta'];
+
+/** Cómo lo elige el pasajero, en primera persona (invariante 8 del v6). */
+export const COMO_LO_DICE: Record<Equipaje, { titulo: string; detalle: string }> = {
+  nada: { titulo: 'Nada', detalle: 'Voy sin equipaje' },
+  bolso: { titulo: 'Un bolso', detalle: 'Va conmigo en el asiento' },
+  maleta: { titulo: 'Una maleta', detalle: 'Va en el maletero' },
 };
 
-export const SIN_EQUIPAJE: Equipaje = { mochilas: 0, maletas: 0 };
-
-/** La cadena de la tarjeta de resultados. Solo puede ser una de estas dos. */
-export function etiquetaDeMaletero(aceptaMaletas: boolean): 'Acepta maletas' | 'Solo mochila' {
-  return aceptaMaletas ? 'Acepta maletas' : 'Solo mochila';
+/** Cómo se lo lee el conductor en la solicitud, en tercera persona. */
+export function comoLoVeElConductor(equipaje: Equipaje): string {
+  return equipaje === 'nada'
+    ? 'Sin equipaje'
+    : equipaje === 'bolso'
+      ? 'Un bolso, va con él en el asiento'
+      : 'Una maleta grande, va al maletero';
 }
 
-/** La línea de ayuda bajo los steppers de `7a`. */
-export function notaDeEquipaje(
-  aceptaMaletas: boolean,
-  maletas: number,
-  nombreDelConductor: string,
-): string {
-  if (!aceptaMaletas) {
-    return `${nombreDelConductor} no lleva maletas en este viaje. Solo lo que va contigo en el asiento.`;
-  }
-  return maletas > 0
-    ? `${nombreDelConductor} ve tu equipaje cuando le llega la solicitud.`
-    : `${nombreDelConductor} acepta una maleta por pasajero.`;
+/** La versión corta, para una fila estrecha. */
+export function resumenCorto(equipaje: Equipaje): string {
+  return equipaje === 'nada' ? 'sin equipaje' : equipaje === 'bolso' ? 'un bolso' : 'una maleta';
 }
 
-/** Cómo se le resume el equipaje al conductor en `11a`. */
-export function resumenDeEquipaje({ mochilas, maletas }: Equipaje): string {
-  if (maletas === 0) return 'Solo mochila';
-  if (mochilas === 0) return maletas === 1 ? 'Una maleta' : `${maletas} maletas`;
-  return maletas === 1 ? 'Mochila y una maleta' : `Mochila y ${maletas} maletas`;
+/**
+ * Lo único que el conductor tiene que pensar antes de responder: si va al
+ * maletero, puede no caber. Un bolso nunca es motivo de nada.
+ */
+export function decideElMaletero(equipaje: Equipaje): boolean {
+  return equipaje === 'maleta';
 }
 
-/** La versión corta, para una fila estrecha: «1 maleta» o «solo mochila». */
-export function resumenCorto({ maletas }: Equipaje): string {
-  if (maletas === 0) return 'solo mochila';
-  return maletas === 1 ? '1 maleta' : `${maletas} maletas`;
+/* ── El puente con la base ────────────────────────────────────────────────
+ *
+ * `bookings` guarda `mochilas` y `maletas` como enteros desde la migración
+ * 0026. No hace falta tocarlos: las tres opciones caben de sobra en dos
+ * columnas, y así el cambio no arrastra una migración detrás.
+ */
+
+export function aFilas(equipaje: Equipaje): { mochilas: number; maletas: number } {
+  return equipaje === 'nada'
+    ? { mochilas: 0, maletas: 0 }
+    : equipaje === 'bolso'
+      ? { mochilas: 1, maletas: 0 }
+      : { mochilas: 0, maletas: 1 };
 }
 
-/** Si el conductor deja de aceptar maletas y alguien ya reservó con una, hay que avisar en rojo (`14d`). */
-export function hayConflictoDeEquipaje(aceptaMaletas: boolean, maletasReservadas: number): boolean {
-  return !aceptaMaletas && maletasReservadas > 0;
+export function deFilas({ mochilas, maletas }: { mochilas: number; maletas: number }): Equipaje {
+  if (maletas > 0) return 'maleta';
+  if (mochilas > 0) return 'bolso';
+  return 'nada';
 }

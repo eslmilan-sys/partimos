@@ -1,5 +1,5 @@
 /**
- * `7c` Puestos y maletas — el paso 3 de publicar.
+ * `7c` Puestos — el paso 3 de publicar.
  *
  * Mover el contador **recalcula el aporte delante de los ojos**, y debajo
  * está la vista previa de cómo va a quedar el anuncio. Es la misma idea que
@@ -17,7 +17,6 @@ import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { aporteCalculado } from '@/dominio/aporte';
-import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { type PublicacionPreparada, prepararPublicacion } from '@/servicios/viajes';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -37,7 +36,6 @@ export default function Puestos() {
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
   const [puestos, setPuestos] = useState(3);
-  const [maletas, setMaletas] = useState(true);
   /** null mientras lo lleve el cálculo; en cuanto lo tocas, manda tu número. */
   const [aporteElegido, setAporte] = useState<number | null>(null);
 
@@ -112,14 +110,6 @@ export default function Puestos() {
             />
           </View>
 
-          <View style={estilos.filaInterruptor}>
-            <Interruptor
-              activo={maletas}
-              alCambiar={setMaletas}
-              etiqueta="Acepto maletas"
-              descripcion="Si lo apagas, solo pueden pedir puesto con mochila."
-            />
-          </View>
         </View>
 
         <View style={estilos.previa}>
@@ -150,7 +140,9 @@ export default function Puestos() {
 
             <View style={estilos.filaEquipaje}>
               <Maleta tamano={13} />
-              <Text style={estilos.equipaje}>{etiquetaDeMaletero(maletas)}</Text>
+              <Text style={estilos.equipaje}>
+                Cada pasajero dice qué lleva; tú decides al recibir su solicitud
+              </Text>
             </View>
           </View>
         </View>

@@ -117,7 +117,6 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         <Text style={estilos.vendidos}>
           {`${viaje.puestosVendidos} de ${viaje.puestosOfrecidos} puestos vendidos`}
         </Text>
-        <Pastilla tamano="m">{viaje.maletas}</Pastilla>
       </View>
 
       {viaje.solicitudes > 0 ? (

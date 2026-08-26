@@ -26,7 +26,6 @@ import { DIJO, compartir } from '@/ui/salidas';
 import { useVolver } from '@/ui/salidas';
 
 import { ciudadYPunto, soloCiudad } from '@/dominio/comoSeLlama';
-import { etiquetaDeMaletero } from '@/dominio/equipaje';
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { reservasDelViaje } from '@/servicios/reservas';
 import { useSesion } from '@/servicios/sesion';
@@ -276,12 +275,9 @@ export default function DetalleDelViaje() {
                       <Text style={estilos.verificadoTexto}>Verificado</Text>
                     </View>
                   ) : null}
-                  <View style={estilos.pastillaEquipaje}>
-                    <Maleta tamano={13} tinta={color.azul700} />
-                    <Text style={estilos.pastillaEquipajeTexto}>
-                      {etiquetaDeMaletero(viaje.accepts_luggage)}
-                    </Text>
-                  </View>
+                  {/* El equipaje ya no se anuncia aquí: lo dice el pasajero
+                      al pedir el puesto y lo decide el conductor al recibir
+                      la solicitud (25-08-2026). */}
                   {/* Aquí sí se dicen las dos, digan que sí o que no: quien
                       está a un toque de pedir el puesto necesita saberlo. */}
                   <View style={estilos.pastillaLlana}>
