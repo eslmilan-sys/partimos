@@ -13,7 +13,7 @@ export {
   guardarViaje, guardarParada, guardarReserva, guardarPago, guardarMensaje, actualizarReserva, actualizarPago,
 } from './almacen';
 
-export { ciudades, corredores, paradasDeLaRuta } from './geografia';
+export { ciudades, corredores, paradasDeLaRuta, ciudadesPedidas, pedirCiudad } from './geografia';
 
 export {
   categorias, perfiles, vehiculos, reputacion, resenas, placasCompletas,

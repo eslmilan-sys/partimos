@@ -476,3 +476,24 @@ export const paradasDeLaRuta: Record<
     ];
   }),
 );
+
+/* ------------------------------------------------------------------ *
+ * Las ciudades que la gente pide y todavía no están (0043).
+ *
+ * En simulado se guardan en memoria y se pierden al recargar, y está bien:
+ * lo que la pantalla necesita saber es si se aceptó la petición, no dónde
+ * acabó. Contra la base va a `city_requests`, que sólo leemos nosotros.
+ * ------------------------------------------------------------------ */
+
+export type PeticionDeCiudad = {
+  profile_id: string | null;
+  nombre: string;
+  provincia: string | null;
+};
+
+export const ciudadesPedidas: PeticionDeCiudad[] = [];
+
+export async function pedirCiudad(p: PeticionDeCiudad): Promise<boolean> {
+  ciudadesPedidas.push(p);
+  return true;
+}

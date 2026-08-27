@@ -79,7 +79,10 @@ export const perfiles: Profile[] = [
     last_initial: 'Q.',
     phone: '+507 6000 0001',
     photo_url: null,
-    home_city_id: '6a6a7413-08f3-4902-9378-62847a9856bd',
+    /* Mateo es quien encarna `1a`, y llega SIN ciudad a propósito: es como
+       llega cualquiera que acaba de abrir la cuenta, y es la única forma de
+       ver la tarjeta «¿de qué ciudad sales?» en el recorrido. */
+    home_city_id: null,
     gender: 'hombre',
     bio: null,
     is_id_verified: true,

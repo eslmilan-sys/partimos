@@ -218,6 +218,65 @@ otrasSalidas.forEach((s, i) => {
 });
 
 /**
+ * LA VUELTA. Chitré → Panamá, sin corredor medido: es una ruta libre, como
+ * las que se publican desde el 24-08-2026.
+ *
+ * Está aquí porque el interurbano de verdad es de ida Y vuelta —se baja el
+ * viernes, se sube el domingo— y el simulado sólo tenía salidas DESDE la
+ * capital. Con eso, quien dice que vive en Chitré no veía una sola salida
+ * desde su ciudad, que es justo lo que la pantalla le promete.
+ */
+[
+  { enMin: 26 * 60, precio: 600, puestos: 3, conductor: JOSE_ID },
+  { enMin: 50 * 60, precio: 600, puestos: 2, conductor: MARIA_ID },
+].forEach((v, i) => {
+  const id = `55555555-5555-4555-8555-5555555557${String(i).padStart(2, '0')}`;
+  const sale = enMinutos(v.enMin);
+  const llega = new Date(new Date(sale).getTime() + 210 * 60_000).toISOString();
+  viajes.push({
+    ...viajes[0],
+    id,
+    driver_id: v.conductor,
+    corridor_id: null,
+    departure_at: sale,
+    arrival_estimate_at: llega,
+    seats_offered: v.puestos,
+    price_cents: v.precio,
+    gender_preference: 'any',
+    origin_label: 'Chitré · Parque Unión',
+    destination_label: 'Ciudad de Panamá · Albrook',
+    origin_city_id: ciudadDe('Chitré · Parque Unión', CIUDAD_PANAMA_ID),
+    destination_city_id: CIUDAD_PANAMA_ID,
+    origin_lat: 7.9614,
+    origin_lng: -80.4297,
+    destination_lat: 8.9737,
+    destination_lng: -79.5527,
+  });
+  paradas.push(
+    {
+      id: `66666666-6666-4666-8666-6666666677${String(i).padStart(2, '0')}`,
+      trip_id: id,
+      pickup_point_id: null,
+      custom_label: 'Chitré · Parque Unión',
+      kind: 'origin',
+      sequence: 0,
+      scheduled_at: sale,
+      created_at: AHORA,
+    },
+    {
+      id: `66666666-6666-4666-8666-6666666678${String(i).padStart(2, '0')}`,
+      trip_id: id,
+      pickup_point_id: null,
+      custom_label: 'Ciudad de Panamá · Albrook',
+      kind: 'destination',
+      sequence: 1,
+      scheduled_at: llega,
+      created_at: AHORA,
+    },
+  );
+});
+
+/**
  * Una salida a otro destino, para que `1a` y los resultados no enseñen la
  * misma ciudad dos veces. Santiago está más lejos, así que el aporte sube: es
  * el mismo cálculo, no un número puesto a mano.

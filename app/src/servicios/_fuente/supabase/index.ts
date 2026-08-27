@@ -92,7 +92,10 @@ export const paradasDeLaRuta: Record<string, { ciudad: string; etiqueta: string;
 type Devuelve = Promise<{ data: unknown; error: { message: string } | null }>;
 type Consulta = {
   select: (columnas?: string) => Devuelve & { eq: (c: string, v: unknown) => Devuelve };
-  insert: (fila: unknown) => { select: () => { single: () => Devuelve } };
+  /* `insert` es esperable por sí solo: cuando la tabla no da `select` a
+     nadie —`city_requests`, 0043— pedir la fila de vuelta falla por
+     permisos aunque el alta haya entrado. */
+  insert: (fila: unknown) => Devuelve & { select: () => { single: () => Devuelve } };
   update: (cambios: unknown) => {
     eq: (c: string, v: unknown) => { select: () => { single: () => Devuelve } };
   };
@@ -315,6 +318,31 @@ export async function guardarMensaje(m: Message): Promise<Message> {
   mensajes.push(guardado);
   return guardado;
 }
+
+/**
+ * PEDIR QUE AGREGUEMOS UNA CIUDAD (0043).
+ *
+ * `city_requests` no tiene `select` para nadie —la bandeja la leemos
+ * nosotros—, así que aquí **no se pide la fila de vuelta**: un `.select()`
+ * detrás del insert fallaría por permisos aunque la fila hubiera entrado.
+ * Lo que la pantalla necesita saber es si se aceptó, y eso es un booleano.
+ *
+ * La misma ciudad pedida dos veces choca contra `uq_city_requests_nombre`, y
+ * eso no es un fallo: quien la pide ya la había pedido.
+ */
+export async function pedirCiudad(p: {
+  profile_id: string | null;
+  nombre: string;
+  provincia: string | null;
+}): Promise<boolean> {
+  const { error } = await tabla('city_requests').insert(p);
+  if (!error) return true;
+  if (error.message.includes('duplicate key')) return true;
+  throw new Error(`city_requests: ${error.message}`);
+}
+
+/** El espejo del arreglo del simulado. Aquí no se lee: sólo se escribe. */
+export const ciudadesPedidas: { profile_id: string | null; nombre: string; provincia: string | null }[] = [];
 
 /**
  * Cambia una fila de `profiles`. La política RLS solo deja tocar la propia, que

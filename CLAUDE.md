@@ -194,6 +194,19 @@ parler :
   c'est la dérivation qui le porte. Dédoublonnage par (kind, booking_id).
   Ce qui manque encore : l'envoi push téléphone fermé (besoin d'un cron pour
   le rappel et d'un canal d'envoi).
+- **La ville de résidence sert enfin à quelque chose (0043, 27-08-2026).**
+  `profiles.home_city_id` existait depuis le début et **aucun écran ne
+  l'écrivait ni ne la lisait** : l'app supposait que tout le monde part de
+  la capitale. On la demande maintenant depuis l'accueil — pas depuis
+  l'inscription, parce que qui entre par Google ou Facebook ne passe pas
+  par ses trois étapes — et elle sert à deux choses : le champ « Salgo de »
+  démarre chez vous, et une section liste les trajets **déjà publiés** au
+  départ de votre ville qui ont encore de la place. Ça n'invente rien ;
+  ça évite d'avoir à chercher. Si la ville n'est pas au catalogue, la
+  personne peut nous demander de l'ajouter : ça écrit dans
+  `city_requests`, que **personne ne lit depuis le client** (pas de
+  `select`, on la relève avec la clé de service). On n'a jamais laissé
+  inventer une ville — une ville inventée, aucune recherche ne la trouve.
 - **On peut écrire au conducteur SANS réserver, depuis la 0041**
   (26-08-2026, demandé par l'utilisateur). `messages.booking_id` devient
   nullable et un fil pend soit d'une réservation, soit d'un trajet —

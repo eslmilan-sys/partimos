@@ -275,6 +275,43 @@ export type SalidaCercana = {
 };
 
 /**
+ * LO QUE SALE DESDE TU CIUDAD, en los próximos días.
+ *
+ * Pedido del dueño el 27-08-2026: «demander où habite la personne pour
+ * proposer des voyages en fonction de dispo, avec des voyages déjà publiés».
+ * No inventa nada — son viajes que alguien ya publicó y que todavía tienen
+ * puesto libre; lo único que aporta es no tener que buscarlos.
+ *
+ * `proximasSalidas` mira una ventana de una hora y no filtra por ciudad:
+ * sirve para «salen ahora». Esto mira los próximos días desde UNA ciudad.
+ */
+export async function salidasDesde(
+  ciudadSlug: string,
+  limite = 6,
+  dias = 7,
+): Promise<SalidaCercana[]> {
+  const ciudad = fuente.ciudades.find((c) => c.slug === ciudadSlug);
+  if (!ciudad) return demora([]);
+
+  const ahora = Date.now();
+  const hasta = ahora + dias * 24 * 3600_000;
+
+  return demora(
+    fuente.viajes
+      .filter((v) => v.status === 'published' && v.origin_city_id === ciudad.id)
+      .filter((v) => {
+        const t = new Date(v.departure_at).getTime();
+        return t >= ahora && t <= hasta;
+      })
+      // «En fonction de dispo»: un viaje lleno no es una propuesta.
+      .filter((v) => v.seats_offered > contarVendidos(v.id))
+      .sort((a, b) => a.departure_at.localeCompare(b.departure_at))
+      .slice(0, limite)
+      .map(comoSalida),
+  );
+}
+
+/**
  * Las salidas que enseña `1a` **sin pedir cuenta**. Es la promesa entera del
  * recorrido del pasajero en una pantalla: hay gente saliendo ahora, y para
  * verlo no hace falta registrarse.
@@ -292,32 +329,38 @@ export async function proximasSalidas(limite = 3, ventanaMin = 60): Promise<Sali
     .filter((v) => v.seats_offered > contarVendidos(v.id))
     .sort((a, b) => a.departure_at.localeCompare(b.departure_at))
     .slice(0, limite)
-    .map((v) => {
-      /* Un bloc de découverte dit la VILLE : « Albrook » ne dit rien à qui
-         n'habite pas la capitale. La règle est dans `comoSeLlama`. */
-      const ciudad = fuente.ciudades.find((c) => c.id === v.destination_city_id);
-      const destino = soloCiudad(ciudad?.name, v.destination_label);
-      const salida = fuente.ciudades.find((c) => c.id === v.origin_city_id);
-      const p = fuente.perfiles.find((x) => x.id === v.driver_id);
-      return {
-        viajeId: v.id,
-        hora: v.departure_at,
-        llegada: v.arrival_estimate_at ?? null,
-        destino,
-        /* Le point exact SANS sa ville : le titre du bloc dit déjà « desde
-           Panamá », et « Chitré · Ciudad de Panamá · Albrook » se lisait comme
-           trois lieux à la file. */
-        recogida: soloPunto(salida?.name, v.origin_label),
-        aporteCentavos: v.price_cents,
-        foto: ciudad?.slug ?? '',
-        conductor: p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : '',
-        calificacion: fuente.reputacion[v.driver_id]?.calificacion ?? null,
-        viajesHechos: fuente.reputacion[v.driver_id]?.viajes ?? 0,
-        directo: !fuente.paradas.some((x) => x.trip_id === v.id),
-        puestosLibres: v.seats_offered - contarVendidos(v.id),
-      };
-    });
+    .map(comoSalida);
   return demora(salidas);
+}
+
+/**
+ * Un viaje contado como salida de un bloque de descubrimiento. Estaba escrito
+ * dentro de `proximasSalidas`; sale aquí porque `salidasDesde` cuenta lo
+ * mismo, y dos copias de esto se separan en cuanto alguien toca una.
+ */
+function comoSalida(v: ViajeFila): SalidaCercana {
+  /* Un bloc de découverte dit la VILLE : « Albrook » ne dit rien à qui
+     n'habite pas la capitale. La règle est dans `comoSeLlama`. */
+  const ciudad = fuente.ciudades.find((c) => c.id === v.destination_city_id);
+  const salida = fuente.ciudades.find((c) => c.id === v.origin_city_id);
+  const p = fuente.perfiles.find((x) => x.id === v.driver_id);
+  return {
+    viajeId: v.id,
+    hora: v.departure_at,
+    llegada: v.arrival_estimate_at ?? null,
+    destino: soloCiudad(ciudad?.name, v.destination_label),
+    /* Le point exact SANS sa ville : le titre du bloc dit déjà « desde
+       Panamá », et « Chitré · Ciudad de Panamá · Albrook » se lisait comme
+       trois lieux à la file. */
+    recogida: soloPunto(salida?.name, v.origin_label),
+    aporteCentavos: v.price_cents,
+    foto: ciudad?.slug ?? '',
+    conductor: p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : '',
+    calificacion: fuente.reputacion[v.driver_id]?.calificacion ?? null,
+    viajesHechos: fuente.reputacion[v.driver_id]?.viajes ?? 0,
+    directo: !fuente.paradas.some((x) => x.trip_id === v.id),
+    puestosLibres: v.seats_offered - contarVendidos(v.id),
+  };
 }
 
 /* ------------------------------------------------------------------ *

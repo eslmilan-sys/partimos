@@ -36,6 +36,8 @@ import {
 } from '@/servicios/preferencias';
 import { type EstadoDeCedula, estadoDeCedula } from '@/servicios/seguridad';
 import { useMiIdOEntrar } from '@/servicios/sesion';
+import { type MiCiudad, guardarMiCiudad, miCiudad } from '@/servicios/miCiudad';
+import { ElegirCiudad } from '@/ui/ElegirCiudad';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
@@ -76,6 +78,11 @@ export default function Ajustes() {
   /* Guardadas de verdad: se leen al abrir y se escriben al tocarlas. */
   const [prefs, setPrefs] = useState<Preferencias>(POR_DEFECTO);
   useEffect(() => setPrefs(preferencias()), []);
+  const [ciudad, setCiudad] = useState<MiCiudad | null>(null);
+  const [eligiendoCiudad, setEligiendoCiudad] = useState(false);
+  useEffect(() => {
+    miCiudad(yo).then(setCiudad);
+  }, [yo]);
 
   useEffect(() => {
     if (!yo) return;
@@ -157,6 +164,23 @@ export default function Ajustes() {
         <View style={estilos.tarjeta}>
           <Text style={[estilos.epigrafe, { marginBottom: 5 }]}>{viaje.titulo}</Text>
 
+          {/* De dónde sales normalmente (0043). Se pregunta en el inicio, pero
+              tiene que poder cambiarse desde algún sitio fijo: allí el enlace
+              «Cambiar» sólo aparece cuando hay salidas desde tu ciudad, así
+              que quien elige un pueblo sin viajes se quedaba encerrado. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              ciudad ? `Salgo de ${ciudad.nombre}. Cambiar` : 'Decir de qué ciudad salgo'
+            }
+            onPress={() => setEligiendoCiudad(true)}
+            style={[estilos.filaDato, { paddingTop: 11, paddingBottom: 11 }]}
+          >
+            <Text style={estilos.filaDatoEtiqueta}>Salgo de</Text>
+            <Text style={estilos.filaDatoValor}>{ciudad?.nombre ?? 'Sin decir'}</Text>
+            <Adelante />
+          </Pressable>
+
           <FilaDePalanca
             etiqueta={SOLO_MUJERES.etiqueta}
             descripcion={SOLO_MUJERES.descripcion}
@@ -232,6 +256,18 @@ export default function Ajustes() {
         </Pressable>
       </View>
       </ScrollView>
+
+      <ElegirCiudad
+        abierto={eligiendoCiudad}
+        yo={yo}
+        actual={ciudad}
+        alElegir={(c) => {
+          setEligiendoCiudad(false);
+          setCiudad(c);
+          if (yo) guardarMiCiudad(yo, c.id).catch(() => {});
+        }}
+        alCerrar={() => setEligiendoCiudad(false)}
+      />
     </View>
   );
 }

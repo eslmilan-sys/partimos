@@ -54,6 +54,39 @@ export async function viajePublicado(viajeId: string): Promise<ViajePublicado | 
   return demora(v ? comoPublicado(v) : null);
 }
 
+/**
+ * Los viajes que MANEJAS, partidos en los que vienen y los que ya pasaron.
+ *
+ * Existía `viajesPublicados` —sólo los que vienen— y `viajesHechos`, que
+ * deduplica por ruta porque su trabajo es ofrecer «publicar de nuevo». Para
+ * un historial eso está mal: cuatro viernes a Chitré son cuatro viajes, no
+ * uno. Aquí no se deduplica nada.
+ *
+ * El corte es el reloj y no el estado: un viaje `published` cuya hora ya
+ * pasó pertenece al pasado aunque nadie lo haya cerrado.
+ */
+export async function misViajesConduciendo(
+  conductorId: string,
+): Promise<{ proximos: ViajePublicado[]; pasados: ViajePublicado[] }> {
+  const ahora = Date.now();
+  const mios = fuente.viajes.filter(
+    (v) => v.driver_id === conductorId && v.status !== 'cancelled',
+  );
+  const yaFue = (v: ViajeFila) =>
+    v.status === 'completed' || new Date(v.departure_at).getTime() < ahora;
+
+  return demora({
+    proximos: mios
+      .filter((v) => !yaFue(v))
+      .sort((a, b) => a.departure_at.localeCompare(b.departure_at))
+      .map(comoPublicado),
+    pasados: mios
+      .filter(yaFue)
+      .sort((a, b) => b.departure_at.localeCompare(a.departure_at))
+      .map(comoPublicado),
+  });
+}
+
 /* --------------------------------------------- 10a · repetir un viaje */
 
 /**

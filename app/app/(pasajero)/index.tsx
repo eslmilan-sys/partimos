@@ -23,6 +23,7 @@ import { useRouter } from 'expo-router';
 import { bandeja } from '@/servicios/avisos';
 import { enviarComentario } from '@/servicios/comentarios';
 import { perfilResumido } from '@/servicios/perfiles';
+import { type MiCiudad, comoLugarDeCiudad, guardarMiCiudad, miCiudad } from '@/servicios/miCiudad';
 import { useMiId } from '@/servicios/sesion';
 import { aDondeSeVaDesde, ciudadesDeSalida, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import {
@@ -32,9 +33,11 @@ import {
   diaEnPanama,
   ganchoDeConductor,
   proximasSalidas,
+  salidasDesde,
   rutasPopulares,
 } from '@/servicios/viajes';
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
+import { ElegirCiudad } from '@/ui/ElegirCiudad';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Pestanas } from '@/ui/Pestanas';
@@ -43,8 +46,8 @@ import { Avatar } from '@/ui/controles';
 import { PuntaDeFlecha } from '@/ui/TarjetaDeViaje';
 import { cifraRedonda, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, diaLargo, hora } from '@/ui/fechas';
-import { Calendario, Campana, Carro, Cerrar, Escudo, Intercambio, Lupa, Marca, Persona, Estrella } from '@/ui/iconos';
-import { familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/ui/tokens';
+import { Calendario, Campana, Carro, Cerrar, Escudo, Intercambio, Lupa, Marca, Persona, Estrella, Avanza } from '@/ui/iconos';
+import { TRACK_MICRO, familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
   chitre: require('../../assets/chitre.jpeg'),
@@ -125,6 +128,17 @@ export default function Inicio() {
   /** El banner de manejar se puede cerrar; vuelve al abrir de nuevo. */
   const [sinBanner, setSinBanner] = useState(false);
 
+  /**
+   * DE DÓNDE SALES NORMALMENTE (27-08-2026).
+   *
+   * `undefined` es «todavía no lo he preguntado a la base»; `null` es «lo
+   * pregunté y no la ha dicho». Tratarlos igual haría parpadear la tarjeta
+   * de «¿de qué ciudad sales?» delante de quien ya la contestó.
+   */
+  const [ciudad, setCiudad] = useState<MiCiudad | null | undefined>(undefined);
+  const [desdeCasa, setDesdeCasa] = useState<SalidaCercana[]>([]);
+  const [eligiendoCiudad, setEligiendoCiudad] = useState(false);
+
   /** Las estrellas de «¿qué tal va la app?» — una vez por visita. */
   const [notaTocada, setNotaTocada] = useState<number | null>(null);
   const [notaPuesta, setNotaPuesta] = useState(false);
@@ -154,7 +168,17 @@ export default function Inicio() {
     if (!yo) return;
     perfilResumido(yo).then((p) => setNombre(p?.first_name ?? null));
     bandeja(yo).then((b) => setSinLeer(b.sinLeer));
+    miCiudad(yo).then(setCiudad);
   }, [yo]);
+
+  /* Lo que sale desde su ciudad, en los próximos días. Y el campo «Salgo de»
+     arranca ahí: quien vive en Chitré tenía que corregir la app cada vez que
+     la abría, porque el valor por defecto era siempre la capital. */
+  useEffect(() => {
+    if (!ciudad) return;
+    setDesde(comoLugarDeCiudad(ciudad));
+    salidasDesde(ciudad.slug).then(setDesdeCasa);
+  }, [ciudad]);
 
   const sugerencias =
     buscando === 'hacia'
@@ -462,71 +486,75 @@ export default function Inicio() {
 
             <View style={estilos.listaSalen}>
               {salen.map((v) => (
-                <Pressable
+                <TarjetaSale
                   key={v.viajeId}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${v.destino} a las ${hora(v.hora)} con ${v.conductor}, ${formatearDineroRedondo(v.aporteCentavos)}`}
-                  onPress={() =>
+                  v={v}
+                  alPulsar={() =>
                     router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.viajeId } })
                   }
-                  style={({ pressed }) => [estilos.tarjetaSale, pressed && pulsado.tarjeta]}
-                >
-                  {/* Fila 1: las dos horas con su flecha, y el aporte. */}
-                  <View style={estilos.filaSale}>
-                    <View style={estilos.filaHoras}>
-                      <Text style={[estilos.horaSale, tabular]}>{hora(v.hora)}</Text>
-                      {v.llegada ? (
-                        <>
-                          <PuntaDeFlecha tamano={8} />
-                          <Text style={[estilos.horaSale, tabular]}>{hora(v.llegada)}</Text>
-                        </>
-                      ) : null}
-                    </View>
-                    <View style={estilos.filaPrecioSale}>
-                      <Text style={estilos.unidadSale}>B/</Text>
-                      <Text style={[estilos.precioSale, tabular]}>{cifraRedonda(v.aporteCentavos)}</Text>
-                    </View>
-                  </View>
+                />
+              ))}
+            </View>
+          </View>
+        ) : null}
 
-                  {/* Fila 2: a dónde va y de dónde recoge, y los cupos. */}
-                  <View style={estilos.filaSale}>
-                    <Text style={estilos.rutaSale} numberOfLines={1}>
-                      {v.destino}
-                      {v.recogida ? (
-                        <Text style={estilos.recogidaSale}>{`  ·  sale de ${v.recogida}`}</Text>
-                      ) : null}
-                    </Text>
-                    <Text
-                      style={[
-                        estilos.cuposSale,
-                        { color: v.puestosLibres <= 2 ? color.rojo800 : color.inkIcono },
-                      ]}
-                    >
-                      {v.puestosLibres === 1 ? '1 cupo' : `${v.puestosLibres} cupos`}
-                    </Text>
-                  </View>
+        {/* **¿DE DÓNDE SALES?** (27-08-2026, pedido del dueño.)
 
-                  <View style={estilos.divisorSale} />
+            La app daba por hecho que todo el mundo sale de la capital: quien
+            vive en Chitré tenía que corregir el campo «Salgo de» cada vez que
+            abría. Se pregunta aquí y no en el registro por dos razones: quien
+            entra con Google o Facebook no pasa por los tres pasos y se
+            quedaría sin ciudad para siempre, y aquí la respuesta se paga sola
+            — debajo aparece lo que sale desde ahí. */}
+        {yo && ciudad === null ? (
+          <View style={estilos.seccion}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Decir de qué ciudad salgo normalmente"
+              onPress={() => setEligiendoCiudad(true)}
+              style={({ pressed }) => [estilos.preguntaCiudad, pressed && pulsado.tarjeta]}
+            >
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.preguntaCiudadTitulo}>¿De qué ciudad sales?</Text>
+                <Text style={estilos.preguntaCiudadTexto}>
+                  Te enseñamos lo que ya está publicado desde ahí, y el buscador arranca en tu
+                  ciudad en vez de en Panamá.
+                </Text>
+              </View>
+              <Avanza />
+            </Pressable>
+          </View>
+        ) : null}
 
-                  {/* Fila 3: quién maneja, con su nota y sus viajes; Directo. */}
-                  <View style={estilos.filaQuienSale}>
-                    <Avatar nombre={v.conductor || '·'} tamano={24} />
-                    <Text style={estilos.quienSale} numberOfLines={1}>
-                      {v.conductor}
-                      {v.calificacion != null ? (
-                        <Text style={[estilos.notaSale, tabular]}>
-                          {`  ★ ${v.calificacion.toFixed(1)}`}
-                          {v.viajesHechos > 0 ? ` · ${v.viajesHechos} viajes` : ''}
-                        </Text>
-                      ) : null}
-                    </Text>
-                    {v.directo ? (
-                      <View style={estilos.chipDirecto}>
-                        <Text style={estilos.chipDirectoTexto}>Directo</Text>
-                      </View>
-                    ) : null}
-                  </View>
-                </Pressable>
+        {/* Lo que sale desde su ciudad en los próximos días. Sin punto en
+            vivo: eso es de la sección de arriba, que mira la próxima hora, y
+            el rojo «en vivo» es uno de sus cuatro sentidos exactos. */}
+        {ciudad && desdeCasa.length > 0 ? (
+          <View style={estilos.seccion}>
+            <View style={estilos.cabeceraSeccion}>
+              <View style={estilos.cabeceraIzquierda}>
+                <Text style={estilos.tituloSeccion}>{`Desde ${ciudad.nombre}, estos días`}</Text>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Cambiar mi ciudad"
+                onPress={() => setEligiendoCiudad(true)}
+                style={zonaDeToque}
+              >
+                <Text style={estilos.enlaceSeccion}>Cambiar</Text>
+              </Pressable>
+            </View>
+
+            <View style={estilos.listaSalen}>
+              {desdeCasa.map((v) => (
+                <TarjetaSale
+                  key={v.viajeId}
+                  v={v}
+                  conDia
+                  alPulsar={() =>
+                    router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.viajeId } })
+                  }
+                />
               ))}
             </View>
           </View>
@@ -607,6 +635,18 @@ export default function Inicio() {
 
       <Pestanas valor="Buscar" insignias={{ Mensajes: sinLeer > 0 ? sinLeer : undefined }} />
 
+      <ElegirCiudad
+        abierto={eligiendoCiudad}
+        yo={yo}
+        actual={ciudad ?? null}
+        alElegir={(c) => {
+          setEligiendoCiudad(false);
+          setCiudad(c);
+          if (yo) guardarMiCiudad(yo, c.id).catch(() => {});
+        }}
+        alCerrar={() => setEligiendoCiudad(false)}
+      />
+
       <BuscadorDeLugar
         abierto={buscando !== null}
         titulo={buscando === 'desde' ? 'Desde dónde sales' : 'A dónde vas'}
@@ -640,7 +680,138 @@ export default function Inicio() {
   );
 }
 
+
+/**
+ * UNA SALIDA, en la tarjeta de `1a`.
+ *
+ * Sale del cuerpo de la sección «Próximas salidas» porque desde el 27-08-2026
+ * hay DOS listas que la dibujan igual —lo que sale ahora, y lo que sale desde
+ * tu ciudad en los próximos días— y sesenta líneas copiadas se separan en
+ * cuanto alguien toca una.
+ */
+function TarjetaSale({
+  v,
+  alPulsar,
+  conDia = false,
+}: {
+  v: SalidaCercana;
+  alPulsar: () => void;
+  /**
+   * Escribe el día junto a la hora. La lista de «salen ahora» mira la próxima
+   * hora, así que el día se sobreentiende; la de «desde tu ciudad» abarca una
+   * semana, y sin fecha dos salidas del martes y del miércoles a la misma
+   * hora se leían como la misma fila repetida.
+   */
+  conDia?: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${v.destino} a las ${hora(v.hora)} con ${v.conductor}, ${formatearDineroRedondo(v.aporteCentavos)}`}
+      onPress={alPulsar}
+      style={({ pressed }) => [estilos.tarjetaSale, pressed && pulsado.tarjeta]}
+    >
+      {/* Fila 1: las dos horas con su flecha, y el aporte. */}
+      <View style={estilos.filaSale}>
+        <View style={estilos.filaHoras}>
+          {conDia ? <Text style={estilos.diaSale}>{diaCorto(v.hora)}</Text> : null}
+          <Text style={[estilos.horaSale, tabular]}>{hora(v.hora)}</Text>
+          {v.llegada ? (
+            <>
+              <PuntaDeFlecha tamano={8} />
+              <Text style={[estilos.horaSale, tabular]}>{hora(v.llegada)}</Text>
+            </>
+          ) : null}
+        </View>
+        <View style={estilos.filaPrecioSale}>
+          <Text style={estilos.unidadSale}>B/</Text>
+          <Text style={[estilos.precioSale, tabular]}>{cifraRedonda(v.aporteCentavos)}</Text>
+        </View>
+      </View>
+
+      {/* Fila 2: a dónde va y de dónde recoge, y los cupos. */}
+      <View style={estilos.filaSale}>
+        <Text style={estilos.rutaSale} numberOfLines={1}>
+          {v.destino}
+          {v.recogida ? (
+            <Text style={estilos.recogidaSale}>{`  ·  sale de ${v.recogida}`}</Text>
+          ) : null}
+        </Text>
+        <Text
+          style={[
+            estilos.cuposSale,
+            { color: v.puestosLibres <= 2 ? color.rojo800 : color.inkIcono },
+          ]}
+        >
+          {v.puestosLibres === 1 ? '1 cupo' : `${v.puestosLibres} cupos`}
+        </Text>
+      </View>
+
+      <View style={estilos.divisorSale} />
+
+      {/* Fila 3: quién maneja, con su nota y sus viajes; Directo. */}
+      <View style={estilos.filaQuienSale}>
+        <Avatar nombre={v.conductor || '·'} tamano={24} />
+        <Text style={estilos.quienSale} numberOfLines={1}>
+          {v.conductor}
+          {v.calificacion != null ? (
+            <Text style={[estilos.notaSale, tabular]}>
+              {`  ★ ${v.calificacion.toFixed(1)}`}
+              {v.viajesHechos > 0 ? ` · ${v.viajesHechos} viajes` : ''}
+            </Text>
+          ) : null}
+        </Text>
+        {v.directo ? (
+          <View style={estilos.chipDirecto}>
+            <Text style={estilos.chipDirectoTexto}>Directo</Text>
+          </View>
+        ) : null}
+      </View>
+    </Pressable>
+  );
+}
+
 const estilos = StyleSheet.create({
+  /** El día junto a la hora, en la lista que abarca varios días. */
+  diaSale: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '600',
+    letterSpacing: 12 * TRACK_MICRO,
+    textTransform: 'uppercase',
+    color: color.ink500,
+    marginRight: 4,
+    fontFamily: familia,
+  },
+  /** La pregunta de la ciudad: de trazo discontinuo, como todo lo que falta. */
+  preguntaCiudad: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: color.bordePorDefecto,
+    borderRadius: radio.l,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+  },
+  preguntaCiudadTitulo: {
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: '600',
+    letterSpacing: -0.26,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  preguntaCiudadTexto: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: color.ink600,
+    marginTop: 4,
+    fontFamily: familia,
+  },
+
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
