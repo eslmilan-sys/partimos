@@ -23,7 +23,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import { type CanalDePago, seCobraEnLaApp } from '@/dominio/tarifas';
 import { cuenta } from '@/servicios/ajustes';
-import { type MetodoDePago, desglosar, metodosDePago } from '@/servicios/pagos';
+import { APORTE_DE_EJEMPLO, type MetodoDePago, desglosar, metodosDePago } from '@/servicios/pagos';
 import { type ReservaPreparada, prepararReserva } from '@/servicios/reservas';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -37,40 +37,64 @@ import { familia, color, espacio, radio, sombra } from '@/ui/tokens';
 /** Daniela, la pasajera del recorrido. Mientras no haya sesión, va aquí. */
 const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 /** Albrook → Chitré: el aporte de 6 $ sobre el que se calculan las tarifas. */
-const VIAJE_DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
+
 
 export default function Metodos() {
   const router = useRouter();
   const volver = useVolver();
   const { viaje: viajeParam } = useLocalSearchParams<{ viaje?: string }>();
-  const viajeId = viajeParam ?? VIAJE_DEL_RECORRIDO;
   const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
   const [metodos, setMetodos] = useState<MetodoDePago[]>([]);
-  const [viaje, setViaje] = useState<ReservaPreparada | null>(null);
+  /** El aporte sobre el que se enseña la tarifa, y de quién es el viaje. */
+  const [sobre, setSobre] = useState<{ aporteCentavos: number; conductor: string } | null>(null);
   const [canal, setCanal] = useState<CanalDePago | null>(null);
 
+  /**
+   * SE ABRÍA EN BLANCO — para siempre. Esta pantalla enseña la tarifa sobre
+   * un aporte CONCRETO, así que pedía la reserva de un viaje. Y cuando se
+   * abre desde la cuenta o desde ajustes NO HAY VIAJE: caía en el
+   * identificador del recorrido de diseño, que no existe en la base real,
+   * `prepararReserva` lanzaba, nadie recogía el fallo y la pantalla se
+   * quedaba en el esqueleto. Sin salida, sin mensaje. Visto por el dueño el
+   * 26-08-2026 — y era también la captura de las tarjetas grises de la
+   * víspera, que no supe situar entonces.
+   *
+   * Dos cosas cambian. Sin viaje NO SE PIDE NINGUNO: la tarifa se enseña
+   * sobre un aporte de ejemplo, dicho como ejemplo. Y con viaje, si algo
+   * falla, se cae al mismo ejemplo en vez de colgarse: una pantalla de
+   * ajustes no puede quedarse en blanco porque un viaje no cargue.
+   */
   useEffect(() => {
     if (!yo) return;
+    let vivo = true;
     (async () => {
-      const [lista, preparado, quien] = await Promise.all([
-        metodosDePago(viajeId),
-        prepararReserva(viajeId),
-        cuenta(yo),
-      ]);
+      const [lista, quien] = await Promise.all([metodosDePago(viajeParam ?? null), cuenta(yo)]);
+      if (!vivo) return;
       setMetodos(lista);
-      setViaje(preparado);
       // El predeterminado es el que la cuenta ya tiene guardado, no el primero
       // que devuelva la lista.
       setCanal(lista.find((m) => m.nombre === quien.metodo)?.canal ?? lista[0]?.canal ?? null);
+
+      const deEjemplo = { aporteCentavos: APORTE_DE_EJEMPLO, conductor: '' };
+      if (!viajeParam) return setSobre(deEjemplo);
+      try {
+        const preparado = await prepararReserva(viajeParam);
+        if (vivo) setSobre({ aporteCentavos: preparado.aporteCentavos, conductor: preparado.conductor });
+      } catch {
+        if (vivo) setSobre(deEjemplo);
+      }
     })();
-  }, [yo, viajeId]);
+    return () => {
+      vivo = false;
+    };
+  }, [yo, viajeParam]);
 
   const desglose = useMemo(
-    () => (viaje && canal ? desglosar(viaje.aporteCentavos, canal, viaje.conductor) : null),
-    [viaje, canal],
+    () => (sobre && canal ? desglosar(sobre.aporteCentavos, canal, sobre.conductor) : null),
+    [sobre, canal],
   );
 
-  if (!viaje || !canal || !desglose) return <Cargando />;
+  if (!sobre || !canal || !desglose) return <Cargando />;
 
   const elegido = metodos.find((m) => m.canal === canal);
 
@@ -148,7 +172,11 @@ export default function Metodos() {
           accessibilityRole="button"
           accessibilityLabel="Añadir método de pago"
           onPress={() =>
-            router.push({ pathname: '/(pasajero)/metodo-nuevo', params: { viaje: viajeId } })
+            router.push(
+              viajeParam
+                ? { pathname: '/(pasajero)/metodo-nuevo', params: { viaje: viajeParam } }
+                : '/(pasajero)/metodo-nuevo',
+            )
           }
           style={estilos.anadir}
         >
@@ -164,7 +192,7 @@ export default function Metodos() {
           </Text>
           <View style={estilos.filaEjemplo}>
             <Text style={estilos.ejemplo}>
-              {`Un viaje de ${formatearDineroRedondo(viaje.aporteCentavos)} con `}
+              {`${viajeParam ? 'Un viaje' : 'Un viaje de ejemplo'} de ${formatearDineroRedondo(sobre.aporteCentavos)} con `}
               <Text style={estilos.ejemplo}>{elegido?.nombre ?? ''}</Text>
             </Text>
             <Dinero centavos={desglose.totalCentavos} style={estilos.ejemploTotal} />

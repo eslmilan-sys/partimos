@@ -30,10 +30,25 @@ export type MetodoDePago = {
 };
 
 /** Los métodos que el viaje admite, con su tarifa ya calculada sobre este aporte. */
-export async function metodosDePago(viajeId: string): Promise<MetodoDePago[]> {
-  const viaje = fuente.viajes.find((v) => v.id === viajeId);
-  if (!viaje) throw new Error(`No existe el viaje ${viajeId}`);
-  const aporte = viaje.price_cents;
+/**
+ * El aporte sobre el que se enseña la tarifa cuando no hay viaje concreto —
+ * desde la cuenta o desde ajustes. Es el de Panamá → Chitré, la ruta más
+ * usada: un porcentaje no se entiende en el aire, hace falta un número al
+ * lado para verlo en dinero.
+ */
+export const APORTE_DE_EJEMPLO = 800;
+
+/**
+ * Los métodos, con lo que cuesta cobrar por cada uno.
+ *
+ * **Sin viaje también.** Antes exigía uno y LANZABA si no lo encontraba, así
+ * que abrir esta pantalla desde la cuenta —donde no hay viaje ninguno—
+ * dejaba la app en el esqueleto para siempre (visto el 26-08-2026). La
+ * tarifa se enseña entonces sobre el aporte de ejemplo, dicho como ejemplo.
+ */
+export async function metodosDePago(viajeId: string | null): Promise<MetodoDePago[]> {
+  const viaje = viajeId ? fuente.viajes.find((v) => v.id === viajeId) : undefined;
+  const aporte = viaje?.price_cents ?? APORTE_DE_EJEMPLO;
 
   const todos: MetodoDePago[] = [
     {
@@ -56,8 +71,12 @@ export async function metodosDePago(viajeId: string): Promise<MetodoDePago[]> {
     },
   ];
 
-  // El conductor decide si acepta efectivo y Yappy directo.
-  return demora(todos.filter((m) => (m.canal === 'external' ? viaje.accepts_cash : true)));
+  /* El conductor decide si acepta efectivo y Yappy directo. Sin viaje no hay
+     conductor que decida, así que se enseñan los tres: la lista es entonces
+     el catálogo de métodos, no lo que un viaje concreto admite. */
+  return demora(
+    todos.filter((m) => (m.canal === 'external' && viaje ? viaje.accepts_cash : true)),
+  );
 }
 
 export type Desglose = {

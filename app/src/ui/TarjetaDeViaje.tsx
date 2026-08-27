@@ -322,7 +322,12 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  rail: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 5 },
+  /* SIN `gap`: el hueco de 5 a cada lado dejaba la punta roja FLOTANDO al
+     lado del trazo en vez de terminarlo — se leía como una esquirla suelta,
+     igual que pasaba en la cabecera de resultados. Ahora el trazo entra bajo
+     la base del triángulo (margen derecho negativo) y los tres son una sola
+     marca. Pedido por el dueño el 26-08-2026. */
+  rail: { width: '100%', flexDirection: 'row', alignItems: 'center' },
   aro: { width: 7, height: 7, borderRadius: 4, borderWidth: 2, borderColor: color.inkIcono },
   /* Un trazo continuo y fino: los guiones del borde «dashed» salían como
      tacos desiguales en el teléfono (25-08). El aro y la punta roja se
@@ -330,9 +335,16 @@ const estilos = StyleSheet.create({
      camino entre los dos. */
   railLinea: {
     flex: 1,
-    height: 1.25,
+    /* 1,25 al 16 % no se veía a un brazo de distancia: el trazo desaparecía y
+       quedaban dos manchas sueltas. Sube a 1,5 y al 22 %, que es leerse sin
+       competir con la hora. */
+    height: 1.5,
     borderRadius: 1,
-    backgroundColor: 'rgba(10,39,49,.16)',
+    backgroundColor: 'rgba(10,39,49,.22)',
+    marginLeft: 4,
+    // La punta tiene su base a 0,9 px del borde de su caja: el trazo se mete
+    // ese píxel por debajo para que no quede blanco entre los dos.
+    marginRight: -1,
   },
   duracion: { fontSize: 10, lineHeight: 13, fontWeight: '500', color: color.ink600, fontFamily: familia, ...tabular },
   paradas: { fontSize: 10, lineHeight: 13, fontWeight: '400', color: color.ink400, fontFamily: familia },

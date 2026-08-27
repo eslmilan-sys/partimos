@@ -38,7 +38,7 @@ import {
   diaEnPanama,
   proximoDiaConViajes,
 } from '@/servicios/viajes';
-import { nombreDeCiudad, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
+import { aDondeSeVaDesde, ciudadesDeSalida, nombreDeCiudad, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import { guardarRutaBuscada } from '@/servicios/rutas';
 import { preferencias } from '@/servicios/preferencias';
 import { useMiId } from '@/servicios/sesion';
@@ -46,6 +46,7 @@ import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
+import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { Boton } from '@/ui/controles';
 import { cifraRedonda, tabular } from '@/ui/dinero';
 import { duracionEntre as duracion, diaCorto, diaLargo, hora } from '@/ui/fechas';
@@ -56,6 +57,13 @@ import { familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/
 /** La ruta del traspaso, cuando la pantalla se abre suelta desde el índice. */
 const ORIGEN_POR_DEFECTO = CIUDAD_POR_DEFECTO;
 const DESTINO_POR_DEFECTO = 'chitre';
+
+const CUANTOS_PUESTOS: Opcion[] = [
+  { valor: '1', etiqueta: '1 pasajero' },
+  { valor: '2', etiqueta: '2 pasajeros' },
+  { valor: '3', etiqueta: '3 pasajeros' },
+  { valor: '4', etiqueta: '4 pasajeros' },
+];
 
 /** Un viaje al que no le caben tus pasajeros: se enseña agotado, no se borra. */
 type ViajeAgotado = ViajeEnTarjeta;
@@ -105,6 +113,10 @@ export default function Resultados() {
   );
   const [hojaAbierta, setHojaAbierta] = useState(false);
   const [eligiendoDia, setEligiendoDia] = useState(false);
+  /** La hoja de editar la búsqueda, y lo que se está tocando dentro. */
+  const [editando, setEditando] = useState(false);
+  const [buscandoLugar, setBuscandoLugar] = useState<'desde' | 'hacia' | null>(null);
+  const [eligiendoCuantos, setEligiendoCuantos] = useState(false);
   const [viajes, setViajes] = useState<ViajeEnTarjeta[]>([]);
   const [agotados, setAgotados] = useState<ViajeAgotado[]>([]);
   const [dia, setDia] = useState<string | null>(null);
@@ -257,10 +269,15 @@ export default function Resultados() {
         >
           <Atras tamano={23} tinta={color.ink900} />
         </Pressable>
+        {/* EL LÁPIZ EDITA AQUÍ. Llamaba a `volver()`: se pulsaba «editar la
+            búsqueda» y la app se iba al inicio — a una pantalla distinta, con
+            los campos vacíos, perdiendo la búsqueda que se quería retocar.
+            Ahora abre una hoja sobre los resultados y al buscar se quedan en
+            su sitio. Pedido por el dueño el 26-08-2026. */}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Editar la búsqueda"
-          onPress={() => volver()}
+          onPress={() => setEditando(true)}
           style={({ pressed }) => [estilos.celdaIcono, pressed && pulsado.celda]}
         >
           <Lapiz />
@@ -598,6 +615,124 @@ export default function Resultados() {
         alCambiar={setFiltros}
         alCerrar={() => setHojaAbierta(false)}
         cuantos={viajes.length}
+      />
+
+      {/* ── EDITAR LA BÚSQUEDA, SIN SALIR DE LOS RESULTADOS ──────────────
+          Cuatro campos y un botón: de dónde sales, a dónde vas, qué día y
+          cuántos van. Tocar «Buscar» escribe `ruta`, y `buscar()` depende de
+          `ruta`, así que la lista de detrás se rehace sola — no hay que
+          navegar a ningún sitio ni pasar parámetros. */}
+      <Modal
+        visible={editando}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setEditando(false)}
+      >
+        <Pressable
+          accessibilityLabel="Cerrar"
+          onPress={() => setEditando(false)}
+          style={estilos.veloEdicion}
+        />
+        <View style={estilos.hojaEdicion}>
+          <View style={estilos.asa} />
+          <View style={estilos.filaTituloEdicion}>
+            <Text style={estilos.tituloEdicion}>Tu búsqueda</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cerrar"
+              onPress={() => setEditando(false)}
+              style={estilos.cerrarEdicion}
+            >
+              <Cerrar tamano={15} />
+            </Pressable>
+          </View>
+
+          {/* Los rótulos son verbos en primera persona — invariante 8. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Salgo de ${nombreDeCiudad(origen)}`}
+            onPress={() => setBuscandoLugar('desde')}
+            style={({ pressed }) => [estilos.campoEdicion, pressed && pulsado.celda]}
+          >
+            <Text style={estilos.cejaEdicion}>Salgo de</Text>
+            <Text style={estilos.valorEdicion} numberOfLines={1}>
+              {nombreDeCiudad(origen)}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Voy a ${etiquetaDestino}`}
+            onPress={() => setBuscandoLugar('hacia')}
+            style={({ pressed }) => [estilos.campoEdicion, pressed && pulsado.celda]}
+          >
+            <Text style={[estilos.cejaEdicion, estilos.cejaHasta]}>Voy a</Text>
+            <Text style={estilos.valorEdicion} numberOfLines={1}>
+              {etiquetaDestino}
+            </Text>
+          </Pressable>
+
+          <View style={estilos.parEdicion}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Qué día, ${cuandoTexto(dia)}`}
+              onPress={() => setEligiendoDia(true)}
+              style={({ pressed }) => [estilos.campoEdicion, { flex: 1 }, pressed && pulsado.celda]}
+            >
+              <Text style={estilos.cejaEdicion}>Qué día</Text>
+              <Text style={estilos.valorEdicion} numberOfLines={1}>
+                {cuandoTexto(dia)}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Cuántos van, ${ruta.pasajeros}`}
+              onPress={() => setEligiendoCuantos(true)}
+              style={({ pressed }) => [estilos.campoEdicion, { flex: 1 }, pressed && pulsado.celda]}
+            >
+              <Text style={estilos.cejaEdicion}>Cuántos van</Text>
+              <Text style={estilos.valorEdicion} numberOfLines={1}>
+                {`${ruta.pasajeros} ${ruta.pasajeros === 1 ? 'pasajero' : 'pasajeros'}`}
+              </Text>
+            </Pressable>
+          </View>
+
+          <View style={{ marginTop: 18 }}>
+            <Boton alPulsar={() => setEditando(false)}>Buscar</Boton>
+          </View>
+        </View>
+      </Modal>
+
+      {/* El mismo buscador de lugares que publicar: se elige de la lista, no
+          se inventa (26-08-2026). Cambiar el origen o el destino reescribe
+          `ruta`, y con ella la búsqueda de detrás. */}
+      <BuscadorDeLugar
+        abierto={buscandoLugar !== null}
+        titulo={buscandoLugar === 'desde' ? 'Desde dónde sales' : 'A dónde vas'}
+        sugerencias={buscandoLugar === 'hacia' ? aDondeSeVaDesde(origen) : ciudadesDeSalida()}
+        alElegir={(l) => {
+          const slug = l.citySlug ?? '';
+          if (slug) {
+            setRuta((r) =>
+              !r
+                ? r
+                : buscandoLugar === 'desde'
+                  ? { ...r, origen: slug }
+                  : { ...r, destino: slug, etiqueta: l.nombre },
+            );
+          }
+          setBuscandoLugar(null);
+        }}
+        alCerrar={() => setBuscandoLugar(null)}
+      />
+
+      <HojaDeEleccion
+        abierta={eligiendoCuantos}
+        titulo="Cuántos van"
+        opciones={CUANTOS_PUESTOS}
+        elegido={String(ruta.pasajeros)}
+        alElegir={(v) => setRuta((r) => (r ? { ...r, pasajeros: Number(v) } : r))}
+        alCerrar={() => setEligiendoCuantos(false)}
       />
 
       <HojaDeEleccion
@@ -1278,6 +1413,73 @@ const estilos = StyleSheet.create({
     width: '100%',
   },
   asa: { width: 40, height: 4, borderRadius: 2, backgroundColor: color.ink200, alignSelf: 'center' },
+
+  /* ── La hoja de editar la búsqueda ───────────────────────────────────
+     Misma gramática que la hoja de filtros: velo de tinta, hoja blanca
+     abajo con su asa, campos de 62 con ceja y valor. Los rótulos son
+     verbos en primera persona, como manda el invariante 8. */
+  veloEdicion: { flex: 1, backgroundColor: 'rgba(10,39,49,.34)' },
+  hojaEdicion: {
+    backgroundColor: color.blanco,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingTop: 10,
+    paddingHorizontal: espacio.gutter,
+    paddingBottom: 30,
+    gap: 10,
+  },
+  filaTituloEdicion: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  tituloEdicion: {
+    fontFamily: familia,
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '600',
+    letterSpacing: -0.6,
+    color: color.ink900,
+  },
+  cerrarEdicion: {
+    width: 32,
+    height: 32,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.campoControl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  campoEdicion: {
+    minHeight: 62,
+    justifyContent: 'center',
+    gap: 3,
+    borderRadius: radio.control,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    backgroundColor: color.blanco,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  cejaEdicion: {
+    fontFamily: familia,
+    fontSize: 10.5,
+    lineHeight: 14,
+    fontWeight: '600',
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
+    color: color.ink600,
+  },
+  valorEdicion: {
+    fontFamily: familia,
+    fontSize: 16.5,
+    lineHeight: 22,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+    color: color.ink900,
+  },
+  parEdicion: { flexDirection: 'row', gap: 10 },
   hojaTitulo: {
     fontFamily: familia,
     fontSize: 20,
