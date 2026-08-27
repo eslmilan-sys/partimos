@@ -638,6 +638,11 @@ export type BorradorDePublicacion = {
   /** Las dos condiciones del carro, no del pasajero. Ver migración 0029. */
   aceptaMascotas: boolean;
   sePuedeFumar: boolean;
+  /** Dónde va sentada la gente (0045). Si falta, todo va sin decir dónde. */
+  adelante?: number | null;
+  atras?: number | null;
+  /** Lo que el conductor quiere decirles. Va a `trips.notes`. */
+  comentario?: string | null;
 };
 
 export async function publicarViaje(borrador: BorradorDePublicacion): Promise<ViajeFila> {
@@ -668,9 +673,11 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
       new Date(borrador.salida).getTime() + (preparada.duracionMin ?? 0) * 60_000,
     ).toISOString(),
     seats_offered: borrador.puestos,
+    seats_front: borrador.adelante ?? null,
+    seats_back: borrador.atras ?? null,
     price_cents: aporte,
     gender_preference: borrador.soloMujeres ? 'women_only' : 'any',
-    notes: null,
+    notes: borrador.comentario?.trim() || null,
     status: 'published',
     price_rule_id: '6ad0a57f-ec7c-4a83-b331-523af650584e',
     snap_distance_km: preparada.distanciaKm,

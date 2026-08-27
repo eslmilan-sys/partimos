@@ -60,7 +60,7 @@ import {
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
-import { Boton, Epigrafe, Stepper } from '@/ui/controles';
+import { Boton, Epigrafe, Stepper, Interruptor } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
 import { color, espacio, familia, interlinea, pulsado, radio, sombra, texto } from '@/ui/tokens';
@@ -360,6 +360,33 @@ export default function RegistrarCarro() {
               </Text>
             </Pressable>
           )}
+        </View>
+
+        {/* ── LO QUE TIENE EL CARRO (0045) ────────────────────────────
+            Pedido del dueño el 27-08-2026: que quien maneja pueda decir qué
+            ofrece su carro. Va aquí y no en cada publicación porque el aire
+            no se instala el viernes y se quita el domingo. */}
+        <View style={estilos.tarjeta}>
+          <Text style={estilos.tituloFoto}>Lo que tiene tu carro</Text>
+          <Text style={estilos.ayudaComodidad}>
+            Se ve en la ficha del viaje, junto al modelo. Sólo se anuncia lo que hay.
+          </Text>
+          <View style={{ marginTop: 14 }}>
+            <Interruptor
+              activo={borrador.aire}
+              alCambiar={(v) => setBorrador((b) => ({ ...b, aire: v }))}
+              etiqueta="Aire acondicionado"
+              descripcion="Tres horas de carretera se notan."
+            />
+          </View>
+          <View style={{ marginTop: 14 }}>
+            <Interruptor
+              activo={borrador.usb}
+              alCambiar={(v) => setBorrador((b) => ({ ...b, usb: v }))}
+              etiqueta="Enchufe USB"
+              descripcion="Para que puedan cargar el teléfono."
+            />
+          </View>
         </View>
 
         {/* ── El resumen, que se arma solo ────────────────────────────── */}
@@ -699,6 +726,13 @@ const estilos = StyleSheet.create({
 
   tarjetaFoto: { paddingHorizontal: 18, paddingVertical: 16 },
   filaTitulo: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  ayudaComodidad: {
+    marginTop: 4,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: color.ink500,
+    fontFamily: familia,
+  },
   tituloFoto: { ...texto.fila, color: color.ink900, flex: 1 },
   obligatoria: {
     fontSize: 11.5,

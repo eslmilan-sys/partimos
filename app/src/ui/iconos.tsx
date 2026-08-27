@@ -261,6 +261,55 @@ export function Chat({ tamano = 21, tinta = color.ink700, grueso, lleno }: Props
   );
 }
 
+/**
+ * AIRE ACONDICIONADO — un copo, que es como se dice el frío en un carro.
+ * Tres ejes con sus puntas: al trazo de 1,9 como todo el sistema.
+ */
+export function Aire({ tamano = 21, tinta = color.ink700, grueso }: PropsPestana) {
+  const t = grueso ?? trazo(tamano);
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path
+        d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"
+        stroke={tinta}
+        strokeWidth={t}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M9.6 4.9 12 6.7l2.4-1.8M9.6 19.1 12 17.3l2.4 1.8"
+        stroke={tinta}
+        strokeWidth={t}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </Svg>
+  );
+}
+
+/** ENCHUFE USB — la clavija con sus dos patas. */
+export function Enchufe({ tamano = 21, tinta = color.ink700, grueso }: PropsPestana) {
+  const t = grueso ?? trazo(tamano);
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path
+        d="M9 2.6v4.2M15 2.6v4.2"
+        stroke={tinta}
+        strokeWidth={t}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M6.6 6.8h10.8v4.4a5.4 5.4 0 0 1-5.4 5.4 5.4 5.4 0 0 1-5.4-5.4z"
+        stroke={tinta}
+        strokeWidth={t}
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <Path d="M12 16.6v4.8" stroke={tinta} strokeWidth={t} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
 export function Persona({ tamano = 21, tinta = color.ink700, grueso, lleno }: PropsPestana) {
   const t = grueso ?? trazo(tamano);
   return (

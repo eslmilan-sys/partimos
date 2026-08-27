@@ -38,6 +38,15 @@ export type BorradorDeCarro = {
   /** Lo pone el modelo, no el conductor. */
   puestos: number;
   foto: string | null;
+  /**
+   * LO QUE TIENE EL CARRO (0045, pedido del dueño con capturas de BlaBlaCar).
+   *
+   * Va con el CARRO y no con cada viaje: el aire no se instala el viernes y
+   * se quita el domingo. Preguntarlo en cada publicación sería hacer teclear
+   * cada semana lo mismo.
+   */
+  aire: boolean;
+  usb: boolean;
 };
 
 export function catalogo(marca?: string): Catalogo {
@@ -73,6 +82,8 @@ export function borradorInicial(): BorradorDeCarro {
        carro lo escribe su dueño, no el formulario. */
     placa: '',
     puestos: puestosDe(modelo),
+    aire: true,
+    usb: false,
     foto: null,
   };
 }
@@ -109,6 +120,26 @@ export function resumen(b: BorradorDeCarro): Resumen {
     linea: `${b.marca} ${b.modelo} ${b.color.toLowerCase()}`,
     detalle: `${placaTapada(b.placa)} · ${b.anio} · ${b.puestos} puestos`,
   };
+}
+
+/**
+ * LO QUE EL CARRO OFRECE, dicho en una lista con icono — como lo enseña
+ * BlaBlaCar en la ficha del viaje, y como el dueño pidió el 27-08-2026.
+ *
+ * Sólo se dice lo que HAY. «Sin aire acondicionado» no es una comodidad que
+ * anunciar; callarlo es más honesto que darle la vuelta a la frase, y quien
+ * lo necesita ya sabe preguntar por el chat.
+ */
+export type ComodidadDelCarro = { clave: 'aire' | 'usb'; texto: string };
+
+export function comodidadesDe(v: {
+  has_ac?: boolean | null;
+  has_usb?: boolean | null;
+}): ComodidadDelCarro[] {
+  const salida: ComodidadDelCarro[] = [];
+  if (v.has_ac) salida.push({ clave: 'aire', texto: 'Aire acondicionado' });
+  if (v.has_usb) salida.push({ clave: 'usb', texto: 'Enchufe USB' });
+  return salida;
 }
 
 /**
@@ -162,6 +193,8 @@ export async function guardarCarro(duenoId: string, b: BorradorDeCarro): Promise
     consumption_l_100km: null,
     rate_per_km_cents: null,
     photo_path: b.foto,
+    has_ac: b.aire,
+    has_usb: b.usb,
   };
 
   const guardado = await fuente.guardarVehiculo(carro);

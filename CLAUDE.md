@@ -194,6 +194,31 @@ parler :
   c'est la dérivation qui le porte. Dédoublonnage par (kind, booking_id).
   Ce qui manque encore : l'envoi push téléphone fermé (besoin d'un cron pour
   le rappel et d'un canal d'envoi).
+- **Publier se fait en étapes (27-08-2026, sur les captures BlaBlaCar du
+  propriétaire).** Un écran, une décision, dans l'ordre où l'on pense un
+  trajet : route → paradas → jour → heure → carro et places → apport →
+  apport depuis chaque parada → conditions → commentaire → repaso. Une
+  date de départ dans le passé se refuse **à l'étape de l'heure**, là où
+  ça se répare, pas en bandeau rouge à la fin.
+- **Le carro dit ce qu'il a, et où l'on s'assoit (0045).**
+  `vehicles.has_ac` / `has_usb` — du carro, pas du trajet : l'air ne
+  s'installe pas le vendredi. `trips.seats_front` / `seats_back` : « máx.
+  2 personas atrás » n'est pas une case de plus, c'est avoir mis 2
+  derrière. Les deux sont **nuls** dans ce qui était publié avant ; on
+  n'invente pas le passé.
+- **« Solo mujeres » n'est offert qu'aux conductrices.** L'étiquette
+  promet une voiture où toutes les personnes à bord sont des femmes, et
+  qui la cherche la cherche pour ça. Avec un homme au volant la promesse
+  ne tient pas, donc l'interrupteur n'existe pas. Sans savoir le genre,
+  on ne l'offre pas non plus.
+- **L'apport depuis une parada a SON propre plafond (0045).** BlaBlaCar
+  laisse fixer le prix de chaque tronçon librement ; nous non. Même
+  formule sur les kilomètres de CE tronçon, même `+1`, et
+  `trip_segment_prices` porte la contrainte `trip_segment_within_cap` —
+  la base le dit, pas le code. Sans ça, découper un trajet en morceaux
+  serait la porte de derrière pour facturer quatre fois le coût.
+  `app/src/dominio/tramos.ts`, avec le test « découper n'encherit
+  jamais ».
 - **Un seul code, et c'est celui de la montée (27-08-2026).** Il y en avait
   deux, tous deux tapés par le conducteur ; le second, à la descente,
   fermait la réservation et libérait l'apport. Deux défauts : le passager

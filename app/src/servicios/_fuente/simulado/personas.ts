@@ -284,6 +284,8 @@ export const vehiculos: Vehicle[] = [
     consumption_l_100km: 8.0,
     rate_per_km_cents: null,
     photo_path: null,
+    has_ac: true,
+    has_usb: true,
   },
   /**
    * El SEGUNDO carro de Andrés. Está aquí porque con uno solo no se puede ver
@@ -306,6 +308,8 @@ export const vehiculos: Vehicle[] = [
     consumption_l_100km: 9.5,
     rate_per_km_cents: null,
     photo_path: null,
+    has_ac: true,
+    has_usb: false,
   },
   {
     id: TUCSON_ID,
@@ -322,6 +326,8 @@ export const vehiculos: Vehicle[] = [
     consumption_l_100km: 11.0,
     rate_per_km_cents: null,
     photo_path: null,
+    has_ac: true,
+    has_usb: false,
   },
   /* ── Los carros de los demás conductores ─────────────────────────────────
    *
@@ -345,6 +351,8 @@ export const vehiculos: Vehicle[] = [
     consumption_l_100km: 6.5,
     rate_per_km_cents: null,
     photo_path: null,
+    has_ac: true,
+    has_usb: false,
   },
   {
     id: 'cccccccc-0000-4000-8000-000000000002',
@@ -361,6 +369,8 @@ export const vehiculos: Vehicle[] = [
     consumption_l_100km: 7.5,
     rate_per_km_cents: null,
     photo_path: null,
+    has_ac: true,
+    has_usb: false,
   },
   {
     id: 'cccccccc-0000-4000-8000-000000000003',
@@ -377,6 +387,8 @@ export const vehiculos: Vehicle[] = [
     consumption_l_100km: 9.5,
     rate_per_km_cents: null,
     photo_path: null,
+    has_ac: true,
+    has_usb: false,
   },
   {
     id: 'cccccccc-0000-4000-8000-000000000004',
@@ -393,6 +405,8 @@ export const vehiculos: Vehicle[] = [
     consumption_l_100km: 6.5,
     rate_per_km_cents: null,
     photo_path: null,
+    has_ac: true,
+    has_usb: false,
   },
   {
     id: 'cccccccc-0000-4000-8000-000000000005',
@@ -409,6 +423,8 @@ export const vehiculos: Vehicle[] = [
     consumption_l_100km: 7.5,
     rate_per_km_cents: null,
     photo_path: null,
+    has_ac: true,
+    has_usb: false,
   },
   {
     id: 'cccccccc-0000-4000-8000-000000000006',
@@ -425,6 +441,8 @@ export const vehiculos: Vehicle[] = [
     consumption_l_100km: 9.5,
     rate_per_km_cents: null,
     photo_path: null,
+    has_ac: true,
+    has_usb: false,
   },
   {
     id: 'cccccccc-0000-4000-8000-000000000007',
@@ -441,6 +459,8 @@ export const vehiculos: Vehicle[] = [
     consumption_l_100km: 7.5,
     rate_per_km_cents: null,
     photo_path: null,
+    has_ac: true,
+    has_usb: false,
   },
 ];
 

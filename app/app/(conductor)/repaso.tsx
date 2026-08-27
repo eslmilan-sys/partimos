@@ -68,6 +68,9 @@ export default function Repaso() {
     mujeres?: string;
     mascotas?: string;
     fumar?: string;
+    adelante?: string;
+    atras?: string;
+    comentario?: string;
   }>();
 
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
@@ -275,6 +278,9 @@ export default function Repaso() {
                 soloMujeres: !!p.mujeres,
                 aceptaMascotas: !!p.mascotas,
                 sePuedeFumar: !!p.fumar,
+                adelante: p.adelante ? Number(p.adelante) : null,
+                atras: p.atras ? Number(p.atras) : null,
+                comentario: p.comentario ?? null,
               });
               // Al panel del conductor, NO al detalle del pasajero: quien
               // acaba de publicar no tiene que pedirse un puesto en su

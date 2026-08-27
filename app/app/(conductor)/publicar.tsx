@@ -8,14 +8,25 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
 
-import { aporteCalculado, elTopeMuerde, origenDelAporte } from '@/dominio/aporte';
+import { CONSUMO_L_100KM, aporteCalculado, costoDelViaje, elTopeMuerde, origenDelAporte } from '@/dominio/aporte';
+import {
+  type Reparto,
+  cambiarReparto,
+  comodidadDeAtras,
+  cuantosPuestos,
+  puedeOfrecerSoloMujeres,
+  repartoDeUnTotal,
+  repartoPorDefecto,
+} from '@/dominio/puestos';
+import { desdeCadaParada } from '@/dominio/tramos';
 import { carrosDe } from '@/servicios/carros';
+import { miGenero } from '@/servicios/perfiles';
 import type { Vehicle } from '@/tipos';
 import { type Lugar, aParams } from '@/dominio/lugar';
 import { LO_QUE_FALTA, quePuedeHacer } from '@/dominio/permiso';
@@ -72,6 +83,64 @@ function lugarDeCiudad(nombre: string, slug: string): Lugar {
     lng: null,
   };
 }
+
+/**
+ * LOS PASOS, EN EL ORDEN EN QUE SE DECIDEN.
+ *
+ * **Por qué en pasos** (27-08-2026, pedido del dueño con capturas de
+ * BlaBlaCar). Esta pantalla era un formulario entero de una vez: ruta, día,
+ * hora, carro, paradas, aporte y cuatro interruptores, todo a la vez y con
+ * el botón de publicar al final. Quien publica por primera vez no sabe por
+ * dónde empezar, y quien ya sabe se pierde el aporte de las paradas porque
+ * está a tres desplazamientos de distancia.
+ *
+ * Una pantalla, una decisión. Y en ESTE orden porque es el orden en que se
+ * piensa un viaje: a dónde voy, por dónde paso, qué día, a qué hora, en qué
+ * carro y con cuántos puestos, cuánto aporta cada quien, cuánto aporta el
+ * que sube a mitad de camino, en qué condiciones, y qué quiero decirles.
+ */
+const PASOS = [
+  'ruta',
+  'paradas',
+  'dia',
+  'hora',
+  'carro',
+  'aporte',
+  'tramos',
+  'condiciones',
+  'comentario',
+] as const;
+type Paso = (typeof PASOS)[number];
+
+/** El rótulo del campo rojo, por paso. Dice DÓNDE estás, no qué hacer. */
+/**
+ * Los peajes del viaje, deducidos de lo que ya se calculó.
+ *
+ * `PublicacionPreparada` trae el costo y la distancia pero no los peajes por
+ * separado, y los tramos los necesitan: son de la carretera y se reparten
+ * como el camino. Se despejan de la misma fórmula en vez de añadir un campo
+ * que habría que mantener en dos sitios.
+ */
+function peajeDelViaje(d: { costoCentavos: number; distanciaKm: number }): number {
+  const gasolina = costoDelViaje({
+    distanciaKm: d.distanciaKm,
+    peajeCentavos: 0,
+    consumoL100km: CONSUMO_L_100KM.standard,
+  });
+  return Math.max(0, d.costoCentavos - gasolina);
+}
+
+const COMO_SE_LLAMA_EL_PASO: Record<Paso, string> = {
+  ruta: '¿De dónde a dónde?',
+  paradas: '¿Por dónde pasas?',
+  dia: '¿Qué día sales?',
+  hora: '¿A qué hora sales?',
+  carro: '¿Con qué carro y cuántos puestos?',
+  aporte: '¿Cuánto aporta cada quien?',
+  tramos: '¿Y quien sube en el camino?',
+  condiciones: 'Las condiciones del viaje',
+  comentario: '¿Algo que decirles?',
+};
 
 export default function Publicar() {
   const router = useRouter();
@@ -131,7 +200,8 @@ export default function Publicar() {
    * cuatro puntos de recogida por viaje es regla del producto.
    */
   const [elegidas, setElegidas] = useState<number[]>([]);
-  const [puestos, setPuestos] = useState(3);
+  /* `puestos` YA NO ES ESTADO: se deriva del reparto adelante/atrás (0045).
+     Dos fuentes para el mismo número acaban contradiciéndose. */
   /**
    * CUÁL DE MIS CARROS. `null` es «el primero», que es lo que hacía siempre.
    * Quien tiene dos —el sedán entre semana y la camioneta el fin de semana—
@@ -141,13 +211,35 @@ export default function Publicar() {
   const [misCarros, setMisCarros] = useState<Vehicle[]>([]);
   const [eligiendoCarro, setEligiendoCarro] = useState(false);
   const [aporteElegido, setAporteElegido] = useState<number | null>(null);
+  /** Lo que el conductor deja puesto en cada tramo, por índice de parada. */
+  const [aportesDeTramo, setAportesDeTramo] = useState<Record<number, number>>({});
+  /** En qué paso vas. Uno por decisión: ver `PASOS`. */
+  const [paso, setPaso] = useState<Paso>('ruta');
+  /**
+   * DÓNDE VA SENTADA LA GENTE (0045). `seats_offered` decía cuántos y no
+   * dónde, y el sitio importa: tres atrás van apretados, dos van cómodos.
+   * `puestos` sigue existiendo porque el cálculo del aporte sólo necesita
+   * el total; aquí se deriva de las dos filas.
+   */
+  const [reparto, setReparto] = useState<Reparto>({ adelante: 1, atras: 2 });
+  /** Lo que el conductor quiere decirles. Va a `trips.notes`. */
+  const [comentario, setComentario] = useState('');
+  /** Si quien maneja puede ofrecer «solo mujeres»: sólo si es mujer. */
+  const [soyMujer, setSoyMujer] = useState(false);
   const [aceptaMaletas, setAceptaMaletas] = useState(true);
   const [soloMujeres, setSoloMujeres] = useState(false);
   const [aceptaMascotas, setAceptaMascotas] = useState(false);
   const [sePuedeFumar, setSePuedeFumar] = useState(false);
 
   /** La salida, ya montada: el día que elegiste a la hora que elegiste. */
+  const puestos = cuantosPuestos(reparto);
   const salidaISO = `${dia}T${horaSalida}:00-05:00`;
+  /**
+   * **UNA SALIDA EN EL PASADO NO SE PUBLICA.** Visto en la captura del
+   * dueño: BlaBlaCar lo rechaza al final, con una franja roja. Aquí se
+   * dice en el paso de la hora, que es donde se puede arreglar.
+   */
+  const saleEnElPasado = new Date(salidaISO).getTime() < Date.now();
   useEffect(() => {
     if (!yo) return;
     estadoDeCedula(yo).then(setCedula);
@@ -169,7 +261,7 @@ export default function Publicar() {
       setDesde(t.origen);
       setHacia(t.destino);
       setHoraSalida(t.hora);
-      setPuestos(t.puestos);
+      setReparto(repartoDeUnTotal(t.puestos));
     });
   }, [deViaje]);
 
@@ -212,7 +304,26 @@ export default function Publicar() {
   useEffect(() => {
     if (!yo) return;
     carrosDe(yo).then(setMisCarros).catch(() => setMisCarros([]));
+    /* «Solo mujeres» sólo se ofrece a una conductora: la etiqueta promete un
+       carro donde todas a bordo son mujeres, y con un hombre al volante la
+       promesa no se sostiene. Sin saberlo, no se ofrece. */
+    miGenero(yo)
+      .then((g) => setSoyMujer(puedeOfrecerSoloMujeres(g)))
+      .catch(() => setSoyMujer(false));
   }, [yo, vueltas]);
+
+  /* El reparto arranca en lo que el carro da: quien elige otro carro no tiene
+     que volver a decir cuántos puestos ofrece. */
+  useEffect(() => {
+    if (!datos) return;
+    setReparto(repartoPorDefecto(datos.carro.seats_total));
+  }, [datos?.carro.id]);
+
+  /* Una condición que ya no se puede sostener no se queda encendida: si el
+     perfil deja de decir que es mujer, el interruptor se apaga solo. */
+  useEffect(() => {
+    if (!soyMujer && soloMujeres) setSoloMujeres(false);
+  }, [soyMujer, soloMujeres]);
 
   const calculado = useMemo(
     () => (datos ? aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos) : 0),
@@ -401,6 +512,41 @@ export default function Publicar() {
   // Cada parada cuesta unos minutos; la llegada se mueve con ellas.
   const llegada = hora(mas(salida, datos.duracionMin + paradas * MINUTOS_POR_PARADA));
 
+  /* El paso de los tramos sólo existe si hay paradas: preguntar «¿y quien
+     sube en el camino?» en un viaje directo es una pantalla que no decide
+     nada. Los pasos se cuentan sobre los que de verdad se van a ver. */
+  const losPasos = PASOS.filter((x) => x !== 'tramos' || paradas > 0);
+  const indiceDelPaso = Math.max(0, losPasos.indexOf(paso));
+  const esElUltimo = indiceDelPaso === losPasos.length - 1;
+
+  const nombreDeParada = (i: number): string =>
+    i === 0 ? datos.origen : (paradasVisibles[i - 1]?.nombre ?? datos.destino);
+
+  /* Las fracciones de camino de cada parada, que es de donde salen los
+     kilómetros de cada tramo. La última es el destino: el camino entero. */
+  const fracciones = [
+    0,
+    ...paradasVisibles.map((p) => Math.min(0.99, p.minutos / Math.max(1, datos.duracionMin))),
+    1,
+  ];
+  const tramos = desdeCadaParada(
+    fracciones,
+    datos.distanciaKm,
+    peajeDelViaje(datos),
+    puestos,
+    datos.carro.consumption_l_100km ?? 7.5,
+  ).filter((t) => t.desde > 0);
+
+  /** Lo que impide seguir, dicho donde se puede arreglar. */
+  const noSePuedeSeguir =
+    paso === 'ruta' && !(desde && hacia)
+      ? 'Dinos de dónde sales y a dónde vas.'
+      : paso === 'hora' && saleEnElPasado
+        ? 'La salida no puede quedar en el pasado. Elige otra hora, o el día siguiente.'
+        : paso === 'carro' && puestos < 1
+          ? 'Sin puestos no hay viaje que publicar.'
+          : null;
+
   return (
     <View style={estilos.pantalla}>
       <CampoRojo altura={206} motivo="palmera" />
@@ -412,18 +558,31 @@ export default function Publicar() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Atrás"
-            onPress={() => volver()}
+            onPress={() =>
+              indiceDelPaso === 0 ? volver() : setPaso(losPasos[indiceDelPaso - 1])
+            }
             style={estilos.circulo}
           >
             <Atras />
           </Pressable>
           <Text style={estilos.epigrafeCampo}>
-            {`Publicar · ${diaEnChip(dia)}, ${hora(salida)} · ${datos.distanciaKm} km`}
+            {`Paso ${indiceDelPaso + 1} de ${losPasos.length} · ${laRuta?.origen ?? datos.origen} → ${laRuta?.destino ?? datos.destino}`}
           </Text>
         </View>
+
+        {/* El avance se VE, no sólo se lee: un segmento por paso, los hechos
+            en tinta plena. Es el mismo lenguaje que el registro. */}
+        <View style={estilos.avance}>
+          {losPasos.map((clave, i) => (
+            <View
+              key={clave}
+              style={[estilos.segmento, i <= indiceDelPaso && estilos.segmentoHecho]}
+            />
+          ))}
+        </View>
+
         <Text style={estilos.titular} numberOfLines={2}>
-          {`${laRuta?.origen ?? datos.origen} → `}
-          <Text style={texto.titularFuerte}>{laRuta?.destino ?? datos.destino}</Text>
+          {COMO_SE_LLAMA_EL_PASO[paso]}
         </Text>
       </View>
 
@@ -432,8 +591,13 @@ export default function Publicar() {
         contentContainerStyle={{ paddingBottom: 18 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* La hoja blanca que monta sobre el borde del campo */}
+        {/* La hoja blanca que monta sobre el borde del campo. Sólo la llevan
+            los pasos que ponen algo dentro: en los demás dejaba una tarjeta
+            blanca vacía flotando bajo el titular. */}
+        {['ruta', 'dia', 'hora', 'carro', 'paradas'].includes(paso) ? (
         <View style={estilos.hoja}>
+          {paso === 'ruta' ? (
+          <>
           {/* De dónde sales y a dónde vas — FILAS con filete, no burbujas con
               borde: cuatro rectángulos delineados casi tocándose leían como
               un formulario ruidoso (visto en el teléfono, 25-08). Es el mismo
@@ -468,48 +632,48 @@ export default function Publicar() {
             </View>
             <Avanza tinta={color.ink300} />
           </Pressable>
-          <View style={estilos.filete} />
+          </>
+          ) : null}
 
-          <View style={estilos.filaEleccion}>
+          {paso === 'dia' ? (
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Día: ${diaEnChip(dia)}. Cambiar`}
               onPress={() => setEligiendo('dia')}
-              style={({ pressed }) => [
-                estilos.eleccion,
-                estilos.eleccionMitad,
-                pressed && estilos.eleccionPulsada,
-              ]}
+              style={({ pressed }) => [estilos.eleccion, pressed && estilos.eleccionPulsada]}
             >
               <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={estilos.eleccionEtiqueta}>Día</Text>
+                <Text style={estilos.eleccionEtiqueta}>Salgo el</Text>
                 <Text style={estilos.eleccionValor} numberOfLines={1}>
                   {diaEnChip(dia)}
                 </Text>
               </View>
               <Avanza tinta={color.ink300} />
             </Pressable>
-            <View style={estilos.fileteVertical} />
+          ) : null}
+
+          {paso === 'hora' ? (
+          <>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Hora: ${horaSalida}. Cambiar`}
               onPress={() => setEligiendo('hora')}
-              style={({ pressed }) => [
-                estilos.eleccion,
-                estilos.eleccionMitad,
-                pressed && estilos.eleccionPulsada,
-              ]}
+              style={({ pressed }) => [estilos.eleccion, pressed && estilos.eleccionPulsada]}
             >
               <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={estilos.eleccionEtiqueta}>Hora</Text>
+                <Text style={estilos.eleccionEtiqueta}>Recojo a las</Text>
                 <Text style={[estilos.eleccionValor, tabular]}>{horaSalida}</Text>
               </View>
               <Avanza tinta={color.ink300} />
             </Pressable>
-          </View>
+            <Text style={estilos.notaParadas}>
+              {`Llegas sobre las ${llegada}. Es una estimación con las paradas que elegiste.`}
+            </Text>
+          </>
+          ) : null}
 
-          <View style={estilos.separadorHoja} />
-
+          {paso === 'carro' ? (
+          <>
           <View style={estilos.filaCarro}>
             <Carro />
             <Text style={estilos.textoCarro} numberOfLines={1}>
@@ -545,6 +709,56 @@ export default function Publicar() {
             </Pressable>
           </View>
 
+          {/* **CUÁNTOS PUESTOS Y DÓNDE** (0045). Antes era un solo número, y
+              el sitio importa: tres atrás van apretados, dos van cómodos, y
+              el de adelante es otro viaje. Dicho así, «máx. 2 personas atrás»
+              deja de ser una casilla aparte — es haber puesto 2 atrás. */}
+          <View style={estilos.filaPuestos}>
+            <Text style={estilos.textoPuestos}>
+              Adelante
+              <Text style={estilos.carroApagado}>{' · junto a ti'}</Text>
+            </Text>
+            <Stepper
+              valor={reparto.adelante}
+              alCambiar={(v) => {
+                setReparto((r) => cambiarReparto(r, 'adelante', v - r.adelante));
+                setAporteElegido(null);
+              }}
+              min={0}
+              max={1}
+              etiquetaAccesible="Puestos adelante"
+            />
+          </View>
+
+          <View style={estilos.filaPuestos}>
+            <Text style={estilos.textoPuestos}>
+              Atrás
+              <Text style={estilos.carroApagado}>{` · el banco lleva ${Math.max(0, datos.puestosMaximos - 1)}`}</Text>
+            </Text>
+            <Stepper
+              valor={reparto.atras}
+              alCambiar={(v) => {
+                setReparto((r) => cambiarReparto(r, 'atras', v - r.atras));
+                setAporteElegido(null);
+              }}
+              min={0}
+              max={Math.min(3, Math.max(0, datos.puestosMaximos - reparto.adelante))}
+              etiquetaAccesible="Puestos atrás"
+            />
+          </View>
+
+          <Text style={estilos.cuenta}>
+            {puestos === 0
+              ? 'Sin puestos no hay viaje que publicar: pon al menos uno.'
+              : `${puestos === 1 ? 'Ofreces 1 puesto' : `Ofreces ${puestos} puestos`}${
+                  comodidadDeAtras(reparto) ? ` · ${comodidadDeAtras(reparto)}` : ''
+                }.`}
+          </Text>
+          </>
+          ) : null}
+
+          {paso === 'paradas' ? (
+          <>
           {/* El límite se ve SIEMPRE —«0 de 2»—, no sólo al chocar con él.
               Y «Añadir todas» aparece cuando de verdad caben todas: antes
               pedía que la ruta ofreciera como mucho dos paradas, así que con
@@ -643,9 +857,13 @@ export default function Publicar() {
               Esta ruta no pasa por ninguna otra ciudad de la lista.
             </Text>
           )}
+          </>
+          ) : null}
         </View>
+        ) : null}
 
         {/* El aporte, con el degradado que cierra la tarjeta */}
+        {paso === 'aporte' ? (
         <View style={estilos.tarjetaAporte}>
           <Brillo />
           {/* El epígrafe va en su propia línea, no al lado del stepper: en un
@@ -670,22 +888,6 @@ export default function Publicar() {
             />
           </View>
 
-          <View style={estilos.filaPuestos}>
-            <Text style={estilos.textoPuestos}>
-              Puestos libres
-              <Text style={estilos.carroApagado}>{` · de ${datos.puestosMaximos}`}</Text>
-            </Text>
-            <Stepper
-              valor={puestos}
-              alCambiar={(v) => {
-                setPuestos(v);
-                setAporteElegido(null); // vuelve al calculado, como en el diseño
-              }}
-              min={1}
-              max={datos.puestosMaximos}
-              etiquetaAccesible="Puestos libres"
-            />
-          </View>
 
           {/* La cifra del costo una sola vez: repetirla al final de la misma
               frase — «B/30,94 … de B/30,94» — era leerla dos veces sin
@@ -715,12 +917,60 @@ export default function Publicar() {
             </View>
           ) : null}
         </View>
+        ) : null}
+
+        {/* **LO QUE APORTA QUIEN SUBE EN EL CAMINO** (0045).
+
+            BlaBlaCar deja poner a mano el precio de cada ciudad de paso, a
+            lo que el conductor quiera. Aquí no puede ser: **cada tramo lleva
+            su propio tope**, con la misma fórmula sobre SUS kilómetros y con
+            el mismo `+1`. Sin eso, partir un viaje en trozos sería la puerta
+            de atrás para cobrar de más — cuatro tramos al precio del viaje
+            entero son cuatro veces el costo. El conductor puede bajarlo; no
+            subirlo por encima de lo que ese tramo cuesta. */}
+        {paso === 'tramos' ? (
+        <View style={estilos.tarjetaAporte}>
+          <Brillo />
+          <Epigrafe>Quien sube en el camino</Epigrafe>
+          {tramos.length === 0 ? (
+            <Text style={estilos.cuenta}>
+              Este viaje va directo, sin paradas: todos aportan lo mismo. Si añades una parada,
+              aquí aparece lo que aporta quien suba ahí.
+            </Text>
+          ) : (
+            <>
+              {tramos.map((t) => (
+                <View key={`${t.desde}-${t.hasta}`} style={estilos.filaPuestos}>
+                  <Text style={estilos.textoPuestos} numberOfLines={1}>
+                    {`Desde ${nombreDeParada(t.desde)}`}
+                    <Text style={estilos.carroApagado}>{` · ${Math.round(t.km)} km`}</Text>
+                  </Text>
+                  <Stepper
+                    valor={Math.round((aportesDeTramo[t.desde] ?? t.aporteCentavos) / 100)}
+                    alCambiar={(v) =>
+                      setAportesDeTramo((m) => ({ ...m, [t.desde]: v * 100 }))
+                    }
+                    min={1}
+                    max={Math.round(t.topeCentavos / 100)}
+                    etiquetaAccesible={`Aporte desde ${nombreDeParada(t.desde)}, en dólares`}
+                  />
+                </View>
+              ))}
+              <Text style={estilos.cuenta}>
+                Menos camino, menos aporte. Cada tramo tiene su propio tope, calculado con sus
+                kilómetros: nadie paga el viaje entero por medio camino.
+              </Text>
+            </>
+          )}
+        </View>
+        ) : null}
 
         {/* Cada interruptor dice QUÉ cambia al encenderlo — invariante 7:
             una afirmación porta su razón. «Solo mujeres» suelto entre tres
             «acepto» leía raro (visto en el teléfono, 25-08): no es una
             comodidad del carro, decide QUIÉN puede pedir puesto, y ahora lo
             dice con todas sus letras. */}
+        {paso === 'condiciones' ? (
         <View style={estilos.tarjetaInterruptores}>
           <Epigrafe>Condiciones del viaje</Epigrafe>
           <View style={estilos.interruptorPrimero}>
@@ -731,14 +981,21 @@ export default function Publicar() {
               descripcion="Con maleta grande, no solo mochila."
             />
           </View>
-          <View style={estilos.interruptorSeparado}>
-            <Interruptor
-              activo={soloMujeres}
-              alCambiar={setSoloMujeres}
-              etiqueta="Solo mujeres"
-              descripcion="Únicamente mujeres podrán pedir puesto."
-            />
-          </View>
+          {/* **SOLO PARA CONDUCTORAS** (27-08-2026, pedido del dueño). La
+              etiqueta promete un carro donde todas las personas a bordo son
+              mujeres, y quien la busca la busca justamente por eso. Con un
+              hombre al volante la promesa no se sostiene, así que el
+              interruptor ni se ofrece. */}
+          {soyMujer ? (
+            <View style={estilos.interruptorSeparado}>
+              <Interruptor
+                activo={soloMujeres}
+                alCambiar={setSoloMujeres}
+                etiqueta="Solo mujeres"
+                descripcion="Únicamente mujeres podrán pedir puesto."
+              />
+            </View>
+          ) : null}
           <View style={estilos.interruptorSeparado}>
             <Interruptor
               activo={aceptaMascotas}
@@ -756,10 +1013,36 @@ export default function Publicar() {
             />
           </View>
         </View>
+        ) : null}
+
+        {/* **EL COMENTARIO** — `trips.notes`, que existía en la base y no lo
+            escribía nadie. Es donde se dicen las cosas que ninguna casilla
+            cubre: que el baúl va medio lleno, que no vas por la autopista,
+            que tienes flexibilidad con el punto de recogida. */}
+        {paso === 'comentario' ? (
+        <View style={estilos.tarjetaInterruptores}>
+          <Epigrafe>Lo que quieras decirles</Epigrafe>
+          <TextInput
+            accessibilityLabel="Comentario para tus pasajeros"
+            value={comentario}
+            onChangeText={setComentario}
+            multiline
+            maxLength={300}
+            placeholder="¿Tienes flexibilidad con el punto de recogida? ¿No vas por la autopista? ¿El baúl va medio lleno? Díselo aquí."
+            placeholderTextColor={color.ink500}
+            style={estilos.comentario}
+          />
+          <Text style={estilos.cuenta}>
+            {comentario.trim()
+              ? `${300 - comentario.length} caracteres de sobra. Se ve en la ficha del viaje.`
+              : 'Puedes dejarlo en blanco: no todos los viajes necesitan explicación.'}
+          </Text>
+        </View>
+        ) : null}
       </ScrollView>
 
       <View style={estilos.pie}>
-        {queFalta ? (
+        {queFalta && esElUltimo ? (
           <View style={estilos.falta}>
             <View style={estilos.filaFalta}>
               <View style={estilos.cuadroFalta}>
@@ -775,9 +1058,24 @@ export default function Publicar() {
             </Boton>
           </View>
         ) : null}
+        {/* Lo que impide seguir, dicho DONDE se puede arreglar: la salida en
+            el pasado en el paso de la hora, y no en una franja roja al final
+            cuando ya no se sabe qué tocar (que es lo que hace BlaBlaCar). */}
+        {noSePuedeSeguir ? (
+          <View style={estilos.falta}>
+            <View style={estilos.filaFalta}>
+              <View style={estilos.cuadroFalta}>
+                <Escudo tamano={17} tinta={color.rojo600} />
+              </View>
+              <Text style={[estilos.faltaTexto, { flex: 1 }]}>{noSePuedeSeguir}</Text>
+            </View>
+          </View>
+        ) : null}
+
+        {esElUltimo ? (
         <Boton
          
-          desactivado={!!queFalta}
+          desactivado={!!queFalta || !!noSePuedeSeguir}
           alPulsar={() =>
             router.push({
               pathname: '/(conductor)/repaso',
@@ -792,7 +1090,16 @@ export default function Publicar() {
                    paradas van, no cuántas. */
                 paradas: enOrden.join(','),
                 puestos: String(puestos),
+                adelante: String(reparto.adelante),
+                atras: String(reparto.atras),
                 aporte: aporteElegido == null ? '' : String(aporteElegido),
+                /* Los tramos que el conductor tocó, «índice:centavos». Los
+                   que no tocó se recalculan: guardar una copia de lo que la
+                   fórmula ya sabe es guardarse una verdad que caduca. */
+                tramos: Object.entries(aportesDeTramo)
+                  .map(([i, c]) => `${i}:${c}`)
+                  .join(','),
+                comentario: comentario.trim(),
                 maletas: aceptaMaletas ? '1' : '',
                 mujeres: soloMujeres ? '1' : '',
                 mascotas: aceptaMascotas ? '1' : '',
@@ -803,10 +1110,20 @@ export default function Publicar() {
         >
           Repasar y publicar
         </Boton>
+        ) : (
+          <Boton
+            desactivado={!!noSePuedeSeguir}
+            alPulsar={() => setPaso(losPasos[indiceDelPaso + 1])}
+          >
+            Continuar
+          </Boton>
+        )}
         <Text style={estilos.notaPie}>
-          {queFalta
+          {queFalta && esElUltimo
             ? 'Puedes seguir calculando: nada de esto se publica.'
-            : 'Nada se publica todavía: lo lees entero antes, en una pantalla.'}
+            : esElUltimo
+              ? 'Nada se publica todavía: lo lees entero antes, en una pantalla.'
+              : 'Nada se publica todavía. Puedes volver atrás en cualquier momento.'}
         </Text>
       </View>
 
@@ -877,6 +1194,28 @@ const estilos = StyleSheet.create({
   },
   epigrafeCampo: { ...texto.epigrafe, color: color.campoTexto, flex: 1 },
   titular: { ...texto.titular, color: color.ink900, marginTop: 12 },
+
+  /** La barra de avance: un segmento por paso, el mismo lenguaje del registro. */
+  avance: { flexDirection: 'row', gap: 4, marginTop: 14 },
+  segmento: { flex: 1, height: 3, borderRadius: 999, backgroundColor: 'rgba(10,39,49,.14)' },
+  segmentoHecho: { backgroundColor: color.ink900 },
+
+  comentario: {
+    marginTop: 12,
+    minHeight: 112,
+    padding: 14,
+    borderRadius: radio.control,
+    backgroundColor: color.sand100,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    fontFamily: familia,
+    /* 16 o más: por debajo, Safari acerca la página al enfocar el campo. */
+    fontSize: 16,
+    lineHeight: 23,
+    color: color.ink900,
+    textAlignVertical: 'top',
+    outlineStyle: 'none',
+  } as never,
 
   hoja: {
     marginHorizontal: espacio.gutter,

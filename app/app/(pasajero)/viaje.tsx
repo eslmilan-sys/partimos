@@ -26,6 +26,7 @@ import { DIJO, compartir } from '@/ui/salidas';
 import { useVolver } from '@/ui/salidas';
 
 import { ciudadYPunto, soloCiudad, soloPunto } from '@/dominio/comoSeLlama';
+import { comodidadDeAtras, deFilas } from '@/dominio/puestos';
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { reservasDelViaje } from '@/servicios/reservas';
 import { useSesion } from '@/servicios/sesion';
@@ -38,6 +39,7 @@ import { Avatar, Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaLargo, enHoras, hora } from '@/ui/fechas';
 import {
+  Aire,
   Asiento,
   Atras,
   Avanza,
@@ -45,8 +47,10 @@ import {
   Chat,
   Compartir,
   Escudo,
+  Enchufe,
   Estrella,
   Mascota,
+  Persona,
   SinHumo,
 } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
@@ -138,6 +142,32 @@ export default function DetalleDelViaje() {
   const esMio = !!yo && yo === viaje.driver_id;
   const ciudades = ciudadesDelViaje(viaje);
   const llegada = viaje.arrival_estimate_at ? hora(viaje.arrival_estimate_at) : '';
+
+  /**
+   * Lo que este viaje ofrece: las comodidades del carro más lo que dice el
+   * reparto de puestos. Van juntas porque quien lee decide con las dos a la
+   * vez — aire y sitio para las piernas son la misma pregunta.
+   */
+  const reparto = deFilas(viaje);
+  const loQueOfrece: { texto: string; icono: React.ReactNode }[] = [
+    ...(carro?.comodidades ?? []).map((c) => ({
+      texto: c.texto,
+      icono:
+        c.clave === 'aire' ? (
+          <Aire tamano={19} tinta={color.ink500} />
+        ) : (
+          <Enchufe tamano={19} tinta={color.ink500} />
+        ),
+    })),
+    ...(comodidadDeAtras(reparto)
+      ? [
+          {
+            texto: comodidadDeAtras(reparto) as string,
+            icono: <Persona tamano={19} tinta={color.ink500} />,
+          },
+        ]
+      : []),
+  ];
 
   /**
    * ¿EL RECORRIDO DICE ALGO QUE LA CABECERA NO DIGA YA?
@@ -369,6 +399,38 @@ export default function DetalleDelViaje() {
               <Avanza />
             </View>
           </Pressable>
+
+          {/* **LO QUE OFRECE EL VIAJE**, en lista con icono — como lo enseña
+              BlaBlaCar y como el dueño pidió el 27-08-2026. Fuera de la
+              tarjeta del conductor: la tarjeta entera lleva al perfil, y esto
+              no es del perfil, es de este viaje.
+
+              Sólo se dice lo que HAY. «Sin aire acondicionado» no es una
+              comodidad que anunciar, y darle la vuelta a la frase para
+              rellenar la lista sería ruido. */}
+          {loQueOfrece.length > 0 ? (
+            <View style={estilos.tarjeta}>
+              <Epigrafe>Lo que ofrece</Epigrafe>
+              <View style={{ marginTop: 12 }}>
+                {loQueOfrece.map((o, i) => (
+                  <View key={o.texto} style={[estilos.filaOfrece, i > 0 && { marginTop: 13 }]}>
+                    {o.icono}
+                    <Text style={estilos.textoOfrece}>{o.texto}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : null}
+
+          {/* El comentario del conductor: `trips.notes`. Es donde dice lo que
+              ninguna casilla cubre — que el baúl va medio lleno, que no va por
+              la autopista. Con comillas, porque son sus palabras. */}
+          {viaje.notes?.trim() ? (
+            <View style={estilos.tarjeta}>
+              <Epigrafe>{`${deNombre} dice`}</Epigrafe>
+              <Text style={estilos.notaDelConductor}>{viaje.notes.trim()}</Text>
+            </View>
+          ) : null}
 
         </View>
       </ScrollView>
@@ -603,6 +665,22 @@ const estilos = StyleSheet.create({
     lineHeight: 18,
     color: color.ink500,
     marginTop: 3,
+    fontFamily: familia,
+  },
+
+  filaOfrece: { flexDirection: 'row', alignItems: 'center', gap: 13 },
+  textoOfrece: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 21,
+    color: color.ink800,
+    fontFamily: familia,
+  },
+  notaDelConductor: {
+    marginTop: 10,
+    fontSize: 14.5,
+    lineHeight: 22,
+    color: color.ink700,
     fontFamily: familia,
   },
 

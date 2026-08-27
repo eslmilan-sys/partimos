@@ -8,6 +8,7 @@
 
 import type { PublicProfile, Review } from '@/tipos';
 
+import { type ComodidadDelCarro, comodidadesDe } from './carros';
 import { fuente } from './_fuente';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
@@ -31,7 +32,13 @@ export type PerfilPublico = {
   desde: string;
   bio: string | null;
   distintivos: Distintivo[];
-  carro: { modelo: string; color: string; placa: string } | null;
+  carro: {
+    modelo: string;
+    color: string;
+    placa: string;
+    /** Lo que el carro ofrece (0045): aire, USB. Sólo lo que hay. */
+    comodidades: ComodidadDelCarro[];
+  } | null;
   resenas: Resena[];
   totalResenas: number;
 };
@@ -71,11 +78,23 @@ export async function perfilPublico(perfilId: string): Promise<PerfilPublico> {
           modelo: [carro.make, carro.model].filter(Boolean).join(' '),
           color: carro.color ?? '',
           placa: fuente.placasCompletas[carro.id] ?? '',
+          comodidades: comodidadesDe(carro),
         }
       : null,
     resenas: suyas.slice(0, 2).map(comoResena),
     totalResenas: suyas.length,
   });
+}
+
+/**
+ * TU PROPIO GÉNERO, para saber si se te puede ofrecer «solo mujeres».
+ *
+ * No sale de `public_profiles`: `gender` no está en la vista pública, y hace
+ * bien en no estarlo. Esto lee la fila propia, que es la única que la
+ * política RLS deja leer entera.
+ */
+export async function miGenero(perfilId: string): Promise<string | null> {
+  return demora(fuente.perfiles.find((p) => p.id === perfilId)?.gender ?? null);
 }
 
 /** El perfil resumido que va dentro de una vista pública (`public_profiles`). */

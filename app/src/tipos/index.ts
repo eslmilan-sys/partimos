@@ -13,11 +13,25 @@ type Vistas = Database['public']['Views'];
 export type Enums = Database['public']['Enums'];
 
 export type Profile = Tablas['profiles']['Row'];
-export type Vehicle = Tablas['vehicles']['Row'];
+/**
+ * Un carro. `has_ac` y `has_usb` son de la 0045 y van aquí a mano porque
+ * `base.ts` se genera del esquema y todavía no se ha regenerado.
+ */
+export type Vehicle = Tablas['vehicles']['Row'] & {
+  has_ac?: boolean | null;
+  has_usb?: boolean | null;
+};
 export type VehicleCategory = Tablas['vehicle_categories']['Row'];
 export type City = Tablas['cities']['Row'];
 export type Corridor = Tablas['corridors']['Row'];
-export type Trip = Tablas['trips']['Row'];
+/**
+ * Un viaje. `seats_front` y `seats_back` son de la 0045 — dónde va sentada
+ * la gente— y son NULOS en lo publicado antes: no se inventa el reparto.
+ */
+export type Trip = Tablas['trips']['Row'] & {
+  seats_front?: number | null;
+  seats_back?: number | null;
+};
 export type TripStop = Tablas['trip_stops']['Row'];
 /**
  * Una reserva. `maletas_pequenas` es de la migración 0042 —el tamaño que
