@@ -39,6 +39,7 @@ import {
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { ElegirCiudad } from '@/ui/ElegirCiudad';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
+import { ElegirDia, diaEnChip } from '@/ui/ElegirDia';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Pestanas } from '@/ui/Pestanas';
 import { CampoRojo, DibujoDelSitio } from '@/ui/CampoRojo';
@@ -59,33 +60,6 @@ const FOTOS: Record<string, number> = {
 /** Los puestos se escriben con letra: en una frase, «tres» se lee y «3» se cuenta. */
 const LETRAS = ['cero', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis'];
 const enLetra = (n: number) => LETRAS[n] ?? String(n);
-
-/**
- * Los quince días que se pueden elegir. Quince y no un calendario entero:
- * los viajes se publican con dos o tres días de antelación, así que un mes
- * de casillas vacías sería enseñar sobre todo días sin nadie.
- */
-const LOS_PROXIMOS_DIAS = (): Opcion[] =>
-  Array.from({ length: 15 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    const dia = diaEnPanama(d);
-    return {
-      valor: dia,
-      etiqueta: comoSeLlamaElDia(dia),
-      debajo: i <= 1 ? diaLargo(d.toISOString()) : undefined,
-    };
-  });
-
-/** «Hoy» y «Mañana» tienen nombre; el resto se dice por su fecha. */
-function comoSeLlamaElDia(dia: string): string {
-  const hoy = diaEnPanama(new Date());
-  if (dia === hoy) return 'Hoy';
-  const manana = new Date();
-  manana.setDate(manana.getDate() + 1);
-  if (dia === diaEnPanama(manana)) return 'Mañana';
-  return diaCorto(`${dia}T12:00:00-05:00`);
-}
 
 /** Cuatro es el máximo: un carro de cinco plazas lleva cuatro pasajeros. */
 const CUANTOS_PUESTOS: Opcion[] = [
@@ -356,12 +330,12 @@ export default function Inicio() {
           <View style={estilos.filaOpciones}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Cuándo sales: ${comoSeLlamaElDia(cuando)}. Cambiar`}
+              accessibilityLabel={`Cuándo sales: ${diaEnChip(cuando)}. Cambiar`}
               onPress={() => setEligiendo('cuando')}
               style={({ pressed }) => [estilos.opcion, pressed && { backgroundColor: color.lavadoChip }]}
             >
               <Calendario tamano={17} />
-              <Text style={estilos.opcionTexto}>{comoSeLlamaElDia(cuando)}</Text>
+              <Text style={estilos.opcionTexto}>{diaEnChip(cuando)}</Text>
             </Pressable>
             <View style={estilos.divisorVertical} />
             <Pressable
@@ -659,10 +633,9 @@ export default function Inicio() {
         alCerrar={() => setBuscando(null)}
       />
 
-      <HojaDeEleccion
+      <ElegirDia
         abierta={eligiendo === 'cuando'}
         titulo="Cuándo sales"
-        opciones={LOS_PROXIMOS_DIAS()}
         elegido={cuando}
         alElegir={setCuando}
         alCerrar={() => setEligiendo(null)}

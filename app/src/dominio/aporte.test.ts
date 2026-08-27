@@ -7,6 +7,7 @@ import {
   costoDelViaje,
   loQuePonesDeTuBolsillo,
   loQueRecuperas,
+  elTopeMuerde,
   origenDelAporte,
   tasaPorKm,
   topeDeRuta,
@@ -68,6 +69,24 @@ test('la pastilla dice de dónde sale la cifra', () => {
   assert.equal(origenDelAporte(null, 600, 700), 'calculado');
   assert.equal(origenDelAporte(500, 500, 700), 'lo pusiste tú');
   assert.equal(origenDelAporte(700, 700, 700), 'tope de la ruta');
+  // Topado SIN que nadie haya escrito la cifra: la pastilla dice el tope, no
+  // «calculado». Es la pregunta de «¿por qué de 1 a 2 puestos no cambia?».
+  assert.equal(origenDelAporte(null, 700, 700), 'tope de la ruta');
+});
+
+test('ofrecer menos puestos NO sube el aporte: sería un recargo por el último', () => {
+  const costo = costoDelViaje(CHITRE);
+  const tope = topeDeRuta(costo);
+  const conUno = aporteCalculado(costo, 1, tope);
+  const conDos = aporteCalculado(costo, 2, tope);
+  // El reparto crudo sí sube al ofrecer menos…
+  assert.ok(costo / 2 > costo / 3);
+  // …pero el tope de la ruta lo corta, y el aporte se queda igual (R3).
+  assert.equal(conUno, conDos);
+  assert.equal(conUno, tope);
+  // Y la pantalla puede decir por qué.
+  assert.equal(elTopeMuerde(costo, 1, tope), true);
+  assert.equal(elTopeMuerde(costo, 3, tope), false);
 });
 
 test('el tope no sube porque el conductor maneje una camioneta', () => {

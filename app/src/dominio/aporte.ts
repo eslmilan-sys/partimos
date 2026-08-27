@@ -118,14 +118,44 @@ export function aporteCalculado(
 
 export type OrigenDelAporte = 'calculado' | 'lo pusiste tú' | 'tope de la ruta';
 
-/** La pastilla que va al lado de la cifra en `5c`. */
+/**
+ * La pastilla que va al lado de la cifra en `5c`.
+ *
+ * **Dice el tope aunque nadie haya tocado el número** (27-08-2026). Antes,
+ * sin cifra escrita a mano devolvía siempre «calculado», también cuando el
+ * reparto se había topado: con un puesto ofrecido el reparto da 15 $, el tope
+ * lo baja a 10, y la pantalla lo llamaba «calculado». De ahí la pregunta del
+ * dueño —«¿por qué de 1 a 2 puestos el precio no cambia?»—: cambiaba el
+ * reparto, no el resultado, y nada en la pantalla lo decía.
+ *
+ * Que no cambie es la regla, no el fallo: si ofrecer menos puestos subiera el
+ * aporte, ofrecer uno solo sería cobrar el doble — un recargo por el último
+ * puesto, que es exactamente lo que R3 prohíbe. El tope es de la RUTA y se
+ * calcula con una ocupación de referencia, así que no depende de cuántos
+ * puestos ponga hoy quien maneja.
+ */
 export function origenDelAporte(
   elegidoPorElConductor: number | null,
   aporteCentavos: number,
   topeCentavos: number,
 ): OrigenDelAporte {
-  if (elegidoPorElConductor == null) return 'calculado';
-  return aporteCentavos >= topeCentavos ? 'tope de la ruta' : 'lo pusiste tú';
+  if (aporteCentavos >= topeCentavos) return 'tope de la ruta';
+  return elegidoPorElConductor == null ? 'calculado' : 'lo pusiste tú';
+}
+
+/**
+ * ¿EL TOPE ESTÁ MORDIENDO? Es decir: el reparto entre los ocupantes da más de
+ * lo que la ruta permite pedir, así que la cifra que se enseña es el tope.
+ *
+ * Sirve para poder explicarlo en la pantalla en vez de dejar un número quieto
+ * sin razón (invariante 7 del v6: una afirmación lleva su porqué).
+ */
+export function elTopeMuerde(
+  costoCentavos: number,
+  puestos: number,
+  topeCentavos: number,
+): boolean {
+  return aDolarArriba(costoCentavos / (puestos + 1)) > topeCentavos;
 }
 
 /** Lo que el conductor recupera si se llena el carro. */

@@ -36,6 +36,7 @@ import {
   misViajes,
   misViajesConduciendo,
 } from '@/servicios/panel';
+import { cerrarLasVencidas } from '@/servicios/abordaje';
 import { bandeja } from '@/servicios/avisos';
 import { perfilResumido } from '@/servicios/perfiles';
 import { useMiIdOEntrar } from '@/servicios/sesion';
@@ -99,7 +100,12 @@ export default function MisViajesPantalla() {
 
   useEffect(() => {
     if (!yo) return;
-    misViajes(yo).then(setDatos);
+    /* Las que ya se dan por buenas solas (24 h desde la llegada) se cierran
+       aquí, al entrar. No hay cron todavía, y una reserva abierta es plata que
+       no le llega a quien manejó. La regla vive en `dominio/cierre`. */
+    cerrarLasVencidas(yo)
+      .then(() => misViajes(yo).then(setDatos))
+      .catch(() => misViajes(yo).then(setDatos));
     misViajesConduciendo(yo).then(setManejando);
     bandeja(yo).then((b) => setAvisos(b.sinLeer));
     perfilResumido(yo).then((p) => setNombre(p?.first_name ?? null));
@@ -328,16 +334,18 @@ export default function MisViajesPantalla() {
           <View style={estilos.puertas}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Ver mi código de llegada"
+              accessibilityLabel="Ver mi código para subir"
               onPress={() =>
                 router.push({
-                  pathname: '/(pasajero)/llegada',
+                  pathname: '/(pasajero)/codigo',
                   params: { reserva: proximo.reservaId },
                 })
               }
               style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
             >
-              <Text style={estilos.puertaTexto}>Código de llegada</Text>
+              {/* El código de SUBIR: es el único que hay desde el 27-08-2026,
+                  y es el que hace falta antes del viaje, no después. */}
+              <Text style={estilos.puertaTexto}>Mi código para subir</Text>
               <Avanza />
             </Pressable>
           </View>

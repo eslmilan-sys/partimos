@@ -53,7 +53,16 @@ export default function Panel() {
     perfilResumido(yo).then((p) => setNombre(p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : null));
   }, [yo]);
 
-  const [hoy, ...resto] = viajes;
+  /**
+   * **UN VIAJE QUE YA SALIÓ NO ES «EL PRÓXIMO»** (27-08-2026, visto por el
+   * dueño). `viajesPublicados` devuelve todo lo publicado ordenado por hora,
+   * y el primero se dibujaba en la hoja blanca con el punto rojo en vivo —
+   * también cuando era el de las 6 de esta mañana, ya hecho. Con «Editar» al
+   * lado, que sobre un viaje pasado no es editar: es reescribir la historia.
+   */
+  const proximos = viajes.filter((v) => !v.yaSalio);
+  const salidos = viajes.filter((v) => v.yaSalio);
+  const [hoy, ...resto] = proximos;
 
   return (
     <View style={estilos.pantalla}>
@@ -83,6 +92,26 @@ export default function Panel() {
         {resto.map((v) => (
           <Proximo key={v.id} viaje={v} router={router} />
         ))}
+
+        {!hoy && salidos.length === 0 ? (
+          <Text style={estilos.pieTexto}>
+            No tienes viajes por delante. Publica el que ya ibas a hacer.
+          </Text>
+        ) : null}
+
+        {/* LOS QUE YA SALIERON, aparte y sin «Editar». Estaban mezclados
+            arriba, así que el viaje de las 6 de esta mañana se dibujaba como
+            el próximo, con el punto rojo en vivo. Se siguen enseñando —desde
+            aquí se teclean los códigos de quien todavía no ha subido— pero ya
+            no se pueden tocar. */}
+        {salidos.length > 0 ? (
+          <>
+            <Text style={estilos.epigrafeSeccion}>Ya salieron</Text>
+            {salidos.map((v) => (
+              <Proximo key={v.id} viaje={v} router={router} />
+            ))}
+          </>
+        ) : null}
 
         {/* PARA REPETIR. El interurbano de verdad es semanal — a Chitré el
             viernes, de vuelta el domingo — y los viajes hechos no salían en
@@ -122,7 +151,9 @@ export default function Panel() {
           </View>
         ) : null}
 
-        <Text style={estilos.pieTexto}>Puedes editar un viaje mientras nadie haya asegurado su puesto.</Text>
+        <Text style={estilos.pieTexto}>
+          Puedes editar un viaje mientras nadie haya asegurado su puesto y no haya salido.
+        </Text>
       </View>
       </ScrollView>
 
@@ -145,15 +176,18 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
       <View style={estilos.filaEpigrafe}>
         <Text style={estilos.epigrafeVivo}>{cuando(viaje.cuando)}</Text>
         <View style={estilos.puntoVivo} />
-        <Pressable
-          accessibilityRole="button"
-          onPress={() =>
-            router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
-          }
-          style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
-        >
-          <Text style={estilos.enlace}>Editar</Text>
-        </Pressable>
+        {viaje.sePuedeEditar ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Editar este viaje"
+            onPress={() =>
+              router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
+            }
+            style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
+          >
+            <Text style={estilos.enlace}>Editar</Text>
+          </Pressable>
+        ) : null}
       </View>
 
       <Recorrido viaje={viaje} />
@@ -210,15 +244,18 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         <Text style={estilos.epigrafeAzul}>
           {`${diaAbrev(viaje.cuando)} ${diaNumero(viaje.cuando)} · ${hora(viaje.cuando)}`}
         </Text>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() =>
-            router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
-          }
-          style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
-        >
-          <Text style={estilos.enlace}>Editar</Text>
-        </Pressable>
+        {viaje.sePuedeEditar ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Editar este viaje"
+            onPress={() =>
+              router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
+            }
+            style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
+          >
+            <Text style={estilos.enlace}>Editar</Text>
+          </Pressable>
+        ) : null}
       </View>
 
       {/* La dirección se escribe con el raíl, no con una flecha entre dos
@@ -531,6 +568,17 @@ const estilos = StyleSheet.create({
     lineHeight: 18.85,
     fontWeight: '600',
     color: color.azul700,
+    fontFamily: familia,
+  },
+  epigrafeSeccion: {
+    fontSize: 11.5,
+    lineHeight: 16,
+    fontWeight: '600',
+    letterSpacing: 11.5 * TRACK_MICRO,
+    textTransform: 'uppercase',
+    color: color.ink500,
+    marginTop: 18,
+    marginBottom: 2,
     fontFamily: familia,
   },
   pieTexto: {

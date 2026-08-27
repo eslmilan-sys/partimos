@@ -122,7 +122,14 @@ export async function pedirPuesto(
     offer_accepted: null,
     payment_channel: canal,
     boarding_code: nuevoCodigo(),
-    arrival_code: nuevoCodigo(),
+    /**
+     * **NULO A PROPÓSITO.** `arrival_code` era el segundo código, el que el
+     * conductor tecleaba al bajarte. Se retiró el 27-08-2026: cierra el
+     * pasajero —«todo bien»— o se cierra solo a las 24 h (`dominio/cierre`).
+     * La columna se queda para no arrastrar una migración detrás, pero ya no
+     * se genera: un secreto que nadie usa es un secreto de más.
+     */
+    arrival_code: null,
     boarded_at: null,
     expires_at: new Date(ahora.getTime() + HORAS_PARA_RESPONDER * 3600_000).toISOString(),
     detour_minutes: null,

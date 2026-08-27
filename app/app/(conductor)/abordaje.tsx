@@ -22,7 +22,6 @@ import {
   listaDeAbordaje,
   marcarNoShow,
   verificarCodigo,
-  verificarLlegada,
 } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
@@ -66,23 +65,21 @@ export default function Abordaje() {
     setTecleado((c) => c + t);
   };
 
-  const bajando = datos.fase === 'bajar';
-  /** A quién le toca ahora: el que sube, o el que baja. */
-  const siguiente = bajando ? datos.siguientePorBajar : datos.siguiente;
+  /**
+   * **YA NO SE TECLEA AL BAJAR** (27-08-2026). Había un segundo código y esta
+   * misma pantalla lo pedía al final del viaje. Con la maleta en la mano y el
+   * carro en doble fila nadie lo tecleaba, y sin ese tecleo la reserva se
+   * quedaba abierta para siempre. Ahora cierra quien viajó —«todo bien»— o se
+   * cierra sola a las 24 h. Aquí sólo queda el código de subir.
+   */
+  const esperando = datos.fase === 'esperando';
+  const siguiente = esperando ? null : datos.siguiente;
 
   const confirmar = async () => {
-    const resultado = bajando
-      ? await verificarLlegada(viajeId, tecleado)
-      : await verificarCodigo(viajeId, tecleado);
+    const resultado = await verificarCodigo(viajeId, tecleado);
     if (resultado.ok) {
       setTecleado('');
       await recargar();
-    } else if (bajando) {
-      setError(
-        resultado.motivo === 'ya-abordo'
-          ? 'Ese viaje ya está cerrado.'
-          : 'Ese código de llegada no es de este viaje. Pídeselo otra vez.',
-      );
     } else {
       setError(
         resultado.motivo === 'ya-abordo'
@@ -115,7 +112,7 @@ export default function Abordaje() {
           {`${datos.parada} · ${hora(datos.salida)}`}
         </Text>
         <Text style={estilos.titular}>
-          {bajando ? 'Bajan ' : 'Suben '}
+          {'Suben '}
           <Text style={estilos.titularFuerte}>
             {datos.total === 1 ? '1 persona' : `${datos.total} personas`}
           </Text>
@@ -127,21 +124,23 @@ export default function Abordaje() {
           <View style={estilos.filaTitulo}>
             <Epigrafe>
               {siguiente
-                ? bajando
-                  ? `Llegada de ${siguiente.nombre.split(' ')[0]}`
-                  : `Código de ${siguiente.nombre.split(' ')[0]}`
-                : 'Viaje cerrado'}
+                ? `Código de ${siguiente.nombre.split(' ')[0]}`
+                : esperando
+                  ? 'Todos a bordo'
+                  : 'Viaje cerrado'}
             </Epigrafe>
             <Text style={estilos.contador}>
-              {bajando
-                ? `${datos.cerrados} de ${datos.total} bajaron`
+              {esperando
+                ? `${datos.cerrados} de ${datos.total} confirmaron`
                 : `${datos.abordados} de ${datos.total} abordaron`}
             </Text>
           </View>
 
           {!siguiente ? (
             <Text style={estilos.todosDentro}>
-              El viaje está cerrado. Cada aporte ya salió hacia ti.
+              {esperando
+                ? 'Ya están todos dentro. Al llegar, cada quien confirma desde su teléfono; si no lo hace, el viaje se da por bueno solo a las 24 h.'
+                : 'El viaje está cerrado. Cada aporte ya salió hacia ti.'}
             </Text>
           ) : (
           <>
@@ -241,9 +240,9 @@ export default function Abordaje() {
 
       <View style={estilos.pie}>
         <Boton desactivado={tecleado.length < 4 || !siguiente} alPulsar={confirmar}>
-          {bajando ? 'Cerrar el viaje' : 'Confirmar abordaje'}
+          Confirmar abordaje
         </Boton>
-        {siguiente && !bajando ? (
+        {siguiente ? (
           <Pressable
             accessibilityRole="button"
             onPress={async () => {
@@ -259,8 +258,8 @@ export default function Abordaje() {
           </Pressable>
         ) : (
           <Text style={estilos.noShow}>
-            {bajando
-              ? 'Al cerrar, el aporte de cada quien sale hacia ti.'
+            {esperando
+              ? 'Al confirmar cada quien, su aporte sale hacia ti.'
               : 'Ya no queda nada por hacer aquí.'}
           </Text>
         )}

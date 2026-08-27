@@ -14,7 +14,9 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
 
-import { aporteCalculado, origenDelAporte } from '@/dominio/aporte';
+import { aporteCalculado, elTopeMuerde, origenDelAporte } from '@/dominio/aporte';
+import { carrosDe } from '@/servicios/carros';
+import type { Vehicle } from '@/tipos';
 import { type Lugar, aParams } from '@/dominio/lugar';
 import { LO_QUE_FALTA, quePuedeHacer } from '@/dominio/permiso';
 import {
@@ -36,6 +38,7 @@ import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { Cargando } from '@/ui/Cargando';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
+import { ElegirDia, diaEnChip } from '@/ui/ElegirDia';
 import { Boton, Epigrafe, Interruptor, Pastilla, Stepper } from '@/ui/controles';
 import { cifraRedonda, formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, hora, mas } from '@/ui/fechas';
@@ -53,14 +56,6 @@ const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
  */
 const HORAS = Array.from({ length: 19 }, (_, i) => `${String(i + 5).padStart(2, '0')}:00`);
 
-/** Quince días, como en la búsqueda: los viajes se publican con dos o tres de antelación. */
-const LOS_PROXIMOS_DIAS = (): Opcion[] =>
-  Array.from({ length: 15 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    const dia = diaEnPanama(d);
-    return { valor: dia, etiqueta: i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : diaCorto(d) };
-  });
 
 /** Lo que cuesta desviarse a recoger en cada parada. */
 const MINUTOS_POR_PARADA = 5;
@@ -137,6 +132,14 @@ export default function Publicar() {
    */
   const [elegidas, setElegidas] = useState<number[]>([]);
   const [puestos, setPuestos] = useState(3);
+  /**
+   * CUÁL DE MIS CARROS. `null` es «el primero», que es lo que hacía siempre.
+   * Quien tiene dos —el sedán entre semana y la camioneta el fin de semana—
+   * no podía publicar con el segundo: «Cambiar» sólo llevaba a registrar otro.
+   */
+  const [carroId, setCarroId] = useState<string | null>(null);
+  const [misCarros, setMisCarros] = useState<Vehicle[]>([]);
+  const [eligiendoCarro, setEligiendoCarro] = useState(false);
   const [aporteElegido, setAporteElegido] = useState<number | null>(null);
   const [aceptaMaletas, setAceptaMaletas] = useState(true);
   const [soloMujeres, setSoloMujeres] = useState(false);
@@ -200,10 +203,16 @@ export default function Publicar() {
       ruta,
       salidaISO,
       !ruta && desde && hacia ? { desde, hacia } : undefined,
+      carroId ?? undefined,
     )
       .then(setDatos)
       .catch(() => setDatos(null));
-  }, [yo, ruta, salidaISO, desde, hacia, vueltas]);
+  }, [yo, ruta, salidaISO, desde, hacia, vueltas, carroId]);
+
+  useEffect(() => {
+    if (!yo) return;
+    carrosDe(yo).then(setMisCarros).catch(() => setMisCarros([]));
+  }, [yo, vueltas]);
 
   const calculado = useMemo(
     () => (datos ? aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos) : 0),
@@ -211,6 +220,8 @@ export default function Publicar() {
   );
   const aporte = aporteElegido ?? calculado;
   const cuenta = datos ? repartoDelCosto(datos.costoCentavos, aporte, puestos) : null;
+  /** ¿La cifra que se enseña es el tope y no el reparto? La pantalla lo dice. */
+  const topeMuerde = !!datos && elTopeMuerde(datos.costoCentavos, puestos, datos.topeCentavos);
 
   /** El buscador de los dos campos, común a los dos modos de la pantalla. */
   const buscador = (
@@ -407,7 +418,7 @@ export default function Publicar() {
             <Atras />
           </Pressable>
           <Text style={estilos.epigrafeCampo}>
-            {`Publicar · ${diaCorto(salida)}, ${hora(salida)} · ${datos.distanciaKm} km`}
+            {`Publicar · ${diaEnChip(dia)}, ${hora(salida)} · ${datos.distanciaKm} km`}
           </Text>
         </View>
         <Text style={estilos.titular} numberOfLines={2}>
@@ -462,7 +473,7 @@ export default function Publicar() {
           <View style={estilos.filaEleccion}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Día: ${diaCorto(salida)}. Cambiar`}
+              accessibilityLabel={`Día: ${diaEnChip(dia)}. Cambiar`}
               onPress={() => setEligiendo('dia')}
               style={({ pressed }) => [
                 estilos.eleccion,
@@ -473,7 +484,7 @@ export default function Publicar() {
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.eleccionEtiqueta}>Día</Text>
                 <Text style={estilos.eleccionValor} numberOfLines={1}>
-                  {diaCorto(salida)}
+                  {diaEnChip(dia)}
                 </Text>
               </View>
               <Avanza tinta={color.ink300} />
@@ -513,13 +524,24 @@ export default function Publicar() {
              * exacto de la corrección 5 del turno 14 — una acción de texto sin
              * área táctil. Ahora es un control de verdad, con sus 44 px.
              */}
+            {/* **Elegir, no añadir** (27-08-2026). Llevaba derecho a registrar
+                otro carro, así que quien ya tenía dos no tenía forma de usar
+                el segundo — y quien sólo quería mirar acababa dando de alta un
+                carro que no quería. Con un solo carro no hay nada que elegir y
+                sigue llevando a registrar. */}
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Cambiar de carro"
-              onPress={() => router.push('/(conductor)/carro')}
+              accessibilityLabel={
+                misCarros.length > 1 ? 'Elegir con qué carro voy' : 'Registrar otro carro'
+              }
+              onPress={() =>
+                misCarros.length > 1
+                  ? setEligiendoCarro(true)
+                  : router.push('/(conductor)/carro')
+              }
               style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
             >
-              <Text style={estilos.cambiar}>Cambiar</Text>
+              <Text style={estilos.cambiar}>{misCarros.length > 1 ? 'Elegir' : 'Cambiar'}</Text>
             </Pressable>
           </View>
 
@@ -673,6 +695,25 @@ export default function Publicar() {
               puestos === 1 ? 'puesto recuperas' : 'puestos recuperas'
             } ${formatearDinero(cuenta.recuperasCentavos)}${cuenta.cubreElViaje ? ' y cubres el viaje' : ''}.`}
           </Text>
+
+          {/* **POR QUÉ EL APORTE NO SUBE AL QUITAR PUESTOS.** El reparto entre
+              los ocupantes sí sube —con un puesto daría la mitad del costo—,
+              pero el tope de la ruta lo corta. Y el tope es de la RUTA, no de
+              este viaje: se calcula con una ocupación de referencia justo para
+              que ofrecer menos puestos no encarezca el puesto. Si subiera,
+              ofrecer uno solo sería cobrar el doble — un recargo por el último
+              puesto, que es lo que no hacemos nunca (R3).
+
+              Sin esta línea el número se quedaba quieto sin decir por qué, y
+              parecía que el stepper estuviera roto (visto por el dueño). */}
+          {topeMuerde ? (
+            <View style={estilos.notaTope}>
+              <Escudo tamano={17} tinta={color.azul500} />
+              <Text style={estilos.notaTopeTexto}>
+                {`Es el tope de esta ruta: ${formatearDinero(datos.topeCentavos)} por puesto. Ofrecer menos puestos no lo sube — el precio no depende de cuántos queden.`}
+              </Text>
+            </View>
+          ) : null}
         </View>
 
         {/* Cada interruptor dice QUÉ cambia al encenderlo — invariante 7:
@@ -772,14 +813,30 @@ export default function Publicar() {
       {buscador}
 
       <HojaDeEleccion
+        abierta={eligiendoCarro}
+        titulo="¿Con qué carro vas?"
+        opciones={[
+          ...misCarros.map((v) => ({
+            valor: v.id,
+            etiqueta: `${v.make} ${v.model}${v.color ? ` ${v.color.toLowerCase()}` : ''}`,
+            debajo: `${v.plate_last3 ? `Placa ···${v.plate_last3} · ` : ''}${v.seats_total} puestos`,
+          })),
+          { valor: 'nuevo', etiqueta: 'Registrar otro carro', debajo: 'Se guarda en tu perfil' },
+        ]}
+        elegido={carroId ?? misCarros[0]?.id ?? ''}
+        alElegir={(v) => {
+          setEligiendoCarro(false);
+          if (v === 'nuevo') router.push('/(conductor)/carro');
+          else setCarroId(v);
+        }}
+        alCerrar={() => setEligiendoCarro(false)}
+      />
+
+      <ElegirDia
         abierta={eligiendo === 'dia'}
         titulo="Qué día sales"
-        opciones={LOS_PROXIMOS_DIAS()}
         elegido={dia}
-        alElegir={(v) => {
-          setDia(v);
-          setEligiendo(null);
-        }}
+        alElegir={setDia}
         alCerrar={() => setEligiendo(null)}
       />
       <HojaDeEleccion
@@ -1001,6 +1058,23 @@ const estilos = StyleSheet.create({
   },
   textoPuestos: { flex: 1, ...texto.fila, color: color.ink900 },
   cuenta: { fontSize: 12.5, lineHeight: 18.125, color: color.ink700, marginTop: 10, fontFamily: familia },
+  /** Azul: informa, no reclama. El rojo tiene sus cuatro sentidos exactos. */
+  notaTope: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 9,
+    marginTop: 12,
+    padding: 12,
+    borderRadius: radio.control,
+    backgroundColor: color.azul50,
+  },
+  notaTopeTexto: {
+    flex: 1,
+    fontSize: 12.5,
+    lineHeight: 18.125,
+    color: color.azul700,
+    fontFamily: familia,
+  },
 
   tarjetaInterruptores: {
     marginHorizontal: espacio.gutter,

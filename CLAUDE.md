@@ -194,6 +194,27 @@ parler :
   c'est la dérivation qui le porte. Dédoublonnage par (kind, booking_id).
   Ce qui manque encore : l'envoi push téléphone fermé (besoin d'un cron pour
   le rappel et d'un canal d'envoi).
+- **Un seul code, et c'est celui de la montée (27-08-2026).** Il y en avait
+  deux, tous deux tapés par le conducteur ; le second, à la descente,
+  fermait la réservation et libérait l'apport. Deux défauts : le passager
+  voyait le code d'arrivée **avant même d'être monté**, et si le conducteur
+  ne tapait rien — maleta à la main, voiture en double file — la
+  réservation restait ouverte pour toujours. Maintenant : le code de
+  montée prouve que le trajet a eu lieu ; **la fermeture, c'est le
+  passager qui la dit** (« todo bien »), et à défaut ça se ferme seul
+  **24 h** après l'arrivée prévue. La règle est dans
+  `app/src/dominio/cierre.ts`, avec ses tests ; le balayage se fait à la
+  lecture (`cerrarLasVencidas`) faute de cron — le jour où il existe, on
+  supprime le balayage et rien d'autre ne bouge. `bookings.arrival_code`
+  devient vestigial : la colonne reste, on n'écrit plus dedans.
+- **Le prix ne bouge pas quand on retire des puestos, et c'est R3.** Le
+  partage entre occupants monte bien, mais le plafond de la ROUTE le
+  coupe — il se calcule sur une occupation de référence, justement pour
+  qu'offrir moins de places ne renchérisse pas la place. Sinon, offrir
+  une seule place reviendrait à facturer le double : un supplément sur la
+  dernière place. Ce qui manquait, c'est que l'écran le DISE : la
+  pastille affichait « calculado » alors que le chiffre était le plafond.
+  Corrigé dans `origenDelAporte` + `elTopeMuerde`.
 - **La ville de résidence sert enfin à quelque chose (0043, 27-08-2026).**
   `profiles.home_city_id` existait depuis le début et **aucun écran ne
   l'écrivait ni ne la lisait** : l'app supposait que tout le monde part de

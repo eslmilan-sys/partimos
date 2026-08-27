@@ -428,11 +428,18 @@ export default function DetalleDelViaje() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Ver mi reserva"
+            /* **EL CÓDIGO ES EL DE SUBIR** (27-08-2026). Esto llevaba derecho
+               a `llegada`, así que nada más pedir puesto la app decía
+               «llegaste» y enseñaba el código del final del viaje, sin
+               haberse montado en el carro todavía. Mientras no haya subido,
+               lo que hace falta es el código de abordaje. */
             onPress={() =>
               router.push(
                 miReserva.status === 'completed'
                   ? { pathname: '/(pasajero)/comprobante', params: { reserva: miReserva.id } }
-                  : { pathname: '/(pasajero)/llegada', params: { reserva: miReserva.id } },
+                  : miReserva.boarded_at
+                    ? { pathname: '/(pasajero)/llegada', params: { reserva: miReserva.id } }
+                    : { pathname: '/(pasajero)/codigo', params: { reserva: miReserva.id } },
               )
             }
             style={({ pressed }) => [

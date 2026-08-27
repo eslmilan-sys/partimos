@@ -6,6 +6,12 @@
  * el aporte, y el reembolso por conductor que no llegó depende de que no exista.
  */
 
+import {
+  type ReservaCerrable,
+  cuandoSeCierraSola,
+  estadoDelCierre,
+  sePuedeConfirmar,
+} from '@/dominio/cierre';
 import { seCobraEnLaApp } from '@/dominio/tarifas';
 import type { ReservaFila } from '@/tipos';
 
@@ -78,15 +84,19 @@ export type PasajeroDeAbordaje = {
 };
 
 /**
- * EL VIAJE TIENE DOS MOMENTOS Y UN SOLO SITIO PARA TECLEAR.
+ * EL VIAJE TIENE UN SOLO CÓDIGO, Y ES EL DE SUBIR.
  *
- * `subir` mientras quede alguien por abordar; `bajar` cuando ya están todos
- * dentro y toca cerrar con el segundo código; `listo` cuando no queda nadie.
- * Antes solo existía el primero: el código de llegada se le enseñaba al
- * pasajero en `1i` y **no había dónde teclearlo**, así que ningún aporte se
- * liberaba nunca. Es la mitad que faltaba del viaje.
+ * `subir` mientras quede alguien por abordar; `esperando` cuando ya están
+ * todos dentro y el cierre depende de que cada quien diga que llegó bien;
+ * `listo` cuando no queda nadie.
+ *
+ * **Antes había un segundo código**, tecleado por el conductor al bajar a
+ * cada pasajero. Se retiró el 27-08-2026: al bajar, con la maleta en la mano
+ * y el carro en doble fila, nadie saca el teléfono para teclear cuatro
+ * dígitos — y si no lo hacía, la reserva se quedaba abierta para siempre.
+ * Ahora cierra el pasajero, o se cierra sola a las 24 h (`dominio/cierre`).
  */
-export type FaseDelViaje = 'subir' | 'bajar' | 'listo';
+export type FaseDelViaje = 'subir' | 'esperando' | 'listo';
 
 export type ListaDeAbordaje = {
   parada: string;
@@ -135,7 +145,7 @@ export async function listaDeAbordaje(viajeId: string): Promise<ListaDeAbordaje>
     pasajeros,
     siguiente,
     siguientePorBajar,
-    fase: siguiente ? 'subir' : siguientePorBajar ? 'bajar' : 'listo',
+    fase: siguiente ? 'subir' : siguientePorBajar ? 'esperando' : 'listo',
     abordados,
     cerrados,
     total: pasajeros.length,
@@ -174,43 +184,64 @@ export async function verificarCodigo(
 }
 
 /**
- * EL SEGUNDO CÓDIGO: EL QUE SUELTA LA PLATA.
+ * EL CIERRE: LO DICE QUIEN VIAJÓ.
  *
- * El conductor lo teclea al bajar a cada quien. Ese tecleo hace tres cosas de
- * una vez, y por eso están juntas: la reserva pasa a `completed`, el pago
- * retenido se captura y `released_at` queda escrito. Sin esto el aporte se
- * quedaba retenido para siempre —era el «pago nunca liberado» del informe— y
- * el conductor no cobraba nunca.
+ * «Todo bien». Hace tres cosas de una vez, y por eso están juntas: la reserva
+ * pasa a `completed`, el pago retenido se captura y `released_at` queda
+ * escrito. Sin esto el aporte se quedaba retenido para siempre —era el «pago
+ * nunca liberado» del informe— y el conductor no cobraba nunca.
  *
- * Solo se cierra a quien subió: sin `boarded_at` no hay viaje que cerrar, y
- * ese es justo el hecho en que se apoya el reembolso por conductor que no
- * llegó.
+ * Solo cierra quien subió: sin `boarded_at` no hay viaje que cerrar, y ese es
+ * justo el hecho en que se apoya el reembolso por conductor que no llegó.
+ *
+ * Y no antes de llegar: confirmar a mitad de camino sería dar por bueno lo
+ * que todavía no ha pasado. La regla vive en `dominio/cierre`.
  */
-export async function verificarLlegada(
-  viajeId: string,
-  codigo: string,
-): Promise<ResultadoDeAbordaje> {
-  const reserva = fuente.reservas.find(
-    (r) =>
-      r.trip_id === viajeId &&
-      (r.status === 'confirmed' || r.status === 'completed') &&
-      r.arrival_code === codigo,
-  );
-  if (!reserva) return demora({ ok: false, motivo: 'no-coincide' } as const);
-  if (!reserva.boarded_at) return demora({ ok: false, motivo: 'no-coincide' } as const);
-  if (reserva.released_at) return demora({ ok: false, motivo: 'ya-abordo' } as const);
+export async function confirmarQueLlegue(reservaId: string): Promise<boolean> {
+  const reserva = fuente.reservas.find((r) => r.id === reservaId);
+  if (!reserva) return demora(false);
+  if (!sePuedeConfirmar(comoCerrable(reserva))) return demora(false);
 
+  await cerrar(reserva);
+  return demora(true);
+}
+
+/**
+ * LAS QUE SE CIERRAN SOLAS. Pasadas las 24 h desde la llegada, un viaje que
+ * ocurrió se da por bueno aunque nadie haya abierto la app.
+ *
+ * **Se barre al leer**, no por un reloj del servidor: no hay cron contratado
+ * todavía, y una reserva que se queda abierta es plata que no llega. El día
+ * que exista el cron, esto se borra y nadie se entera — la regla ya está
+ * fuera, en el dominio.
+ */
+export async function cerrarLasVencidas(perfilId?: string): Promise<number> {
+  const candidatas = fuente.reservas.filter(
+    (r) =>
+      (!perfilId || r.passenger_id === perfilId) &&
+      r.boarded_at != null &&
+      r.released_at == null &&
+      estadoDelCierre(comoCerrable(r)) === 'se-cierra-sola',
+  );
+  for (const r of candidatas) await cerrar(r);
+  return demora(candidatas.length, 0);
+}
+
+async function cerrar(reserva: ReservaFila): Promise<void> {
   const ahora = new Date().toISOString();
   await fuente.actualizarReserva(reserva.id, { status: 'completed', completed_at: ahora });
   // libera el aporte y escribe `released_at`
   await liberarAporte(reserva.id);
+}
 
-  const p = fuente.perfiles.find((x) => x.id === reserva.passenger_id);
-  return demora({
-    ok: true,
-    reservaId: reserva.id,
-    nombre: p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : 'Alguien',
-  } as const);
+/** La reserva, dicha como la lee el dominio del cierre. */
+function comoCerrable(reserva: ReservaFila): ReservaCerrable {
+  const viaje = fuente.viajes.find((v) => v.id === reserva.trip_id);
+  return {
+    boardedAt: reserva.boarded_at,
+    releasedAt: reserva.released_at,
+    llegadaPrevista: viaje?.arrival_estimate_at ?? null,
+  };
 }
 
 /* ------------------------------------------------------------------ *
@@ -219,8 +250,10 @@ export async function verificarLlegada(
 
 export type Llegada = {
   reservaId: string;
-  /** El segundo código: el que cierra el viaje. */
-  digitos: string[];
+  /** En qué punto está el cierre. Ya no hay código que enseñar. */
+  estado: ReturnType<typeof estadoDelCierre>;
+  /** Cuándo se dará por bueno solo, si nadie dice nada. */
+  seCierraSola: string | null;
   ciudad: string;
   lugar: string;
   llegadaHora: string;
@@ -249,7 +282,8 @@ export async function resumenDeLlegada(reservaId: string): Promise<Llegada> {
 
   return demora({
     reservaId,
-    digitos: (reserva.arrival_code ?? '····').split(''),
+    estado: estadoDelCierre(comoCerrable(reserva)),
+    seCierraSola: cuandoSeCierraSola(comoCerrable(reserva)),
     ciudad: ciudad ?? etiqueta,
     lugar: lugar ?? '',
     llegadaHora: ultima?.scheduled_at ?? viaje.arrival_estimate_at ?? viaje.departure_at,

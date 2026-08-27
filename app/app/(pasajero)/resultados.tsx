@@ -46,6 +46,7 @@ import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
+import { ElegirDia, diaEnChip } from '@/ui/ElegirDia';
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { Boton } from '@/ui/controles';
 import { cifraRedonda, tabular } from '@/ui/dinero';
@@ -735,10 +736,9 @@ export default function Resultados() {
         alCerrar={() => setEligiendoCuantos(false)}
       />
 
-      <HojaDeEleccion
+      <ElegirDia
         abierta={eligiendoDia}
         titulo="Qué día viajas"
-        opciones={LOS_PROXIMOS_DIAS()}
         elegido={dia ?? diaEnPanama(new Date())}
         alElegir={(v) => setRuta((r) => (r ? { ...r, dia: v } : r))}
         alCerrar={() => setEligiendoDia(false)}
@@ -869,10 +869,18 @@ function Esqueleto() {
 /* «Acepta maletas» se fue con el booleano del conductor: ya no hay nada que
    filtrar, porque el viaje no lo declara — lo decide al recibir cada
    solicitud (25-08-2026). */
-type ClaveDeFiltro = 'aceptaMascotas' | 'soloMujeres' | 'yappy';
+type ClaveDeFiltro = 'aceptaMascotas' | 'sinHumo' | 'soloMujeres' | 'yappy';
 
+/**
+ * Las etiquetas, escritas del lado que la gente busca (27-08-2026, pedido del
+ * dueño: «in the filtre in search should be smoke, animals»).
+ *
+ * «Sin humo» y no «se puede fumar»: nadie busca un carro donde se fume, se
+ * busca uno donde no. Un filtro escrito al revés no lo pulsa nadie.
+ */
 const ETIQUETAS: Record<ClaveDeFiltro, string> = {
   aceptaMascotas: 'Con mascota',
+  sinHumo: 'Sin humo',
   soloMujeres: 'Solo mujeres',
   yappy: 'Yappy',
 };
@@ -986,18 +994,6 @@ function ChipDeHoja({
 
 /* -------------------------------------------------------------- Utilidades */
 
-const LOS_PROXIMOS_DIAS = (): Opcion[] =>
-  Array.from({ length: 15 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    const dia = diaEnPanama(d);
-    return {
-      valor: dia,
-      etiqueta: cuandoTexto(dia),
-      debajo: i <= 1 ? diaLargo(d.toISOString()) : undefined,
-    };
-  });
-
 /** «Hoy», «Mañana» o el día corto, según cuándo salgan los viajes que hay. */
 function cuandoTexto(dia: string | null): string {
   if (!dia) return 'Hoy';
@@ -1005,7 +1001,9 @@ function cuandoTexto(dia: string | null): string {
   if (dia === hoy) return 'Hoy';
   const manana = diaEnPanama(new Date(Date.now() + 86_400_000));
   if (dia === manana) return 'Mañana';
-  return diaCorto(`${dia}T12:00:00-05:00`);
+  /* Con el mes: «vie 28» a secas se vuelve mentira en cuanto se cruza a
+     septiembre, y el chip es lo único que dice qué día se está mirando. */
+  return diaEnChip(dia);
 }
 
 

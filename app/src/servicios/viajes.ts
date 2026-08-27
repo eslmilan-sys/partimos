@@ -57,6 +57,11 @@ export type Filtros = {
   aceptaMaletas?: boolean;
   /** Quien viaja con su perro no puede subirse a un carro que no los lleva. */
   aceptaMascotas?: boolean;
+  /**
+   * SIN HUMO, y no «se puede fumar»: el filtro se escribe del lado que la
+   * gente busca. Nadie busca un carro donde se fume; se busca uno donde no.
+   */
+  sinHumo?: boolean;
   soloMujeres?: boolean;
   /** Quien paga con Yappy no quiere ver viajes que solo aceptan efectivo. */
   yappy?: boolean;
@@ -100,6 +105,7 @@ export async function buscarViajes(
     .filter((v) => v.status === 'published')
     .filter((v) => diaEnPanama(v.departure_at) === fecha)
     .filter((v) => (filtros.aceptaMascotas ? v.allows_pets : true))
+    .filter((v) => (filtros.sinHumo ? !v.allows_smoking : true))
     .filter((v) => (filtros.soloMujeres ? v.gender_preference === 'women_only' : true))
     .filter((v) => (filtros.yappy ? v.accepts_yappy_direct : true))
     .map(comoResultado)
@@ -497,6 +503,13 @@ export async function prepararPublicacion(
    * desconocidos no se cobran.
    */
   libre?: { desde: Lugar; hacia: Lugar },
+  /**
+   * CUÁL DE SUS CARROS. Antes se cogía el primero activo y punto: quien tiene
+   * dos —el sedán entre semana y la camioneta el fin de semana— no podía
+   * publicar con el segundo, y «Cambiar» sólo llevaba a registrar OTRO
+   * (27-08-2026, pedido del dueño). Sin este dato, el primero, como antes.
+   */
+  carroId?: string,
 ): Promise<PublicacionPreparada> {
   const corredor = fuente.corredores.find((c) => c.slug === corredorSlug) ?? null;
   if (!corredor && !libre) throw new Error(`No conocemos la ruta ${corredorSlug}`);
@@ -514,7 +527,10 @@ export async function prepararPublicacion(
    * el tope de la ruta— y se dice que es una estimación. La pantalla se
    * encarga de que ese caso no pueda publicar.
    */
-  const suyo = fuente.vehiculos.find((v) => v.owner_id === conductorId && v.is_active) ?? null;
+  const mios = fuente.vehiculos.filter((v) => v.owner_id === conductorId && v.is_active);
+  /* El pedido manda; si el identificador ya no vale —lo borró, o es de otro—
+     se cae al primero en vez de dejar la pantalla sin carro. */
+  const suyo = (carroId ? mios.find((v) => v.id === carroId) : null) ?? mios[0] ?? null;
   const carro: Vehicle =
     suyo ?? {
       id: 'referencia',

@@ -285,6 +285,28 @@ export const vehiculos: Vehicle[] = [
     rate_per_km_cents: null,
     photo_path: null,
   },
+  /**
+   * El SEGUNDO carro de Andrés. Está aquí porque con uno solo no se puede ver
+   * elegir: el conductor de verdad tiene el sedán entre semana y la camioneta
+   * cuando baja con la familia, y hasta el 27-08-2026 sólo se podía publicar
+   * con el primero que la base devolviera.
+   */
+  {
+    id: 'cccccccc-0000-4000-8000-00000000000a',
+    owner_id: ANDRES_ID,
+    category_code: 'suv',
+    make: 'Toyota',
+    model: 'RAV4',
+    color: 'negro',
+    year: 2021,
+    seats_total: 5,
+    plate_last3: '871',
+    is_active: true,
+    created_at: '2026-05-19T09:10:00+00:00',
+    consumption_l_100km: 9.5,
+    rate_per_km_cents: null,
+    photo_path: null,
+  },
   {
     id: TUCSON_ID,
     owner_id: CARLA_ID,
@@ -508,5 +530,6 @@ export const resenas: Review[] = [
 /** La placa completa, que la columna `plate_last3` todavía no puede guardar. */
 export const placasCompletas: Record<string, string> = {
   [ELANTRA_ID]: 'AB-1234',
+  ['cccccccc-0000-4000-8000-00000000000a']: 'AR-8871',
   [TUCSON_ID]: 'CV-0907',
 };

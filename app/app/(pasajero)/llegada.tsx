@@ -11,14 +11,14 @@ import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { type Llegada, resumenDeLlegada } from '@/servicios/abordaje';
+import { type Llegada, cerrarLasVencidas, confirmarQueLlegue, resumenDeLlegada } from '@/servicios/abordaje';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { Amanecer, CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { hora } from '@/ui/fechas';
+import { cuando, hora } from '@/ui/fechas';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
@@ -32,9 +32,16 @@ export default function LlegadaPantalla() {
   /* «Todavía no lo sé» y «no está» no son lo mismo: lo segundo dura para
      siempre, y en blanco no hay ni por dónde salir. */
   const [noEsta, setNoEsta] = useState(false);
+  const [cerrando, setCerrando] = useState(false);
 
   useEffect(() => {
-    resumenDeLlegada(reservaId).then(setDatos).catch(() => setNoEsta(true));
+    /* Si ya pasaron las 24 h, se cierra antes de dibujar: así la pantalla no
+       ofrece confirmar algo que el reloj ya dio por bueno. */
+    cerrarLasVencidas()
+      .catch(() => {})
+      .then(() => resumenDeLlegada(reservaId))
+      .then(setDatos)
+      .catch(() => setNoEsta(true));
   }, [reservaId]);
 
   if (noEsta) return <NoEsta />;
@@ -57,7 +64,13 @@ export default function LlegadaPantalla() {
       <BarraDeEstado hora={hora(datos.llegadaHora)} />
 
       <View style={estilos.cabecera}>
-        <Text style={estilos.epigrafeCampo}>{`Llegaste · ${hora(datos.llegadaHora)}`}</Text>
+        <Text style={estilos.epigrafeCampo}>
+          {datos.estado === 'cerrada'
+            ? `Viaje cerrado · ${hora(datos.llegadaHora)}`
+            : datos.estado === 'en-camino' || datos.estado === 'sin-subir'
+              ? `Llegada prevista · ${hora(datos.llegadaHora)}`
+              : `Llegaste · ${hora(datos.llegadaHora)}`}
+        </Text>
         <Text style={estilos.titular}>
           {datos.ciudad}
           {'\n'}
@@ -66,18 +79,51 @@ export default function LlegadaPantalla() {
       </View>
 
       <View style={estilos.cuerpo}>
+        {/* **EL SEGUNDO CÓDIGO SE FUE** (27-08-2026). Aquí había cuatro
+            dígitos que el conductor tecleaba al bajarte. Con la maleta en la
+            mano y el carro en doble fila nadie los tecleaba, y sin ese tecleo
+            la reserva se quedaba abierta para siempre. Cierra quien viajó,
+            que es quien sabe si llegó — o se cierra sola a las 24 h. */}
         <View style={estilos.hoja}>
-          <Epigrafe>Código de llegada</Epigrafe>
-          <View style={estilos.digitos}>
-            {datos.digitos.map((d, i) => (
-              <View key={`${d}-${i}`} style={estilos.digito}>
-                <Text style={estilos.digitoTexto}>{d}</Text>
-              </View>
-            ))}
-          </View>
+          <Epigrafe>
+            {datos.estado === 'cerrada'
+              ? 'Viaje cerrado'
+              : datos.estado === 'sin-subir'
+                ? 'Todavía no subes'
+                : '¿Todo bien?'}
+          </Epigrafe>
           <Text style={estilos.explicacion}>
-            {`${datos.conductor} lo teclea al bajarte. Ese tecleo cierra el viaje y suelta el aporte, así nadie tiene que reclamar nada después.`}
+            {datos.estado === 'cerrada'
+              ? `El viaje quedó cerrado y el aporte salió hacia ${datos.conductor}.`
+              : datos.estado === 'en-camino'
+                ? `Cuando llegues, dilo aquí y el aporte sale hacia ${datos.conductor}.`
+                : datos.estado === 'sin-subir'
+                  ? `Todavía no has subido. ${datos.conductor} teclea tu código al recogerte.`
+                  : `Dilo y el viaje se cierra: el aporte sale hacia ${datos.conductor}. Si no dices nada${
+                      datos.seCierraSola ? `, se da por bueno solo el ${cuando(datos.seCierraSola).toLowerCase()}` : ', se da por bueno solo a las 24 horas'
+                    }.`}
           </Text>
+          {datos.estado === 'por-confirmar' || datos.estado === 'se-cierra-sola' ? (
+            <View style={{ marginTop: 16 }}>
+              <Boton
+                desactivado={cerrando}
+                alPulsar={async () => {
+                  setCerrando(true);
+                  try {
+                    await confirmarQueLlegue(reservaId);
+                    setDatos(await resumenDeLlegada(reservaId));
+                  } finally {
+                    setCerrando(false);
+                  }
+                }}
+              >
+                Sí, todo bien
+              </Boton>
+              <Text style={estilos.explicacion}>
+                {`¿Pasó algo? Cuéntanoslo antes de cerrar y lo miramos contigo.`}
+              </Text>
+            </View>
+          ) : null}
         </View>
 
         <View style={estilos.tarjetaLiberacion}>

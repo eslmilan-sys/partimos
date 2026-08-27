@@ -39,6 +39,16 @@ export type ViajePublicado = {
   expiraLaPrimera: string | null;
   /** Se puede editar mientras nadie haya pagado. */
   editable: boolean;
+  /** La hora de salida ya pasó: el viaje está en marcha o terminado. */
+  yaSalio: boolean;
+  /**
+   * ¿Se puede tocar? Nadie ha asegurado su puesto Y todavía no ha salido.
+   *
+   * Faltaba la segunda mitad (27-08-2026): el panel ofrecía «Editar» sobre un
+   * viaje de esta mañana que ya se había hecho. Cambiarle la hora a un viaje
+   * que ya pasó no es editar, es reescribir la historia.
+   */
+  sePuedeEditar: boolean;
 };
 
 export async function viajesPublicados(conductorId: string): Promise<ViajePublicado[]> {
@@ -193,6 +203,7 @@ function comoPublicado(v: ViajeFila): ViajePublicado {
     .filter((r) => r.status === 'pending')
     .sort((a, b) => (a.expires_at ?? '9').localeCompare(b.expires_at ?? '9'));
   const vendidos = v.seats_offered - puestosLibresDe(v.id);
+  const yaSalio = new Date(v.departure_at).getTime() < Date.now();
 
   return {
     id: v.id,
@@ -209,6 +220,8 @@ function comoPublicado(v: ViajeFila): ViajePublicado {
     solicitudes: pendientes.length,
     expiraLaPrimera: pendientes[0]?.expires_at ?? null,
     editable: reservas.every((r) => r.status !== 'confirmed'),
+    yaSalio,
+    sePuedeEditar: reservas.every((r) => r.status !== 'confirmed') && !yaSalio,
   };
 }
 
