@@ -157,7 +157,7 @@ export async function comprobante(reservaId: string): Promise<Comprobante> {
       },
       {
         etiqueta: 'Puestos',
-        valor: `${reserva.seats} · ${resumenCorto(deFilas({ mochilas: reserva.mochilas, maletas: reserva.maletas }))}`,
+        valor: `${reserva.seats} · ${resumenCorto(deFilas({ mochilas: reserva.mochilas, maletas: reserva.maletas, maletas_pequenas: reserva.maletas_pequenas }))}`,
       },
       { etiqueta: 'Referencia', valor: reserva.boarding_code ?? reserva.id.slice(0, 8) },
     ],

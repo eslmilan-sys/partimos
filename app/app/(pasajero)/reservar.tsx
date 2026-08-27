@@ -16,10 +16,15 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useVolver } from '@/ui/salidas';
 
 import {
+  type ClaseDeEquipaje,
   type Equipaje,
+  CLASES,
   COMO_LO_DICE,
-  EQUIPAJES,
+  SIN_EQUIPAJE,
+  TOPE_POR_CLASE,
   aFilas,
+  cambiar,
+  cuantasPiezas,
   decideElMaletero,
 } from '@/dominio/equipaje';
 import type { Lugar } from '@/dominio/lugar';
@@ -59,7 +64,7 @@ export default function Reservar() {
   /* El pasajero DICE lo que lleva; el conductor decide cuando le llegue la
      solicitud. Antes el viaje traía un booleano y esta pantalla se adaptaba
      a él — decidido en abstracto meses antes. Cambiado el 25-08-2026. */
-  const [equipaje, setEquipaje] = useState<Equipaje>('bolso');
+  const [equipaje, setEquipaje] = useState<Equipaje>(SIN_EQUIPAJE);
   /** El punto elegido del buscador — con sus coordenadas si las trajo. */
   const [buscandoPunto, setBuscandoPunto] = useState(false);
   const [puntoElegido, setPuntoElegido] = useState<Lugar | null>(null);
@@ -159,40 +164,77 @@ export default function Reservar() {
         <View style={estilos.tarjetaEquipaje}>
           <Epigrafe>Qué llevo</Epigrafe>
 
-          {/* Tres opciones y no más: contar maletas era una contabilidad de
-              maletero que nadie iba a llevar. Lo que cambia la respuesta del
-              conductor es si algo va al maletero o no. */}
-          <View style={estilos.opciones}>
-            {EQUIPAJES.map((cual) => {
-              const puesto = cual === equipaje;
-              return (
-                <Pressable
-                  key={cual}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected: puesto }}
-                  accessibilityLabel={COMO_LO_DICE[cual].titulo}
-                  onPress={() => setEquipaje(cual)}
-                  style={({ pressed }) => [
-                    estilos.opcion,
-                    puesto && estilos.opcionPuesta,
-                    pressed && pulsado.celda,
-                  ]}
-                >
-                  <Text style={[estilos.opcionTitulo, puesto && estilos.opcionTituloPuesto]}>
-                    {COMO_LO_DICE[cual].titulo}
-                  </Text>
-                  <Text style={estilos.opcionDetalle}>{COMO_LO_DICE[cual].detalle}</Text>
-                </Pressable>
-              );
-            })}
+          {/* **Se cuenta** (27-08-2026, pedido del dueño). Antes eran tres
+              opciones sueltas —nada, un bolso, una maleta— con el argumento de
+              que contar era una contabilidad de maletero. El argumento no veía
+              lo que sí cambia la respuesta: dos maletas no son una, y una de
+              cabina no es un baúl entero. El número ES el dato.
+
+              Un contador por clase, con el mismo control de ±  que ya usa
+              `publicar` para los puestos, y tope de tres: por encima de eso no
+              es equipaje de pasajero, es una mudanza. */}
+          <View style={estilos.clases}>
+            {CLASES.map((cual: ClaseDeEquipaje, i: number) => (
+              <View key={cual} style={[estilos.clase, i > 0 && estilos.claseConLinea]}>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={estilos.claseTitulo}>{COMO_LO_DICE[cual].titulo}</Text>
+                  <Text style={estilos.claseDetalle}>{COMO_LO_DICE[cual].detalle}</Text>
+                </View>
+                <View style={estilos.contador}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Quitar ${COMO_LO_DICE[cual].uno}`}
+                    disabled={equipaje[cual] === 0}
+                    onPress={() => setEquipaje(cambiar(equipaje, cual, -1))}
+                    style={({ pressed }) => [
+                      estilos.paso,
+                      equipaje[cual] === 0 && estilos.pasoApagado,
+                      pressed && equipaje[cual] > 0 ? pulsado.celda : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        estilos.pasoSigno,
+                        equipaje[cual] === 0 && estilos.pasoSignoApagado,
+                      ]}
+                    >
+                      −
+                    </Text>
+                  </Pressable>
+                  <Text style={estilos.cifra}>{equipaje[cual]}</Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Añadir ${COMO_LO_DICE[cual].uno}`}
+                    disabled={equipaje[cual] === TOPE_POR_CLASE}
+                    onPress={() => setEquipaje(cambiar(equipaje, cual, +1))}
+                    style={({ pressed }) => [
+                      estilos.paso,
+                      equipaje[cual] === TOPE_POR_CLASE && estilos.pasoApagado,
+                      pressed && equipaje[cual] < TOPE_POR_CLASE ? pulsado.celda : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        estilos.pasoSigno,
+                        equipaje[cual] === TOPE_POR_CLASE && estilos.pasoSignoApagado,
+                      ]}
+                    >
+                      +
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            ))}
           </View>
 
           <View style={estilos.nota}>
             <Maleta tamano={14} />
             <Text style={estilos.notaTexto}>
               {decideElMaletero(equipaje)
-                ? `${datos.conductor} ve tu maleta en la solicitud y decide si le cabe.`
-                : `${datos.conductor} lo ve en la solicitud. Un bolso va contigo y nunca estorba.`}
+                ? `${datos.conductor} ve lo que llevas en la solicitud y decide si le cabe en el maletero.`
+                : cuantasPiezas(equipaje) > 0
+                  ? `${datos.conductor} lo ve en la solicitud. Un bolso va contigo y nunca estorba.`
+                  : `Puedes dejarlo en cero: ${datos.conductor} lo ve igual en la solicitud.`}
             </Text>
           </View>
         </View>
@@ -361,32 +403,54 @@ const estilos = StyleSheet.create({
   },
   paradaHora: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
 
-  opciones: { marginTop: 12, gap: 8 },
-  opcion: {
-    borderWidth: 1,
-    borderColor: color.bordePorDefecto,
-    borderRadius: radio.control,
-    backgroundColor: color.blanco,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-  },
-  /* La elegida se marca con la tinta, no con el rojo: elegir equipaje no es
-     una acción primaria, y el rojo tiene sus cuatro sentidos (invariante 4). */
-  opcionPuesta: { borderColor: color.ink900, borderWidth: 1.5 },
-  opcionTitulo: {
+  /** Una fila por clase, separadas por un pelo: es una lista, no tarjetas. */
+  clases: { marginTop: 8 },
+  clase: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
+  claseConLinea: { borderTopWidth: 1, borderTopColor: color.bordeSutil },
+  claseTitulo: {
     fontSize: 15,
     lineHeight: 20,
-    fontWeight: '500',
-    color: color.ink700,
+    fontWeight: '600',
+    letterSpacing: -0.24,
+    color: color.ink900,
     fontFamily: familia,
   },
-  opcionTituloPuesto: { fontWeight: '700', color: color.ink900 },
-  opcionDetalle: {
+  claseDetalle: {
     marginTop: 2,
     fontSize: 12.5,
     lineHeight: 17,
     color: color.ink500,
     fontFamily: familia,
+  },
+  /** El mismo control de ± que usa `publicar` para los puestos. */
+  contador: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  paso: {
+    width: 34,
+    height: 34,
+    borderRadius: radio.icono,
+    backgroundColor: color.lavado,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  /** Apagado sigue OPACO: lo que se apaga es el signo, no la superficie. */
+  pasoApagado: { backgroundColor: color.inerteFondo },
+  pasoSigno: {
+    fontSize: 19,
+    lineHeight: 22,
+    fontWeight: '600',
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  pasoSignoApagado: { color: color.inerteTinta },
+  cifra: {
+    minWidth: 26,
+    textAlign: 'center',
+    fontSize: 16.5,
+    lineHeight: 22,
+    fontWeight: '600',
+    color: color.ink900,
+    fontFamily: familia,
+    ...tabular,
   },
 
   tarjetaEquipaje: {

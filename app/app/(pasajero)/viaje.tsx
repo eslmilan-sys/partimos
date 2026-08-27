@@ -25,7 +25,7 @@ import { DIJO, compartir } from '@/ui/salidas';
 
 import { useVolver } from '@/ui/salidas';
 
-import { ciudadYPunto, soloCiudad } from '@/dominio/comoSeLlama';
+import { ciudadYPunto, soloCiudad, soloPunto } from '@/dominio/comoSeLlama';
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { reservasDelViaje } from '@/servicios/reservas';
 import { useSesion } from '@/servicios/sesion';
@@ -41,13 +41,11 @@ import {
   Asiento,
   Atras,
   Avanza,
-  Ayuda,
   Carro,
   Chat,
   Compartir,
   Escudo,
   Estrella,
-  Maleta,
   Mascota,
   SinHumo,
 } from '@/ui/iconos';
@@ -139,6 +137,24 @@ export default function DetalleDelViaje() {
    */
   const esMio = !!yo && yo === viaje.driver_id;
   const ciudades = ciudadesDelViaje(viaje);
+  const llegada = viaje.arrival_estimate_at ? hora(viaje.arrival_estimate_at) : '';
+
+  /**
+   * ¿EL RECORRIDO DICE ALGO QUE LA CABECERA NO DIGA YA?
+   *
+   * Sí cuando hay parada en el camino —eso no cabe arriba— o cuando algún
+   * extremo tiene punto propio («Albrook · Terminal» y no sólo «Ciudad de
+   * Panamá»). En una ruta libre publicada sin puntos, la respuesta es no: el
+   * bloque repetía las dos ciudades y la hora de salida y nada más.
+   */
+  const laRutaAporta =
+    paradas.length > 2 ||
+    paradas.some((p, i) => {
+      if (i !== 0 && i !== paradas.length - 1) return true;
+      const ciudad = i === 0 ? ciudades.origen : ciudades.destino;
+      const punto = soloPunto(ciudad, p.custom_label);
+      return !!punto && punto !== ciudad;
+    });
 
   return (
     <View style={estilos.pantalla}>
@@ -196,6 +212,15 @@ export default function DetalleDelViaje() {
         </Bandera>
 
         <View style={estilos.hoja}>
+          {/* **La ruta se dibuja cuando dice algo nuevo** (27-08-2026, pedido
+              del dueño: «les données se répètent»). La cabecera ya lleva la
+              hora de salida, la duración y las dos ciudades. En un viaje
+              directo cuyos extremos son las ciudades mismas —lo normal en una
+              ruta libre— este bloque las repetía enteras y no añadía nada.
+              Ahora sólo se despliega si hay paradas en el camino o si algún
+              extremo tiene punto propio; si no, una línea con lo que la
+              cabecera NO dice: la hora de llegada y cómo se acuerda el punto. */}
+          {laRutaAporta ? (
           <View style={estilos.tarjeta}>
             <Epigrafe>Ruta del viaje</Epigrafe>
             <View style={estilos.recorrido}>
@@ -219,7 +244,14 @@ export default function DetalleDelViaje() {
                         {i === 0 ? 'Salida' : ultima ? 'Llegada' : 'Parada'}
                       </Text>
                       <Text style={[estilos.paradaNombre, !ultima && i > 0 && { fontWeight: '400' }]}>
-                        {p.custom_label}
+                        {/* Con la ciudad delante y sin repetirla: `custom_label`
+                            vacío dejaba la fila SIN nombre, un punto y una hora
+                            colgando de nada. */}
+                        {i === 0
+                          ? ciudadYPunto(ciudades.origen, p.custom_label)
+                          : ultima
+                            ? ciudadYPunto(ciudades.destino, p.custom_label)
+                            : (p.custom_label ?? '')}
                       </Text>
                     </View>
                     <Text style={estilos.paradaHora}>
@@ -231,6 +263,18 @@ export default function DetalleDelViaje() {
               })}
             </View>
           </View>
+          ) : (
+            <View style={estilos.tarjetaDirecto}>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.directoTitulo}>
+                  {llegada ? `Directo · llega ${llegada} aprox.` : 'Directo, sin paradas'}
+                </Text>
+                <Text style={estilos.directoNota}>
+                  {`El punto exacto de recogida lo acuerdas con ${deNombre} por el chat.`}
+                </Text>
+              </View>
+            </View>
+          )}
 
           <Pressable
             accessibilityRole="button"
@@ -326,74 +370,6 @@ export default function DetalleDelViaje() {
             </View>
           </Pressable>
 
-          {/* **Preguntar antes de pedir** (26-08-2026). Hasta ahora el chat se
-              abría al aceptar el puesto, así que para saber si pasaba por tu
-              lado había que ocupar un sitio y arrancarle el reloj al conductor.
-              Al revés de como decide la gente. Va fuera de la tarjeta y no
-              dentro: la tarjeta entera lleva al perfil, y un botón dentro de
-              otro botón se pulsa por error. */}
-          {esMio ? null : (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                nombre ? `Escribirle a ${deNombre}` : 'Escribirle al conductor'
-              }
-              onPress={() =>
-                router.push({
-                  pathname: '/(pasajero)/chat',
-                  params: miReserva
-                    ? { reserva: miReserva.id }
-                    : { viaje: viaje.id, con: yo ?? '' },
-                })
-              }
-              style={({ pressed }) => [estilos.escribir, pressed && estilos.escribirPulsado]}
-            >
-              <Chat tamano={19} tinta={color.ink900} />
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={estilos.escribirTexto}>
-                  {nombre ? `Escríbele a ${deNombre}` : 'Escríbele al conductor'}
-                </Text>
-                <Text style={estilos.escribirNota}>
-                  {miReserva
-                    ? 'El chat de tu puesto'
-                    : 'Pregunta lo que necesites. No ocupa el puesto.'}
-                </Text>
-              </View>
-              <Avanza />
-            </Pressable>
-          )}
-
-          {/* Azul, no rojo: informa, no es algo que tocar. */}
-          <View style={estilos.aviso}>
-            <Escudo tamano={19} tinta={color.azul500} />
-            <Text style={estilos.avisoTexto}>
-              <Text style={estilos.avisoFuerte}>Pedir puesto no cuesta nada</Text>
-              {` · no se cobra hasta que ${deNombre} acepte`}
-            </Text>
-          </View>
-
-          {/* Tres cosas ciertas, y ninguna promete lo que no hay: no hay
-              soporte 24/7 ni la plataforma custodia el dinero de nadie.
-              Va en el desplazamiento y no en la barra fija: pegada abajo, la
-              barra se comía un tercio de la pantalla en un teléfono. */}
-          <View style={estilos.tira}>
-            <View style={estilos.tiraItem}>
-              <Escudo tamano={17} tinta={color.ink500} />
-              <Text style={estilos.tiraTexto}>Sin cargo al pedir</Text>
-            </View>
-            <View style={estilos.tiraItem}>
-              <Chat tamano={17} tinta={color.ink500} />
-              <Text style={estilos.tiraTexto}>Chat sin reservar</Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.push('/(ayuda)')}
-              style={estilos.tiraItem}
-            >
-              <Ayuda tamano={17} tinta={color.ink500} />
-              <Text style={estilos.tiraTexto}>Ayuda si algo pasa</Text>
-            </Pressable>
-          </View>
         </View>
       </ScrollView>
 
@@ -409,6 +385,31 @@ export default function DetalleDelViaje() {
             <Text style={estilos.directo}>{esMio ? 'Tu viaje' : 'Aporte directo'}</Text>
           </View>
         </View>
+
+        {/* **Preguntar vive al lado de pedir** (27-08-2026). Estaba en una
+            tarjeta suelta en medio del desplazamiento, donde nadie la ve en el
+            momento en que duda: la duda llega con la mano ya sobre el botón
+            rojo. Aquí están las dos salidas juntas —preguntar o pedir— y la
+            que manda sigue siendo la roja, que ocupa el resto de la fila. */}
+        <View style={estilos.filaAcciones}>
+          {esMio ? null : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={nombre ? `Escribirle a ${deNombre}` : 'Escribirle al conductor'}
+              onPress={() =>
+                router.push({
+                  pathname: '/(pasajero)/chat',
+                  params: miReserva
+                    ? { reserva: miReserva.id }
+                    : { viaje: viaje.id, con: yo ?? '' },
+                })
+              }
+              style={({ pressed }) => [estilos.preguntar, pressed && estilos.preguntarPulsado]}
+            >
+              <Chat tamano={20} tinta={color.ink900} />
+              <Text style={estilos.preguntarTexto}>Preguntar</Text>
+            </Pressable>
+          )}
 
         {esMio ? (
           <Pressable
@@ -470,7 +471,7 @@ export default function DetalleDelViaje() {
             <Avanza tamano={19} tinta="#fff" />
           </Pressable>
         )}
-
+        </View>
       </View>
     </View>
   );
@@ -568,11 +569,11 @@ const estilos = StyleSheet.create({
     marginTop: 14,
   },
 
-  /** La misma tarjeta, en fila: es una acción, no un bloque de lectura. */
-  escribir: {
+
+  /** El sustituto del recorrido cuando el recorrido no aporta nada. */
+  tarjetaDirecto: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: color.bordeSutil,
@@ -581,20 +582,20 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 18,
     marginTop: 14,
   },
-  escribirPulsado: { backgroundColor: color.sand100, borderColor: color.bordePorDefecto },
-  escribirTexto: {
+  directoTitulo: {
     fontSize: 15,
     lineHeight: 21,
     fontWeight: '600',
     letterSpacing: -0.24,
     color: color.ink900,
     fontFamily: familia,
+    ...tabular,
   },
-  escribirNota: {
+  directoNota: {
     fontSize: 12.5,
     lineHeight: 18,
     color: color.ink500,
-    marginTop: 2,
+    marginTop: 3,
     fontFamily: familia,
   },
 
@@ -747,17 +748,6 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  aviso: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 11,
-    marginTop: 14,
-    padding: 15,
-    borderRadius: radio.l,
-    backgroundColor: color.azul50,
-  },
-  avisoTexto: { flex: 1, fontSize: 13.5, lineHeight: 20, color: color.azul700, fontFamily: familia },
-  avisoFuerte: { fontWeight: '600' },
 
   barraVidrio: {
     position: 'absolute',
@@ -785,14 +775,38 @@ const estilos = StyleSheet.create({
   filaDirecto: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto', marginTop: 4 },
   directo: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia },
 
+  /** Preguntar y pedir, en la misma fila. La roja se queda con el resto. */
+  filaAcciones: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  /** Alta como la roja, ancha lo justo: al lado, no en su lugar. */
+  preguntar: {
+    height: 60,
+    width: 74,
+    borderRadius: radio.pastilla,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+  },
+  preguntarPulsado: { backgroundColor: color.sand100, borderColor: color.ink300 },
+  preguntarTexto: {
+    fontSize: 10.5,
+    lineHeight: 14,
+    fontWeight: '600',
+    letterSpacing: -0.1,
+    color: color.ink800,
+    fontFamily: familia,
+  },
   cta: {
+    flex: 1,
     height: 60,
     borderRadius: radio.pastilla,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-    paddingHorizontal: 26,
+    paddingHorizontal: 20,
   },
   ctaTexto: {
     fontSize: 17.5,
@@ -803,32 +817,6 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  tira: {
-    flexDirection: 'row',
-    marginTop: 22,
-    paddingTop: 18,
-    borderTopWidth: 1,
-    borderTopColor: color.bordeSutil,
-  },
-  tiraItem: {
-    minHeight: espacio.tap,
-    flex: 1,
-    /* SIN ESTO EL TEXTO SE CORTABA. Un hijo flexible no baja de su ancho de
-       contenido por defecto, así que «Ayuda si algo pasa» —la más larga de
-       las tres— desbordaba la columna y se veía «Ayuda si algo pa». Con
-       `minWidth: 0` la columna puede encoger y el texto pasa a dos líneas.
-       Visto en el teléfono del dueño el 26-08-2026. */
-    minWidth: 0,
-    alignItems: 'center',
-    gap: 6,
-  },
-  tiraTexto: {
-    fontSize: 11.5,
-    lineHeight: 16,
-    color: color.ink600,
-    textAlign: 'center',
-    fontFamily: familia,
-  },
   precioBarra: {
     fontSize: 30,
     fontWeight: '700',

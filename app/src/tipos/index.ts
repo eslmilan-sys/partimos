@@ -19,7 +19,15 @@ export type City = Tablas['cities']['Row'];
 export type Corridor = Tablas['corridors']['Row'];
 export type Trip = Tablas['trips']['Row'];
 export type TripStop = Tablas['trip_stops']['Row'];
-export type Booking = Tablas['bookings']['Row'];
+/**
+ * Una reserva. `maletas_pequenas` es de la migración 0042 —el tamaño que
+ * `maletas` no distinguía— y va aquí a mano porque `base.ts` se genera del
+ * esquema y todavía no se ha regenerado. Opcional a propósito: una reserva
+ * escrita antes de la 0042 no la trae.
+ */
+export type Booking = Tablas['bookings']['Row'] & {
+  maletas_pequenas?: number | null;
+};
 export type Payment = Tablas['payments']['Row'];
 /**
  * Un mensaje. `trip_id` y `con_id` son de la migración 0041 — el hilo de

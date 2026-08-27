@@ -179,8 +179,8 @@ function comoSolicitud(r: ReservaFila, ahora: Date): Solicitud {
     },
     punto: r.proposed_point ?? '',
     minutosDeDesvio: r.detour_minutes,
-    equipaje: comoLoVeElConductor(deFilas({ mochilas: r.mochilas, maletas: r.maletas })),
-    vaAlMaletero: decideElMaletero(deFilas({ mochilas: r.mochilas, maletas: r.maletas })),
+    equipaje: comoLoVeElConductor(deFilas({ mochilas: r.mochilas, maletas: r.maletas, maletas_pequenas: r.maletas_pequenas })),
+    vaAlMaletero: decideElMaletero(deFilas({ mochilas: r.mochilas, maletas: r.maletas, maletas_pequenas: r.maletas_pequenas })),
     aporteCentavos: r.unit_price_cents * r.seats,
     estado: restante <= 0 ? 'caducada' : 'pendiente',
     expiraEn: restante <= 0 ? 'Caducada' : `Expira en ${textoRestante(restante)}`,
@@ -194,7 +194,7 @@ function comoConfirmado(r: ReservaFila): PasajeroConfirmado {
     id: r.passenger_id,
     nombre: nombreDe(r.passenger_id),
     punto: r.proposed_point ?? '',
-    equipaje: resumenCorto(deFilas({ mochilas: r.mochilas, maletas: r.maletas })),
+    equipaje: resumenCorto(deFilas({ mochilas: r.mochilas, maletas: r.maletas, maletas_pequenas: r.maletas_pequenas })),
     pagado: r.payment_channel !== 'external',
   };
 }

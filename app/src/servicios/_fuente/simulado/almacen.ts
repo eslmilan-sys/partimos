@@ -354,6 +354,7 @@ const reservaBase = (extra: Partial<ReservaFila>): ReservaFila => ({
   released_at: null,
   mochilas: 1,
   maletas: 0,
+  maletas_pequenas: 0,
   ...extra,
 });
 
@@ -379,8 +380,9 @@ export const reservas: ReservaFila[] = [
     passenger_id: MATEO_ID,
     proposed_point: 'Vía Argentina, Riba Smith',
     detour_minutes: 4,
-    mochilas: 1,
-    maletas: 1,
+    mochilas: 2,
+    maletas: 0,
+    maletas_pequenas: 1,
     boarding_code: '4917',
     arrival_code: '2610',
     expires_at: enMinutos(220), // 3 h 40
@@ -391,8 +393,8 @@ export const reservas: ReservaFila[] = [
     passenger_id: ROSA_ID,
     proposed_point: 'Vía España, El Dorado',
     detour_minutes: 2,
-    mochilas: 1,
-    maletas: 0,
+    mochilas: 0,
+    maletas: 2,
     boarding_code: '2384',
     arrival_code: '7431',
     expires_at: enMinutos(50), // menos de 1 h: pastilla roja sólida

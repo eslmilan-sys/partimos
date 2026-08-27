@@ -210,7 +210,13 @@ parler :
   le passager dit ce qu'il emporte — **rien, un sac, une valise** — et le
   conducteur voit ce mot dans la demande et accepte ou refuse, du même geste
   qu'il accepte la place. Trois options et pas une de plus : compter les
-  valises était une comptabilité de coffre que personne n'allait tenir. La
+  valises était une comptabilité de coffre que personne n'allait tenir.
+  **Corrigé le 27-08-2026 par l'utilisateur : on compte.** Trois classes —
+  bolsos, maletas pequeñas, maletas grandes — avec un compteur 0…3 chacune
+  (migration 0042, colonne `bookings.maletas_pequenas` + `CHECK
+  bookings_equipaje_razonable`). L'argument de la veille ne voyait pas que
+  deux valises ne sont pas une, et qu'un carry-on n'est pas un coffre
+  entier : le nombre EST la donnée. La
   règle vit dans `app/src/dominio/equipaje.ts`, avec ses tests. `trips.accepts_luggage`
   devient vestigial (la colonne reste, plus personne ne la lit) ; les colonnes
   `bookings.mochilas` / `maletas` de la 0026 servent de pont, donc pas de
