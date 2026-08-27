@@ -23,16 +23,18 @@ import {
   inicialDelApellido,
   registrarse,
 } from '@/servicios/cuenta';
+import { type MiCiudad } from '@/servicios/miCiudad';
+import { ElegirCiudad } from '@/ui/ElegirCiudad';
 import { Aviso } from '@/ui/Aviso';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Campo } from '@/ui/Campo';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton } from '@/ui/controles';
 import { EntrarCon } from '@/ui/EntrarCon';
-import { Atras } from '@/ui/iconos';
+import { Atras, Avanza } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
-type Paso = 1 | 2 | 3;
+type Paso = 1 | 2 | 3 | 4;
 
 export default function Registro() {
   const router = useRouter();
@@ -44,6 +46,21 @@ export default function Registro() {
   const [clave, setClave] = useState('');
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
+  /**
+   * DE DÓNDE SALE (0044, pedido del dueño el 27-08-2026).
+   *
+   * Se pregunta aquí y no sólo desde el inicio porque la primera pantalla
+   * que ve alguien recién registrado ya puede enseñarle salidas desde su
+   * ciudad — y sin este dato le enseñaba las de la capital. La tarjeta del
+   * inicio se queda igualmente: quien entra con Google o Facebook no pasa
+   * por estos pasos y se quedaría sin ciudad para siempre.
+   *
+   * **No bloquea.** Quien no la encuentre puede pedir que la agreguemos, y
+   * quien no quiera decirla crea la cuenta igual: una cuenta que no se puede
+   * terminar de abrir es peor que un dato que falta.
+   */
+  const [ciudad, setCiudad] = useState<MiCiudad | null>(null);
+  const [eligiendoCiudad, setEligiendoCiudad] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [creando, setCreando] = useState(false);
   /** Cuenta creada, correo de confirmación en camino: un estado propio, no
@@ -59,7 +76,7 @@ export default function Registro() {
     if (creando) return;
     setCreando(true);
     setError(null);
-    const r = await registrarse(correo, clave, nombre, apellido);
+    const r = await registrarse(correo, clave, nombre, apellido, ciudad?.id ?? null);
     setCreando(false);
 
     if (!r.ok) {
@@ -100,13 +117,13 @@ export default function Registro() {
           >
             <Atras />
           </Pressable>
-          <Text style={estilos.epigrafeCampo}>{`Paso ${paso} de 3`}</Text>
+          <Text style={estilos.epigrafeCampo}>{`Paso ${paso} de 4`}</Text>
         </View>
 
         {/* El avance se VE, no solo se lee: tres segmentos, los hechos en
             tinta plena. En la cuenta creada, los tres. */}
         <View style={estilos.avance}>
-          {[1, 2, 3].map((n) => (
+          {[1, 2, 3, 4].map((n) => (
             <View
               key={n}
               style={[estilos.segmento, (hecha || n <= paso) && estilos.segmentoHecho]}
@@ -115,9 +132,25 @@ export default function Registro() {
         </View>
 
         <Text style={estilos.titular}>
-          {hecha ? 'Revisa tu ' : paso === 1 ? 'Tu ' : paso === 2 ? 'Elige una ' : '¿Cómo te '}
+          {hecha
+            ? 'Revisa tu '
+            : paso === 1
+              ? 'Tu '
+              : paso === 2
+                ? 'Elige una '
+                : paso === 3
+                  ? '¿Cómo te '
+                  : '¿De dónde '}
           <Text style={estilos.titularFuerte}>
-            {hecha ? 'correo' : paso === 1 ? 'correo' : paso === 2 ? 'contraseña' : 'llamas?'}
+            {hecha
+              ? 'correo'
+              : paso === 1
+                ? 'correo'
+                : paso === 2
+                  ? 'contraseña'
+                  : paso === 3
+                    ? 'llamas?'
+                    : 'sales?'}
           </Text>
         </Text>
       </View>
@@ -148,12 +181,18 @@ export default function Registro() {
               error={error}
               alSeguir={() => contrasenaValida(clave) && setPaso(3)}
             />
-          ) : (
+          ) : paso === 3 ? (
             <PasoNombre
               nombre={nombre}
               apellido={apellido}
               alEscribirNombre={setNombre}
               alEscribirApellido={setApellido}
+              alSeguir={() => nombre.trim() && apellido.trim() && setPaso(4)}
+            />
+          ) : (
+            <PasoCiudad
+              ciudad={ciudad}
+              alElegir={() => setEligiendoCiudad(true)}
               error={error}
               creando={creando}
               alCrear={crear}
@@ -174,7 +213,7 @@ export default function Registro() {
           <EntrarCon alFallar={setError} titulo="O abre tu cuenta con" />
         ) : null}
 
-        {paso === 3 && !hecha ? (
+        {paso === 4 && !hecha ? (
           <View style={estilos.loQueSigue}>
             <Text style={estilos.loQueSigueTitulo}>Lo que sigue</Text>
             <Paso numero="1" texto="Pides tu puesto y el conductor acepta" />
@@ -217,6 +256,20 @@ export default function Registro() {
           </Pressable>
         ) : null}
       </View>
+
+      <ElegirCiudad
+        abierto={eligiendoCiudad}
+        /* Todavía no hay cuenta: si pide que agreguemos su pueblo, la
+           petición va sin firmar. `city_requests.profile_id` admite nulo
+           justo para esto (0043). */
+        yo={null}
+        actual={ciudad}
+        alElegir={(c) => {
+          setEligiendoCiudad(false);
+          setCiudad(c);
+        }}
+        alCerrar={() => setEligiendoCiudad(false)}
+      />
     </View>
   );
 }
@@ -294,17 +347,13 @@ function PasoNombre({
   apellido,
   alEscribirNombre,
   alEscribirApellido,
-  error,
-  creando,
-  alCrear,
+  alSeguir,
 }: {
   nombre: string;
   apellido: string;
   alEscribirNombre: (v: string) => void;
   alEscribirApellido: (v: string) => void;
-  error: string | null;
-  creando: boolean;
-  alCrear: () => void;
+  alSeguir: () => void;
 }) {
   const inicial = inicialDelApellido(apellido);
   return (
@@ -334,13 +383,65 @@ function PasoNombre({
           : 'En público solo se ve tu nombre y la inicial del apellido — nunca el apellido completo.'}
       </Text>
 
+      <View style={{ marginTop: 18 }}>
+        <Boton desactivado={!nombre.trim() || !apellido.trim()} alPulsar={alSeguir}>
+          Seguir
+        </Boton>
+      </View>
+    </>
+  );
+}
+
+/**
+ * EL CUARTO PASO: DE DÓNDE SALES.
+ *
+ * Última pregunta y no la primera: cuando ya hay correo, contraseña y
+ * nombre, quien está aquí quiere terminar. Y va antes de crear la cuenta
+ * porque el disparador la escribe en el mismo instante — después no habría
+ * sesión con la que guardarla (la confirmación por correo llega más tarde).
+ */
+function PasoCiudad({
+  ciudad,
+  alElegir,
+  error,
+  creando,
+  alCrear,
+}: {
+  ciudad: MiCiudad | null;
+  alElegir: () => void;
+  error: string | null;
+  creando: boolean;
+  alCrear: () => void;
+}) {
+  return (
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={ciudad ? `Salgo de ${ciudad.nombre}. Cambiar` : 'Elegir mi ciudad'}
+        onPress={alElegir}
+        style={({ pressed }) => [estilos.campoCiudad, pressed && { backgroundColor: color.sand100 }]}
+      >
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={estilos.cejaCiudad}>Salgo de</Text>
+          <Text style={[estilos.valorCiudad, !ciudad && estilos.valorCiudadVacio]}>
+            {ciudad?.nombre ?? 'Elige tu ciudad'}
+          </Text>
+        </View>
+        <Avanza />
+      </Pressable>
+
+      <Text style={estilos.ayuda}>
+        Con esto tu inicio abre con los viajes que ya salen de tu ciudad, en vez de los de la
+        capital. Puedes cambiarla cuando quieras desde Ajustes.
+      </Text>
+
       {error ? <Aviso>{error}</Aviso> : null}
 
       <View style={{ marginTop: 18 }}>
-        <Boton
-          desactivado={!nombre.trim() || !apellido.trim() || creando}
-          alPulsar={alCrear}
-        >
+        {/* **No bloquea.** Sin ciudad se crea igual: una cuenta que no se
+            puede terminar de abrir es peor que un dato que falta, y el inicio
+            la vuelve a preguntar con su tarjeta. */}
+        <Boton desactivado={creando} alPulsar={alCrear}>
           Crear mi cuenta
         </Boton>
       </View>
@@ -363,6 +464,39 @@ function Paso({ numero, texto }: { numero: string; texto: string }) {
 }
 
 const estilos = StyleSheet.create({
+  /** El campo de la ciudad: ceja arriba y valor dentro, como los demás. */
+  campoCiudad: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    minHeight: 62,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: radio.control,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+  },
+  cejaCiudad: {
+    fontSize: 11.5,
+    lineHeight: 16,
+    fontWeight: '600',
+    letterSpacing: 11.5 * TRACK_MICRO,
+    textTransform: 'uppercase',
+    color: color.ink500,
+    fontFamily: familia,
+  },
+  valorCiudad: {
+    fontSize: 16.5,
+    lineHeight: 23,
+    fontWeight: '600',
+    letterSpacing: -0.27,
+    color: color.ink900,
+    marginTop: 2,
+    fontFamily: familia,
+  },
+  valorCiudadVacio: { fontWeight: '400', color: color.ink500 },
+
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,

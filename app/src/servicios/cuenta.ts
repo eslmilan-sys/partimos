@@ -88,6 +88,12 @@ export async function registrarse(
   clave: string,
   nombre: string,
   apellido: string,
+  /**
+   * De dónde sale normalmente (0044). Va aquí y no en una segunda llamada
+   * porque con la confirmación por correo **todavía no hay sesión**: nadie
+   * podría escribir en `profiles` justo después. El disparador sí puede.
+   */
+  ciudadId?: string | null,
 ): Promise<Entrada> {
   if (!correoValido(correo)) return { ok: false, motivo: 'correo-invalido' };
   if (!contrasenaValida(clave)) return { ok: false, motivo: 'contrasena-corta' };
@@ -99,7 +105,11 @@ export async function registrarse(
       emailRedirectTo: volverA(),
       // El disparador `handle_new_user` lee esto para escribir el perfil, así
       // que el nombre del paso 3 llega a `profiles` sin un segundo viaje.
-      data: { first_name: nombre.trim(), last_name: apellido.trim() },
+      data: {
+        first_name: nombre.trim(),
+        last_name: apellido.trim(),
+        ...(ciudadId ? { home_city_id: ciudadId } : {}),
+      },
     },
   });
 

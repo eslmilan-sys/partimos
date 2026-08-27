@@ -215,6 +215,16 @@ parler :
   dernière place. Ce qui manquait, c'est que l'écran le DISE : la
   pastille affichait « calculado » alors que le chiffre était le plafond.
   Corrigé dans `origenDelAporte` + `elTopeMuerde`.
+- **La ville se demande À L'INSCRIPTION (0044, 27-08-2026).** Quatrième
+  étape du formulaire, « ¿De dónde sales? », juste avant de créer le
+  compte : elle part dans `options.data` et c'est le déclencheur
+  `handle_new_user` qui l'écrit — après, il n'y aurait pas de session avec
+  laquelle la sauver, la confirmation par courriel arrivant plus tard. Le
+  déclencheur **ne croit pas** l'identifiant : il le vérifie contre
+  `cities`, sinon nul. L'étape ne bloque pas la création : un compte
+  qu'on ne peut pas finir d'ouvrir est pire qu'une donnée qui manque. La
+  carte de l'accueil reste pour qui entre par Google ou Facebook et ne
+  passe pas par ces étapes.
 - **La ville de résidence sert enfin à quelque chose (0043, 27-08-2026).**
   `profiles.home_city_id` existait depuis le début et **aucun écran ne
   l'écrivait ni ne la lisait** : l'app supposait que tout le monde part de
