@@ -21,7 +21,19 @@ export type Trip = Tablas['trips']['Row'];
 export type TripStop = Tablas['trip_stops']['Row'];
 export type Booking = Tablas['bookings']['Row'];
 export type Payment = Tablas['payments']['Row'];
-export type Message = Tablas['messages']['Row'];
+/**
+ * Un mensaje. `trip_id` y `con_id` son de la migración 0041 — el hilo de
+ * PREGUNTA, antes de reservar — y van aquí a mano porque `base.ts` se
+ * genera del esquema y todavía no se ha regenerado. Cuelgan de una cosa o
+ * de la otra, nunca de las dos: la base lo impone con `messages_de_una_cosa`.
+ */
+export type Message = Omit<Tablas['messages']['Row'], 'booking_id'> & {
+  booking_id: string | null;
+  /** El viaje del que se pregunta, cuando no hay reserva todavía. */
+  trip_id?: string | null;
+  /** Con quién habla el conductor: quien preguntó. La clave del hilo. */
+  con_id?: string | null;
+};
 export type Review = Tablas['reviews']['Row'];
 export type PickupPoint = Tablas['pickup_points']['Row'];
 export type PriceRule = Tablas['price_rules']['Row'];

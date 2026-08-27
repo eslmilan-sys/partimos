@@ -194,6 +194,17 @@ parler :
   c'est la dérivation qui le porte. Dédoublonnage par (kind, booking_id).
   Ce qui manque encore : l'envoi push téléphone fermé (besoin d'un cron pour
   le rappel et d'un canal d'envoi).
+- **On peut écrire au conducteur SANS réserver, depuis la 0041**
+  (26-08-2026, demandé par l'utilisateur). `messages.booking_id` devient
+  nullable et un fil pend soit d'une réservation, soit d'un trajet —
+  jamais des deux : le `CHECK messages_de_una_cosa` l'impose. La clé d'un
+  fil de question est `(trip_id, con_id)`, `con_id` étant **celui qui
+  demande** ; ses deux seules parties sont cette personne et le
+  conducteur, pas les autres passagers du trajet. Le déclencheur
+  `messages_hilo_coherente` interdit d'ouvrir un fil au nom d'un tiers
+  **même avec la clé de service**. Demander ne réserve rien : ni place
+  occupée, ni horloge des quatre heures démarrée. Banc d'essai :
+  `supabase/pruebas/13-preguntar.sql` (11 vérifications).
 - **Le bagage se décide à la demande, plus à la publication** (tranché par
   l'utilisateur le 25-08-2026). Le conducteur ne déclare plus rien à l'avance :
   le passager dit ce qu'il emporte — **rien, un sac, une valise** — et le

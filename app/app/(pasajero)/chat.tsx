@@ -4,6 +4,15 @@
  * Sin celulares a la vista: el hilo es la prueba de lo que se acordó, y por eso
  * los mensajes no se editan (en la base hay un trigger que lo impide). Arriba,
  * siempre, de qué puesto se está hablando.
+ *
+ * **Dos maneras de llegar aquí** (0041, 26-08-2026):
+ *
+ * - `?reserva=` — el hilo de un puesto ya pedido. Arriba, la tarjeta del
+ *   puesto con su estado.
+ * - `?viaje=&con=` — una PREGUNTA, antes de reservar nada. Arriba, en su
+ *   lugar, que todavía no hay puesto pedido y el botón para pedirlo. Fingir
+ *   una tarjeta de puesto aquí sería decirle a alguien que tiene reservado
+ *   lo que no ha pedido.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -15,13 +24,19 @@ import { useVolver } from '@/ui/salidas';
 
 import { useMiIdOEntrar } from '@/servicios/sesion';
 
-import { type HiloDelViaje, enviarMensaje, hiloDelViaje } from '@/servicios/mensajes';
+import {
+  type HiloDelViaje,
+  enviarMensaje,
+  enviarPregunta,
+  hiloDeViaje,
+  hiloDelViaje,
+} from '@/servicios/mensajes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe, Insignia } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
-import { cuando } from '@/ui/fechas';
+import { cuando, diaLargo, esHoy } from '@/ui/fechas';
 import { Atras, Avion, Mas } from '@/ui/iconos';
 import { familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
@@ -33,17 +48,27 @@ const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 export default function Chat() {
   const router = useRouter();
   const volver = useVolver();
-  const { reserva } = useLocalSearchParams<{ reserva?: string }>();
-  const reservaId = reserva ?? DEL_RECORRIDO;
+  const { reserva, viaje, con } = useLocalSearchParams<{
+    reserva?: string;
+    viaje?: string;
+    con?: string;
+  }>();
   const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
+  /* Preguntar es de quien pregunta: sin `con` explícito —el caso normal, el
+     pasajero abriendo el hilo desde la ficha del viaje— la otra parte eres tú. */
+  const conId = con ?? yo;
+  /* Un viaje manda sobre la reserva por defecto: `DEL_RECORRIDO` solo entra
+     cuando no llega ningún parámetro y la pantalla se abre suelta. */
+  const reservaId = viaje ? null : (reserva ?? DEL_RECORRIDO);
   const [hilo, setHilo] = useState<HiloDelViaje | null>(null);
   const [texto, setTexto] = useState('');
   const lista = useRef<ScrollView>(null);
 
   const recargar = useCallback(async () => {
     if (!yo) return;
-    setHilo(await hiloDelViaje(reservaId, yo));
-  }, [reservaId, yo]);
+    if (viaje && conId) setHilo(await hiloDeViaje(viaje, conId, yo));
+    else if (reservaId) setHilo(await hiloDelViaje(reservaId, yo));
+  }, [reservaId, viaje, conId, yo]);
 
   useEffect(() => {
     recargar();
@@ -54,7 +79,8 @@ export default function Chat() {
   const mandar = async () => {
     if (!texto.trim()) return;
     if (!yo) return;
-    await enviarMensaje(reservaId, yo, texto);
+    if (viaje && conId) await enviarPregunta(viaje, conId, yo, texto);
+    else if (reservaId) await enviarMensaje(reservaId, yo, texto);
     setTexto('');
     await recargar();
     lista.current?.scrollToEnd({ animated: true });
@@ -88,18 +114,43 @@ export default function Chat() {
       </View>
 
       <View style={estilos.cuerpo}>
-        <View style={estilos.tarjetaPuesto}>
-          <View style={{ flex: 1, minWidth: 0 }}>
-            <Epigrafe>Tu puesto</Epigrafe>
-            <Text style={estilos.resumenPuesto}>{hilo.puesto.resumen}</Text>
+        {hilo.puesto ? (
+          <View style={estilos.tarjetaPuesto}>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Epigrafe>Tu puesto</Epigrafe>
+              <Text style={estilos.resumenPuesto}>{hilo.puesto.resumen}</Text>
+            </View>
+            <Insignia
+              fondo={hilo.puesto.confirmado ? color.hechoFondo : color.sand200}
+              tinta={hilo.puesto.confirmado ? color.hechoTinta : color.ink700}
+            >
+              {hilo.puesto.estado}
+            </Insignia>
           </View>
-          <Insignia
-            fondo={hilo.puesto.confirmado ? color.hechoFondo : color.sand200}
-            tinta={hilo.puesto.confirmado ? color.hechoTinta : color.ink700}
-          >
-            {hilo.puesto.estado}
-          </Insignia>
-        </View>
+        ) : (
+          /* La misma tarjeta, con lo que sí es cierto: preguntar no reserva
+             nada. Y el botón al lado, porque el momento de pedir el puesto es
+             justo después de que te contesten. */
+          <View style={estilos.tarjetaPuesto}>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Epigrafe>Solo una pregunta</Epigrafe>
+              <Text style={estilos.resumenPuesto}>Todavía no has pedido puesto</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Pedir mi puesto en este viaje"
+              onPress={() =>
+                router.push({ pathname: '/(pasajero)/reservar', params: { viaje: viaje ?? '' } })
+              }
+              style={({ pressed }) => [
+                estilos.pedirPuesto,
+                pressed && { backgroundColor: color.rojo600 },
+              ]}
+            >
+              <Text style={estilos.pedirPuestoTexto}>Pedir puesto</Text>
+            </Pressable>
+          </View>
+        )}
 
         <ScrollView
           ref={lista}
@@ -107,7 +158,24 @@ export default function Chat() {
           contentContainerStyle={{ paddingBottom: 8 }}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={estilos.dia}>Ayer</Text>
+          {/* Un hilo de pregunta empieza vacío, y una pantalla en blanco con
+              «Ayer» encima no dice qué hacer. Lo primero que uno quiere saber
+              es si el conductor pasa por su lado. */}
+          {hilo.mensajes.length === 0 ? (
+            <View style={estilos.primeraVez}>
+              <Text style={estilos.primeraVezTitulo}>
+                {`Pregúntale a ${hilo.otro.nombre.split(' ')[0]} lo que necesites saber`}
+              </Text>
+              <Text style={estilos.primeraVezTexto}>
+                Si pasa cerca de donde estás, si te deja en el camino, a qué hora sale de verdad.
+                Preguntar no ocupa el puesto ni te compromete a nada.
+              </Text>
+            </View>
+          ) : (
+            /* El día, del primer mensaje. Estaba escrito «Ayer» a mano, así
+               que un hilo de hace diez minutos decía ayer. */
+            <Text style={estilos.dia}>{elDia(hilo.mensajes[0].cuando)}</Text>
+          )}
 
           <View style={{ gap: 10 }}>
             {hilo.mensajes.map((m) => (
@@ -165,6 +233,15 @@ export default function Chat() {
       </View>
     </View>
   );
+}
+
+/** «Hoy», «Ayer», o el día escrito. Sin adivinar: sale de la fecha. */
+function elDia(cuandoISO: string): string {
+  if (esHoy(cuandoISO)) return 'Hoy';
+  const ayer = new Date();
+  ayer.setDate(ayer.getDate() - 1);
+  if (esHoy(cuandoISO, ayer)) return 'Ayer';
+  return diaLargo(cuandoISO);
 }
 
 const estilos = StyleSheet.create({
@@ -233,6 +310,48 @@ const estilos = StyleSheet.create({
     marginTop: 4,
     fontFamily: familia,
     ...tabular,
+  },
+
+  /** El botón de la tarjeta: 38 de alto, el control chico del v6. */
+  pedirPuesto: {
+    height: 38,
+    paddingHorizontal: 16,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.rojo500,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pedirPuestoTexto: {
+    fontSize: 13.5,
+    lineHeight: interlinea(13.5),
+    fontWeight: '600',
+    color: '#fff',
+    fontFamily: familia,
+  },
+
+  primeraVez: {
+    marginTop: 20,
+    padding: 16,
+    borderRadius: radio.l,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: color.bordePorDefecto,
+    gap: 6,
+  },
+  primeraVezTitulo: {
+    fontSize: 15,
+    lineHeight: interlinea(15.5),
+    fontWeight: '600',
+    letterSpacing: -0.24,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  primeraVezTexto: {
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: color.ink600,
+    fontFamily: familia,
   },
 
   dia: {

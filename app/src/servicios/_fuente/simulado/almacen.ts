@@ -469,6 +469,36 @@ export const mensajes: Message[] = [
     read_at: null,
     created_at: haceMinutos(655),
   },
+
+  /**
+   * Un hilo de PREGUNTA (0041): Daniela le escribe a Carla por un viaje a
+   * Coronado que **no ha reservado**. `booking_id` va nulo y el hilo cuelga
+   * del viaje, con `con_id` diciendo quién es la otra parte.
+   *
+   * Está en el simulado porque la bandeja tenía que poder enseñar las dos
+   * clases de hilo una al lado de la otra: sin esto, «Preguntando» era una
+   * pastilla que nadie veía nunca.
+   */
+  {
+    id: 4,
+    booking_id: null,
+    trip_id: '55555555-5555-4555-8555-555555555901',
+    con_id: DANIELA_ID,
+    sender_id: DANIELA_ID,
+    body: '¿Pasas cerca de la vía Ricardo J. Alfaro? Vivo por ahí.',
+    read_at: null,
+    created_at: haceMinutos(48),
+  },
+  {
+    id: 5,
+    booking_id: null,
+    trip_id: '55555555-5555-4555-8555-555555555901',
+    con_id: DANIELA_ID,
+    sender_id: CARLA_ID,
+    body: 'Sí, salgo por Tumba Muerto. Te puedo recoger en la entrada.',
+    read_at: null,
+    created_at: haceMinutos(41),
+  },
 ];
 
 export const pagos: Payment[] = [];

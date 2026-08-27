@@ -21,7 +21,7 @@ import { useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
 
-import { type HiloDelViaje, hiloDelViaje } from '@/servicios/mensajes';
+import { type HiloDelViaje, hiloDelViaje, hilosDePregunta } from '@/servicios/mensajes';
 import { type PuestoMio, misViajes } from '@/servicios/panel';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -38,7 +38,23 @@ import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 /** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
 const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
-type Fila = { puesto: PuestoMio; hilo: HiloDelViaje };
+/**
+ * Una fila de la bandeja, venga de una reserva o de una pregunta.
+ *
+ * Se normaliza aquí porque las dos cosas se leen igual —un nombre, lo último
+ * dicho, de qué viaje va— y solo cambian en a dónde llevan. Ramificar en el
+ * dibujo habría duplicado la fila entera para cambiar dos parámetros.
+ */
+type Fila = {
+  clave: string;
+  hilo: HiloDelViaje;
+  /** «Chitré · vie 6:00», el contexto que un chat suelto no tiene. */
+  destino: string;
+  cuando: string;
+  params: Record<string, string>;
+  /** Todavía sin puesto pedido: la bandeja lo dice, no lo esconde. */
+  soloPregunta: boolean;
+};
 type Filtro = 'todos' | 'sinLeer';
 
 export default function Conversaciones() {
@@ -54,10 +70,32 @@ export default function Conversaciones() {
     (async () => {
       const mios = await misViajes(yo);
       const todos = [...mios.proximos, ...mios.pasados];
-      const hilos = await Promise.all(
-        todos.map(async (puesto) => ({ puesto, hilo: await hiloDelViaje(puesto.reservaId, yo) })),
-      );
-      setFilas(hilos.filter((f) => f.hilo.mensajes.length > 0));
+      const dePuestos: Fila[] = (
+        await Promise.all(
+          todos.map(async (puesto: PuestoMio) => ({
+            clave: puesto.reservaId,
+            hilo: await hiloDelViaje(puesto.reservaId, yo),
+            destino: puesto.destino,
+            cuando: puesto.cuando,
+            params: { reserva: puesto.reservaId },
+            soloPregunta: false,
+          })),
+        )
+      ).filter((f) => f.hilo.mensajes.length > 0);
+
+      /* Las preguntas van en la MISMA bandeja. Un hilo que se abre desde la
+         ficha de un viaje y no aparece aquí es un hilo perdido: quien pregunta
+         no sabe volver a él, y quien maneja no sabe que le preguntaron. */
+      const preguntas: Fila[] = (await hilosDePregunta(yo)).map((hilo: HiloDelViaje) => ({
+        clave: `${hilo.viajeId}·${hilo.otro.id}`,
+        hilo,
+        destino: hilo.ruta,
+        cuando: hilo.cuando,
+        params: { viaje: hilo.viajeId ?? '', con: hilo.conId ?? '' },
+        soloPregunta: true,
+      }));
+
+      setFilas([...preguntas, ...dePuestos]);
     })();
   }, [yo]);
 
@@ -72,7 +110,7 @@ export default function Conversaciones() {
         (f) =>
           q === '' ||
           f.hilo.otro.nombre.toLowerCase().includes(q) ||
-          f.puesto.destino.toLowerCase().includes(q),
+          f.destino.toLowerCase().includes(q),
       );
   }, [filas, busca, filtro]);
 
@@ -183,17 +221,15 @@ export default function Conversaciones() {
           </View>
         </Pressable>
 
-        {visibles.map(({ puesto, hilo }) => {
+        {visibles.map(({ clave, hilo, destino, cuando, params, soloPregunta }) => {
           const ultimo = hilo.mensajes[hilo.mensajes.length - 1];
           const nuevo = !ultimo?.mio;
           return (
             <Pressable
-              key={puesto.reservaId}
+              key={clave}
               accessibilityRole="button"
               accessibilityLabel={`Conversación con ${hilo.otro.nombre}`}
-              onPress={() =>
-                router.push({ pathname: '/(pasajero)/chat', params: { reserva: puesto.reservaId } })
-              }
+              onPress={() => router.push({ pathname: '/(pasajero)/chat', params })}
               style={({ pressed }) => [estilos.fila, pressed && estilos.pulsada]}
             >
               <Avatar nombre={hilo.otro.nombre} tamano={44} />
@@ -219,8 +255,16 @@ export default function Conversaciones() {
                 </View>
 
                 <View style={estilos.filaContexto}>
+                  {/* «Preguntando» y no un puesto: el estado de un hilo sin
+                      reserva es exactamente ese, y esconderlo haría creer que
+                      hay puesto pedido donde no lo hay. */}
+                  {soloPregunta ? (
+                    <View style={estilos.pastillaPregunta}>
+                      <Text style={estilos.pastillaPreguntaTexto}>Preguntando</Text>
+                    </View>
+                  ) : null}
                   <Text style={estilos.contexto} numberOfLines={1}>
-                    {`${puesto.destino} · ${cuandoLargo(puesto.cuando)}`}
+                    {`${destino} · ${cuandoLargo(cuando)}`}
                   </Text>
                   {nuevo ? (
                     <View style={estilos.pastillaSinLeer}>
@@ -245,7 +289,7 @@ export default function Conversaciones() {
             <Text style={estilos.vacioTexto}>
               {busca.trim() !== ''
                 ? 'Prueba con el nombre de quien maneja o con el destino.'
-                : 'Los chats se abren cuando el conductor acepta tu puesto. Ahí se acuerda dónde te recoge, y queda por escrito.'}
+                : 'Escríbele a quien maneja desde la ficha del viaje, sin pedir puesto todavía. Y al aceptarte, aquí se acuerda dónde te recoge.'}
             </Text>
             {busca.trim() === '' && filtro === 'todos' ? (
               <Pressable
@@ -263,8 +307,8 @@ export default function Conversaciones() {
         ) : null}
 
         <Text style={estilos.pieTexto}>
-          Los chats se abren cuando el conductor acepta y se cierran 48 h después de la llegada.
-          Todo lo del punto de recogida que se acuerde aquí queda por escrito.
+          Puedes preguntar antes de pedir puesto: preguntar no ocupa nada. Los chats se cierran
+          48 h después de la llegada, y todo lo que se acuerde aquí queda por escrito.
         </Text>
       </View>
       </ScrollView>
@@ -418,7 +462,23 @@ const estilos = StyleSheet.create({
   ultimo: { flex: 1, fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia },
   ultimoNuevo: { color: color.ink900, fontWeight: '500' },
 
-  filaContexto: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 5 },
+  filaContexto: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5 },
+  /** Llana y de tinta: informa de un estado, no reclama nada. */
+  pastillaPregunta: {
+    height: 19,
+    paddingHorizontal: 7,
+    borderRadius: radio.ficha,
+    backgroundColor: color.lavado,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pastillaPreguntaTexto: {
+    fontSize: 10.5,
+    lineHeight: 15,
+    fontWeight: '600',
+    color: color.ink600,
+    fontFamily: familia,
+  },
   contexto: { flex: 1, fontSize: 11.5, lineHeight: 17, color: color.ink500, fontFamily: familia },
   pastillaSinLeer: {
     minWidth: 20,

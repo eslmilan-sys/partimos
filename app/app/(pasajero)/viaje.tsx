@@ -326,6 +326,43 @@ export default function DetalleDelViaje() {
             </View>
           </Pressable>
 
+          {/* **Preguntar antes de pedir** (26-08-2026). Hasta ahora el chat se
+              abría al aceptar el puesto, así que para saber si pasaba por tu
+              lado había que ocupar un sitio y arrancarle el reloj al conductor.
+              Al revés de como decide la gente. Va fuera de la tarjeta y no
+              dentro: la tarjeta entera lleva al perfil, y un botón dentro de
+              otro botón se pulsa por error. */}
+          {esMio ? null : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                nombre ? `Escribirle a ${deNombre}` : 'Escribirle al conductor'
+              }
+              onPress={() =>
+                router.push({
+                  pathname: '/(pasajero)/chat',
+                  params: miReserva
+                    ? { reserva: miReserva.id }
+                    : { viaje: viaje.id, con: yo ?? '' },
+                })
+              }
+              style={({ pressed }) => [estilos.escribir, pressed && estilos.escribirPulsado]}
+            >
+              <Chat tamano={19} tinta={color.ink900} />
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.escribirTexto}>
+                  {nombre ? `Escríbele a ${deNombre}` : 'Escríbele al conductor'}
+                </Text>
+                <Text style={estilos.escribirNota}>
+                  {miReserva
+                    ? 'El chat de tu puesto'
+                    : 'Pregunta lo que necesites. No ocupa el puesto.'}
+                </Text>
+              </View>
+              <Avanza />
+            </Pressable>
+          )}
+
           {/* Azul, no rojo: informa, no es algo que tocar. */}
           <View style={estilos.aviso}>
             <Escudo tamano={19} tinta={color.azul500} />
@@ -346,7 +383,7 @@ export default function DetalleDelViaje() {
             </View>
             <View style={estilos.tiraItem}>
               <Chat tamano={17} tinta={color.ink500} />
-              <Text style={estilos.tiraTexto}>Chat al aceptar</Text>
+              <Text style={estilos.tiraTexto}>Chat sin reservar</Text>
             </View>
             <Pressable
               accessibilityRole="button"
@@ -529,6 +566,36 @@ const estilos = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 18,
     marginTop: 14,
+  },
+
+  /** La misma tarjeta, en fila: es una acción, no un bloque de lectura. */
+  escribir: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    borderRadius: radio.l,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    marginTop: 14,
+  },
+  escribirPulsado: { backgroundColor: color.sand100, borderColor: color.bordePorDefecto },
+  escribirTexto: {
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: '600',
+    letterSpacing: -0.24,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  escribirNota: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: color.ink500,
+    marginTop: 2,
+    fontFamily: familia,
   },
 
   recorrido: { position: 'relative', marginTop: 14 },
