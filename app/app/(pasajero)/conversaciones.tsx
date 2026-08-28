@@ -99,7 +99,9 @@ export default function Conversaciones() {
     })();
   }, [yo]);
 
-  const sinLeerDe = (f: Fila) => !f.hilo.mensajes[f.hilo.mensajes.length - 1]?.mio;
+  /* De `read_at`, no de «el último no es mío»: con aquello, abrir un hilo no
+     lo apagaba nunca. Es un hecho de la base, no una deducción. */
+  const sinLeerDe = (f: Fila) => f.hilo.sinLeer > 0;
 
   const visibles = useMemo(() => {
     if (!filas) return [];
@@ -223,7 +225,7 @@ export default function Conversaciones() {
 
         {visibles.map(({ clave, hilo, destino, cuando, params, soloPregunta }) => {
           const ultimo = hilo.mensajes[hilo.mensajes.length - 1];
-          const nuevo = !ultimo?.mio;
+          const nuevo = hilo.sinLeer > 0;
           return (
             <Pressable
               key={clave}
@@ -268,7 +270,7 @@ export default function Conversaciones() {
                   </Text>
                   {nuevo ? (
                     <View style={estilos.pastillaSinLeer}>
-                      <Text style={estilos.pastillaSinLeerTexto}>1</Text>
+                      <Text style={estilos.pastillaSinLeerTexto}>{hilo.sinLeer}</Text>
                     </View>
                   ) : null}
                 </View>
@@ -291,18 +293,9 @@ export default function Conversaciones() {
                 ? 'Prueba con el nombre de quien maneja o con el destino.'
                 : 'Escríbele a quien maneja desde la ficha del viaje, sin pedir puesto todavía. Y al aceptarte, aquí se acuerda dónde te recoge.'}
             </Text>
-            {busca.trim() === '' && filtro === 'todos' ? (
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => router.push('/(pasajero)')}
-                style={({ pressed }) => [
-                  estilos.botonVacio,
-                  pressed && { backgroundColor: color.rojo600 },
-                ]}
-              >
-                <Text style={estilos.botonVacioTexto}>Buscar un viaje</Text>
-              </Pressable>
-            ) : null}
+            {/* Sin botón: la barra de abajo ya tiene «Buscar» a un dedo de
+                distancia, y un botón rojo dentro de un vacío gris pesa más que
+                lo que ofrece (pedido del dueño, 27-08-2026). */}
           </View>
         ) : null}
 
@@ -313,7 +306,7 @@ export default function Conversaciones() {
       </View>
       </ScrollView>
 
-      <Pestanas valor="Mensajes" />
+      <Pestanas valor="Mensajes" yo={yo} />
     </View>
   );
 }

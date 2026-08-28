@@ -28,12 +28,6 @@ import { useVolver } from '@/ui/salidas';
 
 import { type Cuenta, type GrupoDeAjustes, ajustes, cuenta } from '@/servicios/ajustes';
 import { salir } from '@/servicios/cuenta';
-import {
-  type Preferencias,
-  POR_DEFECTO,
-  guardarPreferencia,
-  preferencias,
-} from '@/servicios/preferencias';
 import { type EstadoDeCedula, estadoDeCedula } from '@/servicios/seguridad';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { type MiCiudad, guardarMiCiudad, miCiudad } from '@/servicios/miCiudad';
@@ -51,19 +45,9 @@ const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 /** `--radius-sheet` son 28 px; `radio.hoja` se quedó en 26. Manda el traspaso. */
 const RADIO_HOJA = 28;
 
-/**
- * Los cinco interruptores. Ni `profiles` ni ninguna otra tabla guarda todavía
- * estas preferencias —igual que los avisos, que tampoco tienen tabla—, así que
- * el texto es de interfaz y el sí o el no viven en la pantalla hasta que
- * `servicios/ajustes` tenga dónde escribirlos.
- */
-const SOLO_MUJERES = {
-  etiqueta: 'Solo mujeres',
-  descripcion: 'Solo verás carros con conductoras y pasajeras.',
-};
-const COMPARTIR_LLEGADA = 'Compartir mi llegada';
-
-/** La línea que resume la tarjeta va detrás de los interruptores, no delante. */
+/* Los interruptores se fueron el 27-08-2026 y con ellos `FilaDePalanca`: no
+   queda ninguno en la pantalla. `servicios/preferencias` sigue vivo — la
+   búsqueda lee `soloMujeres` donde se busca —, sólo que no se cambia aquí. */
 /** El relleno que el traspaso da a cada fila de «Dinero y cuenta». */
 const RELLENO_DINERO = [10, 11, 11];
 
@@ -75,9 +59,6 @@ export default function Ajustes() {
   const [quien, setQuien] = useState<Cuenta | null>(null);
   const [cedula, setCedula] = useState<EstadoDeCedula | null>(null);
 
-  /* Guardadas de verdad: se leen al abrir y se escriben al tocarlas. */
-  const [prefs, setPrefs] = useState<Preferencias>(POR_DEFECTO);
-  useEffect(() => setPrefs(preferencias()), []);
   const [ciudad, setCiudad] = useState<MiCiudad | null>(null);
   const [eligiendoCiudad, setEligiendoCiudad] = useState(false);
   useEffect(() => {
@@ -95,9 +76,9 @@ export default function Ajustes() {
 
   if (!grupos || !quien || !cedula) return <Cargando />;
 
-  // El servicio promete los cuatro grupos en este orden, y ese orden es la
+  // El servicio promete los tres grupos en este orden, y ese orden es la
   // pantalla: cambiarlo allí cambia esto, que es lo que queremos.
-  const [avisos, viaje, dinero, salida] = grupos;
+  const [viaje, dinero, salida] = grupos;
 
   return (
     <View style={estilos.pantalla}>
@@ -133,36 +114,14 @@ export default function Ajustes() {
       </View>
 
       <View style={estilos.cuerpo}>
-        {/* La hoja de avisos monta sobre el campo rojo: sombra teñida, sin borde. */}
-        {/* LOS TRES INTERRUPTORES DE AVISOS SE FUERON. Prometían elegir qué
-            te llega al teléfono y no había —ni hay— canal de envío: no
-            podían apagar ni encender nada, y volvían a su sitio al
-            recargar. En su lugar, las dos filas que SÍ llevan a algo, que
-            son las que el servicio ya daba. Vuelven cuando el envío exista. */}
+        {/* **LA HOJA DE AVISOS SE FUE** (27-08-2026, pedido del dueño): «Tus
+            avisos» no es un ajuste, es la bandeja, y ya está a un toque en la
+            campana del inicio. «Rutas guardadas» se mudó a Mis viajes, que es
+            de lo que son. Lo primero de la pantalla es ahora lo primero que
+            de verdad se cambia aquí: de dónde sales. */}
         <View style={estilos.hoja}>
-          <Text style={estilos.epigrafe}>{avisos.titulo}</Text>
-          <Text style={estilos.resumen}>Todo lo de tus viajes, en la bandeja</Text>
-
-          {avisos.filas.map((fila, i) => {
-            const ultima = i === avisos.filas.length - 1;
-            return (
-              <Pressable
-                key={fila.etiqueta}
-                accessibilityRole="button"
-                accessibilityLabel={fila.valor ? `${fila.etiqueta}, ${fila.valor}` : fila.etiqueta}
-                onPress={fila.ruta ? () => router.push(fila.ruta as Href) : undefined}
-                style={[estilos.filaDato, { paddingTop: 11, paddingBottom: ultima ? 0 : 11 }]}
-              >
-                <Text style={estilos.filaDatoEtiqueta}>{fila.etiqueta}</Text>
-                {fila.valor ? <Text style={estilos.filaDatoValor}>{fila.valor}</Text> : null}
-                <Adelante />
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <View style={estilos.tarjeta}>
-          <Text style={[estilos.epigrafe, { marginBottom: 5 }]}>{viaje.titulo}</Text>
+          <Text style={estilos.epigrafe}>{viaje.titulo}</Text>
+          <Text style={estilos.resumen}>Lo que cambia lo que ves al buscar</Text>
 
           {/* De dónde sales normalmente (0043). Se pregunta en el inicio, pero
               tiene que poder cambiarse desde algún sitio fijo: allí el enlace
@@ -181,20 +140,29 @@ export default function Ajustes() {
             <Adelante />
           </Pressable>
 
-          <FilaDePalanca
-            etiqueta={SOLO_MUJERES.etiqueta}
-            descripcion={SOLO_MUJERES.descripcion}
-            activa={prefs.soloMujeres}
-            alCambiar={() => setPrefs(guardarPreferencia('soloMujeres', !prefs.soloMujeres))}
-          />
-          <FilaDePalanca
-            etiqueta={COMPARTIR_LLEGADA}
-            activa={prefs.compartirLlegada}
-            alCambiar={() =>
-              setPrefs(guardarPreferencia('compartirLlegada', !prefs.compartirLlegada))
-            }
-            ultima
-          />
+          {/* **«Solo mujeres» y «Compartir mi llegada» se fueron** el
+              27-08-2026, y las dos por la misma razón: prometían algo que la
+              app no hace. «Solo mujeres» filtraba una búsqueda que ya se
+              filtra donde se busca —y sólo se ofrece a conductoras (0045)—;
+              «Compartir mi llegada» no comparte con nadie porque no hay a
+              quién mandarlo. Un interruptor que no enciende nada es peor que
+              no tenerlo. */}
+          {viaje.filas.map((fila, i) => (
+            <Pressable
+              key={fila.etiqueta}
+              accessibilityRole="button"
+              accessibilityLabel={fila.valor ? `${fila.etiqueta}, ${fila.valor}` : fila.etiqueta}
+              onPress={fila.ruta ? () => router.push(fila.ruta as Href) : undefined}
+              style={[
+                estilos.filaDato,
+                { paddingTop: 11, paddingBottom: i === viaje.filas.length - 1 ? 0 : 11 },
+              ]}
+            >
+              <Text style={estilos.filaDatoEtiqueta}>{fila.etiqueta}</Text>
+              {fila.valor ? <Text style={estilos.filaDatoValor}>{fila.valor}</Text> : null}
+              <Adelante />
+            </Pressable>
+          ))}
         </View>
 
         <View style={estilos.tarjeta}>
@@ -272,49 +240,6 @@ export default function Ajustes() {
   );
 }
 
-/**
- * La fila de interruptor. `Interruptor` de `@/ui/controles` mete la etiqueta en
- * una caja de `flex: 1`, y aquí el traspaso la ciñe al texto y empuja el
- * control contra el borde de la tarjeta; su descripción, además, va a 1,4 de
- * interlineado y no a 18 px pelados. Se queda con las medidas del sistema
- * (48 × 30, pulgar de 24, recorrido de 18) y con esta caja.
- */
-function FilaDePalanca({
-  etiqueta,
-  descripcion,
-  activa,
-  alCambiar,
-  ultima = false,
-}: {
-  etiqueta: string;
-  descripcion?: string;
-  activa: boolean;
-  alCambiar: () => void;
-  ultima?: boolean;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="switch"
-      accessibilityState={{ checked: activa }}
-      accessibilityLabel={descripcion ? `${etiqueta}. ${descripcion}` : etiqueta}
-      onPress={alCambiar}
-      style={[
-        estilos.filaPalanca,
-        { alignItems: descripcion ? 'flex-start' : 'center', paddingBottom: ultima ? 0 : 9 },
-      ]}
-    >
-      <View style={estilos.palancaTextos}>
-        <Text style={estilos.palancaEtiqueta}>{etiqueta}</Text>
-        {descripcion ? <Text style={estilos.palancaDescripcion}>{descripcion}</Text> : null}
-      </View>
-
-      <View style={[estilos.pista, { backgroundColor: activa ? color.rojo500 : color.ink200 }]}>
-        <View style={[estilos.pulgar, { transform: [{ translateX: activa ? 18 : 0 }] }]} />
-      </View>
-    </Pressable>
-  );
-}
-
 /** El galón de «lleva a otra pantalla». No está en `@/ui/iconos`. */
 function Adelante() {
   return (
@@ -386,48 +311,6 @@ const estilos = StyleSheet.create({
     marginBottom: 4,
     alignSelf: 'flex-start',
     fontFamily: familia,
-  },
-
-  filaPalanca: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 16,
-    paddingTop: 9,
-    borderTopWidth: 1,
-    borderTopColor: color.bordeSutil,
-  },
-  palancaTextos: { flexShrink: 1 },
-  palancaEtiqueta: {
-    fontSize: 15.5,
-    lineHeight: 21.75,
-    fontWeight: '500',
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  palancaDescripcion: {
-    fontSize: 13.5,
-    lineHeight: 18.2,
-    color: color.ink600,
-    marginTop: 2,
-    fontFamily: familia,
-  },
-  pista: {
-    width: 48,
-    height: 30,
-    borderRadius: radio.pastilla,
-    padding: 3,
-    justifyContent: 'center',
-  },
-  pulgar: {
-    width: 24,
-    height: 24,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
-    shadowColor: '#14141A',
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
   },
 
   filaDato: {

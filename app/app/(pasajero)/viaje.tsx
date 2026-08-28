@@ -26,6 +26,7 @@ import { DIJO, compartir } from '@/ui/salidas';
 import { useVolver } from '@/ui/salidas';
 
 import { ciudadYPunto, soloCiudad, soloPunto } from '@/dominio/comoSeLlama';
+import { sePuedeCancelar } from '@/dominio/reembolsos';
 import { comodidadDeAtras, deFilas } from '@/dominio/puestos';
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { reservasDelViaje } from '@/servicios/reservas';
@@ -53,7 +54,7 @@ import {
   Persona,
   SinHumo,
 } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
+import { TRACK_MICRO, familia, color, espacio, pulsado, radio } from '@/ui/tokens';
 
 const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 /** Sin sesión que preguntar —solo en simulado—. En producción la pide `1c`.
@@ -432,6 +433,53 @@ export default function DetalleDelViaje() {
             </View>
           ) : null}
 
+          {/* **CANCELAR MI PUESTO** (27-08-2026, pedido por el dueño). Estaba
+              sólo en Ayuda, o sea: en el sitio donde se busca cuando ya no se
+              encuentra. Vive aquí, debajo de todo, donde vive la reserva.
+
+              No va en la barra de abajo: allí está lo que se quiere hacer, y
+              esto es lo contrario. Ni relleno rojo — en el resto de la app el
+              rojo sólido dice «sigue», y aquí seguir es perder el puesto. Y
+              **si ya no se puede, no aparece**: un botón que no hace nada
+              (`sePuedeCancelar`) es peor que ninguno. */}
+          {miReserva ? (
+            <View style={estilos.salidas}>
+              {sePuedeCancelar({
+                status: miReserva.status,
+                boarded_at: miReserva.boarded_at,
+                salida: viaje.departure_at,
+              }) ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Cancelar mi puesto"
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(ayuda)/cancelar',
+                      params: { reserva: miReserva.id },
+                    })
+                  }
+                  style={({ pressed }) => [estilos.salida, pressed && pulsado.celda]}
+                >
+                  <Text style={estilos.salidaTexto}>Cancelar mi puesto</Text>
+                </Pressable>
+              ) : null}
+
+              {/* **AYUDA, DONDE APARECE EL PROBLEMA** (27-08-2026, decidido
+                  por el dueño). No es la tira de tres promesas que se quitó
+                  el 27-08 —aquélla adornaba antes de reservar—: esto sale
+                  SÓLO si ya tienes puesto, que es cuando algo puede salir
+                  mal y hace falta saber a quién escribirle. */}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ayuda y reembolsos"
+                onPress={() => router.push('/(ayuda)')}
+                style={({ pressed }) => [estilos.salida, pressed && pulsado.celda]}
+              >
+                <Text style={estilos.salidaTexto}>Ayuda y reembolsos</Text>
+              </Pressable>
+            </View>
+          ) : null}
+
         </View>
       </ScrollView>
 
@@ -676,6 +724,23 @@ const estilos = StyleSheet.create({
     color: color.ink800,
     fontFamily: familia,
   },
+  /** Contorno, sin relleno: lo de aquí abajo no se pulsa sin querer. */
+  salidas: { marginTop: 12, gap: 8 },
+  salida: {
+    height: 48,
+    borderRadius: radio.boton,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  salidaTexto: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: color.ink600,
+    fontFamily: familia,
+  },
+
   notaDelConductor: {
     marginTop: 10,
     fontSize: 14.5,

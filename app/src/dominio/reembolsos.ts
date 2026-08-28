@@ -106,3 +106,37 @@ function textoDeHoras(horas: number): string {
   }
   return enteras === 1 ? '1 h' : `${enteras} h`;
 }
+
+/* ── ¿Se puede todavía cancelar? (27-08-2026) ────────────────────────── */
+
+/** Lo que hay que saber de la reserva para decidirlo. */
+export type PuestoCancelable = {
+  status: string;
+  /** Cuándo se marcó el código de abordaje, si se marcó. */
+  boarded_at?: string | null;
+  /** La salida del viaje. */
+  salida: string;
+};
+
+/**
+ * CANCELAR SE OFRECE MIENTRAS SIRVA DE ALGO, Y NO DESPUÉS.
+ *
+ * Tres condiciones, y las tres son la misma idea dicha de tres maneras: que
+ * el puesto todavía exista y el viaje todavía no haya pasado.
+ *
+ * 1. El puesto está vivo — `pending` o `confirmed`. Un puesto ya cumplido o
+ *    ya cancelado no se cancela otra vez.
+ * 2. **No te has montado.** Marcado el código de abordaje, el viaje ocurrió:
+ *    lo que queda no es cancelar, es reclamar.
+ * 3. No ha salido. Pasada la hora sin haber subido, el aporte vuelve solo a
+ *    las 2 h (`HORAS_PARA_DEVOLUCION_AUTOMATICA`) y ofrecer un botón sería
+ *    hacer trabajar a alguien por algo que ya está en marcha.
+ *
+ * Fuera de esos casos el botón **no se enseña apagado, no se enseña**: un
+ * botón que no hace nada es peor que ninguno.
+ */
+export function sePuedeCancelar(puesto: PuestoCancelable, ahora: Date = new Date()): boolean {
+  if (puesto.status !== 'pending' && puesto.status !== 'confirmed') return false;
+  if (puesto.boarded_at) return false;
+  return new Date(puesto.salida).getTime() > ahora.getTime();
+}

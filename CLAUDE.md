@@ -274,6 +274,41 @@ parler :
   **même avec la clé de service**. Demander ne réserve rien : ni place
   occupée, ni horloge des quatre heures démarrée. Banc d'essai :
   `supabase/pruebas/13-preguntar.sql` (11 vérifications).
+- **Ouvrir un fil, c'est le lire (27-08-2026).** La pastille « non lu » se
+  déduisait de « le dernier message n'est pas de moi », donc ouvrir le fil
+  ne changeait rien et elle restait allumée pour toujours. Maintenant
+  `marcarHiloLeido` écrit `read_at` — la seule colonne que la politique
+  laisse toucher (`grant update (read_at)`, 0021) — et tout le reste s'en
+  déduit : le compte du fil, la pastille de l'onglet Chats, et l'avis.
+  **La pastille de Chats se compte dans `ui/Pestanas.tsx` et nulle part
+  ailleurs** : elle était posée par chaque écran, c'est-à-dire par un seul,
+  et avec le mauvais chiffre — celui de la cloche (avis) donné à l'onglet
+  des messages.
+- **Un message non lu EST un avis, et il n'a pas de ligne (27-08-2026).**
+  `kind: 'mensaje_nuevo'` est **dérivé** de `messages.read_at`
+  (`dominio/avisar.ts`), pas écrit par un trigger : une ligne serait une
+  deuxième vérité sur la même chose et il faudrait l'effacer à l'ouverture
+  du fil. **Un avis par FIL**, pas par message (règle 3 du traspaso), avec
+  ce qui a été dit et le bouton « Responder ». Il s'éteint tout seul quand
+  le fil est ouvert.
+- **Annuler vit où vit la réservation (27-08-2026).** L'écran `14a`
+  existait depuis longtemps, complet — la conséquence avant le bouton —
+  mais on n'y arrivait que par Ayuda, c'est-à-dire par l'endroit qu'on
+  cherche quand on ne trouve plus. Il y a maintenant « Cancelar mi puesto »
+  au bas de la fiche du trajet, et il **n'apparaît pas** quand ça ne sert
+  plus à rien : `sePuedeCancelar` (place vivante, pas encore montée, départ
+  pas passé). Un bouton qui ne fait rien est pire que pas de bouton.
+- **Ayuda est là où le problème arrive (27-08-2026, tranché par le
+  propriétaire).** Pas sur l'accueil : dans le chat (une icône dans
+  l'en-tête) et sur la fiche du trajet, **et seulement si on y a une
+  place**. Ce n'est pas la tira de trois promesses supprimée le 27-08 —
+  celle-là décorait avant de réserver ; ceci sort après.
+- **Ajustes ne garde que ce qui se règle (27-08-2026).** Le groupe
+  « Avisos » est parti : « Mis avisos » ouvrait la boîte, à un doigt de la
+  cloche de l'accueil, et « Rutas guardadas » sont des trajets — elles
+  vivent dans Mis viajes. Avec eux « Cómo aportas » (doublon de « Cómo se
+  aporta » de Tu cuenta) et les deux interrupteurs « Solo mujeres » /
+  « Compartir mi llegada », qui n'allumaient rien.
 - **Le bagage se décide à la demande, plus à la publication** (tranché par
   l'utilisateur le 25-08-2026). Le conducteur ne déclare plus rien à l'avance :
   le passager dit ce qu'il emporte — **rien, un sac, une valise** — et le

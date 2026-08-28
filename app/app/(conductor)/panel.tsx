@@ -160,7 +160,7 @@ export default function Panel() {
       {/* Sin FAB propio: la barra de abajo YA tiene la casilla Publicar
           levantada en el centro. Dos «+» flotando a sesenta píxeles el uno
           del otro eran la misma acción dibujada dos veces. */}
-      <Pestanas valor="Mis viajes" />
+      <Pestanas valor="Mis viajes" yo={yo} />
     </View>
   );
 }

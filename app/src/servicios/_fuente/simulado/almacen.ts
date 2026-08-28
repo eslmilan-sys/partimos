@@ -594,6 +594,25 @@ export async function guardarMensaje(mensaje: Message): Promise<Message> {
 }
 
 /**
+ * Marcar leídos los mensajes que te escribieron.
+ *
+ * Sólo `read_at`, y sólo de los que NO son tuyos: es lo único que la política
+ * de la base deja tocar (`grant update (read_at)`, 0021). Marcar como leído
+ * el mensaje de otro sería reescribir su correo.
+ */
+export async function marcarMensajesLeidos(ids: number[]): Promise<number> {
+  const ahora = new Date().toISOString();
+  let tocados = 0;
+  for (const m of mensajes) {
+    if (ids.includes(m.id) && m.read_at == null) {
+      m.read_at = ahora;
+      tocados++;
+    }
+  }
+  return tocados;
+}
+
+/**
  * El pago cambia de estado una sola vez en su vida: de retenido a cobrado,
  * cuando el viaje se cierra. `liberarAporte` lo hacía tocando el objeto en
  * memoria, que en el simulado se nota y contra la base no: la fila se quedaba

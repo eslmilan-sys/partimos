@@ -10,7 +10,7 @@
 
 export {
   viajes, paradas, reservas, mensajes, pagos,
-  guardarViaje, guardarParada, guardarReserva, guardarPago, guardarMensaje, actualizarReserva, actualizarPago,
+  guardarViaje, guardarParada, guardarReserva, guardarPago, guardarMensaje, marcarMensajesLeidos, actualizarReserva, actualizarPago,
 } from './almacen';
 
 export { ciudades, corredores, paradasDeLaRuta, ciudadesPedidas, pedirCiudad } from './geografia';

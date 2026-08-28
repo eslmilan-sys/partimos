@@ -30,6 +30,7 @@ import {
   enviarPregunta,
   hiloDeViaje,
   hiloDelViaje,
+  marcarHiloLeido,
 } from '@/servicios/mensajes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
@@ -37,7 +38,7 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe, Insignia } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { cuando, diaLargo, esHoy } from '@/ui/fechas';
-import { Atras, Avion, Mas } from '@/ui/iconos';
+import { Atras, Avion, Ayuda, Mas } from '@/ui/iconos';
 import { familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
@@ -66,6 +67,15 @@ export default function Chat() {
 
   const recargar = useCallback(async () => {
     if (!yo) return;
+    /* **ABRIR ES LEER** (27-08-2026). El hilo se quedaba en «sin leer» para
+       siempre: la pastilla se deducía de «el último no es mío», así que
+       abrirlo no cambiaba nada. Se marca ANTES de dibujar, así la cuenta que
+       se enseña ya es la de después de haber entrado. */
+    await marcarHiloLeido(yo, {
+      reservaId: viaje ? null : reservaId,
+      viajeId: viaje ?? null,
+      conId: viaje ? (conId ?? null) : null,
+    }).catch(() => 0);
     if (viaje && conId) setHilo(await hiloDeViaje(viaje, conId, yo));
     else if (reservaId) setHilo(await hiloDelViaje(reservaId, yo));
   }, [reservaId, viaje, conId, yo]);
@@ -111,6 +121,20 @@ export default function Chat() {
             {`${hilo.ruta} · ${cuando(hilo.cuando).toLowerCase()}`}
           </Text>
         </View>
+
+        {/* **AYUDA, DONDE APARECE EL PROBLEMA** (27-08-2026, decidido por el
+            dueño). Estaba sólo en Perfil → Ajustes: tres pantallas desde
+            aquí, y aquí es justo donde se ve que algo va mal — no contesta,
+            no aparece, cambió el punto. Un icono, no una fila: el chat es
+            para escribir, y esto es la salida de emergencia. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Ayuda y reembolsos"
+          onPress={() => router.push('/(ayuda)')}
+          style={estilos.circulo}
+        >
+          <Ayuda tamano={20} tinta={color.ink700} />
+        </Pressable>
       </View>
 
       <View style={estilos.cuerpo}>

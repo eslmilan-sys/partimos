@@ -241,7 +241,7 @@ export default function Avisos() {
       </View>
       </ScrollView>
 
-      <Pestanas valor="Perfil" />
+      <Pestanas valor="Perfil" yo={yo} />
     </View>
   );
 }

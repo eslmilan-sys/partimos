@@ -120,7 +120,14 @@ export type AvisoPendiente = {
     | 'viaje_cancelado'
     | 'reembolso_enviado'
     /** El recordatorio de salida — derivado del reloj, no escrito (0040). */
-    | 'sales_pronto';
+    | 'sales_pronto'
+    /**
+     * Alguien te escribió y no lo has abierto — derivado de `messages.read_at`
+     * (27-08-2026). **No hay fila ni trigger**, a propósito: sería una segunda
+     * verdad sobre lo mismo, y habría que borrarla al abrir el hilo. Derivado,
+     * el aviso se apaga solo con el `read_at` del mensaje.
+     */
+    | 'mensaje_nuevo';
   title: string;
   body: string;
   /** La acción que el aviso lleva dentro: aceptar sin abrir la app es la clave. */

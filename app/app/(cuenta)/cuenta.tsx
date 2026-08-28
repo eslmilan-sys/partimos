@@ -73,6 +73,29 @@ export default function TuCuenta() {
   if (!datos) return <Cargando />;
 
   /**
+   * LO QUE EL OTRO VE ANTES DE SUBIRSE — las tres cifras del perfil público,
+   * dentro de esta página (27-08-2026). Salen de `datos`, que ya las trae: no
+   * hace falta pedir el perfil otra vez para enseñar lo que ya está aquí.
+   *
+   * La nota se calla mientras no haya ninguna. «Sin nota» no es un defecto de
+   * quien acaba de entrar, y escribir un 0 sería mentir.
+   */
+  const loQueVen = [
+    {
+      etiqueta: datos.viajes === 1 ? 'viaje' : 'viajes',
+      valor: String(datos.viajes),
+    },
+    {
+      etiqueta: datos.calificacion == null ? 'todavía sin nota' : 'de nota',
+      valor: datos.calificacion == null ? '—' : datos.calificacion.toFixed(1).replace('.', ','),
+    },
+    {
+      etiqueta: 'cédula',
+      valor: datos.verificado ? 'Verificada' : 'Sin verificar',
+    },
+  ];
+
+  /**
    * LAS NUEVE FILAS, Y TODAS LLEVAN A ALGUNA PARTE.
    *
    * Tres de ellas eran texto con una punta de flecha al lado y nada detrás.
@@ -234,42 +257,58 @@ export default function TuCuenta() {
                 aquí nadie gana. Lo que queda es lo único que el conductor
                 necesita saber, y ahora ABRE su detalle en vez de quedarse
                 como un adorno. */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Lo que has recuperado, ${formatearDineroRedondo(datos.recuperadoCentavos)}. Ver viaje por viaje`}
-              onPress={() => router.push('/(conductor)/aportes')}
-              style={({ pressed }) => [estilos.tarjeta, pressed && estilos.pulsada]}
-            >
-              <View style={estilos.filaRecuperado}>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={estilos.cifraEtiqueta}>Lo que has recuperado</Text>
-                  <Text style={estilos.cifraValor}>
-                    {formatearDineroRedondo(datos.recuperadoCentavos)}
-                  </Text>
-                </View>
-                <Avanza />
-              </View>
+            {/* **LA TARJETA NO SE PULSA** (27-08-2026, pedido del dueño). La
+                cifra es para leerla, no para entrar en ninguna parte: una
+                tarjeta entera pulsable de 100 px de alto se toca sin querer
+                al desplazar, y lo que abría —el detalle viaje por viaje— es
+                una segunda cosa, no la misma. Ahora es un botón pequeño
+                debajo, que es lo que es. */}
+            <View style={estilos.tarjeta}>
+              <Text style={estilos.cifraEtiqueta}>Lo que has recuperado</Text>
+              <Text style={estilos.cifraValor}>
+                {formatearDineroRedondo(datos.recuperadoCentavos)}
+              </Text>
               <Text style={estilos.nadieGana}>
                 Nadie gana dinero con esto: unos ponen y otros recuperan.
               </Text>
-            </Pressable>
 
-            <Pressable
-              accessibilityRole="button"
-              onPress={() =>
-                router.push({ pathname: '/(pasajero)/perfil', params: { perfil: yo } })
-              }
-              style={({ pressed }) => [estilos.fila, estilos.filaSuelta, pressed && estilos.pulsada]}
-            >
-              <View style={estilos.cuadroIcono}>
-                <Escudo tamano={20} tinta={color.ink600} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ver el histórico, viaje por viaje"
+                onPress={() => router.push('/(conductor)/aportes')}
+                style={({ pressed }) => [estilos.verHistorico, pressed && estilos.pulsada]}
+              >
+                <Text style={estilos.verHistoricoTexto}>Ver histórico</Text>
+                <Avanza tamano={15} />
+              </Pressable>
+            </View>
+
+            {/* **MI PERFIL PÚBLICO, DENTRO DE LA PÁGINA** (27-08-2026, pedido
+                del dueño). Era una fila con galón que abría tu propio perfil
+                en modo visitante — un viaje de ida y vuelta para ver cuatro
+                datos que caben aquí. Se enseña lo que el otro ve ANTES de
+                subirse, que es de lo que trata: tu nota, tus viajes y lo que
+                llevas verificado. */}
+            <View style={estilos.tarjeta}>
+              <View style={estilos.filaPerfil}>
+                <View style={estilos.cuadroIcono}>
+                  <Escudo tamano={20} tinta={color.ink600} />
+                </View>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={estilos.tituloPerfil}>Mi perfil público</Text>
+                  <Text style={estilos.filaValor}>Lo que ve el otro antes de subirse</Text>
+                </View>
               </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={estilos.filaEtiqueta}>Mi perfil público</Text>
-                <Text style={estilos.filaValor}>Lo que ve el otro antes de subirse</Text>
+
+              <View style={estilos.loQueVen}>
+                {loQueVen.map((v) => (
+                  <View key={v.etiqueta} style={estilos.loQueVenColumna}>
+                    <Text style={estilos.loQueVenValor}>{v.valor}</Text>
+                    <Text style={estilos.loQueVenEtiqueta}>{v.etiqueta}</Text>
+                  </View>
+                ))}
               </View>
-              <Avanza />
-            </Pressable>
+            </View>
 
             <View style={estilos.aviso}>
               <Escudo tamano={19} tinta={color.azul500} />
@@ -320,7 +359,7 @@ export default function TuCuenta() {
       </View>
       </ScrollView>
 
-        <Pestanas valor="Perfil" />
+        <Pestanas valor="Perfil" yo={yo} />
     </View>
   );
 }
@@ -439,6 +478,61 @@ const estilos = StyleSheet.create({
     paddingTop: 13,
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
+    fontFamily: familia,
+  },
+
+  /** Pequeño y de contorno: abre una segunda pantalla, no ES la tarjeta. */
+  verHistorico: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    marginTop: 14,
+    height: 34,
+    paddingLeft: 13,
+    paddingRight: 9,
+    borderRadius: radio.s,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+  },
+  verHistoricoTexto: {
+    fontSize: 13.5,
+    fontWeight: '500',
+    color: color.ink700,
+    fontFamily: familia,
+  },
+
+  filaPerfil: { flexDirection: 'row', alignItems: 'center', gap: 13 },
+  tituloPerfil: {
+    fontSize: 15.5,
+    lineHeight: 22.5,
+    fontWeight: '500',
+    letterSpacing: -0.23,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  /** Las tres cifras que el otro mira antes de subirse, en columnas iguales. */
+  loQueVen: {
+    flexDirection: 'row',
+    marginTop: 16,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: color.bordeSutil,
+  },
+  loQueVenColumna: { flex: 1, minWidth: 0 },
+  loQueVenValor: {
+    fontSize: 16.5,
+    lineHeight: 22,
+    fontWeight: '600',
+    color: color.ink900,
+    fontFamily: familia,
+    ...tabular,
+  },
+  loQueVenEtiqueta: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: color.ink500,
+    marginTop: 2,
     fontFamily: familia,
   },
 

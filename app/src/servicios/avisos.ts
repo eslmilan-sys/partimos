@@ -20,6 +20,9 @@
  *     pedir un puesto le aparezca al conductor AL INSTANTE, sin esperar a
  *     ninguna fila, y lo que pone el recordatorio de salida — que no es un
  *     evento sino un estado del reloj, y ninguna tabla lo puede escribir.
+ *     Desde el 27-08-2026 también **los mensajes sin leer**: un hilo con algo
+ *     que contestar es un aviso, y se apaga solo al abrirlo — no hace falta
+ *     ninguna fila ni ninguna marca aparte.
  *
  * Cuando el mismo hecho está en las dos aguas, la fila escrita manda: tiene
  * identidad estable y su «leído» sobrevive a la recarga. El derivado se
@@ -76,6 +79,7 @@ function todosLosDe(perfilId: string): AvisoPendiente[] {
   const derivados = avisosDeLosHechos(perfilId, {
     reservas: fuente.reservas,
     viajes: fuente.viajes,
+    mensajes: fuente.mensajes,
     nombreDe: (id) => {
       const p = fuente.perfiles.find((x) => x.id === id);
       return p ? `${p.first_name} ${p.last_initial ?? ''}`.trim() : 'Alguien';

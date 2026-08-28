@@ -56,6 +56,15 @@ export type HiloDelViaje = {
    */
   puesto: { resumen: string; estado: string; confirmado: boolean } | null;
   mensajes: MensajeEnHilo[];
+  /**
+   * CUÁNTOS TE ESCRIBIERON Y NO HAS ABIERTO.
+   *
+   * Sale de `read_at`, no de «el último no es mío» como antes: con aquello,
+   * abrir el hilo no cambiaba nada y la pastilla se quedaba encendida para
+   * siempre (visto por el dueño el 27-08-2026). Es un hecho de la base, no
+   * una deducción de la pantalla.
+   */
+  sinLeer: number;
 };
 
 export async function hiloDelViaje(reservaId: string, yo: string): Promise<HiloDelViaje> {
@@ -67,6 +76,7 @@ export async function hiloDelViaje(reservaId: string, yo: string): Promise<HiloD
   const otro = fuente.perfiles.find((p) => p.id === otroId);
   const nombre = otro ? `${otro.first_name} ${otro.last_initial ?? ''}`.trim() : 'Alguien';
   const aporte = reserva.unit_price_cents * reserva.seats;
+  const deLaReserva = fuente.mensajes.filter((m) => m.booking_id === reservaId);
 
   return demora({
     reservaId,
@@ -80,10 +90,8 @@ export async function hiloDelViaje(reservaId: string, yo: string): Promise<HiloD
       estado: reserva.status === 'confirmed' ? 'Aceptado' : 'Pendiente',
       confirmado: reserva.status === 'confirmed',
     },
-    mensajes: enHilo(
-      fuente.mensajes.filter((m) => m.booking_id === reservaId),
-      yo,
-    ),
+    mensajes: enHilo(deLaReserva, yo),
+    sinLeer: cuantosSinLeerDe(deLaReserva, yo),
   });
 }
 
@@ -108,6 +116,7 @@ export async function hiloDeViaje(
   const otroId = yo === viaje.driver_id ? conId : viaje.driver_id;
   const otro = fuente.perfiles.find((p) => p.id === otroId);
   const nombre = otro ? `${otro.first_name} ${otro.last_initial ?? ''}`.trim() : 'Alguien';
+  const delHilo = fuente.mensajes.filter((m) => m.trip_id === viajeId && m.con_id === conId);
 
   return demora({
     reservaId: null,
@@ -117,10 +126,8 @@ export async function hiloDeViaje(
     ruta: rutaCorta(viaje),
     cuando: viaje.departure_at,
     puesto: null,
-    mensajes: enHilo(
-      fuente.mensajes.filter((m) => m.trip_id === viajeId && m.con_id === conId),
-      yo,
-    ),
+    mensajes: enHilo(delHilo, yo),
+    sinLeer: cuantosSinLeerDe(delHilo, yo),
   });
 }
 
@@ -195,7 +202,59 @@ export async function enviarPregunta(
   return demora(await fuente.guardarMensaje(mensaje));
 }
 
+/**
+ * ABRIR UN HILO LO MARCA LEÍDO.
+ *
+ * Sólo los que te escribieron: marcar como leído el tuyo no querría decir
+ * nada, y la política de la base sólo deja tocar `read_at` de todas formas.
+ * Devuelve cuántos se marcaron, por si la pantalla quiere refrescar.
+ */
+export async function marcarHiloLeido(
+  yo: string,
+  hilo: { reservaId: string | null; viajeId: string | null; conId: string | null },
+): Promise<number> {
+  const suyos = fuente.mensajes.filter(
+    (m) =>
+      m.sender_id !== yo &&
+      m.read_at == null &&
+      (hilo.reservaId
+        ? m.booking_id === hilo.reservaId
+        : m.trip_id === hilo.viajeId && m.con_id === hilo.conId),
+  );
+  if (suyos.length === 0) return 0;
+  return fuente.marcarMensajesLeidos(suyos.map((m) => m.id));
+}
+
+/**
+ * CUÁNTOS MENSAJES SIN LEER TIENES EN TODA LA APP.
+ *
+ * Es lo que enciende la pastilla de la pestaña Chats. Cuenta los de las dos
+ * clases de hilo —reserva y pregunta— porque para quien mira la barra son lo
+ * mismo: alguien le escribió.
+ */
+export async function cuantosSinLeer(yo: string | null): Promise<number> {
+  if (!yo) return demora(0, 0);
+  const mios = fuente.mensajes.filter((m) => {
+    if (m.sender_id === yo || m.read_at != null) return false;
+    if (m.booking_id) {
+      const r = fuente.reservas.find((x) => x.id === m.booking_id);
+      if (!r) return false;
+      const v = fuente.viajes.find((x) => x.id === r.trip_id);
+      return r.passenger_id === yo || v?.driver_id === yo;
+    }
+    if (!m.trip_id) return false;
+    const v = fuente.viajes.find((x) => x.id === m.trip_id);
+    return m.con_id === yo || v?.driver_id === yo;
+  });
+  return demora(mios.length, 0);
+}
+
 /* ------------------------------------------------------------------ */
+
+/** Los que te escribieron y no has abierto. */
+function cuantosSinLeerDe(mensajes: Message[], yo: string): number {
+  return mensajes.filter((m) => m.sender_id !== yo && m.read_at == null).length;
+}
 
 /** Los mensajes de un hilo, en orden y ya vestidos de burbuja. */
 function enHilo(mensajes: Message[], yo: string): MensajeEnHilo[] {

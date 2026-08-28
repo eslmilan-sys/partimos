@@ -38,6 +38,7 @@ import {
 } from '@/servicios/panel';
 import { cerrarLasVencidas } from '@/servicios/abordaje';
 import { bandeja } from '@/servicios/avisos';
+import { cuantasAvisando } from '@/servicios/rutas';
 import { perfilResumido } from '@/servicios/perfiles';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -90,6 +91,8 @@ export default function MisViajesPantalla() {
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<MisViajes | null>(null);
   const [avisos, setAvisos] = useState(0);
+  /** Cuántas rutas guardadas están avisando, para la puerta de abajo. */
+  const [avisando, setAvisando] = useState(0);
   const [nombre, setNombre] = useState<string | null>(null);
   const [pestana, setPestana] = useState<Pestana>('proximos');
   const [lado, setLado] = useState<Lado>('pasajero');
@@ -108,6 +111,7 @@ export default function MisViajesPantalla() {
       .catch(() => misViajes(yo).then(setDatos));
     misViajesConduciendo(yo).then(setManejando);
     bandeja(yo).then((b) => setAvisos(b.sinLeer));
+    cuantasAvisando(yo).then(setAvisando);
     perfilResumido(yo).then((p) => setNombre(p?.first_name ?? null));
   }, [yo]);
 
@@ -326,12 +330,12 @@ export default function MisViajesPantalla() {
           </View>
         )}
 
-        {/* La puerta del código de llegada, que no dibuja la referencia y que
-            hay que conservar: sin ella sólo se alcanzaba desde el catálogo de
-            pantallas. La del panel del conductor ya no hace falta aquí — ese
-            lado tiene su propia mitad del selector de arriba. */}
-        {proximo ? (
-          <View style={estilos.puertas}>
+        {/* Las puertas de abajo. La del código no la dibuja la referencia y
+            hay que conservarla: sin ella sólo se alcanzaba desde el catálogo
+            de pantallas. La del panel del conductor ya no hace falta aquí —
+            ese lado tiene su propia mitad del selector de arriba. */}
+        <View style={estilos.puertas}>
+          {proximo ? (
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Ver mi código para subir"
@@ -348,14 +352,34 @@ export default function MisViajesPantalla() {
               <Text style={estilos.puertaTexto}>Mi código para subir</Text>
               <Avanza />
             </Pressable>
-          </View>
-        ) : null}
+          ) : null}
+
+          {/* **RUTAS GUARDADAS, AQUÍ** (27-08-2026, pedido del dueño). Vivía
+              en Ajustes, dentro de un grupo «Avisos», y era el único camino
+              para llegar: una ruta guardada es un viaje que todavía no
+              existe, no una preferencia de la cuenta. Su sitio es la
+              pantalla de los viajes. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              avisando > 0 ? `Rutas guardadas, ${avisando} avisando` : 'Rutas guardadas'
+            }
+            onPress={() => router.push('/(pasajero)/rutas')}
+            style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
+          >
+            <Text style={estilos.puertaTexto}>Rutas guardadas</Text>
+            {avisando > 0 ? (
+              <Text style={estilos.cuantos}>{`${avisando} avisando`}</Text>
+            ) : null}
+            <Avanza />
+          </Pressable>
+        </View>
           </>
         )}
       </View>
       </ScrollView>
 
-      <Pestanas valor="Mis viajes" />
+      <Pestanas valor="Mis viajes" yo={yo} />
     </View>
   );
 }

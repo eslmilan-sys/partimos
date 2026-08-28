@@ -11,11 +11,20 @@
  * Perfil — y el icono de Viajes es el carro del v6, que es el que el diseño
  * pone detrás de ese rótulo. Los `valor` internos no cambian: son la clave
  * que las pantallas ya pasan.
+ *
+ * **La pastilla de Chats se cuenta aquí** (27-08-2026). Antes la ponía cada
+ * pantalla, o sea: una sola, y con la cuenta equivocada — le pasaba a Chats
+ * el número de la campana, que son los avisos. Once barras con la misma
+ * cuenta escrita once veces se separan; escrita una vez, no.
  */
 
+import { useCallback, useState } from 'react';
 import { View } from 'react-native';
 
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+
+import { cuantosSinLeer } from '@/servicios/mensajes';
+import { useMiId } from '@/servicios/sesion';
 
 import { BarraDePestanas } from './BarraDePestanas';
 import { Carro, Chat, Lupa, Mas, Persona } from './iconos';
@@ -70,6 +79,14 @@ const LAS_CUATRO = [
 type Props = {
   /** En cuál estás. La pestaña en la que ya estás no navega. */
   valor: Pestana;
+  /**
+   * QUIÉN ERES. Opcional: si la pantalla ya lo tiene en la mano se pasa, y si
+   * no, la barra lo pregunta ella misma. Contra la base es lo mismo —
+   * `useMiId` devuelve la sesión de verdad y no mira el argumento—; en
+   * simulado ahorra tener que darle a cuatro pantallas de búsqueda un dato
+   * que no usan para nada más.
+   */
+  yo?: string | null;
   /** Cuentas de insignia por pestaña — «Viajes · 2» en el dibujo. */
   insignias?: Partial<Record<Pestana, number>>;
 };
@@ -80,15 +97,46 @@ type Props = {
  * también puede llevar a alguien. La pantalla de publicar ya calcula sin
  * carro y sin cédula, así que llevar allí nunca es un callejón.
  */
-export function Pestanas({ valor, insignias }: Props) {
+/** La persona del traspaso — sólo cuenta en simulado (ver `useMiId`). */
+const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
+
+export function Pestanas({ valor, yo, insignias }: Props) {
   const router = useRouter();
+  const deLaSesion = useMiId(DEL_RECORRIDO);
+  const quien = yo === undefined ? deLaSesion : yo;
+  const [sinLeer, setSinLeer] = useState(0);
+
+  /**
+   * Se recuenta al VOLVER, no sólo al montar: se sale de la barra para abrir
+   * un hilo, y al regresar la pastilla tiene que haber bajado. Con un
+   * `useEffect` normal la pantalla de atrás sigue viva y la cuenta se queda
+   * congelada en lo que era antes de leer.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      let vivo = true;
+      cuantosSinLeer(quien).then((n) => {
+        if (vivo) setSinLeer(n);
+      });
+      return () => {
+        vivo = false;
+      };
+    }, [quien]),
+  );
+
+  /* La de Chats se cuenta sola; el resto puede venir de fuera. Estar EN Chats
+     no enciende la pastilla: los que se ven ya se están leyendo. */
+  const cuentas: Partial<Record<Pestana, number>> = {
+    ...insignias,
+    Mensajes: valor === 'Mensajes' || sinLeer === 0 ? undefined : sinLeer,
+  };
 
   return (
     /* En el v6 la barra va de lado a lado, pegada abajo: sin marco propio. */
     <View>
       <BarraDePestanas
         valor={valor}
-        pestanas={LAS_CUATRO.map((p) => ({ ...p, insignia: insignias?.[p.valor as Pestana] }))}
+        pestanas={LAS_CUATRO.map((p) => ({ ...p, insignia: cuentas[p.valor as Pestana] }))}
         alCambiar={(v) => {
           if (v === valor) return;
           const destino = A_DONDE[v as Pestana];

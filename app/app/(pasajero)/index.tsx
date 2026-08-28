@@ -607,7 +607,10 @@ export default function Inicio() {
         </View>
       </ScrollView>
 
-      <Pestanas valor="Buscar" insignias={{ Mensajes: sinLeer > 0 ? sinLeer : undefined }} />
+      {/* `sinLeer` es de la CAMPANA — avisos, no chats. Antes se le pasaba a la
+          pestaña de mensajes y la barra decía «3 chats» habiendo 3 avisos. La
+          cuenta de Chats la hace la barra. */}
+      <Pestanas valor="Buscar" yo={yo} />
 
       <ElegirCiudad
         abierto={eligiendoCiudad}

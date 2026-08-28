@@ -43,6 +43,23 @@ export type ViajeAvisable = {
   destination_label: string | null;
 };
 
+/**
+ * Lo que hay que saber de un mensaje para avisar. Subconjunto de `Message`.
+ *
+ * Un hilo cuelga de una reserva **o** de un viaje, nunca de las dos (0041), y
+ * eso es justo lo que hace falta para saber a dónde manda el aviso.
+ */
+export type MensajeAvisable = {
+  id: number;
+  booking_id: string | null;
+  trip_id?: string | null;
+  con_id?: string | null;
+  sender_id: string;
+  body: string;
+  read_at: string | null;
+  created_at: string;
+};
+
 /** La forma de `AvisoPendiente`, dicha aquí para que el dominio no importe nada. */
 export type AvisoDerivado = {
   id: string;
@@ -53,7 +70,8 @@ export type AvisoDerivado = {
     | 'aporte_recibido'
     | 'califica_tu'
     | 'viaje_cancelado'
-    | 'sales_pronto';
+    | 'sales_pronto'
+    | 'mensaje_nuevo';
   title: string;
   body: string;
   action_label: string | null;
@@ -67,6 +85,8 @@ export type AvisoDerivado = {
 export type Hechos = {
   reservas: ReservaAvisable[];
   viajes: ViajeAvisable[];
+  /** Los mensajes de todos los hilos; se filtran aquí los que te tocan. */
+  mensajes?: MensajeAvisable[];
   /** «Andrés M.», o «Alguien». La guía de nombres vive fuera del dominio. */
   nombreDe: (perfilId: string) => string;
   /** ¿Este pasajero ya calificó esta reserva? Si sí, no se le vuelve a pedir. */
@@ -228,7 +248,102 @@ export function avisosDeLosHechos(perfilId: string, hechos: Hechos): AvisoDeriva
     });
   }
 
+  salen.push(...avisosDeMensajes(perfilId, hechos, viajeDe));
+
   return salen.sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
+
+/**
+ * «Andrés M. te escribió» — UN aviso POR HILO, no por mensaje.
+ *
+ * Regla 3 del traspaso: un evento, un aviso. Tres mensajes seguidos de la
+ * misma persona sobre el mismo viaje son una sola cosa que saber — «tienes
+ * que contestar»—, y tres líneas en la bandeja por eso serían tres veces la
+ * misma. Se apunta el más nuevo sin leer, que es el que se lee al abrir.
+ *
+ * Sólo sobrevive mientras esté SIN LEER: el aviso de un mensaje no es una
+ * constancia de que pasó, es que falta contestarlo. Abrir el hilo lo marca
+ * leído (`marcarHiloLeido`) y con eso el aviso desaparece solo — sin una
+ * segunda marca que mantener en otro sitio.
+ */
+function avisosDeMensajes(
+  perfilId: string,
+  hechos: Hechos,
+  viajeDe: Map<string, ViajeAvisable>,
+): AvisoDerivado[] {
+  const reservaDe = new Map(hechos.reservas.map((r) => [r.id, r]));
+  /** Por hilo: quién escribe, cuántos van, y el último de todos. */
+  const porHilo = new Map<
+    string,
+    { de: string; cuantos: number; ultimo: MensajeAvisable; ruta: string; viajeId: string | null }
+  >();
+
+  for (const m of hechos.mensajes ?? []) {
+    if (m.sender_id === perfilId || m.read_at != null) continue;
+
+    let clave: string;
+    let ruta: string;
+    let viaje: ViajeAvisable | undefined;
+
+    if (m.booking_id) {
+      const r = reservaDe.get(m.booking_id);
+      if (!r) continue;
+      viaje = viajeDe.get(r.trip_id);
+      if (!viaje) continue;
+      if (r.passenger_id !== perfilId && viaje.driver_id !== perfilId) continue;
+      clave = m.booking_id;
+      ruta = `/(pasajero)/chat?reserva=${m.booking_id}`;
+    } else {
+      if (!m.trip_id || !m.con_id) continue;
+      viaje = viajeDe.get(m.trip_id);
+      if (!viaje) continue;
+      if (m.con_id !== perfilId && viaje.driver_id !== perfilId) continue;
+      clave = `${m.trip_id}·${m.con_id}`;
+      ruta = `/(pasajero)/chat?viaje=${m.trip_id}&con=${m.con_id}`;
+    }
+
+    const antes = porHilo.get(clave);
+    const ultimo = antes && antes.ultimo.created_at > m.created_at ? antes.ultimo : m;
+    porHilo.set(clave, {
+      de: m.sender_id,
+      cuantos: (antes?.cuantos ?? 0) + 1,
+      ultimo,
+      ruta,
+      viajeId: viaje.id,
+    });
+  }
+
+  return [...porHilo.entries()].map(([clave, h]) => {
+    const nombre = hechos.nombreDe(h.de);
+    const viaje = h.viajeId ? viajeDe.get(h.viajeId) : undefined;
+    return {
+      id: `av-escrito-${clave}`,
+      profile_id: perfilId,
+      kind: 'mensaje_nuevo' as const,
+      title: h.cuantos === 1 ? `${nombre} te escribió` : `${h.cuantos} mensajes de ${nombre}`,
+      /* Lo que dijo, y de qué viaje. El texto va primero porque es lo que
+         decide si hay que abrir ahora o luego. */
+      body: viaje ? `«${enUnaLinea(h.ultimo.body)}» · ${rutaDelViaje(viaje)}` : enUnaLinea(h.ultimo.body),
+      action_label: 'Responder',
+      action_route: h.ruta,
+      booking_id: h.ultimo.booking_id,
+      trip_id: h.viajeId,
+      read_at: null,
+      created_at: h.ultimo.created_at,
+    };
+  });
+}
+
+/** «Albrook → Chitré», sin hora: un mensaje no ocurre a la hora del viaje. */
+function rutaDelViaje(v: ViajeAvisable): string {
+  const lugar = (etiqueta: string | null) => (etiqueta ?? '').split(' · ')[0];
+  return `${lugar(v.origin_label)} → ${lugar(v.destination_label)}`;
+}
+
+/** Un renglón de bandeja: sin saltos y sin colas de párrafo. */
+function enUnaLinea(texto: string): string {
+  const plano = texto.replace(/\s+/g, ' ').trim();
+  return plano.length > 70 ? `${plano.slice(0, 69)}…` : plano;
 }
 
 /**

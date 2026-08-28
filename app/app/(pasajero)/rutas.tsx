@@ -135,7 +135,7 @@ export default function Rutas() {
         </Text>
       </View>
 
-        <Pestanas valor="Perfil" />
+        <Pestanas valor="Perfil" yo={yo} />
     </View>
   );
 }

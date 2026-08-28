@@ -124,19 +124,10 @@ export default function MensajeDePartimos() {
           </Pressable>
         ))}
 
-        <View style={estilos.acciones}>
-          <Boton tamano="md" ancho alPulsar={() => router.push('/(pasajero)')}>
-            Buscar un viaje
-          </Boton>
-          <Boton
-            tono="contorno"
-            tamano="md"
-            ancho
-            alPulsar={() => router.push('/(conductor)/publicar')}
-          >
-            Publicar el mío
-          </Boton>
-        </View>
+        {/* Los dos botones se fueron (27-08-2026). Las tres tarjetas de arriba
+            ya llevan a donde hay que ir, y la barra de abajo tiene Buscar y
+            Publicar siempre a mano: repetirlos aquí era el mismo camino
+            dibujado tres veces en la misma pantalla. */}
 
         <Text style={estilos.pieTexto}>
           Este es un mensaje nuestro, no una conversación: aquí no contestamos. Para escribirnos,

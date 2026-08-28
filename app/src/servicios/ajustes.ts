@@ -79,23 +79,23 @@ export type GrupoDeAjustes = {
   filas: { etiqueta: string; valor?: string; ruta?: string; peligro?: boolean }[];
 };
 
-/** Cuatro grupos: avisos, viaje, dinero y cuenta. En ese orden. */
+/**
+ * TRES GRUPOS: viaje, dinero y cuenta. En ese orden.
+ *
+ * **El grupo «Avisos» se fue el 27-08-2026**, por pedido del dueño. Sus dos
+ * filas no eran ajustes de nada: «Mis avisos» abría la bandeja —que está a un
+ * toque en la campana del inicio— y «Rutas guardadas» son viajes, así que
+ * ahora vive en Mis viajes, con los demás. Un ajuste es algo que se cambia;
+ * un atajo a otra pantalla, no.
+ *
+ * Y con él, «Cómo aportas»: la misma pantalla que ya abre «Cómo se aporta»
+ * desde Tu cuenta. Dos rótulos distintos para `/(pasajero)/metodos` es la
+ * clase de duplicado que termina divergiendo.
+ */
 export async function ajustes(perfilId: string): Promise<GrupoDeAjustes[]> {
-  const p = fuente.perfiles.find((x) => x.id === perfilId);
   const cedula = await estadoDeCedula(perfilId);
-  const avisando = fuente.rutinas.filter((r) => r.profile_id === perfilId && r.avisar).length;
 
   return demora([
-    {
-      titulo: 'Avisos',
-      filas: [
-        /* Decía «Los tres activos» — contaba tres interruptores que no
-           existen ya, y que nunca encendieron nada. La fila lleva a la
-           bandeja, que es donde los avisos están de verdad. */
-        { etiqueta: 'Mis avisos', ruta: '/(avisos)/avisos' },
-        { etiqueta: 'Rutas guardadas', valor: `${avisando} avisando`, ruta: '/(pasajero)/rutas' },
-      ],
-    },
     {
       titulo: 'Viaje',
       filas: [
@@ -106,11 +106,6 @@ export async function ajustes(perfilId: string): Promise<GrupoDeAjustes[]> {
     {
       titulo: 'Dinero y cuenta',
       filas: [
-        {
-          etiqueta: 'Cómo aportas',
-          valor: `${NOMBRE_DEL_CANAL[p?.preferred_pay_channel ?? 'yappy_app']} · ${fuente.yappyDelConductor[perfilId as keyof typeof fuente.yappyDelConductor] ?? ''}`.trim(),
-          ruta: '/(pasajero)/metodos',
-        },
         { etiqueta: 'Cédula', valor: cedula.puedePublicar ? 'Verificada' : cedula.etiqueta, ruta: '/(conductor)/cedula' },
         { etiqueta: 'Ayuda y reembolsos', ruta: '/(ayuda)' },
       ],

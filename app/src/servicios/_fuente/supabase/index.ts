@@ -97,7 +97,9 @@ type Consulta = {
      permisos aunque el alta haya entrado. */
   insert: (fila: unknown) => Devuelve & { select: () => { single: () => Devuelve } };
   update: (cambios: unknown) => {
-    eq: (c: string, v: unknown) => { select: () => { single: () => Devuelve } };
+    /* Como `insert`: esperable por sí solo cuando no hace falta la fila de
+       vuelta — marcar leído no necesita releer el mensaje. */
+    eq: (c: string, v: unknown) => Devuelve & { select: () => { single: () => Devuelve } };
   };
 };
 const tabla = (nombre: string) => supabase.from(nombre as never) as unknown as Consulta;
@@ -339,6 +341,26 @@ export async function pedirCiudad(p: {
   if (!error) return true;
   if (error.message.includes('duplicate key')) return true;
   throw new Error(`city_requests: ${error.message}`);
+}
+
+/**
+ * Marcar leídos los mensajes que te escribieron.
+ *
+ * Sólo `read_at`: es la única columna que la política deja tocar desde el
+ * cliente (`grant update (read_at)`, 0021). Se manda de uno en uno porque el
+ * cliente tipado no expone `in (...)`, y son tres o cuatro por hilo.
+ */
+export async function marcarMensajesLeidos(ids: number[]): Promise<number> {
+  const ahora = new Date().toISOString();
+  let tocados = 0;
+  for (const id of ids) {
+    const { error } = await tabla('messages').update({ read_at: ahora }).eq('id', id);
+    if (error) throw new Error(`messages: ${error.message}`);
+    const enMemoria = mensajes.find((m) => m.id === id);
+    if (enMemoria) enMemoria.read_at = ahora;
+    tocados++;
+  }
+  return tocados;
 }
 
 /** El espejo del arreglo del simulado. Aquí no se lee: sólo se escribe. */
