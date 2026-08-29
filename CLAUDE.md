@@ -364,6 +364,46 @@ parler :
   obligatoire. Elle dit maintenant « 4,8 · 12 opiniones ». Et la virgule
   décimale vient d'un seul endroit (`enTexto`) : `toFixed(1)` était semé
   dans cinq écrans et écrivait « 4.8 » en espagnol.
+- **Un `<button>` dans un `<button>` (28-08-2026).** En rendant la ligne
+  « Ya van contigo » cliquable, le bouton « Escribir » s'est retrouvé
+  dedans : HTML l'interdit, React l'affiche en encadré rouge, et selon le
+  navigateur le bouton intérieur cesse de répondre. Deux boutons frères
+  maintenant. Les douze écrans ont été balayés avec
+  `document.querySelectorAll('button button')` — c'était le seul.
+- **La note allait dans un seul sens (28-08-2026).** « Même formule des
+  deux côtés » n'avait rien derrière : l'avis `califica_tu` n'était
+  dérivé que pour le passager, donc **personne ne notait jamais un
+  passager** et aucun ne pouvait avoir de note ; l'écran ne passait pas
+  `yo`, donc ouvert par le conducteur il écrivait l'avis au nom du
+  passager ; et les raccourcis étaient ceux du conducteur, toujours.
+  `app/src/dominio/ejes.ts` : trois axes valent des deux côtés
+  (puntualidad, trato, encuentro), deux sont réservés à qui conduit
+  (manejo, carro), et le passager est jugé dans sa propre voix
+  (« Estaba a la hora », pas « Puntual »). Le côté se déduisait par un
+  ternaire permissif qui donnait « passager » pour quiconque n'était pas
+  le passager — y compris un tiers ; les deux parties sont nommées et qui
+  n'en est pas une ne note pas.
+- **Deux avis manquaient, trouvés en comparant avec Uber (28-08-2026).**
+  Une demande qui **expire sans réponse** — le passager attendait une
+  réponse qui ne viendrait plus, c'était le trou le plus cher — et un
+  **passager qui annule**, dont le conducteur n'était jamais informé
+  alors que la place redevient libre et qu'il peut encore la remplir. Les
+  deux sont dérivés des faits existants, sans migration. Ce qui reste
+  volontairement absent : « le conducteur arrive » et le suivi en direct
+  — sans géolocalisation ce serait un mensonge — et toute promotion (R5).
+- **La licence de conduire a une date de péremption (0047,
+  28-08-2026).** Au Panama elle expire sans prévenir, et conduire avec
+  une licence périmée met le passager sans recours — l'assurance ne
+  couvre pas. **Seulement la date** : ni photo ni numéro, même règle que
+  la cédula (R6), et la colonne est un `date` pour que rien d'autre n'y
+  tienne. Trente jours d'avis, parce qu'à ce moment-là on peut encore
+  prendre rendez-vous ; périmée, on ne publie plus de trajets neufs mais
+  **ce qui est déjà publié tient** — les passagers ne paient pas la
+  paperasse de quelqu'un d'autre. **Nulle ne bloque rien** : personne ne
+  perd l'accès à cause d'une colonne qui n'existait pas quand il a ouvert
+  son compte. Elle passe **après** la cédula dans l'ordre de ce qui
+  manque : une cédula se règle en minutes, une licence en semaines.
+  `app/src/dominio/licencia.ts`.
 - **Deux endroits, deux choses (28-08-2026, tranché après l'avoir vu
   fait à l'envers pendant un jour).** L'onglet du bas est **Chats** :
   des conversations, rien d'autre, et sa pastille compte les messages

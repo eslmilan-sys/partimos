@@ -33,7 +33,7 @@ import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Pestanas } from '@/ui/Pestanas';
 import { tabular } from '@/ui/dinero';
-import { Atras, Avanza, Billete, Carro, Chat, Escudo, Estrella, Visto } from '@/ui/iconos';
+import { Atras, Avanza, Billete, Carro, Cedula, Chat, Escudo, Estrella, Visto } from '@/ui/iconos';
 import { TRACK_MICRO, color, espacio, familia, radio } from '@/ui/tokens';
 
 /** Daniela, la pasajera del simulado. Mientras no haya sesión, esta es la convención. */
@@ -56,7 +56,11 @@ function iconoDe(clase: Aviso['clase']) {
     case 'califica_tu':
     case 'te_calificaron':
       return <Estrella tamano={17} tinta={color.oro500} />;
+    case 'licencia_por_vencer':
+      return <Cedula tamano={19} tinta={color.oro500} />;
     case 'viaje_cancelado':
+    case 'solicitud_caducada':
+    case 'puesto_cancelado':
       return <Escudo tamano={19} tinta={color.rojo600} />;
     case 'solicitud_recibida':
     case 'solicitud_aceptada':

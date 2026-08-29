@@ -1,3 +1,6 @@
+import { DIAS_PARA_AVISAR, comoSeDice, estadoDeLicencia } from './licencia.ts';
+import { cuandoCaduca } from './solicitud.ts';
+
 /**
  * Qué avisos merecen los hechos — la regla, sin base y sin pantalla.
  *
@@ -23,6 +26,8 @@ export type ReservaAvisable = {
   trip_id: string;
   passenger_id: string;
   status: string;
+  /** Cuándo se le acaba el plazo al conductor para contestar. */
+  expires_at?: string | null;
   seats: number;
   unit_price_cents: number;
   created_at: string;
@@ -71,7 +76,13 @@ export type AvisoDerivado = {
     | 'califica_tu'
     | 'viaje_cancelado'
     | 'sales_pronto'
-    | 'mensaje_nuevo';
+    | 'mensaje_nuevo'
+    /** Nadie te contestó y el puesto volvió a quedar libre. Derivado. */
+    | 'solicitud_caducada'
+    /** Quien iba contigo canceló. Derivado, y sólo para quien maneja. */
+    | 'puesto_cancelado'
+    /** Tu licencia se vence pronto, o ya se venció (0047). Derivada del reloj. */
+    | 'licencia_por_vencer';
   title: string;
   body: string;
   action_label: string | null;
@@ -91,6 +102,8 @@ export type Hechos = {
   nombreDe: (perfilId: string) => string;
   /** ¿Este pasajero ya calificó esta reserva? Si sí, no se le vuelve a pedir. */
   yaCalifico: (reservaId: string, autorId: string) => boolean;
+  /** Cuándo se vence TU licencia (0047). Nula = no la has dicho. */
+  licencia?: { vence: string | null };
   ahora: Date;
 };
 
@@ -181,6 +194,27 @@ export function avisosDeLosHechos(perfilId: string, hechos: Hechos): AvisoDeriva
           created_at: r.completed_at ?? r.updated_at,
         });
       }
+      /**
+       * **TE CANCELARON UN PUESTO** (28-08-2026, al comparar con Uber).
+       *
+       * El puesto volvía a quedar libre y a quien maneja no se lo decía
+       * nadie: se enteraba abriendo la pantalla de solicitudes por su cuenta.
+       * Es de las pocas cosas sobre las que todavía se puede hacer algo —
+       * queda un sitio, y compartir el viaje lo vuelve a llenar.
+       */
+      if (r.status === 'cancelled_passenger') {
+        salen.push({
+          ...base,
+          id: `av-cancelo-${r.id}`,
+          profile_id: perfilId,
+          kind: 'puesto_cancelado',
+          title: `${nombreCorto(hechos.nombreDe(r.passenger_id))} canceló su puesto`,
+          body: cuando,
+          action_label: 'Ver mi viaje',
+          action_route: `/(conductor)/solicitudes?viaje=${r.trip_id}`,
+          created_at: r.cancelled_at ?? r.updated_at,
+        });
+      }
       if (r.released_at) {
         const aporte = r.unit_price_cents * r.seats;
         salen.push({
@@ -214,6 +248,38 @@ export function avisosDeLosHechos(perfilId: string, hechos: Hechos): AvisoDeriva
 
         const recordatorio = recordatorioDeSalida(r, viaje, hechos.ahora);
         if (recordatorio) salen.push(recordatorio);
+      }
+      /**
+       * **NADIE TE CONTESTÓ** (28-08-2026, al comparar con Uber).
+       *
+       * Una solicitud sin responder caducaba en silencio: el puesto se
+       * liberaba, la reserva se quedaba `pending` para siempre y quien la
+       * pidió seguía esperando una respuesta que ya no iba a llegar. De todo
+       * lo que había sin avisar, éste era el peor — es el único donde la
+       * persona pierde tiempo por no saber.
+       *
+       * Vale para los dos relojes (`dominio/solicitud`): el plazo del
+       * conductor y la salida del viaje. Se cuenta como caducada en cuanto
+       * llega el primero.
+       */
+      if (r.status === 'pending') {
+        const caduca = cuandoCaduca({
+          expiraEn: r.expires_at ?? viaje.departure_at,
+          salida: viaje.departure_at,
+        });
+        if (new Date(caduca) <= hechos.ahora) {
+          salen.push({
+            ...base,
+            id: `av-nadie-${r.id}`,
+            profile_id: perfilId,
+            kind: 'solicitud_caducada',
+            title: `${nombreCorto(hechos.nombreDe(viaje.driver_id))} no contestó a tiempo`,
+            body: cuando,
+            action_label: 'Buscar otro',
+            action_route: '/(pasajero)',
+            created_at: caduca,
+          });
+        }
       }
       if (r.status === 'cancelled_driver') {
         salen.push({
@@ -267,6 +333,41 @@ export function avisosDeLosHechos(perfilId: string, hechos: Hechos): AvisoDeriva
       read_at: null,
       created_at: new Date(salida.getTime() - VENTANA_RECORDATORIO_MS).toISOString(),
     });
+  }
+
+  /**
+   * **LA LICENCIA QUE SE VENCE** (0047, 28-08-2026). Como el recordatorio de
+   * salida, no es un evento que nadie escriba: es que llegó una fecha. Y como
+   * él, se deriva al abrir la bandeja mientras no haya cron.
+   *
+   * Sólo se dice si hay algo que decir: `comoSeDice` devuelve nulo cuando la
+   * licencia está al día, y una fila «todo bien» sería ruido.
+   */
+  if (hechos.licencia) {
+    const texto = comoSeDice(hechos.licencia, hechos.ahora);
+    if (texto && hechos.licencia.vence) {
+      const vencida = estadoDeLicencia(hechos.licencia, hechos.ahora) === 'vencida';
+      salen.push({
+        id: `av-licencia-${hechos.licencia.vence}`,
+        profile_id: perfilId,
+        kind: 'licencia_por_vencer',
+        title: texto,
+        body: vencida
+          ? 'Con la licencia vencida no se publican viajes nuevos'
+          : 'Renuévala antes y no pierdes ningún viaje',
+        action_label: 'Actualizar la fecha',
+        action_route: '/(conductor)/carro',
+        booking_id: null,
+        trip_id: null,
+        read_at: null,
+        /* Nace el día en que empieza el aviso, no hoy: si naciera hoy subiría
+           al principio de la bandeja cada vez que se abre. */
+        created_at: new Date(
+          new Date(`${hechos.licencia.vence}T12:00:00Z`).getTime() -
+            DIAS_PARA_AVISAR * 24 * 3600_000,
+        ).toISOString(),
+      });
+    }
   }
 
   salen.push(...avisosDeMensajes(perfilId, hechos, viajeDe));

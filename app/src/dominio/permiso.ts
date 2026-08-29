@@ -19,8 +19,10 @@
  * las dos.
  */
 
+import { puedePublicar as puedePublicarConLicencia } from './licencia.ts';
+
 /** Lo que hace falta, en el orden en que hay que resolverlo. */
-export type LoQueFalta = 'carro' | 'cedula' | 'revision' | null;
+export type LoQueFalta = 'carro' | 'cedula' | 'revision' | 'licencia' | null;
 
 export type QuePuede = {
   /** Siempre cierto: la cuenta se hace sin papeles. */
@@ -33,14 +35,28 @@ export type QuePuede = {
 export function quePuedeHacer({
   tieneCarroPropio,
   estadoDeCedula,
+  licencia,
+  ahora,
 }: {
   tieneCarroPropio: boolean;
   estadoDeCedula: 'pendiente' | 'en revisión' | 'verificada' | 'rechazada';
+  /**
+   * CUÁNDO SE VENCE LA LICENCIA (0047, 28-08-2026). Opcional a propósito:
+   * quien no la ha dicho publica igual — nadie pierde el acceso por una
+   * columna que no existía cuando hizo su cuenta. Sólo la VENCIDA bloquea.
+   */
+  licencia?: { vence: string | null };
+  ahora?: Date;
 }): QuePuede {
+  /* La licencia va DESPUÉS de la cédula en el orden: la cédula se manda una
+     vez y se resuelve en minutos; renovar una licencia es una cita en el
+     SERTRACEN. Poner primero lo que tarda semanas es cerrar la puerta. */
   const falta: LoQueFalta = !tieneCarroPropio
     ? 'carro'
     : estadoDeCedula === 'verificada'
-      ? null
+      ? licencia && !puedePublicarConLicencia(licencia, ahora)
+        ? 'licencia'
+        : null
       : estadoDeCedula === 'en revisión'
         ? 'revision'
         : 'cedula';
@@ -72,5 +88,12 @@ export const LO_QUE_FALTA: Record<
     texto: 'Suele tomar unos minutos. En cuanto pase, este botón publica.',
     boton: 'Ver el estado',
     ruta: '/(conductor)/cedula',
+  },
+  licencia: {
+    titulo: 'Tu licencia está vencida',
+    texto:
+      'Con la licencia vencida el seguro no cubre el viaje, así que quien sube contigo se queda sin a quién reclamar. Lo que ya publicaste sigue en pie.',
+    boton: 'Actualizar la fecha',
+    ruta: '/(conductor)/carro',
   },
 };

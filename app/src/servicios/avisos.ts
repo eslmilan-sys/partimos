@@ -96,6 +96,7 @@ function todosLosDe(perfilId: string): AvisoPendiente[] {
     },
     yaCalifico: (reservaId, autorId) =>
       fuente.resenas.some((x) => x.booking_id === reservaId && x.author_id === autorId),
+    licencia: { vence: fuente.perfiles.find((p) => p.id === perfilId)?.license_expires_on ?? null },
     ahora: new Date(),
   })
     .filter((d) => !yaEstaEscrito(d, escritos))

@@ -24,7 +24,7 @@
  * sus tres últimos y la foto donde se lee (R6 de cerca: mínimo dato).
  */
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -53,6 +53,8 @@ import {
   catalogo,
   categoriaDe,
   guardarCarro,
+  guardarVencimientoDeLicencia,
+  vencimientoDeLicencia,
   puestosDe,
   resumen,
   subirFotoDelCarro,
@@ -60,6 +62,7 @@ import {
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
+import { aTexto, comoSeDice, deTexto } from '@/dominio/licencia';
 import { Boton, Epigrafe, Stepper, Interruptor } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
@@ -78,6 +81,16 @@ export default function RegistrarCarro() {
   const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [borrador, setBorrador] = useState<BorradorDeCarro>(borradorInicial);
+  /** Cuándo se vence la licencia, tal y como se teclea (0047). */
+  const [licencia, setLicencia] = useState('');
+  useEffect(() => {
+    if (yo) vencimientoDeLicencia(yo).then((v) => setLicencia(aTexto(v)));
+  }, [yo]);
+  /* Lo que se le dice mientras escribe. Sólo cuando ya hay una fecha: con el
+     campo vacío lo que importa es la promesa —sólo la fecha, nada más—, no
+     una relanza que el epígrafe de encima ya está pidiendo. */
+  const fechaDeLicencia = deTexto(licencia);
+  const avisoDeLicencia = fechaDeLicencia ? comoSeDice({ vence: fechaDeLicencia }) : null;
   const decir = useDecir();
   const [faltaLaFoto, setFaltaLaFoto] = useState(false);
   const [guardando, setGuardando] = useState(false);
@@ -170,6 +183,11 @@ export default function RegistrarCarro() {
       let foto = borrador.foto as string;
       if (laFoto.current) foto = await subirFotoDelCarro(yo, laFoto.current, foto);
       await guardarCarro(yo, { ...borrador, foto });
+      /* La licencia va aparte: es del perfil, no del carro. Se guarda sólo
+         cuando lo escrito ES una fecha; a medio teclear no se toca nada. */
+      if (fechaDeLicencia || licencia.trim() === '') {
+        await guardarVencimientoDeLicencia(yo, fechaDeLicencia).catch(() => {});
+      }
       volver();
     } catch (e) {
       const porque = e instanceof Error ? e.message : 'No se pudo guardar. Prueba otra vez.';
@@ -307,6 +325,32 @@ export default function RegistrarCarro() {
             />
             <Text style={estilos.notaCampo}>
               Guardamos solo sus tres últimos. La placa entera vive en la foto.
+            </Text>
+          </View>
+
+          {/* **CUÁNDO SE VENCE TU LICENCIA** (0047, 28-08-2026). Va aquí
+              porque es donde vive el papeleo de quien maneja, pero se guarda
+              en el PERFIL: la licencia es de la persona, y quien tiene dos
+              carros no tiene dos licencias.
+
+              Se pide en DD/MM/AAAA, que es como está impresa — copiarla no
+              debería obligar a nadie a reordenar nada. **Sólo la fecha**: ni
+              foto ni número, igual que la cédula (R6). */}
+          <View style={[estilos.fila, estilos.filaPlaca]}>
+            <Epigrafe>Tu licencia se vence</Epigrafe>
+            <TextInput
+              value={licencia}
+              onChangeText={setLicencia}
+              placeholder="DD/MM/AAAA"
+              placeholderTextColor={color.ink300}
+              keyboardType="number-pad"
+              maxLength={10}
+              accessibilityLabel="Cuándo se vence tu licencia de conducir"
+              style={estilos.entradaPlaca}
+            />
+            <Text style={estilos.notaCampo}>
+              {avisoDeLicencia ??
+                'Solo la fecha: ni la foto ni el número salen de tu teléfono. Te avisamos un mes antes.'}
             </Text>
           </View>
 

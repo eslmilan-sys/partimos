@@ -307,3 +307,49 @@ test('un viaje sin terminar no pide calificación a nadie', () => {
     );
   }
 });
+
+/* ── Los dos huecos que salieron al comparar con Uber (28-08-2026) ────── */
+
+test('nadie contestó: se dice, y el puesto se busca en otro sitio', () => {
+  const hechos = hechosCon({ status: 'pending', expires_at: dentroDe(-10) });
+  const aviso = avisosDeLosHechos('daniela', hechos).find(
+    (a) => a.kind === 'solicitud_caducada',
+  )!;
+  assert.equal(aviso.title, 'Andrés no contestó a tiempo');
+  assert.equal(aviso.action_route, '/(pasajero)');
+  // Al conductor no se le echa en cara: ya tuvo su aviso de que le pidieron.
+  assert.equal(
+    avisosDeLosHechos('andres', hechos).some((a) => a.kind === 'solicitud_caducada'),
+    false,
+  );
+});
+
+test('mientras el plazo corra, no se avisa de nada', () => {
+  const hechos = hechosCon({ status: 'pending', expires_at: dentroDe(120) });
+  assert.equal(
+    avisosDeLosHechos('daniela', hechos).some((a) => a.kind === 'solicitud_caducada'),
+    false,
+  );
+});
+
+test('sin plazo escrito, manda la salida del viaje', () => {
+  /* Una reserva sin `expires_at` de un viaje que ya salió está tan caducada
+     como las demás: es el segundo reloj de `dominio/solicitud`. */
+  const hechos = hechosCon({ status: 'pending', expires_at: null }, { departure_at: dentroDe(-30) });
+  assert.equal(
+    avisosDeLosHechos('daniela', hechos).some((a) => a.kind === 'solicitud_caducada'),
+    true,
+  );
+});
+
+test('te cancelaron un puesto: lo sabe quien maneja, y puede volver a llenarlo', () => {
+  const hechos = hechosCon({ status: 'cancelled_passenger', cancelled_at: dentroDe(-5) });
+  const aviso = avisosDeLosHechos('andres', hechos).find((a) => a.kind === 'puesto_cancelado')!;
+  assert.equal(aviso.title, 'Daniela canceló su puesto');
+  assert.match(aviso.action_route!, /solicitudes/);
+  // Al pasajero no se le repite lo que acaba de hacer él mismo.
+  assert.equal(
+    avisosDeLosHechos('daniela', hechos).some((a) => a.kind === 'puesto_cancelado'),
+    false,
+  );
+});

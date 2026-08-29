@@ -51,3 +51,38 @@ test('cada cosa que falta tiene su puerta, y ninguna es la misma pantalla vacía
     assert.ok(!q.texto.includes('!'), 'sin signos de admiración en el producto');
   }
 });
+
+/* ── La licencia (0047, 28-08-2026) ──────────────────────────────────── */
+
+const AL_DIA = { tieneCarroPropio: true, estadoDeCedula: 'verificada' as const };
+const AHORA_L = new Date('2026-08-28T17:00:00Z');
+
+test('sin decir la licencia se publica igual: nadie pierde el acceso', () => {
+  assert.equal(quePuedeHacer({ ...AL_DIA, licencia: { vence: null }, ahora: AHORA_L }).publicar, true);
+  // Y quien ni siquiera la pasa —una pantalla vieja— tampoco se bloquea.
+  assert.equal(quePuedeHacer(AL_DIA).publicar, true);
+});
+
+test('la licencia vencida bloquea publicar', () => {
+  const r = quePuedeHacer({ ...AL_DIA, licencia: { vence: '2026-08-01' }, ahora: AHORA_L });
+  assert.equal(r.publicar, false);
+  assert.equal(r.falta, 'licencia');
+  // Pero calcular sigue estando: la cuenta no depende de ningún papel.
+  assert.equal(r.calcular, true);
+});
+
+test('por vencer avisa pero no bloquea', () => {
+  const r = quePuedeHacer({ ...AL_DIA, licencia: { vence: '2026-09-05' }, ahora: AHORA_L });
+  assert.equal(r.publicar, true);
+  assert.equal(r.falta, null);
+});
+
+test('la cédula va ANTES que la licencia: se resuelve en minutos, no en semanas', () => {
+  const r = quePuedeHacer({
+    tieneCarroPropio: true,
+    estadoDeCedula: 'pendiente',
+    licencia: { vence: '2026-08-01' },
+    ahora: AHORA_L,
+  });
+  assert.equal(r.falta, 'cedula');
+});

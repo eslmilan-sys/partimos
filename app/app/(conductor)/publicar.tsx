@@ -25,7 +25,7 @@ import {
   repartoPorDefecto,
 } from '@/dominio/puestos';
 import { desdeCadaParada } from '@/dominio/tramos';
-import { carrosDe } from '@/servicios/carros';
+import { carrosDe, vencimientoDeLicencia } from '@/servicios/carros';
 import { miGenero } from '@/servicios/perfiles';
 import type { Vehicle } from '@/tipos';
 import { type Lugar, aParams } from '@/dominio/lugar';
@@ -193,6 +193,8 @@ export default function Publicar() {
     }, []),
   );
   const [cedula, setCedula] = useState<EstadoDeCedula | null>(null);
+  /** Cuándo se vence la licencia de quien publica (0047). */
+  const [licencia, setLicencia] = useState<string | null>(null);
   /**
    * LAS PARADAS ELEGIDAS, por índice — no un contador. Con el contador solo
    * se podía añadir «la siguiente»: quien quería parar en Penonomé pero NO
@@ -243,6 +245,7 @@ export default function Publicar() {
   useEffect(() => {
     if (!yo) return;
     estadoDeCedula(yo).then(setCedula);
+    vencimientoDeLicencia(yo).then(setLicencia);
   }, [yo]);
 
 
@@ -491,6 +494,10 @@ export default function Publicar() {
   const { falta } = quePuedeHacer({
     tieneCarroPropio: datos.carroPropio,
     estadoDeCedula: cedula?.estado ?? 'pendiente',
+    /* La licencia vencida cierra la publicación (0047). Nula no cierra nada:
+       nadie pierde el acceso por una columna que no existía cuando abrió su
+       cuenta. */
+    licencia: { vence: licencia },
   });
   const queFalta = falta ? LO_QUE_FALTA[falta] : null;
 

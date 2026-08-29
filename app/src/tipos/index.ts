@@ -12,7 +12,15 @@ type Tablas = Database['public']['Tables'];
 type Vistas = Database['public']['Views'];
 export type Enums = Database['public']['Enums'];
 
-export type Profile = Tablas['profiles']['Row'];
+/**
+ * Un perfil. `license_expires_on` es de la 0047 —cuándo se vence la licencia
+ * de conducir, SÓLO la fecha (R6)— y va aquí a mano porque `base.ts` se
+ * genera del esquema y todavía no se ha regenerado. Nula = no la ha dicho, y
+ * eso no bloquea nada.
+ */
+export type Profile = Tablas['profiles']['Row'] & {
+  license_expires_on?: string | null;
+};
 /**
  * Un carro. `has_ac` y `has_usb` son de la 0045 y van aquí a mano porque
  * `base.ts` se genera del esquema y todavía no se ha regenerado.
@@ -127,7 +135,25 @@ export type AvisoPendiente = {
      * verdad sobre lo mismo, y habría que borrarla al abrir el hilo. Derivado,
      * el aviso se apaga solo con el `read_at` del mensaje.
      */
-    | 'mensaje_nuevo';
+    | 'mensaje_nuevo'
+    /**
+     * Nadie contestó tu solicitud y el puesto volvió a quedar libre
+     * (28-08-2026). Derivado del reloj, como `sales_pronto`: no es un evento
+     * que nadie escriba, es que llegó una hora. Era el hueco más caro de la
+     * bandeja — quien pedía puesto esperaba una respuesta que ya no venía.
+     */
+    | 'solicitud_caducada'
+    /**
+     * Quien iba contigo canceló. Sólo para quien maneja: el puesto volvió a
+     * estar libre y todavía se puede hacer algo con él.
+     */
+    | 'puesto_cancelado'
+    /**
+     * Tu licencia de conducir se vence pronto, o ya se venció (0047). Derivada
+     * del reloj como `sales_pronto`: no es un evento que nadie escriba, es que
+     * llegó una fecha. En Panamá la licencia se vence sin avisar.
+     */
+    | 'licencia_por_vencer';
   title: string;
   body: string;
   /** La acción que el aviso lleva dentro: aceptar sin abrir la app es la clave. */
