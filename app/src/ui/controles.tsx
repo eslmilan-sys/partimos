@@ -416,12 +416,20 @@ const estilos = StyleSheet.create({
   },
   stepperGlifo: { fontSize: 19, lineHeight: 19, fontWeight: '500', color: color.ink900, fontFamily: familia },
   stepperSufijo: { fontSize: 13.5, lineHeight: 18.85, fontWeight: '600', color: color.ink600 },
+  /**
+   * LA CIFRA DEL STEPPER, EN GRANDE (29-08-2026, pedido del dueño).
+   *
+   * Iba a 19 entre dos botones de 40 px: el número que se está cambiando era
+   * más pequeño que los círculos que lo cambian. Es el dato, no el control.
+   * A 25 pesa lo que tiene que pesar y sigue cabiendo con «3 puestos» de
+   * sufijo en un teléfono de 390.
+   */
   stepperValor: {
-    minWidth: 34,
+    minWidth: 40,
     textAlign: 'center',
-    fontSize: 19, lineHeight: 27.55,
+    fontSize: 25, lineHeight: 30,
     fontWeight: '600',
-    letterSpacing: -0.38,
+    letterSpacing: -0.5,
     color: color.ink900,
     fontVariant: ['tabular-nums'], fontFamily: familia },
 

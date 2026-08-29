@@ -666,7 +666,7 @@ export default function Publicar() {
             >
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.eleccionEtiqueta}>Salgo el</Text>
-                <Text style={estilos.eleccionValor} numberOfLines={1}>
+                <Text style={[estilos.eleccionValorGrande, tabular]} numberOfLines={1}>
                   {diaEnChip(dia)}
                 </Text>
               </View>
@@ -684,7 +684,7 @@ export default function Publicar() {
             >
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.eleccionEtiqueta}>Recojo a las</Text>
-                <Text style={[estilos.eleccionValor, tabular]}>{horaSalida}</Text>
+                <Text style={[estilos.eleccionValorGrande, tabular]}>{horaSalida}</Text>
               </View>
               <Avanza tinta={color.ink300} />
             </Pressable>
@@ -930,7 +930,11 @@ export default function Publicar() {
           <View style={estilos.filaAporte}>
             <View style={{ flex: 1, minWidth: 0 }}>
               <View style={estilos.cifraFila}>
-                <Text style={[texto.precio, tabular, { color: color.ink900 }]}>
+                {/* La cifra del paso, no la de una tarjeta de resultados:
+                    `texto.precio` (22) es el precio dentro de una lista de
+                    viajes, donde compite con otros ocho. Aquí es LA respuesta
+                    de la pantalla y va como las demás respuestas del asistente. */}
+                <Text style={[estilos.cifraDelAporte, tabular]}>
                   {formatearDineroRedondo(aporte)}
                 </Text>
                 <Pastilla estilo={{ marginBottom: 3 }}>{origen}</Pastilla>
@@ -1309,11 +1313,44 @@ const estilos = StyleSheet.create({
   filete: { height: 1, backgroundColor: color.divisor },
   fileteVertical: { width: 1, height: 34, backgroundColor: color.divisor },
   eleccionEtiqueta: { fontSize: 11.5, lineHeight: 16, color: color.ink500, fontFamily: familia },
+  /**
+   * Las respuestas LARGAS: nombres de lugar, que el conductor puede escribir
+   * a mano y pueden ser cualquier cosa. A 22 se leen bien y siguen cabiendo:
+   * medido en el navegador, el nombre más largo del catálogo —«La Concepción
+   * (Bugaba)»— ocupa 233 px de los 284 que hay entre el borde y el chevrón.
+   * A 32 se iría a 340 y saldría cortado, que es peor que pequeño.
+   */
   eleccionValor: {
-    fontSize: 16,
-    lineHeight: 22,
+    fontSize: 22,
+    lineHeight: 29,
     fontWeight: '600',
-    letterSpacing: -0.24,
+    letterSpacing: -0.44,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  /**
+   * LA RESPUESTA DEL PASO, EN GRANDE (29-08-2026, pedido del dueño).
+   *
+   * Un paso del asistente hace UNA pregunta y enseña UNA respuesta. La
+   * respuesta iba a 16 puntos, el mismo cuerpo que el rótulo «Recojo a las»
+   * de encima y que la nota gris de debajo: tres renglones del mismo tamaño
+   * en una tarjeta que existe para enseñar uno. Media pantalla en blanco
+   * abajo y el dato del que va todo, en letra de pie de página.
+   *
+   * A 32 la hora se lee sin acercar el teléfono y la tarjeta dice de un
+   * vistazo qué contestaste. Cifras tabulares: cambiar de 06:00 a 09:00 no
+   * mueve nada de sitio.
+   *
+   * Sólo para respuestas CORTAS —una hora, un día—. Los nombres de ciudad se
+   * quedan en 16: «La Concepción (Bugaba)» a este cuerpo no cabe en 390 px y
+   * saldría cortada, que es peor que pequeña.
+   */
+  eleccionValorGrande: {
+    marginTop: 2,
+    fontSize: 32,
+    lineHeight: 39,
+    fontWeight: '600',
+    letterSpacing: -0.96,
     color: color.ink900,
     fontFamily: familia,
   },
@@ -1453,6 +1490,14 @@ const estilos = StyleSheet.create({
   },
   filaAporte: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 },
   cifraFila: { flexDirection: 'row', alignItems: 'flex-end', gap: 7 },
+  cifraDelAporte: {
+    fontSize: 32,
+    lineHeight: 37,
+    fontWeight: '600',
+    letterSpacing: -1.12,
+    color: color.ink900,
+    fontFamily: familia,
+  },
   filaPuestos: {
     flexDirection: 'row',
     alignItems: 'center',
