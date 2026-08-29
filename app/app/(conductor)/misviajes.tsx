@@ -27,6 +27,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { useDecir } from '@/ui/Nota';
+import { enTexto } from '@/dominio/notas';
 import { DIJO, compartir } from '@/ui/salidas';
 
 import {
@@ -480,7 +481,7 @@ function FichaGrande({
             {puesto.calificacion != null ? (
               <>
                 <Estrella tamano={11} />
-                <Text style={estilos.nota}>{puesto.calificacion.toFixed(1)}</Text>
+                <Text style={estilos.nota}>{enTexto(puesto.calificacion)}</Text>
                 <Text style={estilos.separa}>·</Text>
               </>
             ) : null}

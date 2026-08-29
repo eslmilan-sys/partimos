@@ -26,6 +26,7 @@ import { DIJO, compartir } from '@/ui/salidas';
 import { useVolver } from '@/ui/salidas';
 
 import { ciudadYPunto, soloCiudad, soloPunto } from '@/dominio/comoSeLlama';
+import { enTexto } from '@/dominio/notas';
 import { sePuedeCancelar } from '@/dominio/reembolsos';
 import { comodidadDeAtras, deFilas } from '@/dominio/puestos';
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
@@ -332,9 +333,15 @@ export default function DetalleDelViaje() {
                     <Text style={estilos.nombre}>{nombre}</Text>
                     <View style={estilos.filaCalificacion}>
                       {conductor?.calificacion != null ? <Estrella tamano={13} /> : null}
+                      {/* **DE CUÁNTAS OPINIONES, no de cuántos viajes**
+                          (28-08-2026). Decía «4,8 (34 viajes)» y el paréntesis
+                          se lee como «de dónde sale esa nota» — pero sale de
+                          doce opiniones, porque calificar no es obligatorio y
+                          casi nadie lo hace en todos sus viajes. Los viajes
+                          son otro hecho y viven arriba, con el nombre. */}
                       <Text style={estilos.calificacion}>
                         {conductor?.calificacion != null
-                          ? `${conductor.calificacion.toFixed(1)} (${conductor.viajes} ${conductor.viajes === 1 ? 'viaje' : 'viajes'})`
+                          ? `${enTexto(conductor.calificacion)} · ${conductor.totalResenas === 1 ? '1 opinión' : `${conductor.totalResenas} opiniones`}`
                           : 'Todavía sin calificaciones'}
                       </Text>
                     </View>

@@ -5,6 +5,7 @@
  * piden puesto en `11a`.
  */
 
+import { notaDe } from '@/dominio/notas';
 import type { Profile, Review, Vehicle, VehicleCategory } from '@/tipos';
 
 export const ANDRES_ID = '11111111-1111-4111-8111-111111111111';
@@ -469,16 +470,7 @@ export const vehiculos: Vehicle[] = [
  * Reputación por persona. En producción sale de la vista `driver_ratings` y su
  * equivalente para pasajeros (`reviews` agrupadas por `subject_id`).
  */
-export const reputacion: Record<string, { viajes: number; calificacion: number | null }> = {
-  [ANDRES_ID]: { viajes: 34, calificacion: 4.9 },
-  [MATEO_ID]: { viajes: 12, calificacion: 4.8 },
-  [ROSA_ID]: { viajes: 0, calificacion: null },
-  [DANIELA_ID]: { viajes: 6, calificacion: 5.0 },
-  [MARIA_ID]: { viajes: 21, calificacion: 4.9 },
-  [JOSE_ID]: { viajes: 3, calificacion: 4.7 },
-  [LUCIA_ID]: { viajes: 9, calificacion: 5.0 },
-  [CARLA_ID]: { viajes: 41, calificacion: 5.0 },
-};
+export const reputacion: Record<string, { viajes: number; calificacion: number | null }> = {};
 
 /**
  * Reseñas, forma exacta de `reviews`. Los atajos de `1j` no son una columna
@@ -546,6 +538,83 @@ export const resenas: Review[] = [
     created_at: '2026-07-20T20:00:00+00:00',
   },
 ];
+
+/**
+ * LAS RESEÑAS CALLADAS, para que las notas del recorrido salgan de datos.
+ *
+ * Las cuatro de arriba están escritas a mano porque llevan comentario. Éstas
+ * no llevan ninguno — que es lo normal: casi todo el mundo pone estrellas y
+ * sigue —, y existen porque **la nota ya no se escribe a mano en ningún
+ * sitio**: sale de `dominio/notas.ts` contando estas filas. Sin ellas el
+ * recorrido enseñaría «Todavía sin nota» en todas partes, que es cierto pero
+ * no deja probar nada.
+ *
+ * `booking_id` es sintético: no hay una reserva detrás de cada una. Es la
+ * única licencia que nos tomamos, y sólo la ve `yaCalifico`, que compara
+ * (reserva, autor) y por eso nunca casa con ninguna de éstas.
+ *
+ * Las cuentas están elegidas para que el recorrido enseñe los tres casos que
+ * la fórmula distingue: nota hecha (Carla, Andrés, María), nota naciendo
+ * (Lucía, Daniela) y todavía sin nota (José, Mateo, Rosa).
+ */
+const CALLADAS: { de: string; notas: number[] }[] = [
+  { de: CARLA_ID, notas: [5, 5, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5] },
+  { de: ANDRES_ID, notas: [5, 4, 5, 5, 5, 4, 5, 5, 5] },
+  { de: MARIA_ID, notas: [5, 5, 4, 5, 5, 4, 5, 5] },
+  { de: LUCIA_ID, notas: [5, 5, 4, 5] },
+  { de: DANIELA_ID, notas: [5, 5, 5] },
+  { de: JOSE_ID, notas: [5, 4] },
+];
+
+for (const { de, notas } of CALLADAS) {
+  notas.forEach((rating, i) => {
+    /* Una por semana hacia atrás desde mediados de agosto: el orden importa,
+       porque la ventana de la fórmula se queda con las más nuevas. */
+    const cuando = new Date(Date.UTC(2026, 7, 15) - i * 7 * 86_400_000);
+    resenas.push({
+      id: `bbbbbbb2-0000-4000-8000-${de.slice(0, 8)}${String(i).padStart(4, '0')}`,
+      booking_id: `77777777-7777-4777-8777-callada${String(i).padStart(5, '0')}`,
+      author_id: VIELKA_ID,
+      subject_id: de,
+      rating,
+      comment: null,
+      puntualidad: null,
+      manejo: null,
+      trato: null,
+      carro: null,
+      encuentro: null,
+      created_at: cuando.toISOString(),
+    });
+  });
+}
+
+/**
+ * LA REPUTACIÓN, calculada — ya no escrita a mano (28-08-2026).
+ *
+ * `viajes` son los viajes hechos, que es un hecho aparte y sigue puesto a
+ * mano porque no hay historial completo en el recorrido. `calificacion` sale
+ * de `notaDe`, la MISMA función que usa la fuente real: si la fórmula cambia,
+ * cambian las dos a la vez. Antes eran dos números inventados que no se
+ * podían derivar de ninguna reseña — y uno de ellos, el 4,9 de Andrés, no
+ * coincidía con sus tres reseñas de 5.
+ */
+const VIAJES_HECHOS: Record<string, number> = {
+  [ANDRES_ID]: 34,
+  [MATEO_ID]: 12,
+  [ROSA_ID]: 0,
+  [DANIELA_ID]: 6,
+  [MARIA_ID]: 21,
+  [JOSE_ID]: 3,
+  [LUCIA_ID]: 9,
+  [CARLA_ID]: 41,
+};
+
+for (const [id, viajes] of Object.entries(VIAJES_HECHOS)) {
+  reputacion[id] = {
+    viajes,
+    calificacion: notaDe(resenas.filter((r) => r.subject_id === id)).valor,
+  };
+}
 
 /** La placa completa, que la columna `plate_last3` todavía no puede guardar. */
 export const placasCompletas: Record<string, string> = {

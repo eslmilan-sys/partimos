@@ -24,6 +24,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
+import { enTexto } from '@/dominio/notas';
+
 import { Avatar } from './controles';
 import { Estrella } from './iconos';
 import { cifraRedonda, formatearDineroRedondo, tabular } from './dinero';
@@ -217,7 +219,7 @@ export function TarjetaDeViaje({
             {nota != null ? <Estrella tamano={11} tinta={color.oro500} /> : null}
             <Text style={estilos.meta} numberOfLines={1}>
               {nota != null
-                ? `${nota.toFixed(1)}${viaje.viajesHechos ? ` · ${viaje.viajesHechos} viajes` : ` · ${viaje.conductor.carro}`}`
+                ? `${enTexto(nota)}${viaje.viajesHechos ? ` · ${viaje.viajesHechos} viajes` : ` · ${viaje.conductor.carro}`}`
                 : viaje.conductor.carro}
             </Text>
           </View>

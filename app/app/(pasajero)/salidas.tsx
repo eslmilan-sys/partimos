@@ -19,6 +19,7 @@ import { useRouter } from 'expo-router';
 import { useVolver } from '@/ui/salidas';
 
 import { NOMBRE_DE_FRANJA, type Franja, franjaDe } from '@/dominio/rutinas';
+import { enTexto } from '@/dominio/notas';
 import { type SalidaCercana, proximasSalidas } from '@/servicios/viajes';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
@@ -156,7 +157,7 @@ export default function SalenPronto() {
                         {s.calificacion != null ? (
                           <>
                             <Estrella tamano={10} />
-                            <Text style={estilos.nota}>{s.calificacion.toFixed(1)}</Text>
+                            <Text style={estilos.nota}>{enTexto(s.calificacion)}</Text>
                           </>
                         ) : null}
                       </View>

@@ -21,6 +21,7 @@ import type {
 } from '@/tipos';
 
 import { paradasEnElCamino } from '@/dominio/enElCamino';
+import { notaDe } from '@/dominio/notas';
 import { A_CUALQUIER_HORA, etiquetaDeRutina } from '@/dominio/rutinas';
 
 import { supabase } from './cliente';
@@ -238,16 +239,50 @@ async function cargarParadasDeRuta() {
   }
 }
 
+/**
+ * LA NOTA SALE DE `dominio/notas`, no de un promedio a mano (28-08-2026).
+ *
+ * Lo que había aquí era un promedio corriente calculado a mano, y tenía dos
+ * fallos aparte de no ser la fórmula:
+ *
+ * · `viajes` contaba RESEÑAS y se llamaba viajes. La pantalla escribía «34
+ *   viajes» al lado de la nota de alguien que tenía tres opiniones.
+ * · Una reseña sin `rating` incrementaba `viajes` igual, así que dividía por
+ *   un denominador más grande que el número de notas sumadas y bajaba la
+ *   media de quien tuviera reseñas mudas.
+ *
+ * Ahora los dos números se dicen por separado y con su nombre: `viajes` son
+ * los viajes cumplidos (`bookings` con `completed_at`), y `calificacion` es
+ * lo que devuelve `notaDe` — la misma función, con las mismas constantes,
+ * que usa el recorrido simulado.
+ */
 function calcularReputacion() {
+  const porPersona = new Map<string, { rating: number; created_at: string }[]>();
+
   for (const r of resenas) {
-    const quien = (r as { subject_id?: string }).subject_id;
-    if (!quien) continue;
-    const hasta = reputacion[quien] ?? { viajes: 0, calificacion: null };
-    const nota = (r as { rating?: number | null }).rating;
-    const suma = (hasta.calificacion ?? 0) * hasta.viajes + (nota ?? 0);
-    hasta.viajes += 1;
-    hasta.calificacion = nota == null ? hasta.calificacion : suma / hasta.viajes;
-    reputacion[quien] = hasta;
+    const fila = r as { subject_id?: string; rating?: number | null; created_at?: string };
+    if (!fila.subject_id || fila.rating == null) continue;
+    const suyas = porPersona.get(fila.subject_id) ?? [];
+    suyas.push({ rating: fila.rating, created_at: fila.created_at ?? '' });
+    porPersona.set(fila.subject_id, suyas);
+  }
+
+  /* Los viajes cumplidos, que NO son las reseñas: se puede viajar sin que
+     nadie te califique, y es lo que hace casi todo el mundo. */
+  const viajesDe = new Map<string, number>();
+  for (const b of reservas) {
+    if (!b.completed_at) continue;
+    const viaje = viajes.find((v) => v.id === b.trip_id);
+    for (const quien of [b.passenger_id, viaje?.driver_id]) {
+      if (quien) viajesDe.set(quien, (viajesDe.get(quien) ?? 0) + 1);
+    }
+  }
+
+  for (const quien of new Set([...porPersona.keys(), ...viajesDe.keys()])) {
+    reputacion[quien] = {
+      viajes: viajesDe.get(quien) ?? 0,
+      calificacion: notaDe(porPersona.get(quien) ?? []).valor,
+    };
   }
 }
 

@@ -274,6 +274,36 @@ parler :
   **même avec la clé de service**. Demander ne réserve rien : ni place
   occupée, ni horloge des quatre heures démarrée. Banc d'essai :
   `supabase/pruebas/13-preguntar.sql` (11 vérifications).
+- **La note est une moyenne RÉTRÉCIE, pas une moyenne (28-08-2026).**
+  `driver_ratings` faisait `AVG(rating)` sans minimum ni fenêtre. Sur un
+  marché où quelqu'un a trois trajets et pas trois cents, ça casse : une
+  mauvaise note ruine un débutant (avec deux avis, un 1 fait passer de
+  5,0 à 3,0), un 5,0 d'un avis se lit comme un 5,0 de quarante, et rien
+  ne s'oublie jamais. La formule est maintenant
+  `(5 × 4,6 + Σ notes) / (5 + n)` — cinq avis imaginaires à la moyenne de
+  la plateforme, que les vrais déplacent — sur une **fenêtre des
+  cinquante derniers**. **Sous trois avis la note est nulle** et on
+  affiche ce qu'on sait : le nombre de trajets. C'est l'invariant 7 (une
+  affirmation porte sa raison) poussé jusqu'au bout — « 4,9 » d'un seul
+  avis est un chiffre sans sujet. `app/src/dominio/notas.ts` et la
+  migration 0046 portent la **même** formule ; si l'une change, l'autre
+  aussi. La moyenne 4,6 est une constante tant qu'il n'y a pas de
+  données — surtout pas calculée à la volée, sinon la note de quelqu'un
+  bouge sans que cette personne ait rien fait.
+  **Même formule des deux côtés** : ici il n'y a pas un fournisseur et un
+  client, il y a deux personnes qui partagent un coût. Ce qui change,
+  c'est les axes (manejo et carro ne veulent rien dire pour un passager),
+  pas le calcul. **Toujours pas d'axe prix** (0007) : le plafond est la
+  règle de la plateforme, pas un mérite du conducteur — le noter
+  ramènerait la pression tarifaire par la porte de derrière (R3). Et la
+  note n'ordonne pas les résultats et ne touche pas à l'apport : personne
+  ne gagne d'argent (R1), donc elle ne peut pas être un levier de revenu.
+- **« 34 viajes » n'est pas « 34 avis ».** La fiche du trajet écrivait
+  « 4,8 (34 viajes) » et la parenthèse se lit comme *d'où sort cette
+  note* — alors qu'elle sort de douze avis, parce que noter n'est pas
+  obligatoire. Elle dit maintenant « 4,8 · 12 opiniones ». Et la virgule
+  décimale vient d'un seul endroit (`enTexto`) : `toFixed(1)` était semé
+  dans cinq écrans et écrivait « 4.8 » en espagnol.
 - **Ouvrir un fil, c'est le lire (27-08-2026).** La pastille « non lu » se
   déduisait de « le dernier message n'est pas de moi », donc ouvrir le fil
   ne changeait rien et elle restait allumée pour toujours. Maintenant

@@ -21,6 +21,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { type Cuenta, cuenta } from '@/servicios/ajustes';
+import { enTexto } from '@/dominio/notas';
 import { salir } from '@/servicios/cuenta';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -87,7 +88,7 @@ export default function TuCuenta() {
     },
     {
       etiqueta: datos.calificacion == null ? 'todavía sin nota' : 'de nota',
-      valor: datos.calificacion == null ? '—' : datos.calificacion.toFixed(1).replace('.', ','),
+      valor: datos.calificacion == null ? '—' : enTexto(datos.calificacion),
     },
     {
       etiqueta: 'cédula',

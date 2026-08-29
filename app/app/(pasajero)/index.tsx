@@ -15,6 +15,7 @@
  */
 
 import type { Lugar } from '@/dominio/lugar';
+import { enTexto } from '@/dominio/notas';
 import { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -692,7 +693,7 @@ function TarjetaSale({
           {v.conductor}
           {v.calificacion != null ? (
             <Text style={[estilos.notaSale, tabular]}>
-              {`  ★ ${v.calificacion.toFixed(1)}`}
+              {`  ★ ${enTexto(v.calificacion)}`}
               {v.viajesHechos > 0 ? ` · ${v.viajesHechos} viajes` : ''}
             </Text>
           ) : null}
