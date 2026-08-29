@@ -57,7 +57,13 @@ import { familia, color, espacio, radio, sombra } from '@/ui/tokens';
  * meses; esta pantalla es la de quien acaba de mandarla. Sin sesión que
  * preguntar —solo en simulado—, ésta es la convención.
  */
-const DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
+/**
+ * La persona del recorrido. **Andrés, el conductor verificado** — la misma
+ * que abre Tu cuenta (28-08-2026). Estaba puesta la buscadora `2222…`, que no
+ * tiene ninguna fila en `identity_verifications`, así que Tu cuenta enseñaba
+ * VERIFICADO y esta pantalla, abierta desde esa misma fila, decía Pendiente.
+ */
+const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 /** `--arena-700` del traspaso: el ámbar de lo que está en curso. `@/ui/tokens`
  *  trae la arena clara pero no su tinta, y no se tocan los tokens desde aquí. */
@@ -139,11 +145,21 @@ export default function Cedula() {
       }
       const r = await abrirVerificacion('cedula');
       if ('error' in r) {
-        decir(
-          r.error === 'ya-verificado'
-            ? 'Tu cédula ya está verificada. Puedes publicar.'
-            : 'No se pudo abrir la verificación. Prueba otra vez.',
-        );
+        if (r.error === 'ya-verificado') {
+          /* **EL PROVEEDOR MANDA** (28-08-2026, visto por el dueño). Antes
+             esto avisaba «ya está verificada» y llamaba a `mirar()`, que
+             vuelve a preguntarle a la MISMA fuente que acaba de equivocarse:
+             el aviso salía y debajo seguía el botón rojo «Verificar mi
+             cédula». Si Didit dice que ya está, ya está — de la verificación
+             él es la autoridad, y de eso trata R6: nosotros sólo guardamos el
+             veredicto. */
+          setDatos((d) =>
+            d ? { ...d, estado: 'verificada', etiqueta: 'Verificada', puedePublicar: true } : d,
+          );
+          decir('Tu cédula ya está verificada. Puedes publicar.');
+          return;
+        }
+        decir('No se pudo abrir la verificación. Prueba otra vez.');
         mirar();
         return;
       }

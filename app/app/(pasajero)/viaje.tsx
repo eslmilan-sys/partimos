@@ -68,7 +68,11 @@ export default function DetalleDelViaje() {
   const router = useRouter();
   const volver = useVolver();
   const decir = useDecir();
-  const { viaje: viajeParam } = useLocalSearchParams<{ viaje?: string }>();
+  const { viaje: viajeParam, pasajeros } = useLocalSearchParams<{
+    viaje?: string;
+    /** Cuántos venías buscando. Sigue hasta `reservar`, que lo respeta. */
+    pasajeros?: string;
+  }>();
   const viajeId = viajeParam ?? DEL_RECORRIDO;
 
   /**
@@ -225,10 +229,25 @@ export default function DetalleDelViaje() {
 
           <View style={estilos.cabecera}>
             <Text style={estilos.epigrafeCampo}>{diaLargo(viaje.departure_at)}</Text>
+            {/* **SALE Y LLEGA, EN EL MISMO BLOQUE** (28-08-2026, visto por
+                el dueño). La hora de llegada vivía en OTRA tarjeta, más
+                abajo — «Directo · llega 10:00 aprox.» —, así que arriba
+                decía «06:30 · 3 h 30» y la llegada había que buscarla o
+                calcularla. Dos bloques para un mismo hecho, y con dos
+                formatos distintos: una hora y una duración.
+
+                Puestas juntas, además, cumplen el invariante 2 del sistema:
+                cada lugar bajo SU propia hora — «06:30 → 10:00» arriba y
+                «Ciudad de Panamá → Chitré» justo debajo, en columna. */}
             <View style={estilos.filaTitular}>
               <Text style={estilos.titular}>
                 <Text style={estilos.titularFuerte}>{hora(viaje.departure_at)}</Text>
-                {minutos > 0 ? ` · ${enHoras(minutos)}` : ''}
+                {llegada ? (
+                  <>
+                    <Text style={estilos.flechaHora}>{'  →  '}</Text>
+                    <Text style={estilos.titularFuerte}>{llegada}</Text>
+                  </>
+                ) : null}
               </Text>
               {/* El aporte va en el campo, junto a la hora: es lo primero que
                   se mira y en la hoja se quedaba en un rincón vacío. */}
@@ -239,6 +258,20 @@ export default function DetalleDelViaje() {
             </View>
             <Text style={estilos.subtitulo} numberOfLines={1}>
               {`${soloCiudad(ciudades.origen, viaje.origin_label)} → ${soloCiudad(ciudades.destino, viaje.destination_label)}`}
+            </Text>
+            {/* Lo que la línea de arriba no dice: cuánto dura, cuántas
+                paradas y que la llegada es estimada. En pequeño, porque es
+                el detalle de una cosa que ya se ha dicho. */}
+            <Text style={estilos.metaViaje}>
+              {[
+                minutos > 0 ? enHoras(minutos) : null,
+                paradas.length > 2
+                  ? `${paradas.length - 2} ${paradas.length - 2 === 1 ? 'parada' : 'paradas'}`
+                  : 'Directo',
+                llegada ? 'llegada aproximada' : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </Text>
           </View>
         </Bandera>
@@ -296,15 +329,12 @@ export default function DetalleDelViaje() {
             </View>
           </View>
           ) : (
+            /* Sin titular: «Directo · llega 10:00» está arriba, con la hora
+               de salida. Lo que queda es lo único que esta tarjeta añadía. */
             <View style={estilos.tarjetaDirecto}>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={estilos.directoTitulo}>
-                  {llegada ? `Directo · llega ${llegada} aprox.` : 'Directo, sin paradas'}
-                </Text>
-                <Text style={estilos.directoNota}>
-                  {`El punto exacto de recogida lo acuerdas con ${deNombre} por el chat.`}
-                </Text>
-              </View>
+              <Text style={estilos.directoNota}>
+                {`El punto exacto de recogida lo acuerdas con ${deNombre} por el chat.`}
+              </Text>
             </View>
           )}
 
@@ -397,10 +427,13 @@ export default function DetalleDelViaje() {
                     </Text>
                     {/* La placa entera no se guarda: solo los tres últimos.
                         Enseñar la de alguien a quien no has conocido es lo que
-                        el diseño evita, así que se dice lo que hay. */}
-                    <Text style={estilos.detalleCarro}>
-                      {carro?.placa ? `Placa ${carro.placa}` : 'Lo reconoces por el modelo y el color'}
-                    </Text>
+                        el diseño evita. **Y si no hay placa, no se dice nada**
+                        (28-08-2026, pedido del dueño): «Lo reconoces por el
+                        modelo y el color» era un relleno que repetía la línea
+                        de encima, donde ya está el modelo y el color. */}
+                    {carro?.placa ? (
+                      <Text style={estilos.detalleCarro}>{`Placa ${carro.placa}`}</Text>
+                    ) : null}
                   </>
                 )}
               </View>
@@ -581,7 +614,10 @@ export default function DetalleDelViaje() {
             onPress={() =>
               router.push(
                 yo
-                  ? { pathname: '/(pasajero)/reservar', params: { viaje: viajeId } }
+                  ? {
+                      pathname: '/(pasajero)/reservar',
+                      params: { viaje: viajeId, pasajeros: pasajeros ?? '1' },
+                    }
                   : { pathname: '/(cuenta)/puerta', params: { viaje: viajeId } },
               )
             }
@@ -641,12 +677,24 @@ const estilos = StyleSheet.create({
   },
   titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 12, },
   titularFuerte: { fontWeight: '600' },
+  /** La flecha entre las dos horas: más clara y con aire, no un signo más. */
+  flechaHora: { fontWeight: '400', color: color.campoTexto },
   subtitulo: {
     fontSize: 14,
     lineHeight: 20.3,
     color: color.campoTexto,
     marginTop: 8,
     fontFamily: familia,
+  },
+  /** Duración, paradas y «aproximada»: el detalle de lo ya dicho arriba. */
+  metaViaje: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: color.campoTexto,
+    marginTop: 4,
+    opacity: 0.85,
+    fontFamily: familia,
+    ...tabular,
   },
 
   hoja: {
@@ -706,20 +754,10 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 18,
     marginTop: 14,
   },
-  directoTitulo: {
-    fontSize: 15,
-    lineHeight: 21,
-    fontWeight: '600',
-    letterSpacing: -0.24,
-    color: color.ink900,
-    fontFamily: familia,
-    ...tabular,
-  },
   directoNota: {
     fontSize: 12.5,
     lineHeight: 18,
     color: color.ink500,
-    marginTop: 3,
     fontFamily: familia,
   },
 

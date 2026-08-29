@@ -274,6 +274,37 @@ parler :
   **même avec la clé de service**. Demander ne réserve rien : ni place
   occupée, ni horloge des quatre heures démarrée. Banc d'essai :
   `supabase/pruebas/13-preguntar.sql` (11 vérifications).
+- **Une vérification obtenue bat un balayage postérieur (28-08-2026).**
+  `identity_verifications` garde une ligne par tentative Didit, et le
+  client prenait **celle au `updated_at` le plus récent**. Sur les
+  vraies données ça donne l'inverse de la vérité : deux sessions
+  abandonnées des 15 et 16 août, passées à `expired` par un balayage les
+  22 et 23, gagnaient sur la vérification obtenue le 17. L'app disait
+  « Pendiente » et proposait « Verificar mi cédula » à quelqu'un que
+  Didit, interrogé au même instant, donnait pour `already_verified`. Ce
+  n'était pas un défaut d'affichage : **cette fonction décide qui peut
+  publier**. La règle vit maintenant dans
+  `app/src/dominio/verificacion.ts` avec ses tests, dont un bâti sur les
+  lignes réelles copiées de la base : `status = 'expired'` est de la
+  SESSION (« cet essai n'est pas allé au bout »), pas du document — ce
+  qui périme vraiment a sa colonne, `expires_at`. Donc une vérification
+  obtenue et non périmée **par date** l'emporte sur toute tentative
+  ultérieure qui n'a rien donné. Et si Didit répond `already_verified`,
+  l'écran le croit : de la vérification, le prestataire est l'autorité
+  (c'est tout le propos de R6).
+- **Les puestos cherchés suivent jusqu'à la réservation (28-08-2026).**
+  `pedirPuesto` avait `const puestos = 1` en dur. On cherchait
+  « 2 pasajeros », la recherche filtrait correctement les trajets à deux
+  places libres, on entrait, et il sortait UNE réservation d'une place —
+  l'autre personne restait dehors sans que rien ne le dise. Le nombre
+  voyage maintenant recherche → fiche → `reservar`, avec un ± borné par
+  les places réellement libres et un total qui suit (`B/20 · 2 × B/10`).
+- **Sale et arrive dans le MÊME bloc (28-08-2026).** L'heure d'arrivée
+  vivait dans une autre carte plus bas — « Directo · llega 10:00
+  aprox. » — pendant qu'en haut on lisait « 06:30 · 3 h 30 ». Deux blocs
+  pour un même fait, en deux formats. Maintenant « 06:30 → 10:00 » avec
+  « Ciudad de Panamá → Chitré » juste dessous : chaque lieu sous SON
+  heure, ce qui est l'invariant 2 du système.
 - **La note est une moyenne RÉTRÉCIE, pas une moyenne (28-08-2026).**
   `driver_ratings` faisait `AVG(rating)` sans minimum ni fenêtre. Sur un
   marché où quelqu'un a trois trajets et pas trois cents, ça casse : une

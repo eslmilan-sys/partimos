@@ -49,12 +49,24 @@ export default function Reservar() {
   const router = useRouter();
   const volver = useVolver();
   // `/viaje/[id]` en cuanto exista el descubrimiento; hoy, el del simulado.
-  const { viaje } = useLocalSearchParams<{ viaje?: string }>();
+  const { viaje, pasajeros } = useLocalSearchParams<{ viaje?: string; pasajeros?: string }>();
   const viajeId = viaje ?? VIAJE_DEL_RECORRIDO;
   // Aquí no se manda a entrar: pedir puesto es justo donde el traspaso pide
   // la cuenta, y esa puerta es `1c`, que vuelve a esta pantalla con el viaje.
   const yo = useMiId(YO_DEL_RECORRIDO);
   const [datos, setDatos] = useState<ReservaPreparada | null>(null);
+  /**
+   * CUÁNTOS PUESTOS PIDES.
+   *
+   * Arranca en los que venías buscando (28-08-2026, visto por el dueño):
+   * buscabas «2 pasajeros», la lista te enseñaba sólo los viajes con dos
+   * sitios libres, entrabas… y salía una reserva de UN puesto. La otra
+   * persona se quedaba fuera y nada lo decía. El número viajaba en la
+   * búsqueda y se perdía al entrar en la ficha.
+   */
+  const [puestos, setPuestos] = useState(() =>
+    Math.min(4, Math.max(1, Number(pasajeros) || 1)),
+  );
   /* «Todavía no lo sé» y «no está» no son lo mismo: lo segundo dura para
      siempre, y en blanco no hay ni por dónde salir. */
   const [noEsta, setNoEsta] = useState(false);
@@ -71,7 +83,14 @@ export default function Reservar() {
   const [pidiendo, setPidiendo] = useState(false);
 
   useEffect(() => {
-    prepararReserva(viajeId).then(setDatos).catch(() => setNoEsta(true));
+    prepararReserva(viajeId)
+      .then((d) => {
+        setDatos(d);
+        /* Los que quedan mandan sobre los que traías: se puede llegar aquí
+           con un enlace viejo de cuando había sitio para tres. */
+        setPuestos((n) => Math.max(1, Math.min(n, d.puestosLibres || 1)));
+      })
+      .catch(() => setNoEsta(true));
   }, [viajeId]);
 
   if (noEsta) return <NoEsta />;
@@ -159,6 +178,61 @@ export default function Reservar() {
             </Text>
           </Pressable>
           <Text style={estilos.ayudaPunto}>{`${datos.conductor} lo aprueba junto con el puesto.`}</Text>
+        </View>
+
+        {/* **CUÁNTOS PUESTOS**, con el mismo ± que el equipaje y que
+            `publicar`. Va antes del equipaje porque decide el total, y el
+            total es lo que se mira antes de pedir. */}
+        <View style={estilos.tarjetaEquipaje}>
+          <Epigrafe>Cuántos vamos</Epigrafe>
+          <View style={[estilos.clase, { paddingTop: 10 }]}>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={estilos.claseTitulo}>
+                {puestos === 1 ? 'Un puesto' : `${puestos} puestos`}
+              </Text>
+              <Text style={estilos.claseDetalle}>
+                {datos.puestosLibres <= 1
+                  ? 'Es el único que queda en este carro'
+                  : `Quedan ${datos.puestosLibres} en este carro`}
+              </Text>
+            </View>
+            <View style={estilos.contador}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Un puesto menos"
+                disabled={puestos <= 1}
+                onPress={() => setPuestos((n) => Math.max(1, n - 1))}
+                style={({ pressed }) => [
+                  estilos.paso,
+                  puestos <= 1 && estilos.pasoApagado,
+                  pressed && puestos > 1 ? pulsado.celda : null,
+                ]}
+              >
+                <Text style={[estilos.pasoSigno, puestos <= 1 && estilos.pasoSignoApagado]}>−</Text>
+              </Pressable>
+              <Text style={estilos.cifra}>{puestos}</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Un puesto más"
+                disabled={puestos >= datos.puestosLibres}
+                onPress={() => setPuestos((n) => Math.min(datos.puestosLibres, n + 1))}
+                style={({ pressed }) => [
+                  estilos.paso,
+                  puestos >= datos.puestosLibres && estilos.pasoApagado,
+                  pressed && puestos < datos.puestosLibres ? pulsado.celda : null,
+                ]}
+              >
+                <Text
+                  style={[
+                    estilos.pasoSigno,
+                    puestos >= datos.puestosLibres && estilos.pasoSignoApagado,
+                  ]}
+                >
+                  +
+                </Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
 
         <View style={estilos.tarjetaEquipaje}>
@@ -255,9 +329,17 @@ export default function Reservar() {
         {/* «8 $ por plaza» era de antes del sistema: el dinero se escribe
             B/8 —un solo sitio formatea (ui/dinero)— y aquí nadie dice
             «plaza»: es un puesto, como en todas las demás pantallas. */}
+        {/* El TOTAL, y debajo de dónde sale. Con dos puestos el pie decía
+            «B/6 por puesto» y quien pedía dos veía el precio de uno. */}
         <View style={estilos.filaPrecio}>
-          <Text style={[estilos.precio, tabular]}>{formatearDineroRedondo(datos.aporteCentavos)}</Text>
-          <Pastilla estilo={{ marginBottom: 6 }}>por puesto</Pastilla>
+          <Text style={[estilos.precio, tabular]}>
+            {formatearDineroRedondo(datos.aporteCentavos * puestos)}
+          </Text>
+          <Pastilla estilo={{ marginBottom: 6 }}>
+            {puestos === 1
+              ? 'por puesto'
+              : `${puestos} × ${formatearDineroRedondo(datos.aporteCentavos)}`}
+          </Pastilla>
         </View>
 
         <Boton
@@ -274,7 +356,7 @@ export default function Reservar() {
                 viajeId,
                 { direccionPropia: direccion },
                 equipaje,
-                { pasajeroId: yo },
+                { pasajeroId: yo, puestos },
               );
               // `7b` cobra sobre una reserva concreta: sin este identificador el
               // botón «Confirmar y pagar» no tenía nada que confirmar.

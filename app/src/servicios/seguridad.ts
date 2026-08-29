@@ -14,6 +14,7 @@
  * dice nunca: ni que la reportaron ni que la bloquearon.
  */
 
+import { estadoDe, laQueVale } from '@/dominio/verificacion';
 import type { Incident, IdentityVerification } from '@/tipos';
 
 import { nuevoId } from './_id';
@@ -34,44 +35,24 @@ export type EstadoDeCedula = {
   puedePublicar: boolean;
 };
 
-const ETIQUETA: Record<string, EstadoDeCedula['estado']> = {
-  pending: 'en revisión',
-  verified: 'verificada',
-  rejected: 'rechazada',
-  expired: 'pendiente',
-};
-
 /**
- * LA ÚLTIMA MANDA, y hay que decirlo porque hay varias.
+ * LA REGLA VIVE EN `dominio/verificacion`, con sus pruebas (28-08-2026).
  *
- * `identity_verifications` no tiene nada que impida dos filas para la misma
- * persona, y en la base real las hay: mirando el 26-08-2026, una cuenta tiene
- * TRES filas y otra CUATRO — dos verificadas y dos caducadas—. Cada intento
- * de Didit escribe la suya.
+ * Aquí se ordenaba por `updated_at` y se tomaba la primera. Con las filas de
+ * la base real eso daba lo CONTRARIO de la verdad: dos sesiones abandonadas
+ * del 15 y el 16, barridas a `expired` los días 22 y 23, ganaban a la
+ * verificación conseguida el 17. La app decía «Pendiente» y le ofrecía
+ * «Verificar mi cédula» a quien ya lo estaba — mientras Didit, preguntado en
+ * el mismo momento, respondía `already_verified`.
  *
- * Aquí se hacía `.find()`, o sea «la primera que aparezca». Con cuatro filas
- * el resultado dependía del orden en que la base las devolviera: la misma
- * persona podía verse «Verificada» o «Pendiente» entre dos recargas. Y esta
- * función decide QUIÉN PUEDE PUBLICAR.
- *
- * Manda la más reciente, que es lo único que se sostiene: si te caducó
- * después de verificarte, estás pendiente; si te volviste a verificar
- * después de que caducara, estás al día.
+ * Y esta función decide QUIÉN PUEDE PUBLICAR, así que el fallo no era de
+ * dibujo: dejaba fuera a conductores verificados.
  */
-function laQueVale(perfilId: string) {
-  return fuente.verificaciones
-    .filter((x) => x.profile_id === perfilId)
-    .sort((a, b) =>
-      (b.updated_at ?? b.created_at ?? '').localeCompare(a.updated_at ?? a.created_at ?? ''),
-    )[0];
-}
 
 export async function estadoDeCedula(perfilId: string): Promise<EstadoDeCedula> {
-  const v = laQueVale(perfilId);
-  /* Una verificación con fecha de caducidad pasada no vale, diga lo que diga
-     su `status`: la columna existe y nadie la miraba. */
-  const caducada = v?.expires_at != null && new Date(v.expires_at) < new Date();
-  const estado = !v ? 'pendiente' : caducada ? 'pendiente' : ETIQUETA[v.status];
+  const suyas = fuente.verificaciones.filter((x) => x.profile_id === perfilId);
+  const v = laQueVale(suyas);
+  const estado = estadoDe(suyas);
   return demora({
     estado,
     etiqueta: estado === 'en revisión' ? 'En revisión' : estado === 'verificada' ? 'Verificada' : 'Pendiente',

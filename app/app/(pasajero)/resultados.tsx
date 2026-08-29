@@ -523,13 +523,19 @@ export default function Resultados() {
                   plano
                   viaje={mejor}
                   alPulsar={() =>
-                    router.push({ pathname: '/(pasajero)/viaje', params: { viaje: mejor.id } })
+                    router.push({
+                      pathname: '/(pasajero)/viaje',
+                      params: { viaje: mejor.id, pasajeros: String(ruta.pasajeros ?? 1) },
+                    })
                   }
                 />
                 <Boton
                   tamano="md"
                   alPulsar={() =>
-                    router.push({ pathname: '/(pasajero)/viaje', params: { viaje: mejor.id } })
+                    router.push({
+                      pathname: '/(pasajero)/viaje',
+                      params: { viaje: mejor.id, pasajeros: String(ruta.pasajeros ?? 1) },
+                    })
                   }
                 >
                   Reservar puesto
@@ -542,7 +548,10 @@ export default function Resultados() {
                 key={v.id}
                 viaje={v}
                 alPulsar={() =>
-                  router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })
+                  router.push({
+                    pathname: '/(pasajero)/viaje',
+                    params: { viaje: v.id, pasajeros: String(ruta.pasajeros ?? 1) },
+                  })
                 }
               />
             ))}

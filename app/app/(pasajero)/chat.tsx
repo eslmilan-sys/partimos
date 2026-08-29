@@ -156,8 +156,11 @@ export default function Chat() {
              nada. Y el botón al lado, porque el momento de pedir el puesto es
              justo después de que te contesten. */
           <View style={estilos.tarjetaPuesto}>
+            {/* Sin epígrafe (28-08-2026, pedido del dueño). «SOLO UNA
+                PREGUNTA» rotulaba en versalitas lo que la línea de debajo ya
+                dice con todas sus palabras — y la palabra «solo» además
+                quitaba importancia a lo que la persona está haciendo. */}
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Epigrafe>Solo una pregunta</Epigrafe>
               <Text style={estilos.resumenPuesto}>Todavía no has pedido puesto</Text>
             </View>
             <Pressable

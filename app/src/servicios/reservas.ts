@@ -30,7 +30,15 @@ export type ReservaPreparada = {
   salida: string;
   /** La primera parada de la ruta, de donde arranca el carro. */
   origen: { etiqueta: string; hora: string };
+  /** El aporte de UN puesto. El total lo hace la pantalla: unidad × puestos. */
   aporteCentavos: number;
+  /**
+   * CUÁNTOS PUESTOS QUEDAN. Es el tope del ± de la pantalla.
+   *
+   * Sin esto el contador dejaría pedir tres puestos en un carro con uno
+   * libre, y el error saldría al final — después de elegir punto y equipaje.
+   */
+  puestosLibres: number;
   /** Lo que el punto del pasajero le añade al conductor. */
   minutosDeDesvio: number;
 };
@@ -54,6 +62,15 @@ export async function prepararReserva(viajeId: string): Promise<ReservaPreparada
       hora: origen?.scheduled_at ?? viaje.departure_at,
     },
     aporteCentavos: viaje.price_cents,
+    puestosLibres: Math.max(
+      0,
+      viaje.seats_offered -
+        fuente.reservas
+          .filter(
+            (r) => r.trip_id === viajeId && (r.status === 'pending' || r.status === 'confirmed'),
+          )
+          .reduce((t, r) => t + r.seats, 0),
+    ),
     // Sin mapas de verdad el desvío es una estimación fija; ver «lo que es
     // ingeniería» en el traspaso.
     minutosDeDesvio: 4,
@@ -67,7 +84,7 @@ export async function pedirPuesto(
   viajeId: string,
   punto: Punto,
   equipaje: Equipaje,
-  opciones: { pasajeroId: string; canal?: CanalDePago } = { pasajeroId: '' },
+  opciones: { pasajeroId: string; canal?: CanalDePago; puestos?: number } = { pasajeroId: '' },
 ): Promise<ReservaFila> {
   const viaje = fuente.viajes.find((v) => v.id === viajeId);
   if (!viaje) throw new Error(`No existe el viaje ${viajeId}`);
@@ -77,7 +94,24 @@ export async function pedirPuesto(
      el viaje traía el booleano en falso. */
 
   const canal = opciones.canal ?? 'yappy_app';
-  const puestos = 1;
+  /**
+   * CUÁNTOS PUESTOS. Estaba clavado en 1 (28-08-2026, visto por el dueño):
+   * se buscaba «2 pasajeros», la búsqueda filtraba bien los viajes con dos
+   * sitios libres, y al pedir salía UNA reserva de un puesto. La otra
+   * persona se quedaba fuera sin que nadie lo dijera.
+   *
+   * Se corta a lo que queda: pedir más puestos de los que hay sería una
+   * sobreventa escrita por el cliente, y la base la rechazaría al final del
+   * camino en vez de aquí.
+   */
+  const libres = Math.max(
+    0,
+    viaje.seats_offered -
+      fuente.reservas
+        .filter((r) => r.trip_id === viajeId && (r.status === 'pending' || r.status === 'confirmed'))
+        .reduce((t, r) => t + r.seats, 0),
+  );
+  const puestos = Math.min(Math.max(1, Math.round(opciones.puestos ?? 1)), Math.max(1, libres));
   /**
    * `total_cents` ES EL APORTE, NO LO QUE PAGA EL PASAJERO.
    *
