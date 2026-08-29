@@ -1,8 +1,21 @@
 /**
- * `5b` Mis viajes — el lado del pasajero.
+ * `5b` Mis viajes — LO QUE VIENE, de los dos lados del carro.
  *
  * **La estructura que pidió el cliente**, traída a nuestro lenguaje: una ficha
  * grande para el viaje que viene y filas compactas para los demás.
+ *
+ * **Sin selectores** (28-08-2026, pedido del dueño). Había dos, uno encima
+ * del otro: «Voy de pasajero / Conduzco» y «Próximos / Historial». Cuatro
+ * casillas, dos toques para llegar a cualquiera — y con tres o cuatro viajes
+ * en la cuenta, casi todas se veían vacías. Un selector que parte en cuatro lo
+ * que cabe entero en una pantalla no ahorra nada: cuesta un toque y esconde
+ * tres cuartas partes de lo que hay.
+ *
+ * Ahora una sola lista en orden, y **cada fila dice de qué lado vas** — que es
+ * el mismo dato que daba el selector, dicho en el viaje en vez de exigido
+ * antes de ver nada. El historial no está: vive en el perfil, y una pantalla
+ * llamada «Mis viajes» que abre en lo que ya pasó no sirve para lo que uno
+ * viene a hacer.
  *
  * Lo que la ficha tiene que decir, en este orden, porque es el orden en que se
  * pregunta: de dónde a dónde, qué día y a qué hora, quién maneja y en qué
@@ -63,18 +76,26 @@ import {
 /** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
 const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
-type Pestana = 'proximos' | 'historial';
-
 /**
- * DE QUÉ LADO DEL CARRO ESTÁS.
+ * **UNA SOLA LISTA, Y ES LA DE LO QUE VIENE** (28-08-2026, pedido del dueño).
  *
- * Pedido del dueño el 27-08-2026. Hasta ahora esta pantalla era sólo la del
- * pasajero y el lado del conductor vivía en `/(conductor)/panel`, al que se
- * llegaba por un enlace al final de la lista: quien manejaba y además pide
- * puesto tenía sus viajes en dos sitios distintos y ninguno de los dos lo
- * decía. Son los mismos viajes suyos; lo que cambia es dónde va sentado.
+ * Esta pantalla tenía dos selectores encima, uno debajo del otro: «Voy de
+ * pasajero / Conduzco» y «Próximos / Historial». Cuatro combinaciones, dos
+ * toques para llegar a cualquiera de ellas — y con tres o cuatro viajes en la
+ * cuenta, cada casilla se veía casi siempre vacía. El selector partía en
+ * cuatro lo que cabe entero en una pantalla.
+ *
+ * Ahora: **lo que viene, en orden, todo junto**, y cada fila dice de qué lado
+ * del carro vas. Es el mismo dato que daba el selector, dicho donde importa
+ * —en el viaje— en vez de obligar a elegir antes de ver nada.
+ *
+ * El historial no está: se lleva desde el perfil, que es donde ya vive
+ * («Lo que has recuperado → Ver histórico»). Una pantalla que se llama «Mis
+ * viajes» y abre en lo que ya pasó no sirve para lo que uno viene a hacer.
  */
-type Lado = 'pasajero' | 'conduzco';
+type Fila =
+  | { clase: 'pasajero'; cuando: string; puesto: PuestoMio }
+  | { clase: 'conduzco'; cuando: string; viaje: ViajePublicado };
 
 /** El estado de la reserva, en una palabra y con su color.
  *
@@ -95,8 +116,6 @@ export default function MisViajesPantalla() {
   /** Cuántas rutas guardadas están avisando, para la puerta de abajo. */
   const [avisando, setAvisando] = useState(0);
   const [nombre, setNombre] = useState<string | null>(null);
-  const [pestana, setPestana] = useState<Pestana>('proximos');
-  const [lado, setLado] = useState<Lado>('pasajero');
   const [manejando, setManejando] = useState<{
     proximos: ViajePublicado[];
     pasados: ViajePublicado[];
@@ -118,15 +137,22 @@ export default function MisViajesPantalla() {
 
   if (!datos) return <Cargando altura={186} tarjetas={3} />;
 
+  /* La ficha grande sigue siendo la del próximo PUESTO: lleva el código de
+     subir y el chat, que son cosas de pasajero. Quien maneja no tiene código
+     que enseñar — tiene gente a la que responder, y eso está más abajo. */
   const proximo = datos.hoy ?? datos.proximos[0] ?? null;
-  const otros = datos.proximos.filter((p) => p.reservaId !== proximo?.reservaId);
-  const lista = pestana === 'proximos' ? otros : datos.pasados;
-  const conduzco = lado === 'conduzco';
-  const listaConduzco = manejando
-    ? pestana === 'proximos'
-      ? manejando.proximos
-      : manejando.pasados
-    : [];
+
+  /** Lo que viene, de los dos lados, en orden. */
+  const loQueViene: Fila[] = [
+    ...datos.proximos
+      .filter((p) => p.reservaId !== proximo?.reservaId)
+      .map((p): Fila => ({ clase: 'pasajero', cuando: p.cuando, puesto: p })),
+    ...(manejando?.proximos ?? []).map(
+      (v): Fila => ({ clase: 'conduzco', cuando: v.cuando, viaje: v }),
+    ),
+  ].sort((a, b) => a.cuando.localeCompare(b.cuando));
+
+  const vacio = !proximo && loQueViene.length === 0;
 
   return (
     <View style={estilos.pantalla}>
@@ -173,123 +199,12 @@ export default function MisViajesPantalla() {
           </Pressable>
         </View>
 
-        {/* **Primero de qué lado vas, después cuándo.** El de arriba parte la
-            pantalla en dos vidas —la de quien pide puesto y la de quien
-            maneja—; el de abajo parte cada una en lo que viene y lo que ya
-            pasó. Puesto al revés, «Historial» habría querido decir dos cosas
-            a la vez. */}
-        <View style={estilos.selectorLado}>
-          {(
-            [
-              ['pasajero', 'Voy de pasajero'],
-              ['conduzco', 'Conduzco'],
-            ] as const
-          ).map(([clave, etiqueta]) => (
-            <Pressable
-              key={clave}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: lado === clave }}
-              onPress={() => setLado(clave)}
-              style={[estilos.opcionLado, lado === clave && estilos.opcionLadoActiva]}
-            >
-              <Carro
-                tamano={16}
-                tinta={lado === clave ? '#fff' : color.ink500}
-              />
-              <Text style={[estilos.opcionLadoTexto, lado === clave && estilos.opcionLadoTextoActivo]}>
-                {etiqueta}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        <View style={estilos.selector}>
-          {(
-            [
-              ['proximos', 'Próximos'],
-              ['historial', 'Historial'],
-            ] as const
-          ).map(([clave, etiqueta]) => (
-            <Pressable
-              key={clave}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: pestana === clave }}
-              onPress={() => setPestana(clave)}
-              style={[estilos.opcion, pestana === clave && estilos.opcionActiva]}
-            >
-              <Text style={[estilos.opcionTexto, pestana === clave && estilos.opcionTextoActivo]}>
-                {etiqueta}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
       </View>
 
       <View style={estilos.cuerpo}>
-        {conduzco ? (
+        {proximo ? (
           <>
-            <View style={estilos.filaSeccion}>
-              <Epigrafe>{pestana === 'proximos' ? 'Los que voy a llevar' : 'Los que ya llevé'}</Epigrafe>
-              {listaConduzco.length > 0 ? (
-                <Text style={estilos.cuantos}>
-                  {listaConduzco.length === 1 ? '1 viaje' : `${listaConduzco.length} viajes`}
-                </Text>
-              ) : null}
-            </View>
-
-            {manejando === null ? (
-              <Cargando altura={0} tarjetas={2} />
-            ) : listaConduzco.length === 0 ? (
-              <VacioConduzco
-                pestana={pestana}
-                alPublicar={() => router.push('/(conductor)/publicar')}
-              />
-            ) : (
-              <View style={{ gap: 8 }}>
-                {listaConduzco.map((v) => (
-                  <FilaConduzco
-                    key={v.id}
-                    viaje={v}
-                    pasado={pestana === 'historial'}
-                    alPulsar={() =>
-                      router.push({ pathname: '/(pasajero)/viaje', params: { viaje: v.id } })
-                    }
-                  />
-                ))}
-              </View>
-            )}
-
-            {/* Sin viajes, el vacío ya ofrece publicar: repetirlo aquí sería
-                el mismo botón dos veces en la misma pantalla. */}
-            <View style={estilos.puertas}>
-              {listaConduzco.length > 0 ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Publicar un viaje"
-                  onPress={() => router.push('/(conductor)/publicar')}
-                  style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
-                >
-                  <Carro tamano={19} tinta={color.ink600} />
-                  <Text style={estilos.puertaTexto}>Publicar un viaje</Text>
-                  <Avanza />
-                </Pressable>
-              ) : null}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Quién pide puesto en mis viajes"
-                onPress={() => router.push('/(conductor)/panel')}
-                style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
-              >
-                <Text style={estilos.puertaTexto}>Quién pide puesto</Text>
-                <Avanza />
-              </Pressable>
-            </View>
-          </>
-        ) : (
-          <>
-        {pestana === 'proximos' && proximo ? (
-          <>
-            <Epigrafe>Tu próximo viaje</Epigrafe>
+            <Epigrafe>Tu próximo puesto</Epigrafe>
             <FichaGrande
               puesto={proximo}
               alChat={() =>
@@ -302,39 +217,49 @@ export default function MisViajesPantalla() {
           </>
         ) : null}
 
-        <View style={estilos.filaSeccion}>
-          <Epigrafe>{pestana === 'proximos' ? 'Otros próximos viajes' : 'Ya viajados'}</Epigrafe>
-          {lista.length > 0 ? (
-            <Text style={estilos.cuantos}>
-              {lista.length === 1 ? '1 viaje' : `${lista.length} viajes`}
-            </Text>
-          ) : null}
-        </View>
+        {loQueViene.length > 0 ? (
+          <>
+            <View style={estilos.filaSeccion}>
+              <Epigrafe>{proximo ? 'Después de ése' : 'Lo que viene'}</Epigrafe>
+              <Text style={estilos.cuantos}>
+                {loQueViene.length === 1 ? '1 viaje' : `${loQueViene.length} viajes`}
+              </Text>
+            </View>
 
-        {lista.length === 0 ? (
-          <Vacio
-            pestana={pestana}
-            conProximo={!!proximo}
-            alBuscar={() => router.push('/(pasajero)')}
-          />
-        ) : (
-          <View style={{ gap: 8 }}>
-            {lista.map((p) => (
-              <FilaCompacta
-                key={p.reservaId}
-                puesto={p}
-                alPulsar={() =>
-                  router.push({ pathname: '/(pasajero)/viaje', params: { viaje: p.viajeId } })
-                }
-              />
-            ))}
-          </View>
-        )}
+            <View style={{ gap: 8 }}>
+              {loQueViene.map((f) =>
+                f.clase === 'pasajero' ? (
+                  <FilaCompacta
+                    key={f.puesto.reservaId}
+                    puesto={f.puesto}
+                    alPulsar={() =>
+                      router.push({
+                        pathname: '/(pasajero)/viaje',
+                        params: { viaje: f.puesto.viajeId },
+                      })
+                    }
+                  />
+                ) : (
+                  <FilaConduzco
+                    key={f.viaje.id}
+                    viaje={f.viaje}
+                    alPulsar={() =>
+                      router.push({ pathname: '/(pasajero)/viaje', params: { viaje: f.viaje.id } })
+                    }
+                  />
+                ),
+              )}
+            </View>
+          </>
+        ) : null}
 
-        {/* Las puertas de abajo. La del código no la dibuja la referencia y
-            hay que conservarla: sin ella sólo se alcanzaba desde el catálogo
-            de pantallas. La del panel del conductor ya no hace falta aquí —
-            ese lado tiene su propia mitad del selector de arriba. */}
+        {/* **SIN TARJETA NI BOTÓN** (28-08-2026, pedido del dueño). El vacío
+            era una tarjeta de trazo discontinuo con su icono, su párrafo y un
+            botón «Buscar un viaje» — media pantalla para decir «no hay nada»,
+            y con un botón que la barra de abajo ya tiene a un dedo. Una línea
+            basta: dice lo que pasa sin ocupar el sitio de lo que vendrá. */}
+        {vacio ? <Text style={estilos.nadaTodavia}>Todavía no tienes viajes por delante.</Text> : null}
+
         <View style={estilos.puertas}>
           {proximo ? (
             <Pressable
@@ -355,11 +280,22 @@ export default function MisViajesPantalla() {
             </Pressable>
           ) : null}
 
+          {/* Las dos del conductor bajan aquí: vivían en la mitad «Conduzco»
+              del selector, y esa mitad ya no existe. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Quién pide puesto en mis viajes"
+            onPress={() => router.push('/(conductor)/panel')}
+            style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
+          >
+            <Text style={estilos.puertaTexto}>Quién pide puesto</Text>
+            <Avanza />
+          </Pressable>
+
           {/* **RUTAS GUARDADAS, AQUÍ** (27-08-2026, pedido del dueño). Vivía
               en Ajustes, dentro de un grupo «Avisos», y era el único camino
               para llegar: una ruta guardada es un viaje que todavía no
-              existe, no una preferencia de la cuenta. Su sitio es la
-              pantalla de los viajes. */}
+              existe, no una preferencia de la cuenta. */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={
@@ -369,14 +305,10 @@ export default function MisViajesPantalla() {
             style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
           >
             <Text style={estilos.puertaTexto}>Rutas guardadas</Text>
-            {avisando > 0 ? (
-              <Text style={estilos.cuantos}>{`${avisando} avisando`}</Text>
-            ) : null}
+            {avisando > 0 ? <Text style={estilos.cuantos}>{`${avisando} avisando`}</Text> : null}
             <Avanza />
           </Pressable>
         </View>
-          </>
-        )}
       </View>
       </ScrollView>
 
@@ -581,8 +513,11 @@ function FilaCompacta({ puesto, alPulsar }: { puesto: PuestoMio; alPulsar: () =>
             {puesto.destino}
           </Text>
         </View>
+        {/* De qué lado vas, EN LA FILA. Es exactamente lo que decía el
+            selector de arriba, dicho donde importa — en el viaje — en vez de
+            obligar a elegir antes de ver nada (28-08-2026). */}
         <Text style={estilos.sitioMini} numberOfLines={1}>
-          {[puesto.conductor, formatearDineroRedondo(puesto.aporteCentavos)]
+          {['Voy de pasajero', puesto.conductor, formatearDineroRedondo(puesto.aporteCentavos)]
             .filter(Boolean)
             .join(' · ')}
         </Text>
@@ -603,61 +538,11 @@ function FilaCompacta({ puesto, alPulsar }: { puesto: PuestoMio; alPulsar: () =>
   );
 }
 
-/* ------------------------------------------------------------- El vacío */
-
-function Vacio({
-  pestana,
-  conProximo,
-  alBuscar,
-}: {
-  pestana: Pestana;
-  conProximo: boolean;
-  alBuscar: () => void;
-}) {
-  const [titulo, texto] =
-    pestana === 'historial'
-      ? ['Todavía no has viajado', 'Cuando termines un viaje, queda aquí con lo que aportaste.']
-      : conProximo
-        ? ['No tienes más viajes por delante', 'Este es el único que tienes reservado ahora mismo.']
-        : ['No tienes viajes reservados', 'Busca a dónde vas y pide tu puesto; aparecerá aquí.'];
-
-  return (
-    <View style={estilos.vacio}>
-      <View style={estilos.cuadroVacio}>
-        <Carro tamano={22} tinta={color.ink400} />
-      </View>
-      <Text style={estilos.vacioTitulo}>{titulo}</Text>
-      <Text style={estilos.vacioTexto}>{texto}</Text>
-      {pestana === 'proximos' && !conProximo ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Buscar un viaje"
-          onPress={alBuscar}
-          style={({ pressed }) => [estilos.botonVacio, pressed && { backgroundColor: color.azul600 }]}
-        >
-          <Text style={estilos.llenoTexto}>Buscar un viaje</Text>
-        </Pressable>
-      ) : null}
-    </View>
-  );
-}
-
-/* ------------------------------------------------- El lado del volante */
-
 /**
- * Un viaje que TÚ llevas. La misma fila que la del pasajero —el mismo raíl de
- * dos puntos— pero con lo que a un conductor le importa en el lado derecho:
- * cuántos puestos van vendidos y cuántas solicitudes esperan respuesta.
+ * Un viaje que TÚ llevas. Ya no recibe `pasado`: esta pantalla enseña sólo lo
+ * que viene, y lo que ya pasó se lleva desde el perfil (28-08-2026).
  */
-function FilaConduzco({
-  viaje,
-  pasado,
-  alPulsar,
-}: {
-  viaje: ViajePublicado;
-  pasado: boolean;
-  alPulsar: () => void;
-}) {
+function FilaConduzco({ viaje, alPulsar }: { viaje: ViajePublicado; alPulsar: () => void }) {
   const pendientes = viaje.solicitudes;
 
   return (
@@ -686,34 +571,22 @@ function FilaConduzco({
           </Text>
         </View>
         <Text style={estilos.sitioMini} numberOfLines={1}>
-          {`${viaje.puestosVendidos} de ${viaje.puestosOfrecidos} puestos · ${formatearDineroRedondo(viaje.aporteCentavos)}`}
+          {`Conduzco · ${viaje.puestosVendidos} de ${viaje.puestosOfrecidos} puestos · ${formatearDineroRedondo(viaje.aporteCentavos)}`}
         </Text>
       </View>
 
       <View style={estilos.ladoFila}>
         {/* Rojo sólo cuando reclama respuesta: es uno de sus cuatro sentidos.
             Un viaje pasado no reclama nada, aunque quedaran solicitudes. */}
-        {!pasado && pendientes > 0 ? (
+        {pendientes > 0 ? (
           <View style={[estilos.pastilla, { backgroundColor: color.rojo500 }]}>
             <Text style={[estilos.pastillaTexto, { color: '#fff' }]}>
               {pendientes === 1 ? '1 pide puesto' : `${pendientes} piden puesto`}
             </Text>
           </View>
         ) : (
-          <View
-            style={[
-              estilos.pastilla,
-              { backgroundColor: pasado ? color.sand200 : color.hechoFondo },
-            ]}
-          >
-            <Text
-              style={[
-                estilos.pastillaTexto,
-                { color: pasado ? color.ink600 : color.hechoTinta },
-              ]}
-            >
-              {pasado ? 'Llevado' : 'Publicado'}
-            </Text>
+          <View style={[estilos.pastilla, { backgroundColor: color.hechoFondo }]}>
+            <Text style={[estilos.pastillaTexto, { color: color.hechoTinta }]}>Publicado</Text>
           </View>
         )}
         <Text style={estilos.cuandoFila}>
@@ -727,42 +600,17 @@ function FilaConduzco({
   );
 }
 
-function VacioConduzco({
-  pestana,
-  alPublicar,
-}: {
-  pestana: Pestana;
-  alPublicar: () => void;
-}) {
-  const [titulo, texto] =
-    pestana === 'historial'
-      ? ['Todavía no has llevado a nadie', 'Cuando termines un viaje que hayas publicado, queda aquí.']
-      : ['No tienes viajes publicados', 'Publica el que ya ibas a hacer y comparte lo que cuesta.'];
-
-  return (
-    <View style={estilos.vacio}>
-      <View style={estilos.cuadroVacio}>
-        <Carro tamano={22} tinta={color.ink400} />
-      </View>
-      <Text style={estilos.vacioTitulo}>{titulo}</Text>
-      <Text style={estilos.vacioTexto}>{texto}</Text>
-      {pestana === 'proximos' ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Publicar un viaje"
-          onPress={alPublicar}
-          style={({ pressed }) => [estilos.botonVacio, pressed && { backgroundColor: color.azul600 }]}
-        >
-          <Text style={estilos.llenoTexto}>Publicar un viaje</Text>
-        </Pressable>
-      ) : null}
-    </View>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-
 const estilos = StyleSheet.create({
+  /** El vacío, en una línea. Sin tarjeta, sin icono y sin botón. */
+  nadaTodavia: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: color.ink500,
+    marginTop: 4,
+    marginBottom: 4,
+    fontFamily: familia,
+  },
+
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
@@ -818,70 +666,6 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  /* El selector se sienta SOBRE el campo rojo, no debajo: en la referencia va
-     pegado al título, y es lo que separa la cabecera de la lista. */
-  /** El de arriba: superficie de tinta, para que se lea como el mando mayor. */
-  selectorLado: {
-    flexDirection: 'row',
-    gap: 4,
-    marginTop: 18,
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderColor: color.bordePorDefecto,
-    borderRadius: radio.pastilla,
-    padding: 4,
-  },
-  opcionLado: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 7,
-    height: espacio.tap,
-    borderRadius: radio.pastilla,
-  },
-  opcionLadoActiva: { backgroundColor: color.ink900 },
-  opcionLadoTexto: {
-    fontSize: 13.5,
-    lineHeight: 19.575,
-    fontWeight: '600',
-    color: color.ink600,
-    fontFamily: familia,
-  },
-  opcionLadoTextoActivo: { color: '#fff' },
-
-  /** El de abajo, más callado: parte cada lado en cuándo. */
-  selector: {
-    flexDirection: 'row',
-    gap: 4,
-    marginTop: 8,
-    backgroundColor: color.lavado,
-    borderRadius: radio.pastilla,
-    padding: 4,
-  },
-  opcion: {
-    flex: 1,
-    height: espacio.tap,
-    borderRadius: radio.pastilla,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  opcionActiva: {
-    backgroundColor: color.blanco,
-    shadowColor: '#8F1024',
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
-  },
-  opcionTexto: {
-    fontSize: 13.5,
-    lineHeight: 19.575,
-    fontWeight: '600',
-    color: color.campoTexto,
-    fontFamily: familia,
-  },
-  opcionTextoActivo: { color: color.ink900 },
 
   cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 16, paddingBottom: 20, gap: 10 },
 
@@ -1158,49 +942,4 @@ const estilos = StyleSheet.create({
   },
 
   /* ── el vacío ── */
-  vacio: {
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 30,
-    paddingHorizontal: 24,
-    borderRadius: radio.l,
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: color.bordePorDefecto,
-  },
-  cuadroVacio: {
-    width: 52,
-    height: 52,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.sand200,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  vacioTitulo: {
-    fontSize: 15.5,
-    lineHeight: 22.475,
-    fontWeight: '600',
-    letterSpacing: -0.28,
-    color: color.ink900,
-    textAlign: 'center',
-    fontFamily: familia,
-  },
-  vacioTexto: {
-    fontSize: 13.5,
-    lineHeight: interlinea(13.5),
-    color: color.ink600,
-    textAlign: 'center',
-    fontFamily: familia,
-  },
-  botonVacio: {
-    marginTop: 12,
-    height: espacio.tap,
-    paddingHorizontal: 20,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.azul500,
-    alignItems: 'center',
-    ...zonaDeToque,
-  },
 });

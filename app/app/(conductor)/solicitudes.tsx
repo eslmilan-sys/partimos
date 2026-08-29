@@ -26,9 +26,9 @@ import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Boton, Epigrafe, Insignia } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { Atras, Avanza, Maleta, Pin, Visto } from '@/ui/iconos';
+import { Atras, Avanza, Chat, Maleta, Pin, Visto } from '@/ui/iconos';
 import { cuando } from '@/ui/fechas';
-import { familia, color, espacio, radio, texto } from '@/ui/tokens';
+import { familia, color, espacio, pulsado, radio, texto } from '@/ui/tokens';
 
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, el del traspaso. */
 const DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
@@ -221,7 +221,22 @@ export default function Solicitudes() {
               <Text style={estilos.reciboTexto}>
                 {`Aceptado · le cobramos ${formatearDineroRedondo(r.aporteCentavos)}`}
               </Text>
-              <Text style={estilos.escribir}>Escribir</Text>
+              {/* **AHORA ABRE EL CHAT** (28-08-2026, visto por el dueño).
+                  Era un `Text` pintado de azul: parecía un enlace, tenía el
+                  color de un enlace, y no hacía absolutamente nada. Justo
+                  después de aceptar es cuando hay algo que decirse —dónde y a
+                  qué hora—, así que era el peor sitio donde poner un botón
+                  muerto. `id` es el de la reserva, que es la clave del hilo. */}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Escribirle a ${r.nombre}`}
+                onPress={() =>
+                  router.push({ pathname: '/(pasajero)/chat', params: { reserva: id } })
+                }
+                style={({ pressed }) => [estilos.botonEscribir, pressed && pulsado.celda]}
+              >
+                <Text style={estilos.escribir}>Escribir</Text>
+              </Pressable>
             </View>
           </View>
         ))}
@@ -278,6 +293,18 @@ export default function Solicitudes() {
                 >
                   {c.pagado ? 'Aporte listo' : 'Aporta al subir'}
                 </Insignia>
+                {/* Y a quien ya iba contigo, también: la fila enseñaba su
+                    punto y su equipaje y no daba forma de preguntarle nada. */}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Escribirle a ${c.nombre}`}
+                  onPress={() =>
+                    router.push({ pathname: '/(pasajero)/chat', params: { reserva: c.reservaId } })
+                  }
+                  style={({ pressed }) => [estilos.celdaChat, pressed && pulsado.celda]}
+                >
+                  <Chat tamano={18} tinta={color.ink600} />
+                </Pressable>
               </View>
             ))}
           </View>
@@ -404,6 +431,15 @@ const estilos = StyleSheet.create({
   },
   reciboTexto: { flex: 1, fontSize: 13.5, lineHeight: 19.57, fontWeight: '500', letterSpacing: -0.2, color: color.ink900, fontFamily: familia },
   escribir: { fontSize: 12.5, lineHeight: 18.12, fontWeight: '600', color: color.azul700, fontFamily: familia },
+  /** Zona de toque de verdad: el texto solo mide 18 px de alto. */
+  botonEscribir: { paddingVertical: 6, paddingHorizontal: 8, marginVertical: -6, marginRight: -8, borderRadius: radio.s },
+  celdaChat: {
+    width: 36,
+    height: 36,
+    borderRadius: radio.icono,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   vacio: {
     marginHorizontal: espacio.gutter,

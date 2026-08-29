@@ -16,6 +16,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
+import { enTexto } from '@/dominio/notas';
 
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { type Solicitud, aceptarSolicitud, listarSolicitudes, rechazarSolicitud } from '@/servicios/solicitudes';
@@ -136,7 +137,10 @@ export default function Solicitante() {
 
           <View style={estilos.cifras}>
             <Cifra valor={String(perfil.viajes)} etiqueta="viajes" />
-            <Cifra valor={perfil.calificacion?.toFixed(1) ?? '—'} etiqueta="calificación" />
+            <Cifra
+              valor={perfil.calificacion != null ? enTexto(perfil.calificacion) : '—'}
+              etiqueta="calificación"
+            />
             <Cifra valor="0" etiqueta="cancelados" />
           </View>
         </View>

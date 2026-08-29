@@ -255,23 +255,12 @@ export default function Avisos() {
               </View>
             </View>
 
-            <View style={estilos.tarjetaVacia}>
-              <Text style={estilos.vacioTitulo}>Todavía no hay nada que contarte.</Text>
-              <Text style={estilos.vacioTexto}>
-                Aquí llegan tres cosas y ninguna más: cuando alguien acepta tu puesto, cuando te
-                piden uno de los tuyos, y cuando te aportan. Nunca promociones.
-              </Text>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => router.push('/(pasajero)')}
-                style={({ pressed }) => [
-                  estilos.botonVacio,
-                  { backgroundColor: pressed ? color.rojo600 : color.rojo500 },
-                ]}
-              >
-                <Text style={estilos.botonTexto}>Buscar un viaje</Text>
-              </Pressable>
-            </View>
+            {/* **SIN TARJETA DE VACÍO** (28-08-2026, pedido del dueño). Debajo
+                del ejemplo había otra tarjeta —«Todavía no hay nada que
+                contarte»— con su párrafo y un botón «Buscar un viaje»: media
+                pantalla para decir dos veces lo mismo, porque el ejemplo de
+                arriba ya lleva su rótulo EJEMPLO y ya explica que aquí no hay
+                nada tuyo. Y el botón lo tiene la barra de abajo, a un dedo. */}
           </>
         ) : (
           <Text style={estilos.promesa}>
@@ -428,31 +417,6 @@ const estilos = StyleSheet.create({
     textTransform: 'uppercase',
     color: color.ink600,
     fontFamily: familia,
-  },
-
-  tarjetaVacia: {
-    marginTop: 4,
-    padding: 18,
-    borderRadius: radio.l,
-    borderWidth: 1.5,
-    borderColor: color.bordePorDefecto,
-    gap: 12,
-  },
-  vacioTitulo: {
-    fontSize: 17,
-    lineHeight: 24,
-    fontWeight: '600',
-    letterSpacing: -0.34,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.campoTexto, fontFamily: familia },
-  botonVacio: {
-    height: 48,
-    borderRadius: radio.pastilla,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 2,
   },
 
   promesa: {

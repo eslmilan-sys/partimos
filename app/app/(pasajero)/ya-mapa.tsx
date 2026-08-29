@@ -12,6 +12,7 @@
  */
 
 import { soloCiudad, soloPunto } from '@/dominio/comoSeLlama';
+import { enTexto } from '@/dominio/notas';
 import type { Lugar } from '@/dominio/lugar';
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -163,7 +164,12 @@ export default function YaMapa() {
                   {`${primero.first_name ?? ''} ${primero.last_initial ?? ''}`.trim()}
                 </Text>
                 <Text style={estilos.nota}>
-                  {`${(primero.driver_rating ?? 0).toFixed(1)} · ${primero.seats_available} puestos libres`}
+                  {[
+                    primero.driver_rating != null ? enTexto(primero.driver_rating) : null,
+                    `${primero.seats_available} puestos libres`,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </Text>
               </View>
               <Insignia fondo={color.rojo50} tinta={color.rojo700}>

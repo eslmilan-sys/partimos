@@ -12,6 +12,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
+import { enTexto } from '@/dominio/notas';
 
 import { type PerfilPublico, perfilPublico } from '@/servicios/perfiles';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -80,7 +81,7 @@ export default function Perfil() {
             <Text style={estilos.nombre}>{datos.nombre}</Text>
             <Text style={estilos.resumen}>
               {[
-                datos.calificacion?.toFixed(1),
+                datos.calificacion != null ? enTexto(datos.calificacion) : null,
                 `${datos.viajes} viajes`,
                 `desde ${datos.desde}`,
               ]
@@ -154,7 +155,7 @@ export default function Perfil() {
                   <Text style={estilos.autor}>{r.autor}</Text>
                   <View style={estilos.filaEstrella}>
                     <Estrella tamano={10} />
-                    <Text style={estilos.nota}>{r.estrellas.toFixed(1)}</Text>
+                    <Text style={estilos.nota}>{enTexto(r.estrellas)}</Text>
                   </View>
                 </View>
                 <Text style={estilos.textoResena}>{r.texto}</Text>

@@ -11,6 +11,7 @@
  */
 
 import { ciudadYPunto, soloCiudad } from '@/dominio/comoSeLlama';
+import { enTexto } from '@/dominio/notas';
 import { useEffect, useState } from 'react';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -202,7 +203,9 @@ function Detallada({ viaje, alPulsar }: { viaje: ViajeEnResultados; alPulsar: ()
           <View style={estilos.filaNota}>
             <Estrella tamano={11} />
             <Text style={estilos.nota}>
-              {`${(viaje.driver_rating ?? 0).toFixed(1)} · ${categoria(viaje.category_code)}`}
+              {[viaje.driver_rating != null ? enTexto(viaje.driver_rating) : null, categoria(viaje.category_code)]
+                .filter(Boolean)
+                .join(' · ')}
             </Text>
           </View>
         </View>

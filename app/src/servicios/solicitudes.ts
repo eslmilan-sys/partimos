@@ -6,6 +6,7 @@
  */
 
 import { comoLoVeElConductor, decideElMaletero, deFilas, resumenCorto } from '@/dominio/equipaje';
+import { enTexto } from '@/dominio/notas';
 import { tarifaDeServicio } from '@/dominio/tarifas';
 import type { EstadoDeSolicitud, Payment, ReservaFila } from '@/tipos';
 
@@ -172,10 +173,21 @@ function comoSolicitud(r: ReservaFila, ahora: Date): Solicitud {
     pasajero: {
       id: r.passenger_id,
       nombre: nombreDe(r.passenger_id),
+      /**
+       * TRES CASOS, y el de en medio se escribía «undefined» (28-08-2026).
+       *
+       * Decía `rep.calificacion?.toFixed(1)` dando por hecho que quien tiene
+       * viajes tiene nota. Desde que la nota es nula debajo de tres opiniones
+       * (`dominio/notas`), eso es falso muy a menudo — y quien maneja leía
+       * «undefined · 12 viajes» encima de la cara de quien le pide puesto.
+       * Sin nota se dicen los viajes, que es lo que sí se sabe.
+       */
       reputacion:
         !rep || rep.viajes === 0
           ? 'Nueva · sin viajes'
-          : `${rep.calificacion?.toFixed(1)} · ${rep.viajes} viajes`,
+          : rep.calificacion == null
+            ? `Todavía sin nota · ${enViajes(rep.viajes)}`
+            : `${enTexto(rep.calificacion)} · ${enViajes(rep.viajes)}`,
     },
     punto: r.proposed_point ?? '',
     minutosDeDesvio: r.detour_minutes,
@@ -207,3 +219,6 @@ function textoRestante(ms: number): string {
 }
 
 
+
+/** «12 viajes», «1 viaje». */
+const enViajes = (n: number) => (n === 1 ? '1 viaje' : `${n} viajes`);

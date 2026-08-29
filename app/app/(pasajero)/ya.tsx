@@ -12,6 +12,7 @@
  */
 
 import { soloCiudad } from '@/dominio/comoSeLlama';
+import { enTexto } from '@/dominio/notas';
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -122,7 +123,12 @@ export default function Ya() {
                   <View style={estilos.filaNota}>
                     <Estrella tamano={11} />
                     <Text style={estilos.nota}>
-                      {`${(primero.driver_rating ?? 0).toFixed(1)} · ${primero.make ?? ''} ${primero.model ?? ''} ${primero.color ?? ''}`.trim()}
+                      {[
+                        primero.driver_rating != null ? enTexto(primero.driver_rating) : null,
+                        `${primero.make ?? ''} ${primero.model ?? ''} ${primero.color ?? ''}`.trim(),
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
                     </Text>
                   </View>
                 </View>

@@ -274,6 +274,35 @@ parler :
   **même avec la clé de service**. Demander ne réserve rien : ni place
   occupée, ni horloge des quatre heures démarrée. Banc d'essai :
   `supabase/pruebas/13-preguntar.sql` (11 vérifications).
+- **Mis viajes : une seule liste, et c'est ce qui vient (28-08-2026).**
+  L'écran avait deux sélecteurs l'un sur l'autre — « Voy de pasajero /
+  Conduzco » et « Próximos / Historial ». Quatre cases, deux touches pour
+  atteindre n'importe laquelle, et avec trois ou quatre trajets dans le
+  compte, presque toutes se voyaient vides : un sélecteur qui coupe en
+  quatre ce qui tient entier sur un écran coûte une touche et cache les
+  trois quarts. Maintenant **une liste chronologique des deux côtés**, et
+  **chaque ligne dit de quel côté du volant on est** — le même
+  renseignement que donnait le sélecteur, dit dans le trajet plutôt
+  qu'exigé avant de rien voir. L'historique n'y est plus : il vit dans le
+  profil (« Lo que has recuperado → Ver histórico »).
+- **Un vide ne mérite pas une carte (28-08-2026).** Deux écrans en
+  avaient une, en trait discontinu, avec icône, paragraphe et bouton :
+  la moitié d'un écran pour dire qu'il n'y a rien — et le bouton
+  (« Buscar un viaje ») est déjà dans la barre du bas, à un doigt. Mis
+  viajes garde une ligne de texte, la bandeja rien du tout (l'exemple
+  au-dessus, étiqueté EJEMPLO, dit déjà que rien n'est à soi).
+- **Un `Text` bleu n'est pas un bouton.** « Escribir », juste après avoir
+  accepté quelqu'un, était un `<Text>` peint en bleu : la couleur d'un
+  lien, la forme d'un lien, et rien derrière. C'était le pire endroit
+  possible — juste après l'acceptation, il y a justement quelque chose à
+  se dire (où, à quelle heure). Il ouvre le fil, et « Ya van contigo » a
+  reçu le sien aussi.
+- **Une note nulle n'est pas zéro.** Depuis que la note est nulle sous
+  trois avis, quatre écrans mentaient : `rep.calificacion?.toFixed(1)`
+  écrivait « undefined · 12 viajes » sur la fiche de qui demande une
+  place, et `(driver_rating ?? 0).toFixed(1)` inventait un **0,0** —
+  pire, parce que ça se lit comme une vraie mauvaise note. Sans note on
+  dit ce qu'on sait : le nombre de trajets.
 - **Une vérification obtenue bat un balayage postérieur (28-08-2026).**
   `identity_verifications` garde une ligne par tentative Didit, et le
   client prenait **celle au `updated_at` le plus récent**. Sur les
