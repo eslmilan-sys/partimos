@@ -322,7 +322,7 @@ export default function RegistrarCarro() {
               style={estilos.entradaPlaca}
             />
             <Text style={estilos.notaCampo}>
-              Guardamos solo sus tres últimos. La placa entera vive en la foto.
+              Guardamos solo sus tres últimos.
             </Text>
           </View>
 

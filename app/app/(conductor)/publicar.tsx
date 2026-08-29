@@ -741,10 +741,12 @@ export default function Publicar() {
               el de adelante es otro viaje. Dicho así, «máx. 2 personas atrás»
               deja de ser una casilla aparte — es haber puesto 2 atrás. */}
           <View style={estilos.filaPuestos}>
-            <Text style={estilos.textoPuestos}>
-              Adelante
-              <Text style={estilos.carroApagado}>{' · junto a ti'}</Text>
-            </Text>
+            {/* Sólo «Adelante» y «Atrás». Llevaban una coletilla cada uno
+                —«· junto a ti», «· el banco lleva 3»— que no decidía nada:
+                el conductor sabe dónde va sentado y cuánta gente le cabe
+                atrás, y el propio ± ya no le deja pasarse. Quitadas el
+                29-08-2026 a pedido del dueño. */}
+            <Text style={estilos.textoPuestos}>Adelante</Text>
             <Stepper
               valor={reparto.adelante}
               alCambiar={(v) => {
@@ -758,10 +760,7 @@ export default function Publicar() {
           </View>
 
           <View style={estilos.filaPuestos}>
-            <Text style={estilos.textoPuestos}>
-              Atrás
-              <Text style={estilos.carroApagado}>{` · el banco lleva ${Math.max(0, datos.puestosMaximos - 1)}`}</Text>
-            </Text>
+            <Text style={estilos.textoPuestos}>Atrás</Text>
             <Stepper
               valor={reparto.atras}
               alCambiar={(v) => {

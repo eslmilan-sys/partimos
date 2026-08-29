@@ -17,8 +17,17 @@ type StepperProps = {
   min?: number;
   max?: number;
   /** Se lee con lector de pantalla: «Puestos libres, 3». */
-  /** Lo que va detrás de la cifra: «$» cuando el contador cuenta dinero. */
-  sufijo?: string;
+  /**
+   * LO QUE VA DELANTE DE LA CIFRA CUANDO EL CONTADOR CUENTA DINERO: «B/».
+   *
+   * Antes esto era un `sufijo` y su único uso escribía «8 $», con el símbolo
+   * detrás — el único sitio de la app donde el dinero no llevaba el prefijo
+   * balboa del sistema, y en una pantalla que tres líneas más abajo escribía
+   * «B/10» bien. En español de Panamá la moneda va DELANTE, y el sistema lo
+   * fija en un invariante: dos formatos de dinero en una app son un formato
+   * de menos (29-08-2026).
+   */
+  prefijo?: string;
   etiquetaAccesible: string;
 };
 
@@ -27,7 +36,7 @@ export function Stepper({
   alCambiar,
   min = 0,
   max = 9,
-  sufijo,
+  prefijo,
   etiquetaAccesible,
 }: StepperProps) {
   const boton = (paso: number, apagado: boolean, glifo: string, nombre: string) => (
@@ -54,10 +63,10 @@ export function Stepper({
     >
       {boton(-1, valor <= min, '−', 'Uno menos')}
       <Text style={estilos.stepperValor}>
-        {valor}
         {/* El símbolo va más pequeño y en tinta suave: la cifra es lo que se
             mueve, el símbolo sólo dice de qué. */}
-        {sufijo ? <Text style={estilos.stepperSufijo}>{` ${sufijo}`}</Text> : null}
+        {prefijo ? <Text style={estilos.stepperSufijo}>{prefijo}</Text> : null}
+        {valor}
       </Text>
       {boton(1, valor >= max, '+', 'Uno más')}
     </View>

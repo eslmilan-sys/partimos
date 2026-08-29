@@ -12,9 +12,11 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
+
+import { useVolver } from '@/ui/salidas';
 
 import { aporteCalculado } from '@/dominio/aporte';
 import { type PublicacionPreparada, prepararPublicacion } from '@/servicios/viajes';
@@ -25,14 +27,15 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Interruptor, Pastilla, Stepper } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { enHoras, hora } from '@/ui/fechas';
-import { Maleta } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
+import { Atras, Maleta } from '@/ui/iconos';
+import { TRACK_MICRO, familia, color, espacio, interlinea, pulsado, radio } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
 export default function Puestos() {
   const router = useRouter();
+  const volver = useVolver();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
   const [puestos, setPuestos] = useState(3);
@@ -67,13 +70,30 @@ export default function Puestos() {
 
       <View style={estilos.cabecera}>
         <View style={estilos.filaSuperior}>
-          <View style={estilos.circulo} />
-          <Text style={estilos.epigrafeCampo}>Publicar · paso 3 de 4</Text>
+          {/* **AQUÍ NO HABÍA BOTÓN**: era un círculo gris vacío, con la forma
+              del de atrás y sin nada dentro ni nada detrás. Desde esta
+              pantalla no se podía volver (29-08-2026). */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás"
+            onPress={() => volver()}
+            style={({ pressed }) => [estilos.circulo, pressed && pulsado.celda]}
+          >
+            <Atras />
+          </Pressable>
+          {/* **NI ES «PUBLICAR» NI ES EL PASO 3 DE 4.** El asistente de
+              publicar tiene ocho pasos desde el 27-08, y a esta pantalla se
+              llega desde «editar un viaje publicado»: quien venía a cambiar
+              los puestos de un viaje que ya está en la calle leía que estaba
+              publicando, y en un paso que no existe. El epígrafe dice ahora
+              la ruta, como en todas las demás. */}
+          <Text style={estilos.epigrafeCampo} numberOfLines={1}>
+            {`${datos.origen} → ${datos.destino}`}
+          </Text>
         </View>
         <Text style={estilos.titular}>
-          {'¿Cuánto '}
-          <Text style={estilos.titularFuerte}>cabe</Text>
-          {'?'}
+          {'Puestos y '}
+          <Text style={estilos.titularFuerte}>aporte</Text>
         </Text>
       </View>
 
@@ -105,8 +125,14 @@ export default function Puestos() {
               alCambiar={(v) => setAporte(v * 100)}
               min={3}
               max={Math.round(datos.topeCentavos / 100)}
-              sufijo="$"
-              etiquetaAccesible="Aporte por puesto, en dólares"
+              /* **`B/`, NO `$`.** El sistema escribe el dinero con el prefijo
+                 balboa, y esta misma pantalla ya lo hacía bien tres veces
+                 —«Tope de la ruta: B/10», «Publicar · 3 puestos a B/8»—: el
+                 stepper y la vista previa eran los dos únicos sitios de la
+                 app con el símbolo detrás. Dos formatos de dinero en una
+                 pantalla es un formato de menos. */
+              prefijo="B/"
+              etiquetaAccesible="Aporte por puesto, en balboas"
             />
           </View>
 
@@ -121,10 +147,7 @@ export default function Puestos() {
                 {`${hora(datos.salida)} · ${enHoras(datos.duracionMin)}`}
               </Text>
               <View style={estilos.bloquePrecio}>
-                <Text style={estilos.precio}>
-                  {Math.round(aporte / 100)}
-                  <Text style={estilos.precioSimbolo}> $</Text>
-                </Text>
+                <Text style={estilos.precio}>{formatearDineroRedondo(aporte)}</Text>
                 <Pastilla estilo={{ marginTop: 2 }}>
                   {puestos === 1 ? '1 puesto' : `${puestos} puestos`}
                 </Pastilla>
@@ -138,12 +161,23 @@ export default function Puestos() {
               </Text>
             </View>
 
-            <View style={estilos.filaEquipaje}>
-              <Maleta tamano={13} />
-              <Text style={estilos.equipaje}>
-                Cada pasajero dice qué lleva; tú decides al recibir su solicitud
-              </Text>
-            </View>
+          </View>
+
+          {/* **ESTA FRASE NO IBA DENTRO DE LA PREVIA.**
+              Decía «Cada pasajero dice qué lleva; tú decides al recibir su
+              solicitud» DENTRO de la tarjeta rotulada «Así lo verán los
+              pasajeros» — y está escrita al conductor: «tú decides». O sea,
+              la previa enseñaba al pasajero una frase que el pasajero no ve
+              nunca, y encima hablándole de usted a otra persona. Nadie podía
+              entenderla, y así lo dijo el dueño el 29-08-2026.
+              La previa se queda con lo que el pasajero ve de verdad; la
+              advertencia baja aquí, fuera de la tarjeta y en su voz. */}
+          <View style={estilos.notaEquipaje}>
+            <Maleta tamano={14} />
+            <Text style={estilos.notaEquipajeTexto}>
+              Cada quien te dice qué equipaje lleva cuando pide su puesto. Tú
+              decides si te cabe antes de aceptar.
+            </Text>
           </View>
         </View>
       </View>
@@ -153,8 +187,13 @@ export default function Puestos() {
         <Boton alPulsar={() => router.push('/(conductor)/publicar')}>
           {`Publicar · ${puestos} ${puestos === 1 ? 'puesto' : 'puestos'} a ${formatearDineroRedondo(aporte)}`}
         </Boton>
+        {/* **EL TOPE, UNA VEZ.** Ya está escrito arriba, bajo el aporte —«Tope
+            de la ruta: B/10»—, que es donde sirve: junto al control que puede
+            cruzarlo. Repetirlo aquí no enseñaba nada nuevo, y encima lo decía
+            con otra palabra: «plaza», que no sale en ninguna otra pantalla de
+            la app. Aquí va lo que este botón no hace. */}
         <Text style={estilos.notaPie}>
-          {`Tope del aporte: ${formatearDineroRedondo(datos.topeCentavos)} por plaza en esta ruta.`}
+          Todavía no se publica nada: en el siguiente paso lo repasas entero.
         </Text>
       </View>
     </View>
@@ -285,7 +324,6 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  precioSimbolo: { fontSize: 14, lineHeight: 13.3, fontWeight: '500' },
 
   filaRuta: { flexDirection: 'row', alignItems: 'center', gap: 11, marginTop: 12 },
   puntoAzul: { width: 9, height: 9, borderRadius: 999, backgroundColor: color.azul700 },
@@ -299,8 +337,14 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  filaEquipaje: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 12 },
-  equipaje: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
+  notaEquipaje: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, marginTop: 14 },
+  notaEquipajeTexto: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 19,
+    color: color.ink500,
+    fontFamily: familia,
+  },
 
   pie: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 26 },
   notaPie: {
