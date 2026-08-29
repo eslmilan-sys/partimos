@@ -27,11 +27,9 @@ import { type MiCiudad, comoLugarDeCiudad, guardarMiCiudad, miCiudad } from '@/s
 import { useMiId } from '@/servicios/sesion';
 import { aDondeSeVaDesde, ciudadesDeSalida, CIUDAD_POR_DEFECTO } from '@/servicios/lugares';
 import {
-  type GanchoDeConductor,
   type RutaPopular,
   type SalidaCercana,
   diaEnPanama,
-  ganchoDeConductor,
   proximasSalidas,
   salidasDesde,
   rutasPopulares,
@@ -47,7 +45,7 @@ import { Avatar } from '@/ui/controles';
 import { PuntaDeFlecha } from '@/ui/TarjetaDeViaje';
 import { cifraRedonda, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, diaLargo, hora } from '@/ui/fechas';
-import { Calendario, Campana, Carro, Cerrar, Escudo, Intercambio, Lupa, Marca, Persona, Estrella, Avanza } from '@/ui/iconos';
+import { Calendario, Campana, Carro, Escudo, Intercambio, Lupa, Marca, Persona, Estrella, Avanza } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -56,10 +54,6 @@ const FOTOS: Record<string, number> = {
   david: require('../../assets/david.jpeg'),
   'las-tablas': require('../../assets/venao.webp'),
 };
-
-/** Los puestos se escriben con letra: en una frase, «tres» se lee y «3» se cuenta. */
-const LETRAS = ['cero', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis'];
-const enLetra = (n: number) => LETRAS[n] ?? String(n);
 
 /** Cuatro es el máximo: un carro de cinco plazas lleva cuatro pasajeros. */
 const CUANTOS_PUESTOS: Opcion[] = [
@@ -80,8 +74,6 @@ const DESDE_POR_DEFECTO: Lugar = {
   lng: -79.5199,
 };
 
-const FOTO_MANEJAR = require('../../assets/manejar.webp');
-
 /** Sin sesión que preguntar —solo en simulado—: la persona del recorrido. */
 const YO_DEL_RECORRIDO = '22222222-2222-4222-8222-222222222222';
 
@@ -92,15 +84,12 @@ export default function Inicio() {
   const [sinLeer, setSinLeer] = useState(0);
   const [rutas, setRutas] = useState<RutaPopular[]>([]);
   const [salen, setSalen] = useState<SalidaCercana[]>([]);
-  const [gancho, setGancho] = useState<GanchoDeConductor | null>(null);
   const [desde, setDesde] = useState<Lugar>(DESDE_POR_DEFECTO);
   const [hacia, setHacia] = useState<Lugar | null>(null);
   const [buscando, setBuscando] = useState<'desde' | 'hacia' | null>(null);
   const [cuando, setCuando] = useState(() => diaEnPanama(new Date()));
   const [pasajeros, setPasajeros] = useState(1);
   const [eligiendo, setEligiendo] = useState<'cuando' | 'pasajeros' | null>(null);
-  /** El banner de manejar se puede cerrar; vuelve al abrir de nuevo. */
-  const [sinBanner, setSinBanner] = useState(false);
 
   /**
    * DE DÓNDE SALES NORMALMENTE (27-08-2026).
@@ -132,7 +121,6 @@ export default function Inicio() {
 
   useEffect(() => {
     rutasPopulares().then(setRutas);
-    ganchoDeConductor().then(setGancho);
     /* Lo que sale ya. Si no hay nada en la próxima hora la sección no
        aparece: una fila vacía diciendo «salen ahora» sería mentira. */
     proximasSalidas(6).then(setSalen);
@@ -534,40 +522,12 @@ export default function Inicio() {
           </View>
         ) : null}
 
-        {/* La tarjeta del conductor: la otra mitad del producto, con su
-            fotografía (pedida por el dueño el 25-08). «recuperas», jamás
-            «ganas» — regla R5. */}
-        {gancho && !sinBanner ? (
-          <View style={estilos.seccion}>
-            <View style={estilos.manejarTarjeta}>
-              <View style={estilos.manejarMarco}>
-                <Image source={FOTO_MANEJAR} style={estilos.manejarFoto} resizeMode="cover" />
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Cerrar este aviso"
-                  onPress={() => setSinBanner(true)}
-                  style={estilos.manejarCerrar}
-                >
-                  <Cerrar tamano={14} tinta={color.ink700} />
-                </Pressable>
-              </View>
-              <View style={estilos.manejarCuerpo}>
-                <Text style={estilos.bannerTitulo}>¿Vas a manejar?</Text>
-                <Text style={estilos.bannerTexto}>
-                  {`Comparte tu viaje y recuperas hasta ${formatearDineroRedondo(gancho.recuperasCentavos)} llevando ${enLetra(gancho.puestos)} puestos a ${gancho.destino}.`}
-                </Text>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Publicar mi viaje"
-                  onPress={() => router.push('/(conductor)/publicar')}
-                  style={({ pressed }) => [estilos.bannerBoton, pressed && pulsado.boton]}
-                >
-                  <Text style={estilos.bannerBotonTexto}>Publicar mi viaje</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        ) : null}
+        {/* **LA TARJETA «¿VAS A MANEJAR?» SE FUE** (27-08-2026, pedido del
+            dueño). Ofrecer un viaje sigue siendo la mitad del producto, pero
+            no hace falta una tarjeta con fotografía para decirlo: el cuadrado
+            oscuro «Publicar» está en la barra de abajo, visible en esta misma
+            pantalla y en todas. La tarjeta repetía ese camino ocupando media
+            página, y quien entra a buscar puesto la cerraba. */}
 
         {/* Cómo va la app — para la fase de prueba entre conocidos. Las
             estrellas escriben en la misma mesa que el botón Cuéntame; el
@@ -1196,30 +1156,6 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  /* ---------------------------------------------- La bannière de manejar */
-  /** La tarjeta del conductor: la fotografía arriba, el argumento debajo. */
-  manejarTarjeta: {
-    marginHorizontal: espacio.gutter,
-    backgroundColor: color.blanco,
-    borderRadius: radio.l,
-    borderWidth: 1,
-    borderColor: color.bordeSutil,
-    overflow: 'hidden',
-  },
-  manejarMarco: { height: 148 },
-  manejarFoto: { width: '100%', height: '100%' },
-  manejarCerrar: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(255,255,255,.88)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  manejarCuerpo: { padding: 16 },
   /** Las estrellas de la fase de prueba. */
   notaTarjeta: {
     marginHorizontal: espacio.gutter,
@@ -1253,33 +1189,5 @@ const estilos = StyleSheet.create({
     fontWeight: '400',
     color: color.ink500,
     fontFamily: familia,
-  },
-  bannerBoton: {
-    alignSelf: 'flex-start',
-    marginTop: 10,
-    height: 40,
-    paddingHorizontal: 16,
-    borderRadius: 13,
-    backgroundColor: color.rojo500,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...sombra.cta,
-  },
-  bannerBotonTexto: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '600',
-    letterSpacing: -0.13,
-    color: color.blanco,
-    fontFamily: familia,
-  },
-  bannerCerrar: {
-    width: 32,
-    height: 32,
-    marginTop: -4,
-    marginRight: -4,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

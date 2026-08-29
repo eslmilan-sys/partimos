@@ -418,31 +418,6 @@ export async function resumenDeRuta(corredorSlug: string, pasajeros = 1): Promis
   });
 }
 
-export type GanchoDeConductor = {
-  /** Lo que el conductor recupera llevando el carro lleno en esa ruta. */
-  recuperasCentavos: number;
-  puestos: number;
-  destino: string;
-};
-
-/** La tarjeta que invita a publicar, en `3a`. La cifra es de un viaje, no del mes. */
-export async function ganchoDeConductor(corredorSlug = 'panama-chitre'): Promise<GanchoDeConductor> {
-  const corredor = fuente.corredores.find((c) => c.slug === corredorSlug)!;
-  const destino = fuente.ciudades.find((x) => x.id === corredor.destination_city_id);
-  const puestos = 3;
-  const costo = costoDelViaje({
-    distanciaKm: Number(corredor.distance_km),
-    peajeCentavos: Number(corredor.toll_cents),
-    consumoL100km: CONSUMO_L_100KM.standard,
-  });
-  const aporte = aporteCalculado(costo, puestos, topeDeRuta(costo));
-  return demora({
-    recuperasCentavos: loQueRecuperas(aporte, puestos),
-    puestos,
-    destino: destino?.name ?? '',
-  });
-}
-
 function aporteDeReferencia(c: Corridor): number {
   const costo = costoDelViaje({
     distanciaKm: Number(c.distance_km),
