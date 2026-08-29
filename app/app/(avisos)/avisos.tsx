@@ -135,33 +135,12 @@ export default function Avisos() {
           ) : null}
         </View>
         <Text style={estilos.titular}>
-          {'Tu '}
-          <Text style={estilos.titularFuerte}>bandeja</Text>
+          {'Tus '}
+          <Text style={estilos.titularFuerte}>avisos</Text>
         </Text>
       </View>
 
       <View style={estilos.cuerpo}>
-        {/* **LA PUERTA A LOS HILOS** (28-08-2026). La pestaña de abajo ya no
-            va a la lista de conversaciones: va aquí, porque lo que a uno le
-            llega no son sólo mensajes. Pero los hilos siguen existiendo y hay
-            que poder verlos todos, también los ya leídos —que por definición
-            no dejan aviso—. Sin esta fila la lista quedaba huérfana. */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Ver todas mis conversaciones"
-          onPress={() => router.push('/(pasajero)/conversaciones')}
-          style={({ pressed }) => [estilos.puertaChats, pressed && { backgroundColor: color.sand100 }]}
-        >
-          <View style={estilos.cuadroIcono}>
-            <Chat tamano={19} tinta={color.azul700} />
-          </View>
-          <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={estilos.titulo}>Mis conversaciones</Text>
-            <Text style={estilos.detalle}>Todos los hilos, también los ya leídos</Text>
-          </View>
-          <Avanza tamano={16} />
-        </Pressable>
-
         {datos.pideAccion.length > 0 ? (
           <>
             <View style={estilos.filaSeccion}>
@@ -270,7 +249,7 @@ export default function Avisos() {
       </View>
       </ScrollView>
 
-      <Pestanas valor="Mensajes" yo={yo} />
+      <Pestanas valor="Perfil" yo={yo} />
     </View>
   );
 }
@@ -330,19 +309,6 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   puntoSeccion: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#fff' },
-
-  /** La puerta a la lista de hilos: tarjeta, pero de paso — no es un aviso. */
-  puertaChats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 18,
-    padding: 13,
-    backgroundColor: color.blanco,
-    borderRadius: radio.l,
-    borderWidth: 1,
-    borderColor: color.bordeSutil,
-  },
 
   tarjeta: {
     backgroundColor: color.blanco,

@@ -184,24 +184,37 @@ export default function Solicitudes() {
               <Avanza tamano={15} />
             </Pressable>
 
-            <View style={estilos.acciones}>
-              <Boton
-                tamano="md"
-                ancho
-                desactivado={ocupado === s.id}
-                alPulsar={() => aceptar(s.id, s.pasajero.nombre, s.aporteCentavos)}
-              >
-                {`Aceptar · ${formatearDineroRedondo(s.aporteCentavos)}`}
-              </Boton>
-              <Boton
-                tono="contorno"
-                tamano="md"
-                desactivado={ocupado === s.id}
-                alPulsar={() => rechazar(s.id)}
-              >
-                No puedo
-              </Boton>
-            </View>
+            {/* **UNA SOLICITUD CADUCADA NO SE ACEPTA** (28-08-2026, visto por
+                el dueño: aceptó un puesto en un viaje del pasado). La pastilla
+                ya decía «Caducada» y los botones seguían encendidos: el
+                servicio lo rechaza desde hoy, pero un botón que sólo sirve
+                para dar un error no debería estar. En su sitio, por qué. */}
+            {s.estado === 'caducada' ? (
+              <Text style={estilos.porQueCaduco}>
+                {new Date(datos.viaje.salida) <= new Date()
+                  ? 'Ese viaje ya salió. No se puede aceptar ni rechazar.'
+                  : 'Se pasaron las cuatro horas. El puesto volvió a quedar libre.'}
+              </Text>
+            ) : (
+              <View style={estilos.acciones}>
+                <Boton
+                  tamano="md"
+                  ancho
+                  desactivado={ocupado === s.id}
+                  alPulsar={() => aceptar(s.id, s.pasajero.nombre, s.aporteCentavos)}
+                >
+                  {`Aceptar · ${formatearDineroRedondo(s.aporteCentavos)}`}
+                </Boton>
+                <Boton
+                  tono="contorno"
+                  tamano="md"
+                  desactivado={ocupado === s.id}
+                  alPulsar={() => rechazar(s.id)}
+                >
+                  No puedo
+                </Boton>
+              </View>
+            )}
           </View>
         ))}
 
@@ -277,35 +290,57 @@ export default function Solicitudes() {
             <View style={{ marginBottom: 10 }}>
               <Epigrafe>Ya van contigo</Epigrafe>
             </View>
+            {/* **LA FILA ABRE, Y CABE** (28-08-2026, visto por el dueño).
+                Dos defectos a la vez: el renglón se cortaba —«Vía Argentina,
+                Riba Smith · …»— porque tres cosas se peleaban por el mismo
+                ancho, y la fila entera no llevaba a ninguna parte: enseñaba la
+                cara y el punto de alguien sin forma de saber quién es.
+
+                Ahora la fila abre su perfil, la pastilla y el chat bajan a su
+                propia línea, y el punto y el equipaje tienen el ancho entero
+                — en dos renglones si hacen falta. */}
             {yaVanContigo.map((c) => (
-              <View key={c.reservaId} style={estilos.filaConfirmado}>
-                <Avatar nombre={c.nombre} tamano={36} />
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={estilos.nombreConfirmado}>{c.nombre}</Text>
-                  <Text style={estilos.detalleConfirmado} numberOfLines={1}>
-                    {`${c.punto} · ${c.equipaje}`}
-                  </Text>
+              <Pressable
+                key={c.reservaId}
+                accessibilityRole="button"
+                accessibilityLabel={`Ver quién es ${c.nombre}`}
+                onPress={() =>
+                  router.push({ pathname: '/(pasajero)/perfil', params: { perfil: c.id } })
+                }
+                style={({ pressed }) => [estilos.filaConfirmado, pressed && pulsado.celda]}
+              >
+                <View style={estilos.filaPersonaConfirmada}>
+                  <Avatar nombre={c.nombre} tamano={36} />
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={estilos.nombreConfirmado}>{c.nombre}</Text>
+                    <Text style={estilos.detalleConfirmado} numberOfLines={2}>
+                      {`${c.punto} · ${c.equipaje}`}
+                    </Text>
+                  </View>
+                  <Avanza />
                 </View>
-                <Insignia
-                  punto
-                  fondo={c.pagado ? color.hechoFondo : color.sand200}
-                  tinta={c.pagado ? color.hechoTinta : color.ink700}
-                >
-                  {c.pagado ? 'Aporte listo' : 'Aporta al subir'}
-                </Insignia>
-                {/* Y a quien ya iba contigo, también: la fila enseñaba su
-                    punto y su equipaje y no daba forma de preguntarle nada. */}
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`Escribirle a ${c.nombre}`}
-                  onPress={() =>
-                    router.push({ pathname: '/(pasajero)/chat', params: { reserva: c.reservaId } })
-                  }
-                  style={({ pressed }) => [estilos.celdaChat, pressed && pulsado.celda]}
-                >
-                  <Chat tamano={18} tinta={color.ink600} />
-                </Pressable>
-              </View>
+
+                <View style={estilos.pieConfirmado}>
+                  <Insignia
+                    punto
+                    fondo={c.pagado ? color.hechoFondo : color.sand200}
+                    tinta={c.pagado ? color.hechoTinta : color.ink700}
+                  >
+                    {c.pagado ? 'Aporte listo' : 'Aporta al subir'}
+                  </Insignia>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Escribirle a ${c.nombre}`}
+                    onPress={() =>
+                      router.push({ pathname: '/(pasajero)/chat', params: { reserva: c.reservaId } })
+                    }
+                    style={({ pressed }) => [estilos.escribirle, pressed && pulsado.celda]}
+                  >
+                    <Chat tamano={17} tinta={color.ink700} />
+                    <Text style={estilos.escribirleTexto}>Escribir</Text>
+                  </Pressable>
+                </View>
+              </Pressable>
             ))}
           </View>
         ) : null}
@@ -433,12 +468,43 @@ const estilos = StyleSheet.create({
   escribir: { fontSize: 12.5, lineHeight: 18.12, fontWeight: '600', color: color.azul700, fontFamily: familia },
   /** Zona de toque de verdad: el texto solo mide 18 px de alto. */
   botonEscribir: { paddingVertical: 6, paddingHorizontal: 8, marginVertical: -6, marginRight: -8, borderRadius: radio.s },
-  celdaChat: {
-    width: 36,
-    height: 36,
-    borderRadius: radio.icono,
+  /** Nombre y punto arriba, pastilla y chat abajo: nadie se roba el ancho. */
+  filaPersonaConfirmada: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  pieConfirmado: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: color.bordeSutil,
+  },
+  escribirle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 32,
+    paddingHorizontal: 11,
+    borderRadius: radio.s,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+  },
+  porQueCaduco: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: color.bordeSutil,
+    fontSize: 13,
+    lineHeight: 19,
+    color: color.ink500,
+    fontFamily: familia,
+  },
+  escribirleTexto: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: color.ink700,
+    fontFamily: familia,
   },
 
   vacio: {

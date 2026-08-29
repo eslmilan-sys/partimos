@@ -7,6 +7,7 @@
 
 import { comoLoVeElConductor, decideElMaletero, deFilas, resumenCorto } from '@/dominio/equipaje';
 import { enTexto } from '@/dominio/notas';
+import { cuandoCaduca, porQueCaduco, sePuedeAceptar } from '@/dominio/solicitud';
 import { tarifaDeServicio } from '@/dominio/tarifas';
 import type { EstadoDeSolicitud, Payment, ReservaFila } from '@/tipos';
 
@@ -105,6 +106,28 @@ export async function aceptarSolicitud(
   const reserva = fuente.reservas.find((r) => r.id === id);
   if (!reserva) throw new Error(`No existe la solicitud ${id}`);
   if (reserva.status !== 'pending') throw new Error('Esta solicitud ya no está pendiente');
+
+  /**
+   * **NO SE ACEPTA UN PUESTO EN UN CARRO QUE YA SE FUE** (28-08-2026, visto
+   * por el dueño). Aquí sólo se miraba el estado y los puestos libres, nunca
+   * la hora de salida: se podía confirmar una solicitud de un viaje de ayer,
+   * y quedaba una reserva `confirmed` con su aporte retenido por un viaje que
+   * nadie iba a hacer. La regla —y el otro reloj— viven en `dominio/solicitud`.
+   */
+  const viaje = fuente.viajes.find((v) => v.id === reserva.trip_id);
+  if (!viaje) throw new Error('El viaje de esta solicitud ya no existe');
+  const vencimiento = {
+    expiraEn: reserva.expires_at ?? viaje.departure_at,
+    salida: viaje.departure_at,
+  };
+  if (!sePuedeAceptar(vencimiento)) {
+    throw new Error(
+      porQueCaduco(vencimiento) === 'ya-salio'
+        ? 'Ese viaje ya salió: la solicitud caducó'
+        : 'Esta solicitud caducó: se pasaron las cuatro horas',
+    );
+  }
+
   if (puestosLibresDe(reserva.trip_id) < reserva.seats) {
     throw new Error('Ya no quedan puestos en este viaje');
   }
@@ -165,7 +188,12 @@ function nombreDe(id: string): string {
 function comoSolicitud(r: ReservaFila, ahora: Date): Solicitud {
   // Una solicitud sin caducidad no ha empezado a correr: se enseña con las
   // cuatro horas enteras por delante, no como caducada hace un siglo.
-  const caduca = r.expires_at ?? new Date(ahora.getTime() + HORAS_PARA_RESPONDER * 3_600_000).toISOString();
+  /* **DOS RELOJES, y manda el primero.** Antes sólo contaba `expires_at`, así
+     que una solicitud de un viaje ya salido se enseñaba como pendiente con
+     sus horas por delante. La regla vive en `dominio/solicitud`. */
+  const plazo = r.expires_at ?? new Date(ahora.getTime() + HORAS_PARA_RESPONDER * 3_600_000).toISOString();
+  const salida = fuente.viajes.find((v) => v.id === r.trip_id)?.departure_at ?? plazo;
+  const caduca = cuandoCaduca({ expiraEn: plazo, salida });
   const restante = new Date(caduca).getTime() - ahora.getTime();
   const rep = fuente.reputacion[r.passenger_id];
   return {

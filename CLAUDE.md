@@ -364,6 +364,29 @@ parler :
   obligatoire. Elle dit maintenant « 4,8 · 12 opiniones ». Et la virgule
   décimale vient d'un seul endroit (`enTexto`) : `toFixed(1)` était semé
   dans cinq écrans et écrivait « 4.8 » en espagnol.
+- **Deux endroits, deux choses (28-08-2026, tranché après l'avoir vu
+  fait à l'envers pendant un jour).** L'onglet du bas est **Chats** :
+  des conversations, rien d'autre, et sa pastille compte les messages
+  qu'on t'a écrits et que tu n'as pas ouverts. La cloche de l'accueil,
+  en haut à droite, est la **bandeja** : ce qui s'est passé. La veille
+  les deux avaient été fusionnés en un seul onglet ; sur le téléphone ça
+  ne marche pas — qui va à la barre du bas y va pour parler à quelqu'un,
+  et tombait sur une liste d'événements où il fallait chercher la
+  conversation. Qu'un message apparaisse aux deux endroits — pastille
+  ici, avis dans la cloche — est voulu et demandé : la cloche compte ce
+  qui est arrivé, l'onglet ce qu'il reste à répondre.
+- **Une demande meurt par DEUX horloges (28-08-2026).** On pouvait
+  **accepter une demande de place sur un trajet déjà parti** : l'écran
+  la montrait en attente — ses quatre heures couraient encore — et le
+  service la confirmait sans jamais regarder l'heure de départ. Résultat
+  : une réservation `confirmed` sur un trajet d'hier, un apport retenu
+  pour un trajet que personne ne fera, et un passager listé dans « Ya
+  van contigo » d'une voiture déjà rentrée. La règle est dans
+  `app/src/dominio/solicitud.ts` avec ses tests : **c'est la première
+  des deux échéances qui l'emporte** — les quatre heures du conducteur
+  ou le départ. Le service refuse, et l'écran n'offre plus les boutons
+  du tout : il écrit pourquoi à leur place. Un bouton qui ne sert qu'à
+  donner une erreur ne devrait pas être là.
 - **Ouvrir un fil, c'est le lire (27-08-2026).** La pastille « non lu » se
   déduisait de « le dernier message n'est pas de moi », donc ouvrir le fil
   ne changeait rien et elle restait allumée pour toujours. Maintenant
