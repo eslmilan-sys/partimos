@@ -7,15 +7,24 @@
  * vuelvan a separarse. `BarraDePestanas` sigue siendo la pieza de dibujo;
  * esto es la de navegación.
  *
- * **Los rótulos son los del v6** — Buscar · Viajes · Publicar · Chats ·
+ * **Los rótulos son los del v6** — Buscar · Viajes · Publicar · Bandeja ·
  * Perfil — y el icono de Viajes es el carro del v6, que es el que el diseño
  * pone detrás de ese rótulo. Los `valor` internos no cambian: son la clave
  * que las pantallas ya pasan.
  *
- * **La pastilla de Chats se cuenta aquí** (27-08-2026). Antes la ponía cada
- * pantalla, o sea: una sola, y con la cuenta equivocada — le pasaba a Chats
- * el número de la campana, que son los avisos. Once barras con la misma
- * cuenta escrita once veces se separan; escrita una vez, no.
+ * **«Chats» se llama BANDEJA desde el 28-08-2026** (pedido del dueño). El
+ * rótulo prometía conversaciones y la pastilla contaba conversaciones, pero
+ * lo que a uno le llega no son sólo mensajes: es que le aceptaron el puesto,
+ * que le pidieron uno, que sale mañana. Dos sitios donde mirar —la campana
+ * de arriba y la pestaña de abajo— con dos cuentas distintas era pedirle a
+ * la gente que llevara la contabilidad. Ahora hay UNA bandeja, un número, y
+ * la campana del inicio va al mismo sitio.
+ *
+ * **Y el número se cuenta aquí, una vez.** Ojo con lo que parece obvio y no
+ * lo es: la cuenta NO es «mensajes sin leer + avisos sin leer». Un mensaje
+ * sin leer YA ES un aviso desde el 27-08 (`kind: 'mensaje_nuevo'`), así que
+ * sumarlos contaría cada mensaje dos veces. `bandeja().sinLeer` es la cuenta
+ * entera, y por eso es la única que se pide.
  */
 
 import { useCallback, useState } from 'react';
@@ -23,11 +32,11 @@ import { View } from 'react-native';
 
 import { useFocusEffect, useRouter } from 'expo-router';
 
-import { cuantosSinLeer } from '@/servicios/mensajes';
+import { bandeja } from '@/servicios/avisos';
 import { useMiId } from '@/servicios/sesion';
 
 import { BarraDePestanas } from './BarraDePestanas';
-import { Carro, Chat, Lupa, Mas, Persona } from './iconos';
+import { Campana, Carro, Lupa, Mas, Persona } from './iconos';
 import { color } from './tokens';
 
 /** El nombre de cada pestaña es su valor: no hay una clave aparte que mantener. */
@@ -41,7 +50,7 @@ const A_DONDE: Record<Pestana, string> = {
   Buscar: '/(pasajero)',
   'Mis viajes': '/(conductor)/misviajes',
   Publicar: '/(conductor)/publicar',
-  Mensajes: '/(pasajero)/conversaciones',
+  Mensajes: '/(avisos)/avisos',
   Perfil: '/(cuenta)/cuenta',
 };
 
@@ -66,8 +75,9 @@ const LAS_CUATRO = [
   },
   {
     valor: 'Mensajes',
-    etiqueta: 'Chats',
-    icono: (a: boolean) => <Chat tamano={23} tinta={tinta(a)} grueso={grueso(a)} />,
+    etiqueta: 'Bandeja',
+    /* La campana y no la burbuja: aquí ya no hay sólo conversaciones. */
+    icono: (a: boolean) => <Campana tamano={23} tinta={tinta(a)} grueso={grueso(a)} />,
   },
   {
     valor: 'Perfil',
@@ -114,18 +124,24 @@ export function Pestanas({ valor, yo, insignias }: Props) {
    */
   useFocusEffect(
     useCallback(() => {
+      if (!quien) {
+        setSinLeer(0);
+        return;
+      }
       let vivo = true;
-      cuantosSinLeer(quien).then((n) => {
-        if (vivo) setSinLeer(n);
-      });
+      bandeja(quien)
+        .then((b) => {
+          if (vivo) setSinLeer(b.sinLeer);
+        })
+        .catch(() => {});
       return () => {
         vivo = false;
       };
     }, [quien]),
   );
 
-  /* La de Chats se cuenta sola; el resto puede venir de fuera. Estar EN Chats
-     no enciende la pastilla: los que se ven ya se están leyendo. */
+  /* La de la bandeja se cuenta sola; el resto puede venir de fuera. Estar EN
+     la bandeja no enciende la pastilla: lo que se ve ya se está leyendo. */
   const cuentas: Partial<Record<Pestana, number>> = {
     ...insignias,
     Mensajes: valor === 'Mensajes' || sinLeer === 0 ? undefined : sinLeer,

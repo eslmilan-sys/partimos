@@ -33,21 +33,40 @@ import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Pestanas } from '@/ui/Pestanas';
 import { tabular } from '@/ui/dinero';
-import { Atras, Avanza, Billete, Carro, Escudo, Estrella, Visto } from '@/ui/iconos';
+import { Atras, Avanza, Billete, Carro, Chat, Escudo, Estrella, Visto } from '@/ui/iconos';
 import { TRACK_MICRO, color, espacio, familia, radio } from '@/ui/tokens';
 
 /** Daniela, la pasajera del simulado. Mientras no haya sesión, esta es la convención. */
 const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
 
 /** El dibujo de cada clase de aviso. Un aviso sin cara es una línea de texto. */
-function iconoDe(titulo: string) {
-  const t = titulo.toLowerCase();
-  if (t.includes('aport') || t.includes('$')) return <Billete tamano={19} tinta={color.azul700} />;
-  if (t.includes('califica')) return <Estrella tamano={17} tinta={color.oro500} />;
-  if (t.includes('no puede') || t.includes('cancel'))
-    return <Escudo tamano={19} tinta={color.rojo600} />;
-  if (t.includes('pidió') || t.includes('aceptó')) return <Carro tamano={19} tinta={color.azul700} />;
-  return <Visto tamano={17} tinta={color.azul700} />;
+/**
+ * El icono sale del `kind`, no del texto del título (28-08-2026).
+ *
+ * Antes buscaba palabras dentro del título — «¿dice "aport"?», «¿dice
+ * "aceptó"?» — así que reescribir una frase cambiaba el dibujo, y el aviso de
+ * un mensaje nuevo, que no dice ninguna de esas palabras, caía en el icono
+ * genérico. La clase ya la traen las dos aguas de la bandeja.
+ */
+function iconoDe(clase: Aviso['clase']) {
+  switch (clase) {
+    case 'aporte_recibido':
+    case 'reembolso_enviado':
+      return <Billete tamano={19} tinta={color.azul700} />;
+    case 'califica_tu':
+    case 'te_calificaron':
+      return <Estrella tamano={17} tinta={color.oro500} />;
+    case 'viaje_cancelado':
+      return <Escudo tamano={19} tinta={color.rojo600} />;
+    case 'solicitud_recibida':
+    case 'solicitud_aceptada':
+    case 'sales_pronto':
+      return <Carro tamano={19} tinta={color.azul700} />;
+    case 'mensaje_nuevo':
+      return <Chat tamano={19} tinta={color.azul700} />;
+    default:
+      return <Visto tamano={17} tinta={color.azul700} />;
+  }
 }
 
 export default function Avisos() {
@@ -116,12 +135,33 @@ export default function Avisos() {
           ) : null}
         </View>
         <Text style={estilos.titular}>
-          {'Tus '}
-          <Text style={estilos.titularFuerte}>avisos</Text>
+          {'Tu '}
+          <Text style={estilos.titularFuerte}>bandeja</Text>
         </Text>
       </View>
 
       <View style={estilos.cuerpo}>
+        {/* **LA PUERTA A LOS HILOS** (28-08-2026). La pestaña de abajo ya no
+            va a la lista de conversaciones: va aquí, porque lo que a uno le
+            llega no son sólo mensajes. Pero los hilos siguen existiendo y hay
+            que poder verlos todos, también los ya leídos —que por definición
+            no dejan aviso—. Sin esta fila la lista quedaba huérfana. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Ver todas mis conversaciones"
+          onPress={() => router.push('/(pasajero)/conversaciones')}
+          style={({ pressed }) => [estilos.puertaChats, pressed && { backgroundColor: color.sand100 }]}
+        >
+          <View style={estilos.cuadroIcono}>
+            <Chat tamano={19} tinta={color.azul700} />
+          </View>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text style={estilos.titulo}>Mis conversaciones</Text>
+            <Text style={estilos.detalle}>Todos los hilos, también los ya leídos</Text>
+          </View>
+          <Avanza tamano={16} />
+        </Pressable>
+
         {datos.pideAccion.length > 0 ? (
           <>
             <View style={estilos.filaSeccion}>
@@ -132,7 +172,7 @@ export default function Avisos() {
             {datos.pideAccion.map((aviso) => (
               <View key={aviso.id} style={[estilos.tarjeta, estilos.tarjetaAccion]}>
                 <View style={estilos.filaTarjeta}>
-                  <View style={estilos.cuadroIcono}>{iconoDe(aviso.titulo)}</View>
+                  <View style={estilos.cuadroIcono}>{iconoDe(aviso.clase)}</View>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={estilos.titulo} numberOfLines={2}>
                       {aviso.titulo}
@@ -174,7 +214,7 @@ export default function Avisos() {
                 style={({ pressed }) => [estilos.tarjeta, pressed && { backgroundColor: color.sand100 }]}
               >
                 <View style={estilos.filaTarjeta}>
-                  <View style={estilos.cuadroIcono}>{iconoDe(aviso.titulo)}</View>
+                  <View style={estilos.cuadroIcono}>{iconoDe(aviso.clase)}</View>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={estilos.titulo} numberOfLines={2}>
                       {aviso.titulo}
@@ -241,7 +281,7 @@ export default function Avisos() {
       </View>
       </ScrollView>
 
-      <Pestanas valor="Perfil" yo={yo} />
+      <Pestanas valor="Mensajes" yo={yo} />
     </View>
   );
 }
@@ -301,6 +341,19 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   puntoSeccion: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#fff' },
+
+  /** La puerta a la lista de hilos: tarjeta, pero de paso — no es un aviso. */
+  puertaChats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 18,
+    padding: 13,
+    backgroundColor: color.blanco,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+  },
 
   tarjeta: {
     backgroundColor: color.blanco,

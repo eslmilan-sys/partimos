@@ -41,6 +41,15 @@ const demora = <T,>(valor: T, ms = 120): Promise<T> =>
 
 export type Aviso = {
   id: string;
+  /**
+   * DE QUÉ VA, tal cual lo dice la base o la derivación.
+   *
+   * La bandeja elegía el icono leyendo el TÍTULO —«¿incluye "aport"?»— y eso
+   * es adivinar: un aviso nuevo cae en el icono por defecto sin que nadie se
+   * entere, y cambiar una palabra del texto cambia el dibujo. El `kind` ya
+   * existe; sólo no llegaba a la pantalla.
+   */
+  clase: AvisoPendiente['kind'];
   titulo: string;
   detalle: string;
   /** La acción que el aviso lleva dentro, si la hay. */
@@ -58,6 +67,7 @@ export type Bandeja = {
 
 const comoAviso = (a: AvisoPendiente): Aviso => ({
   id: a.id,
+  clase: a.kind,
   titulo: a.title,
   detalle: a.body,
   accion: a.action_label && a.action_route ? { etiqueta: a.action_label, ruta: a.action_route } : null,
