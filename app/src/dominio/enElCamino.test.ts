@@ -89,3 +89,35 @@ test('el mismo sitio no alarga nada, y dos puntos iguales no dan ruta', () => {
   assert.equal(cuantoAlarga(PANAMA, PANAMA, CHITRE), 0);
   assert.equal(paradasEnElCamino(PANAMA, PANAMA, [{ ...CHITRE }]).length, 0);
 });
+
+/**
+ * PANAMÁ → LAS TABLAS, la ruta con la que el dueño encontró el defecto del
+ * 29-08-2026: la pantalla decía «esta ruta no pasa por ninguna otra ciudad de
+ * la lista» y ofrecía cero paradas.
+ *
+ * La regla nunca estuvo de acuerdo con esa frase, y esto lo deja escrito: por
+ * esa carretera se pasa por media Panamá Oeste y media Coclé. El defecto no
+ * era la regla — era que las rutas sin corredor declarado no la llamaban
+ * nunca (`servicios/viajes.ts`, `paradasQueSeOfrecen`).
+ */
+test('Panamá → Las Tablas atraviesa la vía entera, no «ninguna ciudad»', () => {
+  const LAS_TABLAS = { lat: 7.7667, lng: -80.2833 };
+  const CAPIRA = { lat: 8.7561, lng: -79.8811 };
+  const RIO_HATO = { lat: 8.3789, lng: -80.1711 };
+
+  const candidatas = [
+    { nombre: 'Aguadulce', ...AGUADULCE },
+    { nombre: 'Capira', ...CAPIRA },
+    { nombre: 'Chitré', ...CHITRE },
+    { nombre: 'Colón', ...COLON },
+    { nombre: 'David', ...DAVID },
+    { nombre: 'La Chorrera', ...LA_CHORRERA },
+    { nombre: 'Penonomé', ...PENONOME },
+    { nombre: 'Río Hato', ...RIO_HATO },
+  ];
+
+  assert.deepEqual(
+    paradasEnElCamino(PANAMA, LAS_TABLAS, candidatas).map((p) => p.nombre),
+    ['La Chorrera', 'Capira', 'Río Hato', 'Penonomé', 'Aguadulce', 'Chitré'],
+  );
+});

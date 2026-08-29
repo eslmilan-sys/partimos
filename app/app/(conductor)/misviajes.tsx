@@ -53,7 +53,6 @@ import {
 import { cerrarLasVencidas } from '@/servicios/abordaje';
 import { bandeja } from '@/servicios/avisos';
 import { cuantasAvisando } from '@/servicios/rutas';
-import { perfilResumido } from '@/servicios/perfiles';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
@@ -115,7 +114,6 @@ export default function MisViajesPantalla() {
   const [avisos, setAvisos] = useState(0);
   /** Cuántas rutas guardadas están avisando, para la puerta de abajo. */
   const [avisando, setAvisando] = useState(0);
-  const [nombre, setNombre] = useState<string | null>(null);
   const [manejando, setManejando] = useState<{
     proximos: ViajePublicado[];
     pasados: ViajePublicado[];
@@ -132,7 +130,6 @@ export default function MisViajesPantalla() {
     misViajesConduciendo(yo).then(setManejando);
     bandeja(yo).then((b) => setAvisos(b.sinLeer));
     cuantasAvisando(yo).then(setAvisando);
-    perfilResumido(yo).then((p) => setNombre(p?.first_name ?? null));
   }, [yo]);
 
   if (!datos) return <Cargando altura={186} tarjetas={3} />;
@@ -188,15 +185,11 @@ export default function MisViajesPantalla() {
               </View>
             ) : null}
           </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Mi perfil"
-            onPress={() => router.push('/(cuenta)/cuenta')}
-            style={estilos.zonaAvatar}
-          >
-            <Avatar nombre={nombre ?? 'Tú'} tamano={38} />
-          </Pressable>
+          {/* AQUÍ NO VA EL AVATAR. La cuenta ya tiene su pestaña abajo, en la
+              barra, en todas las pantallas: repetirla arriba a la derecha era
+              un segundo camino al mismo sitio, y de los dos el de arriba es el
+              que no se ve. Quitado el 29-08-2026. La campana sí se queda: los
+              avisos no tienen otra puerta. */}
         </View>
 
       </View>
@@ -658,12 +651,6 @@ const estilos = StyleSheet.create({
     color: color.rojo600,
     fontFamily: familia,
     ...tabular,
-  },
-  zonaAvatar: {
-    width: espacio.tap,
-    height: espacio.tap,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
 

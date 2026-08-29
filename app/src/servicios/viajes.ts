@@ -15,6 +15,7 @@ import {
   topeDeRuta,
 } from '@/dominio/aporte';
 import { soloCiudad, soloPunto } from '@/dominio/comoSeLlama';
+import { paradasEnElCamino } from '@/dominio/enElCamino';
 import { type Lugar, distanciaKm as kmEntrePuntos } from '@/dominio/lugar';
 import type { AvailableTrip, Corridor, TripStop, Vehicle, ViajeFila } from '@/tipos';
 
@@ -465,6 +466,76 @@ export type PublicacionPreparada = {
   carroPropio: boolean;
 };
 
+/**
+ * LAS CIUDADES QUE ESTA RUTA ATRAVIESA — venga de un corredor o no.
+ *
+ * **El defecto que esto corrige** (visto por el dueño el 29-08-2026,
+ * publicando Ciudad de Panamá → Las Tablas). El paso «¿Por dónde pasas?»
+ * decía *«Esta ruta no pasa por ninguna otra ciudad de la lista»* y ofrecía
+ * cero paradas. Y es falso: por esa carretera se pasa por La Chorrera,
+ * Capira, Chame, Coronado, San Carlos, Río Hato, Antón, Penonomé, Natá,
+ * Aguadulce, Parita, Chitré, Los Santos y Guararé. Dieciséis en total.
+ *
+ * La causa: las paradas se buscaban SÓLO por `slug` de corredor
+ * —`fuente.paradasDeLaRuta[corredorSlug]`—, y sólo hay cuatro corredores
+ * declarados. Desde que se abrieron todas las rutas a la publicación
+ * (24-08-2026), la inmensa mayoría de los viajes se publican como ruta
+ * libre, sin slug: la búsqueda daba `undefined`, el `?? []` la convertía en
+ * «ninguna», y la pantalla anunciaba como un hecho lo que era una tabla
+ * vacía. Toda ruta que no fuera una de las cuatro salía sin paradas.
+ *
+ * La regla para saber qué queda de camino ya existía y ya estaba probada
+ * (`dominio/enElCamino`): es la misma con la que las dos fuentes calculan
+ * las paradas de los corredores. Lo único que faltaba era llamarla también
+ * cuando no hay corredor. Nada nuevo que probar, un camino menos.
+ */
+/**
+ * DÓNDE CAE UN LUGAR.
+ *
+ * Un lugar del catálogo puede llegar sin coordenadas —una fila de ciudad
+ * convertida a mano, que es lo que hace la pantalla de publicar: `lat: null,
+ * lng: null` y sólo el `citySlug`—. Las 32 ciudades del almacén sí las
+ * tienen, así que se completan desde ahí antes de rendirse.
+ *
+ * Estaba escrita dentro de `estimarRuta`, donde nadie más la veía. Sacarla
+ * aquí es lo que hace que las paradas del camino se calculen igual que los
+ * kilómetros: con la misma idea de dónde está cada extremo.
+ */
+function dondeCae(l: Lugar | null | undefined): { lat: number; lng: number } | null {
+  if (!l) return null;
+  if (l.lat != null && l.lng != null) return { lat: l.lat, lng: l.lng };
+  const ciudad = l.citySlug ? fuente.ciudades.find((c) => c.slug === l.citySlug) : null;
+  if (ciudad?.lat != null && ciudad?.lng != null) return { lat: ciudad.lat, lng: ciudad.lng };
+  return null;
+}
+
+function paradasQueSeOfrecen(
+  corredorSlug: string,
+  desde: Lugar | null | undefined,
+  hasta: Lugar | null | undefined,
+): { etiqueta: string; fraccion: number }[] {
+  const declaradas = fuente.paradasDeLaRuta[corredorSlug];
+  if (declaradas && declaradas.length > 0) return declaradas;
+
+  const a = dondeCae(desde);
+  const b = dondeCae(hasta);
+  if (!a || !b) return [];
+
+  /* Los dos extremos no son paradas del camino: son el camino. Se van por
+     `citySlug` y no por nombre, porque el conductor pudo escribir «Costa
+     del Este» y la ciudad seguir siendo Ciudad de Panamá. */
+  const extremos = new Set([desde?.citySlug, hasta?.citySlug].filter(Boolean));
+  const candidatas = fuente.ciudades.filter(
+    (c): c is typeof c & { lat: number; lng: number } =>
+      c.lat != null && c.lng != null && !extremos.has(c.slug),
+  );
+
+  return paradasEnElCamino(a, b, candidatas).map((p) => ({
+    etiqueta: p.name,
+    fraccion: p.fraccion,
+  }));
+}
+
 export async function prepararPublicacion(
   conductorId: string,
   corredorSlug: string,
@@ -585,7 +656,7 @@ export async function prepararPublicacion(
        salen aquí, donde se conoce la duración. Así una parada al 60 % de un
        viaje de tres horas cae a las 1 h 48, y no en un número escrito a mano
        que deja de valer en cuanto cambia la ruta. */
-    paradasOfrecidas: (fuente.paradasDeLaRuta[corredorSlug] ?? []).map((p) => ({
+    paradasOfrecidas: paradasQueSeOfrecen(corredorSlug, libre?.desde, libre?.hacia).map((p) => ({
       nombre: p.etiqueta,
       minutos: Math.round(p.fraccion * duracionMin),
     })),
@@ -867,17 +938,8 @@ export function estimarRuta(desde: Lugar, hacia: Lugar, puestos = 3): Estimacion
     }
   }
 
-  /* Un lugar del catálogo puede llegar sin coordenadas —una fila de ciudad
-     convertida a mano—: las 32 ciudades del almacén las tienen, así que se
-     completan desde ahí antes de rendirse. */
-  const conCoordenadas = (l: Lugar): { lat: number; lng: number } | null => {
-    if (l.lat != null && l.lng != null) return { lat: l.lat, lng: l.lng };
-    const ciudad = l.citySlug ? fuente.ciudades.find((c) => c.slug === l.citySlug) : null;
-    if (ciudad?.lat != null && ciudad?.lng != null) return { lat: ciudad.lat, lng: ciudad.lng };
-    return null;
-  };
-  const a = conCoordenadas(desde);
-  const b = conCoordenadas(hacia);
+  const a = dondeCae(desde);
+  const b = dondeCae(hacia);
   if (!a || !b) return null;
 
   const km = Math.max(1, Math.round(kmEntrePuntos(a, b) * FACTOR_DE_CARRETERA));

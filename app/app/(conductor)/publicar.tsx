@@ -203,6 +203,16 @@ export default function Publicar() {
    * cuatro puntos de recogida por viaje es regla del producto.
    */
   const [elegidas, setElegidas] = useState<number[]>([]);
+  /**
+   * SI SE VE EL CAMINO ENTERO O SÓLO SU PRINCIPIO.
+   *
+   * Panamá → Las Tablas atraviesa DIECISÉIS ciudades del catálogo, y de ellas
+   * caben dos. Enseñar las dieciséis de golpe es empujar el resto de la
+   * pantalla —el recorrido, la llegada, el botón— fuera de la vista para
+   * elegir dos. Se abren las primeras del camino, que son las que un viaje
+   * desde Panamá recoge de verdad, y las demás quedan a un toque, contadas.
+   */
+  const [verTodasLasParadas, setVerTodasLasParadas] = useState(false);
   /* `puestos` YA NO ES ESTADO: se deriva del reparto adelante/atrás (0045).
      Dos fuentes para el mismo número acaban contradiciéndose. */
   /**
@@ -516,6 +526,10 @@ export default function Publicar() {
     .map((p, i) => ({ indice: i, ...p }))
     .filter((p) => !enOrden.includes(p.indice));
   const hayHueco = paradas < MAX_INTERMEDIAS;
+  /** Cuántas se abren sin pedirlo. Ver `verTodasLasParadas`. */
+  const A_LA_VISTA = 6;
+  const seVen = verTodasLasParadas ? porElegir : porElegir.slice(0, A_LA_VISTA);
+  const escondidas = porElegir.length - seVen.length;
 
   // Cada parada cuesta unos minutos; la llegada se mueve con ellas.
   const llegada = hora(mas(salida, datos.duracionMin + paradas * MINUTOS_POR_PARADA));
@@ -829,11 +843,11 @@ export default function Publicar() {
           {porElegir.length > 0 ? (
             <>
               <View style={estilos.pastillas}>
-                {porElegir.map((p) => (
+                {seVen.map((p) => (
                   <Pressable
                     key={p.indice}
                     accessibilityRole="button"
-                    accessibilityLabel={`Añadir ${p.nombre}`}
+                    accessibilityLabel={`Añadir ${p.nombre}, pasas sobre las ${hora(mas(salida, p.minutos))}`}
                     disabled={!hayHueco}
                     onPress={() =>
                       setElegidas((xs) => (xs.length < MAX_INTERMEDIAS ? [...xs, p.indice] : xs))
@@ -851,9 +865,37 @@ export default function Publicar() {
                     >
                       {p.nombre}
                     </Text>
+                    {/* LA HORA A LA QUE PASAS POR AHÍ, en la pastilla y no
+                        después de añadirla. Sin ella son dieciséis nombres
+                        sin orden aparente y hay que añadir una para saber si
+                        cae a las siete o a las diez; con ella la lista se lee
+                        como lo que es, el camino en orden. */}
+                    <Text
+                      style={[estilos.pastillaHora, !hayHueco && estilos.pastillaTextoLleno]}
+                    >
+                      {hora(mas(salida, p.minutos))}
+                    </Text>
                   </Pressable>
                 ))}
               </View>
+
+              {escondidas > 0 ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Ver las otras ${escondidas} ciudades del camino`}
+                  onPress={() => setVerTodasLasParadas(true)}
+                  style={[{ alignSelf: 'flex-start', paddingVertical: 8 }, zonaDeToque]}
+                >
+                  {/* AZUL, NO ROJO. `cambiar` es rojo, y en este sistema el
+                      rojo tiene cuatro significados contados y ninguno es
+                      «abrir una lista». Va del azul de las pastillas que
+                      despliega, que es de lo que habla. */}
+                  <Text style={estilos.verLasOtras}>
+                    {`Ver las otras ${escondidas} del camino`}
+                  </Text>
+                </Pressable>
+              ) : null}
+
               <Text style={estilos.notaParadas}>
                 {hayHueco
                   ? 'En el orden en que las pasas. El punto exacto lo acuerdas con cada pasajero.'
@@ -861,8 +903,15 @@ export default function Publicar() {
               </Text>
             </>
           ) : (
+            /* SIN CANDIDATAS. Dice POR QUÉ no hay ninguna, no sólo que no las
+               hay: el catálogo de ciudades es corto y en un tramo corto —o en
+               una ruta que no atraviesa ninguna— es normal que salga vacío.
+               La frase de antes, «esta ruta no pasa por ninguna otra ciudad de
+               la lista», se enseñaba también cuando el defecto era nuestro:
+               las rutas libres nunca consultaban la regla y TODAS decían eso. */
             <Text style={estilos.notaParadas}>
-              Esta ruta no pasa por ninguna otra ciudad de la lista.
+              No conocemos ninguna ciudad entre {datos.origen} y {datos.destino}. Publica directo:
+              quien quiera subirse en el camino te lo pedirá por el chat.
             </Text>
           )}
           </>
@@ -1301,6 +1350,15 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   pastillaTextoLleno: { color: color.ink400 },
+  /** La hora dentro de la pastilla: cifras tabulares y un peso menos que el
+   *  nombre — se lee, pero el nombre sigue mandando. */
+  pastillaHora: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: color.ink500,
+    ...tabular,
+    fontFamily: familia,
+  },
   filaParadasTitulo: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
   notaParadas: {
     marginTop: 8,
@@ -1321,6 +1379,7 @@ const estilos = StyleSheet.create({
   carroApagado: { fontWeight: '400', color: color.ink500, fontFamily: familia },
   /** Small 12/17 en el acento de texto: en el v1 lo que actúa es rojo. */
   cambiar: { fontSize: 12, lineHeight: 17, fontWeight: '500', color: color.rojo700, fontFamily: familia },
+  verLasOtras: { fontSize: 12.5, lineHeight: 17, fontWeight: '500', color: color.azul700, fontFamily: familia },
 
   recorrido: { marginTop: 10, position: 'relative' },
   lineaRecorrido: {
