@@ -391,6 +391,28 @@ parler :
   deux sont dérivés des faits existants, sans migration. Ce qui reste
   volontairement absent : « le conducteur arrive » et le suivi en direct
   — sans géolocalisation ce serait un mensonge — et toute promotion (R5).
+- **Le point de ramassage est du TEXTE (28-08-2026).** « Ver el punto de
+  recogida » ouvrait `ya-mapa` : une carte **dessinée** — aucun
+  fournisseur de cartes n'est contracté — avec des pastilles de voitures
+  dessus, la barre d'onglets qui tombait au milieu de la page, et pas un
+  mot du point qu'on venait regarder. Une fausse carte, au moment précis
+  où quelqu'un est dans la rue à chercher une voiture. Ce qu'il faut là
+  c'est **où, à quelle heure et avec qui**, en gros et sans rien
+  d'autre : `app/(pasajero)/punto.tsx`. Une vraie carte, le jour où elle
+  existe, se met **en dessous** — elle ne remplace pas ça. `ya-mapa` a
+  été supprimé : ses seuls liens étaient ces deux-là.
+- **Une affirmation se lit, elle ne se clique pas.** « Conductores con
+  cédula verificada » était un bouton qui ouvrait Ayuda, sans en avoir
+  l'air — ni chevron, ni couleur de lien — donc on ne le découvrait
+  qu'en le touchant par accident. C'est l'invariant 7 (une affirmation
+  porte sa raison), pas une porte.
+- **La ville dite à l'inscription se récupère toute seule.** Elle part
+  dans `options.data` et c'est le déclencheur de la 0044 qui la copie
+  dans `profiles`. **Si la 0044 n'est pas appliquée** — elles se posent à
+  la main — le profil reste sans ville et l'accueil la redemande, alors
+  que la réponse est toujours là, dans les métadonnées du compte.
+  `miCiudad` va la chercher là et l'écrit dans le profil : la réparation
+  est définitive et marche 0044 posée ou non.
 - **La licence passe par Didit, comme la cédula (0047 puis 0048,
   28-08-2026).** Au Panama elle expire sans prévenir, et conduire avec
   une licence périmée met le passager sans recours — l'assurance ne

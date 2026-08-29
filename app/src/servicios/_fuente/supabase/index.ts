@@ -486,3 +486,21 @@ export async function cambiarAvisoDeRutina(id: string, avisar: boolean): Promise
   rutinas[i] = { ...rutinas[i], avisar };
   return rutinas[i];
 }
+
+/**
+ * LA CIUDAD QUE SE DIJO AL REGISTRARSE (28-08-2026).
+ *
+ * `registrarse` la manda en `options.data`, y el disparador `handle_new_user`
+ * de la 0044 la copia a `profiles.home_city_id`. **Pero el disparador puede
+ * no estar** —la migración se aplica a mano— y entonces la persona contesta
+ * «¿de dónde sales?» en el registro y la app se lo vuelve a preguntar en el
+ * inicio, como si no hubiera dicho nada.
+ *
+ * El dato no se pierde: sigue en los metadatos de la cuenta. Esto lo lee de
+ * ahí para que la app se cure sola, aplicada la 0044 o no.
+ */
+export async function ciudadDelRegistro(): Promise<string | null> {
+  const { data } = await supabase.auth.getUser();
+  const meta = data.user?.user_metadata as { home_city_id?: string } | undefined;
+  return meta?.home_city_id ?? null;
+}

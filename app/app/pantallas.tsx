@@ -44,7 +44,7 @@ const TABLEROS: { nombre: string; pantallas: Pantalla[] }[] = [
       { id: '6c', titulo: 'Chat del viaje', ruta: '/(pasajero)/chat' },
       { id: '16a', titulo: 'Conversaciones', ruta: '/(pasajero)/conversaciones' },
       { id: '1d', titulo: 'Ya · lista', ruta: '/(pasajero)/ya' },
-      { id: '1e', titulo: 'Ya · mapa', ruta: '/(pasajero)/ya-mapa' },
+      { id: '1e', titulo: 'Punto de recogida', ruta: '/(pasajero)/punto' },
       { id: '1f', titulo: 'Código de abordaje', ruta: '/(pasajero)/codigo' },
       { id: '1h', titulo: 'En ruta', ruta: '/(pasajero)/ruta' },
       { id: '1i', titulo: 'Llegada y liberación', ruta: '/(pasajero)/llegada' },

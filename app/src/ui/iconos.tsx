@@ -374,11 +374,16 @@ export function MarcaColor({ tamano = 44 }: { tamano?: number }) {
   );
 }
 
+/**
+ * El avión de «mandar». **Apunta a la derecha** — se corrigió el 28-08-2026:
+ * la punta estaba en la izquierda, así que el botón de enviar señalaba hacia
+ * atrás, justo al revés de lo que hace.
+ */
 export function Avion({ tamano = 20, tinta = '#fff' }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path
-        d="M4 12l16-8-6 8 6 8z"
+        d="M20 12L4 4l6 8-6 8z"
         stroke={tinta}
         strokeWidth={trazo(tamano)}
         strokeLinecap="round"

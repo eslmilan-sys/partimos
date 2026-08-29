@@ -34,3 +34,13 @@ export {
 
 /** El catálogo de carros no es un dato: es una lista cerrada del producto. */
 export * from './catalogo';
+
+/**
+ * LA CIUDAD QUE SE DIJO AL REGISTRARSE, desde los metadatos de la cuenta.
+ *
+ * En el recorrido no hay registro que recordar, así que no hay nada que
+ * devolver. Existe para que el contrato con la fuente real esté cerrado.
+ */
+export async function ciudadDelRegistro(): Promise<string | null> {
+  return null;
+}

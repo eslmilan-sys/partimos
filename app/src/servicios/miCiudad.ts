@@ -41,7 +41,23 @@ export async function miCiudad(perfilId: string | null): Promise<MiCiudad | null
   const ciudad = perfil?.home_city_id
     ? fuente.ciudades.find((c) => c.id === perfil.home_city_id)
     : undefined;
-  return demora(ciudad ? comoCiudad(ciudad) : null);
+  if (ciudad) return demora(comoCiudad(ciudad));
+
+  /**
+   * **LA QUE SE DIJO AL REGISTRARSE** (28-08-2026, visto por el dueño: puso
+   * su ciudad al abrir la cuenta y el inicio se la volvía a pedir).
+   *
+   * El formulario la manda en `options.data` y el disparador de la 0044 la
+   * copia a `profiles`. Si la 0044 no está aplicada —se aplican a mano— el
+   * perfil queda sin ciudad y la respuesta se pierde de vista, aunque siga
+   * guardada en los metadatos de la cuenta. Se recupera de ahí y se escribe
+   * en el perfil, así que la cura es de una sola vez.
+   */
+  const delRegistro = await fuente.ciudadDelRegistro();
+  const rescatada = delRegistro ? fuente.ciudades.find((c) => c.id === delRegistro) : undefined;
+  if (!rescatada) return demora(null);
+  await guardarMiCiudad(perfilId, rescatada.id).catch(() => {});
+  return demora(comoCiudad(rescatada));
 }
 
 /** Todas las ciudades servidas, en orden alfabético: es una lista para elegir. */

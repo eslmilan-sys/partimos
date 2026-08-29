@@ -119,7 +119,14 @@ export default function Codigo() {
           </View>
 
           <View style={{ marginTop: 20 }}>
-            <Boton alPulsar={() => router.push('/(pasajero)/ya-mapa')}>
+            {/* Al punto, en texto (28-08-2026). Antes abría un mapa DIBUJADO
+                que no decía ni dónde ni a qué hora — justo lo que se viene a
+                mirar cuando uno está en la calle buscando el carro. */}
+            <Boton
+              alPulsar={() =>
+                router.push({ pathname: '/(pasajero)/punto', params: { reserva: reservaId } })
+              }
+            >
               Ver el punto de recogida
             </Boton>
           </View>

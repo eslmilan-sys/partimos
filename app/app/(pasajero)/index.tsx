@@ -357,15 +357,15 @@ export default function Inicio() {
 
         {/* La línea de confianza. Dice lo que es verdad: sin cédula
             verificada no se publica. Lleva a la pantalla que lo explica. */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Cómo cuidamos el viaje"
-          onPress={() => router.push('/(ayuda)')}
-          style={estilos.confianza}
-        >
+        {/* **NO ES UN BOTÓN** (28-08-2026, pedido del dueño). Era pulsable y
+            abría Ayuda, pero no lo parece —ni lleva galón, ni color de
+            enlace— así que sólo se descubría tocándolo por accidente. Es una
+            afirmación con su razón (invariante 7), y una afirmación se lee.
+            Ayuda vive en Perfil, en el chat y en la ficha del viaje. */}
+        <View style={estilos.confianza}>
           <Escudo tamano={13} tinta={color.inkIcono} />
           <Text style={estilos.confianzaTexto}>Conductores con cédula verificada</Text>
-        </Pressable>
+        </View>
       </View>
 
         {rutas.length > 0 ? (

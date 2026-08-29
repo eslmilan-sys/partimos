@@ -224,7 +224,12 @@ export default function Chat() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Ver el punto de recogida"
-            onPress={() => router.push('/(pasajero)/ya-mapa')}
+            onPress={() =>
+              router.push({
+                pathname: '/(pasajero)/punto',
+                params: reservaId ? { reserva: reservaId } : {},
+              })
+            }
             style={estilos.adjuntar}
           >
             <Mas tamano={19} tinta={color.ink700} />
