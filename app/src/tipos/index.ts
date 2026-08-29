@@ -12,15 +12,7 @@ type Tablas = Database['public']['Tables'];
 type Vistas = Database['public']['Views'];
 export type Enums = Database['public']['Enums'];
 
-/**
- * Un perfil. `license_expires_on` es de la 0047 —cuándo se vence la licencia
- * de conducir, SÓLO la fecha (R6)— y va aquí a mano porque `base.ts` se
- * genera del esquema y todavía no se ha regenerado. Nula = no la ha dicho, y
- * eso no bloquea nada.
- */
-export type Profile = Tablas['profiles']['Row'] & {
-  license_expires_on?: string | null;
-};
+export type Profile = Tablas['profiles']['Row'];
 /**
  * Un carro. `has_ac` y `has_usb` son de la 0045 y van aquí a mano porque
  * `base.ts` se genera del esquema y todavía no se ha regenerado.

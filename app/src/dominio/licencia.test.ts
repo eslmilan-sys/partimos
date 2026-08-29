@@ -4,8 +4,8 @@ import { test } from 'node:test';
 import {
   DIAS_PARA_AVISAR,
   aTexto,
-  deTexto,
   comoSeDice,
+  deLaVerificacion,
   diasQueFaltan,
   estadoDeLicencia,
   puedePublicar,
@@ -67,29 +67,23 @@ test('la hora del día no mueve la cuenta', () => {
 
 /* ── Escribirla y leerla ─────────────────────────────────────────────── */
 
-test('se teclea como está impresa en la licencia y se guarda como la base quiere', () => {
-  assert.equal(deTexto('30/04/2029'), '2029-04-30');
-  assert.equal(deTexto('30042029'), '2029-04-30');
+test('la fecha sale de la verificación, y sólo si está verificada', () => {
+  assert.deepEqual(
+    deLaVerificacion({ status: 'verified', expires_at: '2029-04-30T00:00:00Z' }),
+    { vence: '2029-04-30' },
+  );
+  // Sin verificar no hay licencia, aunque la fila traiga una fecha: una
+  // sesión rechazada o abandonada no prueba nada.
+  assert.deepEqual(deLaVerificacion({ status: 'rejected', expires_at: '2029-04-30' }), { vence: null });
+  assert.deepEqual(deLaVerificacion({ status: 'pending', expires_at: '2029-04-30' }), { vence: null });
+  assert.deepEqual(deLaVerificacion(undefined), { vence: null });
+});
+
+test('verificada pero sin fecha: verificada no es lo mismo que fechada', () => {
+  assert.deepEqual(deLaVerificacion({ status: 'verified', expires_at: null }), { vence: null });
+});
+
+test('la fecha se enseña como está impresa en la licencia', () => {
   assert.equal(aTexto('2029-04-30'), '30/04/2029');
   assert.equal(aTexto(null), '');
-});
-
-test('lo incompleto no es un error: todavía se está tecleando', () => {
-  assert.equal(deTexto(''), null);
-  assert.equal(deTexto('30/04'), null);
-  assert.equal(deTexto('30/04/202'), null);
-});
-
-test('una fecha que no existe se rechaza, aunque los números encajen', () => {
-  assert.equal(deTexto('31/02/2029'), null);
-  assert.equal(deTexto('31/04/2029'), null);
-  assert.equal(deTexto('00/04/2029'), null);
-  assert.equal(deTexto('30/13/2029'), null);
-  // …y el 29 de febrero SÍ existe en año bisiesto
-  assert.equal(deTexto('29/02/2028'), '2028-02-29');
-});
-
-test('lo que se guarda se vuelve a leer igual', () => {
-  const ida = deTexto('05/12/2030')!;
-  assert.equal(deTexto(aTexto(ida)), ida);
 });

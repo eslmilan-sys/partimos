@@ -38,6 +38,13 @@
 /** Lo que hace falta de una fila para decidir. Subconjunto de la tabla. */
 export type Verificacion = {
   status: string;
+  /**
+   * QUÉ DOCUMENTO ES. `ID` la cédula, `DL` la licencia de conducir — los
+   * nombres que usa Didit y que `identity_verifications.document_type` ya
+   * guarda. Dos documentos, dos verificaciones, dos vidas separadas: tener la
+   * cédula al día no dice nada de la licencia.
+   */
+  document_type?: string | null;
   /** Cuándo deja de valer el documento. Nulo = no caduca. */
   expires_at?: string | null;
   updated_at?: string | null;
@@ -86,3 +93,15 @@ export function estadoDe(filas: Verificacion[], ahora: Date = new Date()): Estad
 /* ------------------------------------------------------------------ */
 
 const cuando = (v: Verificacion) => v.updated_at ?? v.created_at ?? '';
+
+/**
+ * SÓLO LAS DE UN DOCUMENTO.
+ *
+ * Sin este filtro, la licencia verificada haría pasar por buena una cédula
+ * rechazada y al revés — es exactamente el fallo que `didit-start` ya
+ * corrigió de su lado («respondía already_verified para un documento jamás
+ * presentado»), y que aquí faltaba.
+ */
+export function soloDe<T extends Verificacion>(filas: T[], documento: string): T[] {
+  return filas.filter((v) => (v.document_type ?? 'ID') === documento);
+}

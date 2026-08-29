@@ -50,6 +50,18 @@ export async function abrirVerificacion(documento: Documento = 'cedula'): Promis
   const motivo = await leerMotivo(error);
   if (motivo === 'already_verified') return { error: 'ya-verificado' };
 
+  /**
+   * **EL FLUJO DE ESE DOCUMENTO NO ESTÁ CONTRATADO** (28-08-2026).
+   *
+   * `didit-start` responde `sin_flujo_<documento>` cuando falta el secreto
+   * del flujo — hoy es el caso de la licencia. Antes caía en el recorrido
+   * SUELTO, y eso para la licencia es peor que un error: la persona hace la
+   * verificación entera, se queda tranquila, y el resultado no vuelve a
+   * ninguna fila porque Didit no sabe de quién es. Se dice que todavía no
+   * se puede en vez de dejarla trabajar para nada.
+   */
+  if (motivo?.startsWith('sin_flujo')) return { error: 'sin-flujo' };
+
   return { url: RECORRIDO_SUELTO, ligada: false };
 }
 

@@ -14,7 +14,8 @@
  * dice nunca: ni que la reportaron ni que la bloquearon.
  */
 
-import { estadoDe, laQueVale } from '@/dominio/verificacion';
+import { deLaVerificacion, type Licencia } from '@/dominio/licencia';
+import { estadoDe, laQueVale, soloDe } from '@/dominio/verificacion';
 import type { Incident, IdentityVerification } from '@/tipos';
 
 import { nuevoId } from './_id';
@@ -50,7 +51,10 @@ export type EstadoDeCedula = {
  */
 
 export async function estadoDeCedula(perfilId: string): Promise<EstadoDeCedula> {
-  const suyas = fuente.verificaciones.filter((x) => x.profile_id === perfilId);
+  /* **SÓLO LA CÉDULA.** Sin el filtro, una licencia verificada haría pasar
+     por buena una cédula rechazada — el mismo fallo que `didit-start` ya
+     corrigió de su lado, y que aquí faltaba (28-08-2026). */
+  const suyas = soloDe(fuente.verificaciones.filter((x) => x.profile_id === perfilId), 'ID');
   const v = laQueVale(suyas);
   const estado = estadoDe(suyas);
   return demora({
@@ -176,4 +180,41 @@ export async function reportar(
 
   await fuente.guardarIncidencia(incidencia);
   return demora(incidencia);
+}
+
+
+/* ------------------------------------------------------- La licencia */
+
+/**
+ * CUÁNDO SE VENCE TU LICENCIA, según Didit (28-08-2026).
+ *
+ * No es un campo del perfil: es la fila `DL` de `identity_verifications`,
+ * con la fecha que el proveedor sacó del documento. Una fecha que uno mismo
+ * se pone no prueba nada — y ésta decide si se puede publicar.
+ *
+ * Nula mientras no haya una verificación en pie, que es el estado de todo el
+ * mundo hasta que el flujo de licencia de Didit esté contratado.
+ */
+export async function licenciaDe(perfilId: string): Promise<Licencia> {
+  const suyas = soloDe(
+    fuente.verificaciones.filter((x) => x.profile_id === perfilId),
+    'DL',
+  );
+  return demora(deLaVerificacion(laQueVale(suyas)));
+}
+
+/** El estado de la licencia, para la pantalla del carro. */
+export async function estadoDeLaLicencia(perfilId: string): Promise<{
+  licencia: Licencia;
+  /** Si ya la presentó y está en revisión, se dice en vez de pedirla otra vez. */
+  enRevision: boolean;
+}> {
+  const suyas = soloDe(
+    fuente.verificaciones.filter((x) => x.profile_id === perfilId),
+    'DL',
+  );
+  return demora({
+    licencia: deLaVerificacion(laQueVale(suyas)),
+    enRevision: estadoDe(suyas) === 'en revisión',
+  });
 }

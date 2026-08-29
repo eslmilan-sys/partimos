@@ -53,8 +53,6 @@ import {
   catalogo,
   categoriaDe,
   guardarCarro,
-  guardarVencimientoDeLicencia,
-  vencimientoDeLicencia,
   puestosDe,
   resumen,
   subirFotoDelCarro,
@@ -62,7 +60,9 @@ import {
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
-import { aTexto, comoSeDice, deTexto } from '@/dominio/licencia';
+import { type Licencia, aTexto, comoSeDice } from '@/dominio/licencia';
+import { irAVerificarse } from '@/servicios/identidad';
+import { estadoDeLaLicencia } from '@/servicios/seguridad';
 import { Boton, Epigrafe, Stepper, Interruptor } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
@@ -81,16 +81,18 @@ export default function RegistrarCarro() {
   const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [borrador, setBorrador] = useState<BorradorDeCarro>(borradorInicial);
-  /** Cuándo se vence la licencia, tal y como se teclea (0047). */
-  const [licencia, setLicencia] = useState('');
+  /** Lo que Didit dice de tu licencia (28-08-2026). */
+  const [licencia, setLicencia] = useState<Licencia>({ vence: null });
+  const [licenciaEnRevision, setLicenciaEnRevision] = useState(false);
   useEffect(() => {
-    if (yo) vencimientoDeLicencia(yo).then((v) => setLicencia(aTexto(v)));
+    if (!yo) return;
+    estadoDeLaLicencia(yo).then((l) => {
+      setLicencia(l.licencia);
+      setLicenciaEnRevision(l.enRevision);
+    });
   }, [yo]);
-  /* Lo que se le dice mientras escribe. Sólo cuando ya hay una fecha: con el
-     campo vacío lo que importa es la promesa —sólo la fecha, nada más—, no
-     una relanza que el epígrafe de encima ya está pidiendo. */
-  const fechaDeLicencia = deTexto(licencia);
-  const avisoDeLicencia = fechaDeLicencia ? comoSeDice({ vence: fechaDeLicencia }) : null;
+  /* Sólo cuando hay algo que decir: al día, `comoSeDice` devuelve nulo. */
+  const avisoDeLicencia = licencia.vence ? comoSeDice(licencia) : null;
   const decir = useDecir();
   const [faltaLaFoto, setFaltaLaFoto] = useState(false);
   const [guardando, setGuardando] = useState(false);
@@ -183,11 +185,7 @@ export default function RegistrarCarro() {
       let foto = borrador.foto as string;
       if (laFoto.current) foto = await subirFotoDelCarro(yo, laFoto.current, foto);
       await guardarCarro(yo, { ...borrador, foto });
-      /* La licencia va aparte: es del perfil, no del carro. Se guarda sólo
-         cuando lo escrito ES una fecha; a medio teclear no se toca nada. */
-      if (fechaDeLicencia || licencia.trim() === '') {
-        await guardarVencimientoDeLicencia(yo, fechaDeLicencia).catch(() => {});
-      }
+
       volver();
     } catch (e) {
       const porque = e instanceof Error ? e.message : 'No se pudo guardar. Prueba otra vez.';
@@ -328,31 +326,49 @@ export default function RegistrarCarro() {
             </Text>
           </View>
 
-          {/* **CUÁNDO SE VENCE TU LICENCIA** (0047, 28-08-2026). Va aquí
-              porque es donde vive el papeleo de quien maneja, pero se guarda
-              en el PERFIL: la licencia es de la persona, y quien tiene dos
-              carros no tiene dos licencias.
+          {/* **TU LICENCIA, VERIFICADA POR DIDIT** (28-08-2026).
+              Estuvo un rato como un campo `DD/MM/AAAA` que el conductor
+              rellenaba. No se sostiene: en cuanto la fecha decide si puedes
+              publicar, una fecha que tú mismo te pones no es una prueba —
+              quien la tiene vencida escribe 2035 y sigue publicando. Va por
+              el mismo camino que la cédula, y de ahí sale la fecha.
 
-              Se pide en DD/MM/AAAA, que es como está impresa — copiarla no
-              debería obligar a nadie a reordenar nada. **Sólo la fecha**: ni
-              foto ni número, igual que la cédula (R6). */}
-          <View style={[estilos.fila, estilos.filaPlaca]}>
-            <Epigrafe>Tu licencia se vence</Epigrafe>
-            <TextInput
-              value={licencia}
-              onChangeText={setLicencia}
-              placeholder="DD/MM/AAAA"
-              placeholderTextColor={color.ink300}
-              keyboardType="number-pad"
-              maxLength={10}
-              accessibilityLabel="Cuándo se vence tu licencia de conducir"
-              style={estilos.entradaPlaca}
-            />
-            <Text style={estilos.notaCampo}>
-              {avisoDeLicencia ??
-                'Solo la fecha: ni la foto ni el número salen de tu teléfono. Te avisamos un mes antes.'}
+              Sigue sin guardarse ni la foto ni el número (R6): lo único que
+              vuelve del proveedor es el veredicto y una fecha. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              licencia.vence ? 'Ver el estado de mi licencia' : 'Verificar mi licencia de conducir'
+            }
+            onPress={async () => {
+              const r = await irAVerificarse('licencia');
+              if ('error' in r) {
+                decir(
+                  r.error === 'ya-verificado'
+                    ? 'Tu licencia ya está verificada.'
+                    : r.error === 'sin-flujo'
+                      ? 'La verificación de licencia todavía no está abierta. Te avisamos en cuanto lo esté.'
+                      : 'No se pudo abrir la verificación. Prueba otra vez.',
+                );
+              } else if (!r.ligada) {
+                decir('La verificación todavía no está conectada a las cuentas. Escríbenos desde Ayuda.');
+              }
+            }}
+            style={({ pressed }) => [estilos.fila, pressed && { backgroundColor: color.sand100 }]}
+          >
+            <View style={estilos.bloque}>
+              <Epigrafe>Licencia de conducir</Epigrafe>
+              <Text style={estilos.notaFila}>
+                {avisoDeLicencia ??
+                  (licenciaEnRevision
+                    ? 'En revisión. Te avisamos en cuanto pase.'
+                    : 'Se verifica con el mismo proveedor que la cédula.')}
+              </Text>
+            </View>
+            <Text style={estilos.valorLicencia}>
+              {licencia.vence ? aTexto(licencia.vence) : 'Verificar'}
             </Text>
-          </View>
+          </Pressable>
 
           <View style={estilos.fila}>
             <View style={estilos.bloque}>
@@ -719,6 +735,14 @@ const estilos = StyleSheet.create({
     lineHeight: 17,
     color: color.ink500,
     fontFamily: familia,
+  },
+  /** La fecha, o «Verificar»: tabular porque es una cifra comparable. */
+  valorLicencia: {
+    fontSize: 14.5,
+    fontWeight: '500',
+    color: color.ink700,
+    fontFamily: familia,
+    ...tabular,
   },
   notaFila: {
     fontSize: 12,

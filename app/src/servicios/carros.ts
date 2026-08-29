@@ -208,25 +208,3 @@ export async function guardarCarro(duenoId: string, b: BorradorDeCarro): Promise
 export async function carrosDe(duenoId: string): Promise<Vehicle[]> {
   return demora(fuente.vehiculos.filter((v) => v.owner_id === duenoId && v.is_active));
 }
-
-/**
- * CUÁNDO SE VENCE TU LICENCIA (0047).
- *
- * Va en `profiles`, no en `vehicles`: la licencia es de la persona, y quien
- * tiene dos carros no tiene dos licencias. Se guarda desde la pantalla del
- * carro porque es donde vive el papeleo de quien maneja, pero lo que se
- * escribe es el perfil.
- *
- * **Sólo la fecha.** Ni foto ni número, igual que la cédula (R6).
- */
-export async function guardarVencimientoDeLicencia(
-  perfilId: string,
-  vence: string | null,
-): Promise<void> {
-  await fuente.actualizarPerfil(perfilId, { license_expires_on: vence });
-}
-
-/** Lo que la pantalla necesita para rellenar el campo al abrirlo. */
-export async function vencimientoDeLicencia(perfilId: string): Promise<string | null> {
-  return fuente.perfiles.find((p) => p.id === perfilId)?.license_expires_on ?? null;
-}

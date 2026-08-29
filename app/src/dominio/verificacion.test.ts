@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { type Verificacion, estadoDe, laQueVale, vale } from './verificacion.ts';
+import { type Verificacion, estadoDe, laQueVale, soloDe, vale } from './verificacion.ts';
 
 const AHORA = new Date('2026-08-28T12:00:00Z');
 const dia = (d: string) => `2026-08-${d}T12:00:00Z`;
@@ -67,4 +67,28 @@ test('en revisión mientras Didit no ha contestado', () => {
 
 test('el orden en que llegan las filas no cambia el resultado', () => {
   assert.equal(estadoDe(LAS_DE_LA_BASE.slice().reverse(), AHORA), 'verificada');
+});
+
+/* ── Dos documentos, dos vidas (28-08-2026) ──────────────────────────── */
+
+test('la licencia verificada no hace pasar por buena la cédula', () => {
+  const filas: Verificacion[] = [
+    { status: 'verified', document_type: 'DL', created_at: dia('20'), updated_at: dia('20') },
+    { status: 'rejected', document_type: 'ID', created_at: dia('21'), updated_at: dia('21') },
+  ];
+  assert.equal(estadoDe(soloDe(filas, 'ID'), AHORA), 'rechazada');
+  assert.equal(estadoDe(soloDe(filas, 'DL'), AHORA), 'verificada');
+});
+
+test('sin `document_type` se toma por cédula: es lo que había antes de Didit', () => {
+  const viejas: Verificacion[] = [{ status: 'verified', created_at: dia('17'), updated_at: dia('17') }];
+  assert.equal(soloDe(viejas, 'ID').length, 1);
+  assert.equal(soloDe(viejas, 'DL').length, 0);
+});
+
+test('sin licencia presentada, el estado es «pendiente», no «verificada»', () => {
+  const soloCedula: Verificacion[] = [
+    { status: 'verified', document_type: 'ID', created_at: dia('17'), updated_at: dia('17') },
+  ];
+  assert.equal(estadoDe(soloDe(soloCedula, 'DL'), AHORA), 'pendiente');
 });

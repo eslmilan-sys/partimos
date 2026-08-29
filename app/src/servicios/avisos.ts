@@ -33,6 +33,8 @@
 import type { AvisoPendiente } from '@/tipos';
 
 import { avisosDeLosHechos, yaEstaEscrito } from '@/dominio/avisar';
+import { deLaVerificacion } from '@/dominio/licencia';
+import { laQueVale, soloDe } from '@/dominio/verificacion';
 
 import { fuente } from './_fuente';
 
@@ -96,7 +98,16 @@ function todosLosDe(perfilId: string): AvisoPendiente[] {
     },
     yaCalifico: (reservaId, autorId) =>
       fuente.resenas.some((x) => x.booking_id === reservaId && x.author_id === autorId),
-    licencia: { vence: fuente.perfiles.find((p) => p.id === perfilId)?.license_expires_on ?? null },
+    /* La licencia sale de su VERIFICACIÓN, no de una columna del perfil
+       (28-08-2026): una fecha que uno mismo se pone no prueba nada. */
+    licencia: deLaVerificacion(
+      laQueVale(
+        soloDe(
+          fuente.verificaciones.filter((v) => v.profile_id === perfilId),
+          'DL',
+        ),
+      ),
+    ),
     ahora: new Date(),
   })
     .filter((d) => !yaEstaEscrito(d, escritos))

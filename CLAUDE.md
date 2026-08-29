@@ -391,19 +391,39 @@ parler :
   deux sont dérivés des faits existants, sans migration. Ce qui reste
   volontairement absent : « le conducteur arrive » et le suivi en direct
   — sans géolocalisation ce serait un mensonge — et toute promotion (R5).
-- **La licence de conduire a une date de péremption (0047,
+- **La licence passe par Didit, comme la cédula (0047 puis 0048,
   28-08-2026).** Au Panama elle expire sans prévenir, et conduire avec
   une licence périmée met le passager sans recours — l'assurance ne
-  couvre pas. **Seulement la date** : ni photo ni numéro, même règle que
-  la cédula (R6), et la colonne est un `date` pour que rien d'autre n'y
-  tienne. Trente jours d'avis, parce qu'à ce moment-là on peut encore
-  prendre rendez-vous ; périmée, on ne publie plus de trajets neufs mais
-  **ce qui est déjà publié tient** — les passagers ne paient pas la
-  paperasse de quelqu'un d'autre. **Nulle ne bloque rien** : personne ne
-  perd l'accès à cause d'une colonne qui n'existait pas quand il a ouvert
-  son compte. Elle passe **après** la cédula dans l'ordre de ce qui
-  manque : une cédula se règle en minutes, une licence en semaines.
-  `app/src/dominio/licencia.ts`.
+  couvre pas. Elle a d'abord été faite comme une **date tapée** par le
+  conducteur ; le propriétaire a confirmé qu'elle passe par Didit, et il
+  a raison : dès que cette date **décide** quelque chose — ici, si tu
+  peux publier — une date qu'on se donne à soi-même n'est plus une
+  preuve. Qui l'a périmée tape 2035 et continue. Un contrôle que le
+  contrôlé remplit ne contrôle rien.
+  Elle vit donc dans `identity_verifications` avec
+  `document_type = 'DL'` et la date dans `expires_at` — des colonnes qui
+  existaient depuis la 0001, et un chemin que `didit-start` sait déjà
+  demander (`kind: 'licencia'`). La 0048 **retire** la colonne de la
+  0047 : deux colonnes pour la même chose est l'erreur qu'on a corrigée
+  le plus souvent ici.
+  **R6 tient, avec un ajout assumé** : du document reviennent le verdict
+  et **une date**. Ni image, ni numéro, ni nom. Une date n'identifie
+  personne, et sans elle la règle ne peut pas exister.
+  Les règles restent dans `app/src/dominio/licencia.ts` : trente jours
+  d'avis, périmée on ne publie plus de trajets neufs mais **ce qui est
+  publié tient**, et **sans date rien n'est bloqué** — tant que le flux
+  licence de Didit n'est pas contracté, personne ne peut la vérifier, et
+  bloquer sur une chose impossible à faire, c'est fermer la porte et
+  jeter la clé. Elle passe **après** la cédula dans l'ordre : une cédula
+  se règle en minutes, une licence en semaines.
+  **Ce qui manque, et qui est côté compte** : le workflow licence chez
+  Didit et son secret `DIDIT_WORKFLOW_LICENCIA`. Sans lui `didit-start`
+  répond `sin_flujo_licencia`, et l'app le dit au lieu d'envoyer les gens
+  dans le parcours non lié — où ils feraient la vérification pour rien.
+  **Et le nom du champ de la date dans la décision Didit n'est pas
+  confirmé** : le webhook essaie les chemins documentés et prend la
+  première vraie date. À réduire à un seul dès la première décision
+  réelle.
 - **Deux endroits, deux choses (28-08-2026, tranché après l'avoir vu
   fait à l'envers pendant un jour).** L'onglet du bas est **Chats** :
   des conversations, rien d'autre, et sa pastille compte les messages

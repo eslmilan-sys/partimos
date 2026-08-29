@@ -21,6 +21,27 @@ const ciudad = (slug: string) => ciudades.find((c) => c.slug === slug)!.id;
  * tienen, o no estarían ahí.
  */
 export const verificaciones: IdentityVerification[] = [
+  /**
+   * LA LICENCIA DE ANDRÉS, verificada y por vencer (28-08-2026). Es una
+   * verificación más —`document_type: 'DL'`— y no una columna del perfil:
+   * la fecha viene del documento, no de lo que el conductor teclee.
+   */
+  {
+    id: 'id000000-0000-4000-8000-000000000002',
+    profile_id: ANDRES_ID,
+    provider: 'didit',
+    provider_ref: 'ver_0002',
+    document_country: 'PA',
+    document_type: 'DL',
+    status: 'verified',
+    score: 0.97,
+    verified_at: haceDias(400),
+    /* Dentro de tres semanas: es el caso que hay que poder ver en el
+       recorrido — el aviso sale, y publicar sigue permitido. */
+    expires_at: new Date(Date.now() + 19 * 86_400_000).toISOString(),
+    created_at: haceDias(400),
+    updated_at: haceDias(400),
+  },
   {
     id: 'id000000-0000-4000-8000-000000000001',
     profile_id: ANDRES_ID,

@@ -62,6 +62,23 @@ const STATUS_MAP: Record<string, "pending" | "verified" | "rejected" | "expired"
  *  ni entreprises ni transactions chez Didit. */
 const TIPOS_TRATADOS = new Set(["status.updated", "data.updated"]);
 
+/**
+ * La primera de varias rutas que dé una fecha válida. Tolerante a propósito:
+ * el evento llega de fuera y su forma exacta no está confirmada — pero una
+ * fecha o es una fecha o no lo es, y lo que no lo sea se ignora en silencio
+ * en vez de escribir basura en una columna que decide quién publica.
+ */
+function primeraFecha(evento: Record<string, any>, rutas: string[][]): string | null {
+  for (const ruta of rutas) {
+    let v: any = evento;
+    for (const paso of ruta) v = v?.[paso];
+    if (typeof v !== "string" || !/^\d{4}-\d{2}-\d{2}/.test(v)) continue;
+    const d = new Date(`${v.slice(0, 10)}T12:00:00Z`);
+    if (!Number.isNaN(d.getTime())) return v.slice(0, 10);
+  }
+  return null;
+}
+
 const encoder = new TextEncoder();
 
 async function hmacHex(secret: string, mensaje: string): Promise<string> {
@@ -208,11 +225,33 @@ Deno.serve(async (req) => {
      rejouer le même événement réécrit la même ligne avec la même valeur.
      Didit peut livrer deux fois sans conséquence. */
   const ahora = new Date().toISOString();
-  const verdicto = {
+  const verdicto: Record<string, unknown> = {
     status,
     verified_at: status === "verified" ? ahora : null,
     updated_at: ahora,
   };
+
+  /* 4 bis. LA FECHA DE VENCIMIENTO DEL DOCUMENTO (28-08-2026).
+     Hasta hoy sólo se guardaba el veredicto, y para la cédula basta. Para
+     la LICENCIA no: lo que decide si alguien puede seguir publicando es
+     cuándo se vence, y una fecha que el conductor se escriba a sí mismo no
+     prueba nada — quien la tiene vencida teclea 2035.
+
+     R6 sigue en pie. Lo que se guarda es una FECHA: ni la imagen, ni el
+     número, ni el nombre. Una fecha no identifica a nadie, y sin ella la
+     regla de la licencia no puede existir.
+
+     EL NOMBRE DEL CAMPO NO ESTÁ CONFIRMADO todavía: no hay ninguna decisión
+     real de Didit contra la que mirarlo, así que se prueban las rutas
+     documentadas y se toma la primera que sea una fecha de verdad. En cuanto
+     llegue la primera decisión, esto se reduce a la que sea. */
+  const vence = primeraFecha(evento, [
+    ["decision", "id_verification", "expiration_date"],
+    ["decision", "id_verification", "date_of_expiry"],
+    ["id_verification", "expiration_date"],
+    ["expiration_date"],
+  ]);
+  if (vence) verdicto.expires_at = vence;
 
   /* On met à jour la ligne ouverte par `didit-start`. C'est le chemin
      normal, et il ne touche jamais `profile_id` — donc aucune clé

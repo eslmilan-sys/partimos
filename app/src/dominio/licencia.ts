@@ -1,6 +1,20 @@
 /**
  * LA LICENCIA DE CONDUCIR QUE SE VENCE — la regla, sin base y sin pantalla.
  *
+ * **LA FECHA NO SE TECLEA: LA VERIFICA DIDIT** (confirmado por el dueño el
+ * 28-08-2026). Se había hecho como un campo `DD/MM/AAAA` en el perfil, y eso
+ * no se sostiene en cuanto la fecha decide algo: una fecha que uno mismo se
+ * pone no es una prueba — quien la tiene vencida escribe 2035 y publica
+ * igual. Si va a cerrar la publicación, tiene que venir del documento.
+ *
+ * Así que la licencia es una verificación más, con su propia fila en
+ * `identity_verifications` (`document_type = 'DL'`, que `didit-start` ya
+ * sabe pedir) y su `expires_at`. Dos documentos, dos vidas: tener la cédula
+ * al día no dice nada de la licencia.
+ *
+ * Sigue sin guardarse ni la foto ni el número (R6). Lo que se añade es UNA
+ * FECHA, que no identifica a nadie y sin la cual esto no puede existir.
+ *
  * En Panamá la licencia se renueva cada pocos años y **se vence sin avisar**:
  * no llega ninguna carta. Quien maneja con la licencia vencida no está
  * cubierto por su seguro, y llevar a alguien en esas condiciones es
@@ -44,9 +58,26 @@ export type EstadoDeLicencia =
   | 'vencida';
 
 export type Licencia = {
-  /** Cuándo se vence, en 'AAAA-MM-DD'. Nula si nunca la dijo. */
+  /**
+   * Cuándo se vence, en 'AAAA-MM-DD'. Nula si todavía no la ha verificado.
+   * Sale de `identity_verifications.expires_at` de la fila `DL`.
+   */
   vence: string | null;
 };
+
+/**
+ * De una verificación de Didit a la licencia que este módulo entiende.
+ *
+ * Verificada y con fecha, la fecha manda. **Sin verificar no hay licencia**,
+ * aunque exista una fila: una sesión abandonada o rechazada no prueba nada, y
+ * tomar su `expires_at` sería creerle a un documento que nadie miró.
+ */
+export function deLaVerificacion(
+  v: { status: string; expires_at?: string | null } | undefined,
+): Licencia {
+  if (!v || v.status !== 'verified') return { vence: null };
+  return { vence: v.expires_at ? v.expires_at.slice(0, 10) : null };
+}
 
 /** Cuántos días faltan; negativo si ya pasó. Nulo sin fecha. */
 export function diasQueFaltan(l: Licencia, ahora: Date = new Date()): number | null {
@@ -68,8 +99,12 @@ export function estadoDeLicencia(l: Licencia, ahora: Date = new Date()): EstadoD
 /**
  * ¿PUEDE PUBLICAR UN VIAJE?
  *
- * Sólo lo VENCIDO bloquea. Sin fecha se deja publicar a propósito: nadie
- * pierde el acceso por una columna que no existía cuando se hizo su cuenta.
+ * Sólo lo VENCIDO bloquea. Sin fecha se deja publicar **a propósito y por
+ * ahora**: mientras el flujo de licencia de Didit no esté contratado, nadie
+ * puede verificarla, y bloquear por algo que no se puede hacer sería cerrar
+ * la puerta y tirar la llave. El día que el flujo exista, esto se vuelve
+ * `estado === 'al-dia' || estado === 'por-vencer'` y se cambia aquí, en una
+ * línea, con su prueba.
  */
 export function puedePublicar(l: Licencia, ahora: Date = new Date()): boolean {
   return estadoDeLicencia(l, ahora) !== 'vencida';
@@ -99,31 +134,9 @@ const aDia = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/
 /* ── Escribirla y leerla ─────────────────────────────────────────────── */
 
 /**
- * DE LO QUE SE TECLEA A LA FECHA DE LA BASE.
- *
- * Se pide en `DD/MM/AAAA` porque es como está impreso en la licencia
- * panameña — copiarla no debería obligar a nadie a reordenar nada. La base
- * la guarda en `AAAA-MM-DD`, que es lo que `date` entiende.
- *
- * Nulo cuando todavía no es una fecha: mientras se teclea, la mitad de las
- * pulsaciones dan algo incompleto, y eso no es un error que enseñar.
+ * `DD/MM/AAAA`, para ENSEÑARLA. Ya no para escribirla: la fecha viene de
+ * Didit, y el campo donde se tecleaba se retiró el 28-08-2026.
  */
-export function deTexto(escrito: string): string | null {
-  const d = escrito.replace(/\D/g, '');
-  if (d.length !== 8) return null;
-  const dia = Number(d.slice(0, 2));
-  const mes = Number(d.slice(2, 4));
-  const anio = Number(d.slice(4, 8));
-  if (mes < 1 || mes > 12 || dia < 1 || dia > 31) return null;
-  const iso = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-  /* Un 31 de febrero pasa las comprobaciones de arriba y no existe: se
-     construye la fecha y se comprueba que sea la que se pidió. */
-  const fecha = new Date(`${iso}T12:00:00Z`);
-  if (Number.isNaN(fecha.getTime()) || fecha.getUTCDate() !== dia) return null;
-  return iso;
-}
-
-/** De la fecha de la base a lo que se enseña en el campo. */
 export function aTexto(vence: string | null): string {
   if (!vence) return '';
   const [a, m, d] = vence.split('-');

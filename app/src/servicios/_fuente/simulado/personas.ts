@@ -55,8 +55,6 @@ export async function guardarResena(resena: Review): Promise<Review> {
 export const perfiles: Profile[] = [
   {
     id: ANDRES_ID,
-    /* Por vencer dentro de tres semanas: es el caso que hay que poder ver. */
-    license_expires_on: new Date(Date.now() + 19 * 86_400_000).toISOString().slice(0, 10),
     first_name: 'Andrés',
     last_initial: 'M.',
     phone: '+507 6000 0000',
@@ -78,7 +76,6 @@ export const perfiles: Profile[] = [
   },
   {
     id: MATEO_ID,
-    license_expires_on: '2029-04-30',
     first_name: 'Mateo',
     last_initial: 'Q.',
     phone: '+507 6000 0001',
