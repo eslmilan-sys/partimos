@@ -47,7 +47,15 @@ export type PasajeroConfirmado = {
   pagado: boolean;
 };
 
-/** Lo que la cabecera cuenta: solicitudes nuevas y puestos vendidos. */
+/**
+ * **NO SE VENDEN PUESTOS.** Este producto tiene una regla que lo sostiene
+ * entero: el conductor nunca gana — reparte lo que le costó la gasolina. Y la
+ * pantalla decía «3 de 3 puestos vendidos», que es el vocabulario del que
+ * vende: un puesto vendido tiene precio, comprador y margen. Aquí un puesto
+ * se OCUPA, y lo que entra es un aporte, no una venta. Ninguna palabra de la
+ * app puede contradecir la única promesa que hace (29-08-2026).
+ */
+/** Lo que la cabecera cuenta: solicitudes nuevas y puestos ocupados. */
 export type ResumenDeSolicitudes = {
   /** Para la cabecera: «Hoy 14:50 · Albrook → Chitré». */
   viaje: { salida: string; origen: string; destino: string };
@@ -92,7 +100,7 @@ export async function listarSolicitudes(
           : pendientes === 1
             ? '1 solicitud nueva'
             : `${pendientes} solicitudes nuevas`
-      } · ${confirmados.length} de ${viaje.seats_offered} puestos vendidos`,
+      } · ${confirmados.length} de ${viaje.seats_offered} puestos ocupados`,
   });
 }
 

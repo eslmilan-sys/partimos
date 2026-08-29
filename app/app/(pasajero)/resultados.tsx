@@ -1311,7 +1311,8 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.45,
     textTransform: 'uppercase',
-    color: color.inkIcono,
+    /* Texto, no icono: `inkIcono` se queda en 3,69:1. Ver `tokens.ts`. */
+    color: color.ink500,
     fontFamily: familia,
   },
   metaAgotada: { fontSize: 12, lineHeight: 17, fontWeight: '400', color: color.ink400, fontFamily: familia, ...tabular },

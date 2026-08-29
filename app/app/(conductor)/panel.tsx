@@ -141,7 +141,7 @@ export default function Panel() {
                   </Text>
                   <Text style={estilos.repetirMeta}>
                     {`${diaAbrev(h.cuando)} ${hora(h.cuando)} · ${
-                      h.puestosVendidos === 1 ? '1 puesto vendido' : `${h.puestosVendidos} puestos vendidos`
+                      h.puestosVendidos === 1 ? '1 puesto ocupado' : `${h.puestosVendidos} puestos ocupados`
                     }`}
                   </Text>
                 </View>
@@ -194,7 +194,7 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
 
       <View style={estilos.filaVendidos}>
         <Text style={estilos.vendidos}>
-          {`${viaje.puestosVendidos} de ${viaje.puestosOfrecidos} puestos vendidos`}
+          {`${viaje.puestosVendidos} de ${viaje.puestosOfrecidos} puestos ocupados`}
         </Text>
       </View>
 
@@ -278,7 +278,7 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         <Text style={estilos.nadie}>
           {viaje.puestosVendidos === 0
             ? 'Nadie todavía'
-            : `${viaje.puestosVendidos} de ${viaje.puestosOfrecidos} puestos vendidos`}
+            : `${viaje.puestosVendidos} de ${viaje.puestosOfrecidos} puestos ocupados`}
         </Text>
         <Pressable
           accessibilityRole="button"
@@ -288,7 +288,7 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
           }
           style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
         >
-          <Text style={estilos.enlace}>Compartir el viaje</Text>
+          <Text style={estilos.enlaceFuerte}>Compartir el viaje</Text>
         </Pressable>
       </View>
     </View>
@@ -354,7 +354,10 @@ const estilos = StyleSheet.create({
   titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 12, },
   titularFuerte: { fontWeight: '600' },
 
-  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 22, paddingBottom: 8, gap: 10 },
+  /* El hueco de abajo es el ALTO DE LA BARRA DE PESTAÑAS más aire: con 8 px
+     la última tarjeta se cortaba justo por su fila de acciones, que es la
+     parte que hay que poder tocar. */
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 22, paddingBottom: 88, gap: 10 },
 
   hoja: {
     backgroundColor: color.blanco,
@@ -395,10 +398,26 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   puntoVivo: { width: 7, height: 7, borderRadius: 999, backgroundColor: color.rojo500 },
+  /**
+   * **UN SOLO ROJO POR TARJETA.** «Editar» y «Compartir el viaje» iban los
+   * dos en rojo, uno en cada esquina de la misma tarjeta, tirando por igual.
+   * En este sistema el rojo tiene cuatro sentidos contados y «acción
+   * primaria» es uno: si dos enlaces de la misma tarjeta son primarios,
+   * ninguno lo es. El rojo se queda donde de verdad hace falta —compartir el
+   * viaje es lo que llena el carro— y «Editar» baja a tinta, que es lo que
+   * es: una salida secundaria (29-08-2026).
+   */
   enlace: {
     fontSize: 12,
     lineHeight: 17,
     fontWeight: '500',
+    color: color.ink600,
+    fontFamily: familia,
+  },
+  enlaceFuerte: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '600',
     color: color.rojo700,
     fontFamily: familia,
   },

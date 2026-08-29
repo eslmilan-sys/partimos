@@ -192,7 +192,16 @@ export default function Conversaciones() {
       <View style={estilos.cuerpo}>
         {/* El hilo de Partimos va siempre y va primero: una bandeja vacía el
             primer día no dice nada, y quien acaba de entrar no sabe qué puede
-            hacer. No se guarda en `messages` porque no es de nadie. */}
+            hacer. No se guarda en `messages` porque no es de nadie.
+
+            **Y POR ESO NO LLEVA CHINCHETA DE SIN LEER.** Llevaba un «1» rojo
+            escrito a mano, y era mentira por partida triple: no se apagaba al
+            abrirlo, no lo contaban los chips —«Todos 2» y «Sin leer 2» con
+            TRES filas en pantalla y tres chinchetas—, y el filtro «Sin leer»
+            lo dejaba puesto igual porque vive fuera de la lista. Un número
+            que no cuadra con lo que se ve al lado le quita el crédito a los
+            otros dos, que sí son ciertos (29-08-2026).
+            Se queda fijo arriba, sin chincheta y diciendo lo que es. */}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Mensaje de Partimos: bienvenido a bordo"
@@ -216,9 +225,6 @@ export default function Conversaciones() {
               <Text style={estilos.contexto} numberOfLines={1}>
                 Un mensaje nuestro · aquí no contestamos
               </Text>
-              <View style={estilos.pastillaSinLeer}>
-                <Text style={estilos.pastillaSinLeerTexto}>1</Text>
-              </View>
             </View>
           </View>
         </Pressable>

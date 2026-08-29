@@ -679,7 +679,12 @@ function TarjetaSale({
         <Text
           style={[
             estilos.cuposSale,
-            { color: v.puestosLibres <= 2 ? color.rojo800 : color.inkIcono },
+      /* **NO EN LA TINTA DEL ICONO.** `inkIcono` (#6C8A93) contrasta 3,69:1:
+         vale para una forma, no para un texto de 11 px. Y aquí el texto dice
+         cuántos puestos quedan, que es lo que decide si te cabe. Cuando
+         quedan dos o menos va en rojo —«poca disponibilidad», uno de los
+         cuatro sentidos del rojo—; cuando sobran, en la tinta de leer. */
+            { color: v.puestosLibres <= 2 ? color.rojo800 : color.ink500 },
           ]}
         >
           {v.puestosLibres === 1 ? '1 cupo' : `${v.puestosLibres} cupos`}

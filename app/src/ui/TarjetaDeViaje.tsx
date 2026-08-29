@@ -229,7 +229,12 @@ export function TarjetaDeViaje({
             <Text style={estilos.precioUnidad}>B/</Text>
             <Text style={estilos.precio}>{cifraRedonda(viaje.aporteCentavos)}</Text>
           </View>
-          <Text style={[estilos.cupos, { color: pocos ? color.rojo800 : color.inkIcono }]}>
+          {/* **NO EN LA TINTA DEL ICONO.** `inkIcono` contrasta 3,69:1: vale
+              para una forma, no para un texto de 11 px — y este dice cuántos
+              puestos quedan, que es lo que decide si te cabe. Con dos o menos
+              va en rojo, que es «poca disponibilidad», uno de los cuatro
+              sentidos del acento; con más, en la tinta de leer. */}
+          <Text style={[estilos.cupos, { color: pocos ? color.rojo800 : color.ink500 }]}>
             {viaje.puestosLibres === 1 ? '1 cupo' : `${viaje.puestosLibres} cupos`}
           </Text>
         </View>

@@ -395,7 +395,9 @@ export async function prepararEdicion(viajeId: string): Promise<Edicion> {
       {
         clave: 'puestos',
         etiqueta: 'Puestos',
-        valor: `${viaje.seats_offered} · ${pagados.length} vendido${pagados.length === 1 ? '' : 's'}`,
+        /* «Ocupado», no «vendido»: aquí nadie vende un puesto. Ver la nota
+           en `servicios/solicitudes.ts`. */
+        valor: `${viaje.seats_offered} · ${pagados.length} ocupado${pagados.length === 1 ? '' : 's'}`,
         cerrado: false,
       },
       {
