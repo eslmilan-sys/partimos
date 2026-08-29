@@ -120,15 +120,17 @@ export default function Ya() {
                   <Text style={estilos.nombre}>
                     {`${primero.first_name ?? ''} ${primero.last_initial ?? ''}`.trim()}
                   </Text>
+                  {/* La estrella sólo si hay nota: sin ella señalaba al modelo
+                      del carro. Ver la nota igual en `destino`. */}
                   <View style={estilos.filaNota}>
-                    <Estrella tamano={11} />
+                    {primero.driver_rating != null ? (
+                      <>
+                        <Estrella tamano={11} />
+                        <Text style={estilos.nota}>{`${enTexto(primero.driver_rating)} ·`}</Text>
+                      </>
+                    ) : null}
                     <Text style={estilos.nota}>
-                      {[
-                        primero.driver_rating != null ? enTexto(primero.driver_rating) : null,
-                        `${primero.make ?? ''} ${primero.model ?? ''} ${primero.color ?? ''}`.trim(),
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
+                      {`${primero.make ?? ''} ${primero.model ?? ''} ${primero.color ?? ''}`.trim()}
                     </Text>
                   </View>
                 </View>

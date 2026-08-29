@@ -51,6 +51,15 @@ const RADIO_HOJA = 28;
 /** El relleno que el traspaso da a cada fila de «Dinero y cuenta». */
 const RELLENO_DINERO = [10, 11, 11];
 
+/** Qué color le toca a cada estado de la cédula. Ver `estilos.insignia`. */
+function tonoDeEstado(valor: string | null | undefined): { fondo: string; tinta: string } {
+  const v = (valor ?? '').toLowerCase();
+  if (v.includes('verificad')) return { fondo: color.hechoFondo, tinta: color.hechoTinta };
+  if (v.includes('revisión') || v.includes('revision'))
+    return { fondo: color.esperaFondo, tinta: color.esperaTinta };
+  return { fondo: color.sand300, tinta: color.ink600 };
+}
+
 export default function Ajustes() {
   const router = useRouter();
   const volver = useVolver('/(cuenta)/cuenta');
@@ -192,9 +201,15 @@ export default function Ajustes() {
                 {esEstado ? (
                   // El punto se sienta en el hueco que la etiqueta reserva a su
                   // izquierda: así la pastilla mide lo que mide en el traspaso.
-                  <View style={estilos.insignia}>
-                    <View style={estilos.punto} />
-                    <Text style={estilos.insigniaTexto}>{fila.valor}</Text>
+                  <View style={[estilos.insignia, { backgroundColor: tonoDeEstado(fila.valor).fondo }]}>
+                    <View
+                      style={[estilos.punto, { backgroundColor: tonoDeEstado(fila.valor).tinta }]}
+                    />
+                    <Text
+                      style={[estilos.insigniaTexto, { color: tonoDeEstado(fila.valor).tinta }]}
+                    >
+                      {fila.valor}
+                    </Text>
                   </View>
                 ) : (
                   <>
@@ -276,12 +291,18 @@ const estilos = StyleSheet.create({
   },
   epigrafeCampo: { ...texto.epigrafe, color: color.campoTexto },
   // Ceñido al texto, como el titular del traspaso: si se estira, se descentra.
+  /**
+   * **ERA BLANCO SOBRE EL LIENZO CLARO: 1,08:1.** El título de la pantalla,
+   * a 33 px, invisible. Resto del campo rojo héroe que el sistema v6 retiró
+   * —allí el titular iba en blanco sobre la banda roja—; al quitar la banda,
+   * la pantalla se quedó con un encabezado que no se ve (29-08-2026).
+   */
   titular: {
     fontSize: 33,
     lineHeight: 34.65,
     letterSpacing: -1.32,
     fontWeight: '600',
-    color: color.blanco,
+    color: color.ink900,
     marginTop: 14,
     alignSelf: 'flex-start',
     fontFamily: familia,
@@ -338,11 +359,18 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
 
+  /**
+   * EL COLOR SIGUE AL ESTADO, no al revés. La pastilla estaba clavada en
+   * verde —la tinta de «hecho»— y enseñaba «Pendiente» en verde: el color
+   * decía una cosa y la palabra la contraria, y el color se lee primero.
+   * Ahora los tres estados que puede dar `seguridad` tienen el suyo:
+   * verificada en verde, en revisión en el oro de esperar, y rechazada o
+   * pendiente en gris, que es no saber nada todavía.
+   */
   insignia: {
     height: 22,
     borderRadius: radio.pastilla,
     justifyContent: 'center',
-    backgroundColor: color.hechoFondo,
   },
   punto: {
     position: 'absolute',

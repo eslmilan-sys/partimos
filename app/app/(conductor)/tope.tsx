@@ -181,13 +181,18 @@ const estilos = StyleSheet.create({
   },
 
   filaCifra: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, marginTop: 22 },
+  /**
+   * **ERA BLANCA SOBRE EL LIENZO CLARO: 1,08:1.** Y es la cifra de 58 px por
+   * la que existe esta pantalla — el tope de la ruta—: no un adorno, el dato.
+   * Resto del campo rojo héroe que el v6 retiró (29-08-2026).
+   */
   cifra: {
     fontSize: 58,
     // 0.9 del traspaso: la cifra manda tanto que su caja tiene que apretarla.
     lineHeight: 52.2,
     fontWeight: '700',
     letterSpacing: -2.9,
-    color: color.blanco,
+    color: color.ink900,
     fontFamily: familia,
     ...tabular,
   },

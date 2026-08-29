@@ -34,7 +34,7 @@ import { Pestanas } from '@/ui/Pestanas';
 import { Insignia, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { duracionEntre as duracion, diaAbrev, diaCorto, enHoras, hora } from '@/ui/fechas';
-import { Atras, Estrella, Maleta } from '@/ui/iconos';
+import { Atras, Escudo, Estrella } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
 const FOTOS: Record<string, number> = {
@@ -185,8 +185,12 @@ function Detallada({ viaje, alPulsar }: { viaje: ViajeEnResultados; alPulsar: ()
         </View>
       </View>
 
+      {/* EL ICONO DICE LO MISMO QUE LA PALABRA. Iba una MALETA junto a
+          «Cédula verificada» y junto a «Solo mujeres»: el icono del equipaje
+          para hablar de identidad. El escudo es el que el sistema usa para
+          lo verificado, y es el que sale en la ficha del viaje. */}
       <View style={estilos.filaEquipaje}>
-        <Maleta tamano={13} />
+        <Escudo tamano={13} tinta={color.ink500} />
         <Text style={estilos.equipaje}>
           {soloMujeres ? 'Solo mujeres' : 'Cédula verificada'}
         </Text>
@@ -201,12 +205,18 @@ function Detallada({ viaje, alPulsar }: { viaje: ViajeEnResultados; alPulsar: ()
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={estilos.nombre}>{nombre}</Text>
           <View style={estilos.filaNota}>
-            <Estrella tamano={11} />
-            <Text style={estilos.nota}>
-              {[viaje.driver_rating != null ? enTexto(viaje.driver_rating) : null, categoria(viaje.category_code)]
-                .filter(Boolean)
-                .join(' · ')}
-            </Text>
+            {/* LA ESTRELLA SÓLO SI HAY NOTA. Se pintaba siempre, y a un
+                conductor sin calificar todavía le salía «★ SUV»: una estrella
+                señalando a un modelo de carro. La estrella no es un adorno de
+                la fila, es el símbolo de un número que aquí puede no existir. */}
+            {viaje.driver_rating != null ? (
+              <>
+                <Estrella tamano={11} />
+                <Text style={estilos.nota}>{enTexto(viaje.driver_rating)}</Text>
+                <Text style={estilos.nota}>·</Text>
+              </>
+            ) : null}
+            <Text style={estilos.nota}>{categoria(viaje.category_code)}</Text>
           </View>
         </View>
         {soloMujeres ? (
@@ -247,18 +257,27 @@ const estilos = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: radio.pastilla,
-    // Aquí sí es vidrio: se sienta sobre una fotografía, que es algo con color.
-    backgroundColor: color.campoControl,
+    // Aquí sí es vidrio: se sienta sobre una fotografía, que es algo con
+    // color. Blanco, no tinta translúcida: ver `pastillaDia`.
+    backgroundColor: 'rgba(255,255,255,.92)',
     borderWidth: 1,
     borderColor: 'rgba(10,39,49,.10)',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /**
+   * SOBRE UNA FOTO, EL CRISTAL TIENE QUE SER BLANCO, no tinta al 6 %. La
+   * pastilla y el botón de atrás se sientan encima de una fotografía de playa
+   * —cielo casi blanco arriba, palmeras oscuras abajo—, y `campoControl` es
+   * tinta translúcida: sobre el cielo desaparecía y sobre las palmeras se
+   * volvía un borrón. Un fondo blanco al 92 % da un contraste que no depende
+   * de qué foto toque (29-08-2026).
+   */
   pastillaDia: {
     height: 40,
     paddingHorizontal: 15,
     borderRadius: radio.pastilla,
-    backgroundColor: color.campoControl,
+    backgroundColor: 'rgba(255,255,255,.92)',
     borderWidth: 1,
     borderColor: 'rgba(10,39,49,.10)',
     justifyContent: 'center',
@@ -288,21 +307,33 @@ const estilos = StyleSheet.create({
     shadowOffset: { width: 0, height: 14 },
     elevation: 8,
   },
+  /**
+   * LOS TRES RENGLONES DE LA BANDA VAN EN BLANCO, y no era así.
+   *
+   * La banda sigue siendo ROJA —es la única pantalla donde el campo rojo del
+   * sistema anterior sobrevive, porque aquí sale de una fotografía y tiene
+   * sentido—, pero sus tres textos se quedaron con las tintas del lienzo
+   * claro al que emigró el resto de la app: el epígrafe en `campoTexto`
+   * (1,05:1 sobre el rojo), el titular en `ink900` y la línea de abajo en
+   * `ink600` (1,30:1). Es decir: «FIN DE SEMANA · 2 PASAJEROS» y «85 km ·
+   * 1 h 15 · 11 viajes» eran invisibles, y «Panamá → Coronado» casi.
+   * Sobre rojo pleno la única tinta que se lee es el blanco (29-08-2026).
+   */
   epigrafeBanda: {
     fontSize: 11.5,
     lineHeight: interlinea(11),
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.campoTexto,
+    color: 'rgba(255,255,255,.82)',
     fontFamily: familia,
   },
-  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 9, },
+  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.blanco, fontFamily: familia, marginTop: 9, },
   titularFuerte: { fontWeight: '600' },
   debajo: {
     fontSize: 13.5,
     lineHeight: 18.85,
-    color: color.ink600,
+    color: 'rgba(255,255,255,.88)',
     marginTop: 8,
     fontFamily: familia,
     ...tabular,

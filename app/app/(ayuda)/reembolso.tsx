@@ -259,13 +259,20 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /**
+   * **ERA BLANCO SOBRE EL LIENZO CLARO.** Resto del campo rojo héroe que el
+   * sistema v6 retiró: allí el titular iba en blanco sobre la banda roja, y al
+   * quitar la banda se quedó blanco sobre `#F4F7F8` — 1,08:1, invisible. El
+   * título de la pantalla, sin más. Visto el 29-08-2026 midiendo el contraste
+   * de las cincuenta y dos pantallas; salieron seis con el mismo fallo.
+   */
   titular: {
     fontSize: 33,
     // 1.05 del titular grande, no la interlínea del cuerpo.
     lineHeight: 34.65,
     letterSpacing: -1.32,
     fontWeight: '400',
-    color: color.blanco,
+    color: color.ink900,
     marginTop: 16,
     fontFamily: familia,
   },

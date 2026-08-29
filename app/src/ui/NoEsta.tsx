@@ -66,12 +66,19 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
   cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 46 },
+  /**
+   * **ERA BLANCO SOBRE EL LIENZO CLARO.** Resto del campo rojo héroe que el
+   * sistema v6 retiró: allí el titular iba en blanco sobre la banda roja, y al
+   * quitar la banda se quedó blanco sobre `#F4F7F8` — 1,08:1, invisible. Y esta es la pantalla COMPARTIDA de «esto no está»: el fallo
+   * salía en todos los vacíos de la app a la vez. Visto el 29-08-2026 midiendo el contraste
+   * de las cincuenta y dos pantallas; salieron seis con el mismo fallo.
+   */
   titular: {
     fontSize: 30,
     lineHeight: 30.74,
     letterSpacing: -1.3,
     fontWeight: '600',
-    color: '#fff',
+    color: color.ink900,
     fontFamily: familia,
   },
   cuerpo: { flex: 1, paddingHorizontal: espacio.gutter, paddingTop: 40 },
