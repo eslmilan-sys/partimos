@@ -74,6 +74,11 @@ export default function DetalleDelViaje() {
     pasajeros?: string;
   }>();
   const viajeId = viajeParam ?? DEL_RECORRIDO;
+  /**
+   * CUÁNTOS PUESTOS DICE LA BARRA. Los de la reserva si ya la hay; si no, los
+   * que venías buscando. Decía «1 puesto» escrito a mano, así que quien
+   * llegaba buscando dos leía uno justo al lado del precio.
+   */
 
   /**
    * QUIÉN ESTÁ DENTRO DECIDE A DÓNDE LLEVA EL BOTÓN.
@@ -249,11 +254,13 @@ export default function DetalleDelViaje() {
                   </>
                 ) : null}
               </Text>
-              {/* El aporte va en el campo, junto a la hora: es lo primero que
-                  se mira y en la hoja se quedaba en un rincón vacío. */}
+              {/* **EL APORTE, UNA SOLA VEZ.** Estaba aquí Y en la barra de
+                  abajo, con el mismo número, y la barra es fija: las dos
+                  cifras se veían a la vez sin desplazar nada. La que se queda
+                  es la de abajo, que está pegada al botón —donde se decide— y
+                  no se va al desplazar. Aquí queda la hora, la ruta y la
+                  duración, que es lo que la cabecera tiene que decir. */}
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={estilos.precio}>{formatearDineroRedondo(viaje.price_cents)}</Text>
-                <Text style={estilos.porPuesto}>por puesto</Text>
               </View>
             </View>
             <Text style={estilos.subtitulo} numberOfLines={1}>
@@ -526,7 +533,14 @@ export default function DetalleDelViaje() {
       <View style={estilos.barraVidrio}>
         <View style={estilos.filaPrecioBarra}>
           <Text style={estilos.precioBarra}>{formatearDineroRedondo(viaje.price_cents)}</Text>
-          <Pastilla estilo={{ marginTop: 3 }}>1 puesto</Pastilla>
+          {/* Cuántos puestos, DE VERDAD: decía «1 puesto» escrito a mano, así
+              que quien venía buscando dos leía uno junto al precio. */}
+          <Pastilla estilo={{ marginTop: 3 }}>
+            {(() => {
+              const n = miReserva?.seats ?? Math.max(1, Number(pasajeros ?? '1') || 1);
+              return n === 1 ? '1 puesto' : `${n} puestos`;
+            })()}
+          </Pastilla>
           {/* «Aporte directo» y no «pago seguro»: la plataforma no guarda la
               plata de nadie, y decir lo contrario sería la única mentira que
               este producto no se puede permitir. */}
@@ -597,12 +611,19 @@ export default function DetalleDelViaje() {
               { backgroundColor: pressed ? color.ink800 : color.ink900 },
             ]}
           >
-            <Text style={estilos.ctaTexto}>
+            {/* **EL RÓTULO DICE LO QUE PASA AL PULSAR, no cómo estás.**
+                Decía «Tu puesto está confirmado», que es un estado: un botón
+                anunciando algo en vez de ofrecer algo. Y no cabía — se partía
+                en dos renglones dentro de la barra, que en un botón primario
+                se lee como que la pantalla está rota (29-08-2026).
+                El estado sigue dicho, arriba y en su sitio; aquí va la puerta
+                a la que este botón lleva de verdad. */}
+            <Text style={estilos.ctaTexto} numberOfLines={1}>
               {miReserva.status === 'completed'
-                ? 'Viaje hecho · ver comprobante'
-                : miReserva.status === 'confirmed'
-                  ? 'Tu puesto está confirmado'
-                  : 'Tu puesto está pedido'}
+                ? 'Ver el comprobante'
+                : miReserva.boarded_at
+                  ? 'Ya vas a bordo'
+                  : 'Ver mi código de subir'}
             </Text>
             <Avanza tamano={19} tinta="#fff" />
           </Pressable>
@@ -721,14 +742,6 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
     ...tabular,
-  },
-  porPuesto: {
-    fontSize: 12.5,
-    lineHeight: 17.4,
-    textAlign: 'right',
-    color: color.campoTexto,
-    marginTop: 3,
-    fontFamily: familia,
   },
 
   tarjeta: {

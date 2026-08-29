@@ -1091,7 +1091,8 @@ const estilos = StyleSheet.create({
     gap: 8,
   },
   chipOscuro: {
-    height: 38,
+    // 44, el mínimo de un dedo: son los dos controles de la cabecera.
+    height: 44,
     paddingHorizontal: 13,
     borderRadius: radio.cuadrado,
     backgroundColor: color.ink900,
@@ -1125,7 +1126,8 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   chipClaro: {
-    height: 38,
+    // 44, el mínimo de un dedo: son los dos controles de la cabecera.
+    height: 44,
     paddingHorizontal: 13,
     borderRadius: radio.cuadrado,
     backgroundColor: color.blanco,

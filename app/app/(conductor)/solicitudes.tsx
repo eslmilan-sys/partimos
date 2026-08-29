@@ -497,7 +497,8 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    height: 36,
+    // 44, el mínimo de un dedo (Apple y Material). Iba a 36.
+    height: 44,
     paddingHorizontal: 10,
     borderRadius: radio.s,
     borderWidth: 1,

@@ -207,10 +207,12 @@ export default function TuCuenta() {
 
         {/* El estado de la cédula, arriba y no enterrado en la lista: es lo
             único que decide si puedes publicar. */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={datos.verificado ? 'Cédula verificada' : 'Verificar la cédula'}
-          onPress={() => router.push('/(conductor)/cedula')}
+        {/* Es un ESTADO, no un botón: quien no está verificado tiene la fila
+            de abajo para hacerlo, y con la razón. Dos puertas al mismo sitio,
+            una de ellas sin decir a dónde va, es lo que había. */}
+        <View
+          accessibilityRole="text"
+          accessibilityLabel={datos.verificado ? 'Cédula verificada' : 'Cédula sin verificar'}
           style={[estilos.chipEstado, datos.verificado ? estilos.chipVerde : estilos.chipClaro]}
         >
           <Cedula tamano={15} tinta={datos.verificado ? color.hechoTinta : color.campoTexto} />
@@ -222,7 +224,7 @@ export default function TuCuenta() {
           >
             {datos.verificado ? 'Verificado' : 'Sin verificar'}
           </Text>
-        </Pressable>
+        </View>
       </View>
 
       <View style={estilos.contenido}>
@@ -311,10 +313,30 @@ export default function TuCuenta() {
               </View>
             </View>
 
-            <View style={estilos.aviso}>
-              <Escudo tamano={19} tinta={color.azul500} />
-              <Text style={estilos.avisoTexto}>{datos.queTeFalta}</Text>
-            </View>
+            {/* **LO QUE FALTA SE PUEDE HACER DESDE AQUÍ.**
+                Era una frase suelta con un escudo al lado — «Verifica tu
+                cédula para poder publicar viajes.» —, con pinta de botón y sin
+                serlo: la única cosa accionable de la pantalla no llevaba a
+                ninguna parte. Y era la TERCERA vez que la misma pantalla decía
+                lo mismo (la pastilla de arriba, la columna «Sin verificar ·
+                cédula», y esto). Verificada, la frase no aporta nada nuevo y
+                se va; sin verificar, se convierte en la fila que lleva a
+                hacerlo, con la razón debajo — invariante 7 (29-08-2026). */}
+            {!datos.verificado ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Verificar mi cédula"
+                onPress={() => router.push('/(conductor)/cedula')}
+                style={({ pressed }) => [estilos.aviso, pressed && estilos.pulsada]}
+              >
+                <Escudo tamano={19} tinta={color.azul500} />
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={estilos.avisoTitulo}>Verificar mi cédula</Text>
+                  <Text style={estilos.avisoTexto}>Sin esto no puedes publicar viajes.</Text>
+                </View>
+                <Avanza />
+              </Pressable>
+            ) : null}
           </>
         ) : (
           <View style={estilos.lista}>
@@ -343,8 +365,13 @@ export default function TuCuenta() {
           </View>
         )}
 
-        {/* Su propio bloque, separado y en contorno: un botón destructivo va en
-            contorno y nunca en relleno rojo, que es el color de seguir. */}
+        {/* **CERRAR SESIÓN NO ES LO QUE SE VIENE A HACER AQUÍ**, y era el
+            control más fuerte de la pantalla: 56 px de alto, a todo el ancho,
+            con borde rojo y la palabra en rojo. El rojo tiene cuatro sentidos
+            en este sistema —destino, acción primaria, poca disponibilidad, en
+            vivo— y salir no es ninguno. Se queda donde estaba, al final, pero
+            dicho en voz baja: sin caja, en tinta secundaria, del tamaño de un
+            enlace. Sigue siendo fácil de encontrar y ya no compite con nada. */}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Cerrar sesión"
@@ -354,7 +381,7 @@ export default function TuCuenta() {
           }}
           style={({ pressed }) => [estilos.cerrar, pressed && { backgroundColor: color.rojo50 }]}
         >
-          <Salir tamano={19} />
+          <Salir tamano={17} tinta={color.ink600} />
           <Text style={estilos.cerrarTexto}>Cerrar sesión</Text>
         </Pressable>
       </View>
@@ -489,9 +516,10 @@ const estilos = StyleSheet.create({
     alignSelf: 'flex-start',
     gap: 4,
     marginTop: 14,
-    height: 34,
-    paddingLeft: 13,
-    paddingRight: 9,
+    // 44, el mínimo de un dedo. Iba a 34.
+    height: 44,
+    paddingLeft: 15,
+    paddingRight: 11,
     borderRadius: radio.s,
     borderWidth: 1,
     borderColor: color.bordeSutil,
@@ -581,35 +609,47 @@ const estilos = StyleSheet.create({
   },
   filaValor: { fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia },
 
+  /**
+   * BLANCA COMO LAS DEMÁS TARJETAS. Iba en `azul50`, que en este sistema
+   * resuelve a `#F4F7F8` — el mismo color del lienzo—: la fila flotaba sin
+   * caja entre dos tarjetas blancas, y la única acción pendiente de la
+   * pantalla era lo único sin superficie donde apoyarse.
+   */
   aviso: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 11,
-    marginTop: 10,
-    padding: 15,
+    gap: 12,
+    marginTop: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     borderRadius: radio.l,
-    backgroundColor: color.azul50,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
   },
-  avisoTexto: { flex: 1, fontSize: 13.5, lineHeight: 20, color: color.azul700, fontFamily: familia },
+  avisoTitulo: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '600',
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  avisoTexto: { fontSize: 13, lineHeight: 18, color: color.ink600, fontFamily: familia },
 
   cerrar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 9,
-    marginTop: 16,
-    height: 56,
-    borderRadius: radio.l,
-    borderWidth: 1.5,
-    borderColor: color.rojo200,
-    backgroundColor: color.blanco,
+    gap: 8,
+    marginTop: 24,
+    height: 48,
   },
   cerrarTexto: {
-    fontSize: 15.5,
-    lineHeight: 22.5,
-    fontWeight: '600',
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '500',
     letterSpacing: -0.16,
-    color: color.rojo600,
+    color: color.ink600,
     fontFamily: familia,
   },
 
