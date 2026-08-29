@@ -302,7 +302,7 @@ const estilos = StyleSheet.create({
   debajo: {
     fontSize: 13.5,
     lineHeight: 18.85,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 8,
     fontFamily: familia,
     ...tabular,
@@ -326,7 +326,7 @@ const estilos = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 16,
   },
-  cuando: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  cuando: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
   precioBloque: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
   precio: {
     fontSize: 27,
@@ -360,13 +360,13 @@ const estilos = StyleSheet.create({
   horaLlegada: {
     fontSize: 13.5,
     lineHeight: 18.85,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     ...tabular,
   },
 
   filaEquipaje: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 10 },
-  equipaje: { fontSize: 12.5, lineHeight: 18.125, color: color.ink600, fontFamily: familia },
+  equipaje: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
 
   raya: { height: 1, backgroundColor: color.bordeSutil, marginTop: 14 },
 
@@ -396,7 +396,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   filaNota: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  nota: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  nota: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
 
   compacta: {
     flexDirection: 'row',
@@ -413,7 +413,7 @@ const estilos = StyleSheet.create({
     width: 62,
     fontSize: 13.5,
     lineHeight: interlinea(13.5),
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },

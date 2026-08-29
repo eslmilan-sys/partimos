@@ -170,12 +170,12 @@ export function BuscadorDeLugar({
             onPress={alCerrar}
             style={estilos.cerrar}
           >
-            <Cerrar tamano={12} tinta={color.ink600} />
+            <Cerrar tamano={12} tinta={color.ink500} />
           </Pressable>
         </View>
 
         <View style={estilos.campo}>
-          <Lupa tamano={18} tinta={color.ink500} />
+          <Lupa tamano={18} tinta={color.ink600} />
           <TextInput
             accessibilityLabel={titulo}
             value={texto}
@@ -264,7 +264,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
   },
   cerrar: {
     width: 30,
@@ -320,7 +320,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     fontSize: 12.5,
     lineHeight: interlinea(12),
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 1,
   },
   vamos: {
@@ -335,7 +335,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     fontSize: 13.5,
     lineHeight: interlinea(13),
-    color: color.ink500,
+    color: color.ink600,
     paddingVertical: 16,
   },
 });

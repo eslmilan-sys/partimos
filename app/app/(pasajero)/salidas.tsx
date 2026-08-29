@@ -114,7 +114,7 @@ export default function SalenPronto() {
               style={estilos.vacioEnlace}
             >
               <Text style={estilos.vacioEnlaceTexto}>¿Manejas tú? Publica el tuyo</Text>
-              <Avanza tamano={14} tinta={color.ink500} />
+              <Avanza tamano={14} tinta={color.ink600} />
             </Pressable>
           </View>
         ) : (
@@ -226,7 +226,7 @@ const estilos = StyleSheet.create({
     alignItems: 'baseline',
     marginBottom: 10,
   },
-  cuantos: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
+  cuantos: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },
 
   fila: {
     flexDirection: 'row',
@@ -258,8 +258,8 @@ const estilos = StyleSheet.create({
   },
   destino: { flex: 1, fontSize: 14, lineHeight: 21, color: color.ink700, fontFamily: familia },
   filaQuien: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
-  quien: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
-  nota: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia, ...tabular },
+  quien: { fontSize: 12.5, lineHeight: 18, color: color.ink500, fontFamily: familia },
+  nota: { fontSize: 12.5, lineHeight: 18, color: color.ink500, fontFamily: familia, ...tabular },
 
   precio: {
     fontSize: 21,
@@ -270,7 +270,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  puestos: { fontSize: 11.5, lineHeight: 16, color: color.ink500, fontFamily: familia },
+  puestos: { fontSize: 11.5, lineHeight: 16, color: color.ink600, fontFamily: familia },
 
   vacio: {
     backgroundColor: color.blanco,
@@ -288,7 +288,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink600, fontFamily: familia },
+  vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink500, fontFamily: familia },
   vacioEnlace: {
     marginTop: 12,
     flexDirection: 'row',
@@ -300,7 +300,7 @@ const estilos = StyleSheet.create({
     fontSize: 13.5,
     lineHeight: 20,
     fontWeight: '500',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 });

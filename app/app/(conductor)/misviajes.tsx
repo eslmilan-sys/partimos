@@ -104,7 +104,7 @@ type Fila =
 const ESTADO: Record<string, { texto: string; fondo: string; tinta: string }> = {
   confirmed: { texto: 'Confirmado', fondo: color.hechoFondo, tinta: color.hechoTinta },
   pending: { texto: 'Pendiente', fondo: color.esperaFondo, tinta: color.esperaTinta },
-  completed: { texto: 'Terminado', fondo: color.sand200, tinta: color.ink600 },
+  completed: { texto: 'Terminado', fondo: color.sand200, tinta: color.ink500 },
 };
 
 export default function MisViajesPantalla() {
@@ -421,7 +421,7 @@ function FichaGrande({
         {puesto.carro ? (
           <View style={estilos.carro}>
             <View style={estilos.cuadroCarro}>
-              <Carro tamano={19} tinta={color.ink600} />
+              <Carro tamano={19} tinta={color.ink500} />
             </View>
             <View style={{ minWidth: 0 }}>
               <Text style={estilos.carroModelo} numberOfLines={1}>
@@ -598,7 +598,7 @@ const estilos = StyleSheet.create({
   nadaTodavia: {
     fontSize: 14,
     lineHeight: 20,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 4,
     marginBottom: 4,
     fontFamily: familia,
@@ -662,7 +662,7 @@ const estilos = StyleSheet.create({
     alignItems: 'baseline',
     marginTop: 12,
   },
-  cuantos: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
+  cuantos: { fontSize: 12.5, lineHeight: 18.125, color: color.ink600, fontFamily: familia },
 
   /* ── la ficha grande ── */
   ficha: {
@@ -709,11 +709,11 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  aporteSufijo: { fontSize: 12.5, lineHeight: 18.125, fontWeight: '400', color: color.ink500 },
+  aporteSufijo: { fontSize: 12.5, lineHeight: 18.125, fontWeight: '400', color: color.ink600 },
   sitio: {
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 1,
     marginBottom: 12,
     fontFamily: familia,
@@ -742,7 +742,7 @@ const estilos = StyleSheet.create({
     fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '600',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   diaNumero: {
@@ -758,7 +758,7 @@ const estilos = StyleSheet.create({
     fontSize: 11.5,
     lineHeight: 16.675,
     fontWeight: '600',
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   bloqueHora: { alignItems: 'flex-end' },
@@ -768,7 +768,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 10 * 0.07,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   horaGrande: {
@@ -803,8 +803,8 @@ const estilos = StyleSheet.create({
   filaNota: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   nota: { fontSize: 12.5, lineHeight: 17.4, fontWeight: '600', color: color.ink700, fontFamily: familia, ...tabular },
   /* `ink400` daba 2,59:1 sobre la banda: un punto es texto aunque separe. */
-  separa: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, fontFamily: familia },
-  cuantosViajes: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, fontFamily: familia, ...tabular },
+  separa: { fontSize: 12.5, lineHeight: 17.4, color: color.ink600, fontFamily: familia },
+  cuantosViajes: { fontSize: 12.5, lineHeight: 17.4, color: color.ink600, fontFamily: familia, ...tabular },
 
   carro: { flexDirection: 'row', alignItems: 'center', gap: 8, maxWidth: 148 },
   cuadroCarro: {
@@ -822,7 +822,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  carroDetalle: { fontSize: 11.5, lineHeight: 16.675, color: color.ink500, fontFamily: familia },
+  carroDetalle: { fontSize: 11.5, lineHeight: 16.675, color: color.ink600, fontFamily: familia },
 
   acciones: {
     flexDirection: 'row',
@@ -891,10 +891,10 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  sitioMini: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, marginTop: 3, marginLeft: 17, fontFamily: familia },
+  sitioMini: { fontSize: 12.5, lineHeight: 17.4, color: color.ink600, marginTop: 3, marginLeft: 17, fontFamily: familia },
 
   ladoFila: { alignItems: 'flex-end', gap: 4 },
-  cuandoFila: { fontSize: 12.5, lineHeight: 17.4, color: color.ink600, fontFamily: familia, ...tabular },
+  cuandoFila: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, fontFamily: familia, ...tabular },
   horaFila: {
     fontSize: 14,
     lineHeight: 20,

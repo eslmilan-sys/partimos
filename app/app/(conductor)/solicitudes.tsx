@@ -160,7 +160,7 @@ export default function Solicitudes() {
                 que puso meses antes (25-08-2026). La maleta se destaca
                 porque es lo único que puede no caber; un bolso no. */}
             <View style={[estilos.filaEquipaje, s.vaAlMaletero && estilos.filaMaletero]}>
-              <Maleta tinta={s.vaAlMaletero ? color.esperaTinta : color.ink600} />
+              <Maleta tinta={s.vaAlMaletero ? color.esperaTinta : color.ink500} />
               <Text style={[estilos.equipaje, s.vaAlMaletero && estilos.equipajeMaletero]}>
                 {s.equipaje}
               </Text>
@@ -405,7 +405,7 @@ const estilos = StyleSheet.create({
   },
   filaPersona: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   nombre: { fontSize: 15.5, lineHeight: 23.2, fontWeight: '500', letterSpacing: -0.32, color: color.ink900, fontFamily: familia },
-  reputacion: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, marginTop: 1, fontFamily: familia, ...tabular },
+  reputacion: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, marginTop: 1, fontFamily: familia, ...tabular },
   pastillaExpira: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: radio.pastilla },
   pastillaExpiraTexto: { fontSize: 11.5, lineHeight: 15.95, fontWeight: '600', fontFamily: familia },
 
@@ -419,7 +419,7 @@ const estilos = StyleSheet.create({
     borderTopColor: color.bordeSutil,
   },
   punto: { flex: 1, fontSize: 13.5, lineHeight: 19.57, fontWeight: '500', letterSpacing: -0.2, color: color.ink900, fontFamily: familia },
-  desvio: { fontSize: 13.5, lineHeight: 19.57, color: color.ink500, fontFamily: familia, ...tabular },
+  desvio: { fontSize: 13.5, lineHeight: 19.57, color: color.ink600, fontFamily: familia, ...tabular },
 
   /* Cuando algo va al maletero, la fila se enciende en ámbar: es una
      espera de respuesta, no una alarma — el rojo tiene sus cuatro sentidos. */
@@ -510,7 +510,7 @@ const estilos = StyleSheet.create({
     borderTopColor: color.bordeSutil,
     fontSize: 13,
     lineHeight: 19,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   accionConfirmadoTexto: {
@@ -538,7 +538,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     marginBottom: 4,
   },
-  vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink600, fontFamily: familia },
+  vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink500, fontFamily: familia },
 
   seccionConfirmados: { marginHorizontal: espacio.gutter, marginTop: 16 },
   filaConfirmado: {
@@ -553,5 +553,5 @@ const estilos = StyleSheet.create({
     gap: 12,
   },
   nombreConfirmado: { fontSize: 14, lineHeight: 21.02, fontWeight: '500', letterSpacing: -0.22, color: color.ink900, fontFamily: familia },
-  detalleConfirmado: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, marginTop: 1, fontFamily: familia },
+  detalleConfirmado: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, marginTop: 1, fontFamily: familia },
 });

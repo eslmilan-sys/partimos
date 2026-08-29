@@ -239,7 +239,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  contexto: { fontSize: 13.5, lineHeight: interlinea(13.5), color: color.ink600, fontFamily: familia, ...tabular },
+  contexto: { fontSize: 13.5, lineHeight: interlinea(13.5), color: color.ink500, fontFamily: familia, ...tabular },
 
   estrellas: {
     flexDirection: 'row',
@@ -252,7 +252,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13.5,
     lineHeight: interlinea(13.5),
-    color: color.ink600,
+    color: color.ink500,
     marginBottom: 20,
     fontFamily: familia,
   },

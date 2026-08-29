@@ -415,8 +415,11 @@ export default function Resultados() {
               pressed && { backgroundColor: color.lavadoChip },
             ]}
           >
+            {/* «Otra fecha» es un BOTÓN, no un día vacío: sus dos renglones
+                iban en la tinta de lo apagado y se leía como deshabilitado
+                justo lo único que abre el calendario. */}
             <Text style={estilos.diaTiraNombre}>Otra</Text>
-            <Text style={[estilos.diaTiraCuenta, estilos.diaTiraCuentaVacia]}>fecha</Text>
+            <Text style={estilos.diaTiraCuentaOtra}>fecha</Text>
           </Pressable>
         </ScrollView>
       ) : null}
@@ -1055,7 +1058,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.99,
     textTransform: 'uppercase',
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   cejaHasta: { color: color.rojo700 },
@@ -1070,7 +1073,7 @@ const estilos = StyleSheet.create({
     lineHeight: 22,
     fontWeight: '500',
     letterSpacing: -0.34,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   destino: {
@@ -1079,7 +1082,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  meta: { fontSize: 12, lineHeight: 16, fontWeight: '400', color: color.ink600, fontFamily: familia },
+  meta: { fontSize: 12, lineHeight: 16, fontWeight: '400', color: color.ink500, fontFamily: familia },
 
   barraChips: {
     paddingTop: 16,
@@ -1179,7 +1182,7 @@ const estilos = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     fontWeight: '600',
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   diaTiraNombrePuesto: { color: 'rgba(255,255,255,.82)' },
@@ -1193,8 +1196,18 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   diaTiraCuentaPuesta: { color: color.blanco },
-  diaTiraCuentaVacia: { color: color.ink300, fontWeight: '500' },
+  /** El «—» de un día SIN viajes: eso sí está vacío, y se dice apagándolo.
+   *  Iba en `ink300` —1,86:1—, que el sistema reserva para raíles y guiones,
+   *  nunca para texto; `ink400` es la tinta de lo agotado y es la que toca. */
+  diaTiraCuentaVacia: { color: color.ink400, fontWeight: '500' },
   diaTiraOtra: { borderStyle: 'dashed', justifyContent: 'center' },
+  diaTiraCuentaOtra: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: color.ink600,
+    fontFamily: familia,
+  },
 
   filaAplicados: { paddingTop: 12 },
   tiraAplicados: {
@@ -1263,8 +1276,8 @@ const estilos = StyleSheet.create({
     color: color.rojo800,
     fontFamily: familia,
   },
-  metaDestacada: { fontSize: 11, lineHeight: 15, fontWeight: '400', color: color.ink600, fontFamily: familia },
-  razon: { fontSize: 12, lineHeight: 17, fontWeight: '400', letterSpacing: -0.12, color: color.ink500, fontFamily: familia },
+  metaDestacada: { fontSize: 11, lineHeight: 15, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  razon: { fontSize: 12, lineHeight: 17, fontWeight: '400', letterSpacing: -0.12, color: color.ink600, fontFamily: familia },
   divisorDestacada: { height: 1, backgroundColor: color.divisor },
 
   agotada: {
@@ -1366,7 +1379,7 @@ const estilos = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
     fontWeight: '400',
-    color: color.ink500,
+    color: color.ink600,
     textAlign: 'center',
     fontFamily: familia,
   },
@@ -1476,7 +1489,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.9,
     textTransform: 'uppercase',
-    color: color.ink600,
+    color: color.ink500,
   },
   valorEdicion: {
     fontFamily: familia,
@@ -1502,7 +1515,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
   },
   hojaGrupo: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   hojaPie: { gap: 12, marginTop: 4 },

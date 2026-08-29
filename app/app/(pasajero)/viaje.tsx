@@ -160,16 +160,16 @@ export default function DetalleDelViaje() {
       texto: c.texto,
       icono:
         c.clave === 'aire' ? (
-          <Aire tamano={19} tinta={color.ink500} />
+          <Aire tamano={19} tinta={color.ink600} />
         ) : (
-          <Enchufe tamano={19} tinta={color.ink500} />
+          <Enchufe tamano={19} tinta={color.ink600} />
         ),
     })),
     ...(comodidadDeAtras(reparto)
       ? [
           {
             texto: comodidadDeAtras(reparto) as string,
-            icono: <Persona tamano={19} tinta={color.ink500} />,
+            icono: <Persona tamano={19} tinta={color.ink600} />,
           },
         ]
       : []),
@@ -393,13 +393,13 @@ export default function DetalleDelViaje() {
                   {/* Aquí sí se dicen las dos, digan que sí o que no: quien
                       está a un toque de pedir el puesto necesita saberlo. */}
                   <View style={estilos.pastillaLlana}>
-                    <Mascota tamano={13} tinta={color.ink600} />
+                    <Mascota tamano={13} tinta={color.ink500} />
                     <Text style={estilos.pastillaLlanaTexto}>
                       {viaje.allows_pets ? 'Acepta mascotas' : 'Sin mascotas'}
                     </Text>
                   </View>
                   <View style={estilos.pastillaLlana}>
-                    <SinHumo tamano={13} tinta={color.ink600} />
+                    <SinHumo tamano={13} tinta={color.ink500} />
                     <Text style={estilos.pastillaLlanaTexto}>
                       {viaje.allows_smoking ? 'Se puede fumar' : 'No se fuma'}
                     </Text>
@@ -412,7 +412,7 @@ export default function DetalleDelViaje() {
 
             <View style={estilos.filaCarro}>
               <View style={estilos.cuadroCarro}>
-                <Carro tamano={26} tinta={color.ink500} />
+                <Carro tamano={26} tinta={color.ink600} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 {conductor === undefined ? (
@@ -531,7 +531,7 @@ export default function DetalleDelViaje() {
               plata de nadie, y decir lo contrario sería la única mentira que
               este producto no se puede permitir. */}
           <View style={estilos.filaDirecto}>
-            <Escudo tamano={15} tinta={color.ink600} />
+            <Escudo tamano={15} tinta={color.ink500} />
             <Text style={estilos.directo}>{esMio ? 'Tu viaje' : 'Aporte directo'}</Text>
           </View>
         </View>
@@ -757,7 +757,7 @@ const estilos = StyleSheet.create({
   directoNota: {
     fontSize: 12.5,
     lineHeight: 18,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -782,7 +782,7 @@ const estilos = StyleSheet.create({
   salidaTexto: {
     fontSize: 15,
     fontWeight: '500',
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
 
@@ -807,10 +807,10 @@ const estilos = StyleSheet.create({
   paradaQue: {
     fontSize: 12.5,
     lineHeight: 18.12,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
-  aprox: { fontSize: 11.5, color: color.ink500 },
+  aprox: { fontSize: 11.5, color: color.ink600 },
   puntoLleno: {
     width: 10,
     height: 10,
@@ -847,7 +847,7 @@ const estilos = StyleSheet.create({
   paradaHora: {
     fontSize: 14,
     lineHeight: 23,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     ...tabular,
   },
@@ -922,7 +922,7 @@ const estilos = StyleSheet.create({
   calificacion: {
     fontSize: 13.5,
     lineHeight: 18.85,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },
@@ -939,7 +939,7 @@ const estilos = StyleSheet.create({
   detalleCarro: {
     fontSize: 13.5,
     lineHeight: 18.85,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     ...tabular,
   },
@@ -968,7 +968,7 @@ const estilos = StyleSheet.create({
   },
   filaPrecioBarra: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 12 },
   filaDirecto: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto', marginTop: 4 },
-  directo: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia },
+  directo: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia },
 
   /** Preguntar y pedir, en la misma fila. La roja se queda con el resto. */
   filaAcciones: { flexDirection: 'row', alignItems: 'center', gap: 10 },

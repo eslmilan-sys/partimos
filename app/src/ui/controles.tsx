@@ -403,10 +403,25 @@ export function Epigrafe({ children, tinta = color.azul700 }: { children: ReactN
 }
 
 const estilos = StyleSheet.create({
-  stepper: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  /**
+   * EL HUECO ES 8, NO 14. Al subir los botones de 40 a 44 el control se llevó
+   * 40 px de la columna del texto, y en `reservar` las descripciones —«Mochila
+   * o cartera. Va contigo en el asiento.»— pasaron de dos renglones a tres.
+   * Los 44 son intocables, que es el dedo; el aire entre los tres elementos
+   * sí se puede apretar sin que nadie falle un toque, porque los botones se
+   * tocan por su superficie y no por el hueco.
+   */
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  /**
+   * 44, QUE ES EL MÍNIMO DE UN DEDO. Iban a 40 aquí y a 34 en `reservar`,
+   * que tenía su propia copia del control: el mismo ± en tres tamaños según
+   * la pantalla. 44 × 44 es el mínimo que piden tanto Apple como Material, y
+   * este control es el que más se pulsa de la app —cuatro veces seguidas
+   * para pedir dos puestos y un bolso—. En `reservar` ya no hay copia.
+   */
   stepperBoton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: radio.pastilla,
     borderWidth: 1,
     borderColor: color.bordePorDefecto,
@@ -415,7 +430,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   stepperGlifo: { fontSize: 19, lineHeight: 19, fontWeight: '500', color: color.ink900, fontFamily: familia },
-  stepperSufijo: { fontSize: 13.5, lineHeight: 18.85, fontWeight: '600', color: color.ink600 },
+  stepperSufijo: { fontSize: 13.5, lineHeight: 18.85, fontWeight: '600', color: color.ink500 },
   /**
    * LA CIFRA DEL STEPPER, EN GRANDE (29-08-2026, pedido del dueño).
    *
@@ -425,7 +440,7 @@ const estilos = StyleSheet.create({
    * sufijo en un teléfono de 390.
    */
   stepperValor: {
-    minWidth: 40,
+    minWidth: 30,
     textAlign: 'center',
     fontSize: 25, lineHeight: 30,
     fontWeight: '600',
@@ -451,7 +466,7 @@ const estilos = StyleSheet.create({
     marginTop: 4,
     fontSize: 13,
     lineHeight: 19,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   pista: {
@@ -529,6 +544,6 @@ const estilos = StyleSheet.create({
     // en web el input trae su propio contorno al enfocarse
     outlineStyle: 'none',
   } as never,
-  campoAyuda: { marginTop: 6, fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
+  campoAyuda: { marginTop: 6, fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },
 });
 

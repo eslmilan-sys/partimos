@@ -200,7 +200,7 @@ const estilos = StyleSheet.create({
   rotulo: {
     fontSize: 12.5,
     lineHeight: 16.2,
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 5,
     fontFamily: familia,
   },
@@ -245,7 +245,7 @@ const estilos = StyleSheet.create({
     fontSize: 10,
     lineHeight: 14.5,
     fontWeight: '700',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     ...tabular,
   },
@@ -256,7 +256,7 @@ const estilos = StyleSheet.create({
   pasoTexto: {
     fontSize: 12.5,
     lineHeight: 17.5,
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 2,
     fontFamily: familia,
   },
@@ -268,7 +268,7 @@ const estilos = StyleSheet.create({
     marginHorizontal: espacio.tarjeta,
     fontSize: 12.5,
     lineHeight: 18.75,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
 });

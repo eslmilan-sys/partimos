@@ -427,7 +427,7 @@ const estilos = StyleSheet.create({
   horaParada: {
     fontSize: 13.5,
     lineHeight: 18.85,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     ...tabular,
   },
@@ -452,7 +452,7 @@ const estilos = StyleSheet.create({
   nadie: {
     fontSize: 13.5,
     lineHeight: interlinea(13.5),
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -514,7 +514,7 @@ const estilos = StyleSheet.create({
   solicitudesPie: {
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
 
@@ -532,7 +532,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     paddingHorizontal: 16,
     paddingTop: 8,
@@ -559,7 +559,7 @@ const estilos = StyleSheet.create({
   repetirMeta: {
     fontSize: 12.5,
     lineHeight: 18,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },
@@ -576,7 +576,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 11.5 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 18,
     marginBottom: 2,
     fontFamily: familia,
@@ -584,7 +584,7 @@ const estilos = StyleSheet.create({
   pieTexto: {
     fontSize: 12.5,
     lineHeight: 18.75,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 14,
     fontFamily: familia,
   },

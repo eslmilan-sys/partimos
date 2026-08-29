@@ -282,7 +282,9 @@ export default function Inicio() {
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={[estilos.cejaCampo, estilos.cejaVoyA]}>Voy a</Text>
                 <Text
-                  style={[estilos.valorCampo, !hacia && { color: color.ink400 }]}
+                  /* El marcador de posición NO va en la tinta de lo deshabilitado:
+                     es la única frase que dice qué se espera en el campo. */
+                  style={[estilos.valorCampo, !hacia && { color: color.ink500 }]}
                   numberOfLines={1}
                 >
                   {hacia?.nombre ?? '¿A dónde vas?'}
@@ -691,13 +693,23 @@ function TarjetaSale({
         <Avatar nombre={v.conductor || '·'} tamano={24} />
         <Text style={estilos.quienSale} numberOfLines={1}>
           {v.conductor}
-          {v.calificacion != null ? (
-            <Text style={[estilos.notaSale, tabular]}>
-              {`  ★ ${enTexto(v.calificacion)}`}
-              {v.viajesHechos > 0 ? ` · ${v.viajesHechos} viajes` : ''}
-            </Text>
-          ) : null}
         </Text>
+        {/* LA ESTRELLA ES EL ICONO, NO EL CARÁCTER «★». Aquí iba U+2605
+            dentro del texto, y el subconjunto de Switzer no lo trae: el
+            navegador lo sacaba de otra fuente y quedaba una estrella de otro
+            peso y otro tamaño en mitad de la línea. Además la app ya tiene su
+            estrella —la de `misviajes`, mismo dato y mismo sitio—: dos
+            estrellas distintas para la misma nota es lo peor de los dos
+            mundos. Se saca del `<Text>` y se pone al lado, como allí. */}
+        {v.calificacion != null ? (
+          <View style={estilos.filaNotaSale}>
+            <Estrella tamano={11} />
+            <Text style={[estilos.notaSale, tabular]}>{enTexto(v.calificacion)}</Text>
+            {v.viajesHechos > 0 ? (
+              <Text style={estilos.notaSale}>{`· ${v.viajesHechos} viajes`}</Text>
+            ) : null}
+          </View>
+        ) : null}
         {v.directo ? (
           <View style={estilos.chipDirecto}>
             <Text style={estilos.chipDirectoTexto}>Directo</Text>
@@ -716,7 +728,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 12 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     marginRight: 4,
     fontFamily: familia,
   },
@@ -744,7 +756,7 @@ const estilos = StyleSheet.create({
   preguntaCiudadTexto: {
     fontSize: 13,
     lineHeight: 19,
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 4,
     fontFamily: familia,
   },
@@ -824,8 +836,14 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  /** El eco apagado del título, `#8FA6AD` en el archivo. */
-  tituloApagado: { color: '#8FA6AD' },
+  /**
+   * El eco apagado del título. El archivo v6 lo da en `#8FA6AD`, que sobre
+   * este lienzo contrasta **2,37:1** — por debajo del 3:1 que pide un texto
+   * de 30 px. Es la mitad de la primera frase de la app: la mitad que dice
+   * «hoy». `#7A939B` conserva el escalón —sigue siendo un eco apagado— y
+   * llega a 3,1:1.
+   */
+  tituloApagado: { color: '#7A939B' },
 
   /* --------------------------------------------- La tarjeta de búsqueda */
   zonaBusqueda: { paddingTop: 20, paddingHorizontal: espacio.gutter },
@@ -879,7 +897,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   /** VOY A va en el acento de texto: es el destino, y el destino es rojo. */
@@ -964,7 +982,7 @@ const estilos = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
     fontWeight: '500',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -998,7 +1016,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   enlaceSeccion: {
@@ -1060,7 +1078,7 @@ const estilos = StyleSheet.create({
     lineHeight: 15,
     fontWeight: '500',
     letterSpacing: -0.11,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   destinoFavorita: {
@@ -1078,7 +1096,7 @@ const estilos = StyleSheet.create({
     lineHeight: 16,
     fontWeight: '500',
     letterSpacing: -0.12,
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 3,
     fontFamily: familia,
     ...tabular,
@@ -1118,11 +1136,12 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  recogidaSale: { fontWeight: '400', color: color.ink500, letterSpacing: 0 },
+  recogidaSale: { fontWeight: '400', color: color.ink600, letterSpacing: 0 },
   divisorSale: { height: 1, backgroundColor: color.divisor, marginTop: 2 },
   filaQuienSale: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  filaNotaSale: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   quienSale: {
-    flex: 1,
+    flexShrink: 1,
     minWidth: 0,
     fontSize: 12,
     lineHeight: 17,
@@ -1130,9 +1149,9 @@ const estilos = StyleSheet.create({
     color: color.ink700,
     fontFamily: familia,
   },
-  notaSale: { fontWeight: '400', color: color.ink600 },
+  notaSale: { fontWeight: '400', color: color.ink500 },
   filaPrecioSale: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  unidadSale: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink600, fontFamily: familia },
+  unidadSale: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink500, fontFamily: familia },
   precioSale: {
     fontSize: 20,
     lineHeight: 23,
@@ -1188,7 +1207,7 @@ const estilos = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
     fontWeight: '400',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 });

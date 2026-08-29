@@ -665,7 +665,12 @@ export default function Publicar() {
               style={({ pressed }) => [estilos.eleccion, pressed && estilos.eleccionPulsada]}
             >
               <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={estilos.eleccionEtiqueta}>Salgo el</Text>
+                {/* «SALGO», NO «SALGO EL». La respuesta puede ser «Hoy» o
+                    «Mañana», y entonces el rótulo daba «Salgo el Mañana»,
+                    que no es español (visto por el dueño el 29-08-2026). Sin
+                    la preposición el rótulo vale para las tres respuestas que
+                    `diaEnChip` sabe dar: hoy, mañana y «vie 30 ago». */}
+                <Text style={estilos.eleccionEtiqueta}>Salgo</Text>
                 <Text style={[estilos.eleccionValorGrande, tabular]} numberOfLines={1}>
                   {diaEnChip(dia)}
                 </Text>
@@ -1090,7 +1095,7 @@ export default function Publicar() {
             multiline
             maxLength={300}
             placeholder="¿Tienes flexibilidad con el punto de recogida? ¿No vas por la autopista? ¿El baúl va medio lleno? Díselo aquí."
-            placeholderTextColor={color.ink500}
+            placeholderTextColor={color.ink600}
             style={estilos.comentario}
           />
           <Text style={estilos.cuenta}>
@@ -1312,7 +1317,7 @@ const estilos = StyleSheet.create({
   /** El filete horizontal entre filas y el vertical entre Día y Hora. */
   filete: { height: 1, backgroundColor: color.divisor },
   fileteVertical: { width: 1, height: 34, backgroundColor: color.divisor },
-  eleccionEtiqueta: { fontSize: 11.5, lineHeight: 16, color: color.ink500, fontFamily: familia },
+  eleccionEtiqueta: { fontSize: 11.5, lineHeight: 16, color: color.ink600, fontFamily: familia },
   /**
    * Las respuestas LARGAS: nombres de lugar, que el conductor puede escribir
    * a mano y pueden ser cualquier cosa. A 22 se leen bien y siguen cabiendo:
@@ -1361,7 +1366,7 @@ const estilos = StyleSheet.create({
     fontSize: 11.5,
     lineHeight: 15,
     fontWeight: '600',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   pastillas: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
@@ -1392,7 +1397,7 @@ const estilos = StyleSheet.create({
   pastillaHora: {
     fontSize: 12,
     lineHeight: 18,
-    color: color.ink500,
+    color: color.ink600,
     ...tabular,
     fontFamily: familia,
   },
@@ -1401,7 +1406,7 @@ const estilos = StyleSheet.create({
     marginTop: 8,
     fontSize: 12,
     lineHeight: 17,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   filaCarro: {
@@ -1413,7 +1418,7 @@ const estilos = StyleSheet.create({
     borderBottomColor: color.bordeSutil,
   },
   textoCarro: { flex: 1, ...texto.fila, color: color.ink900 },
-  carroApagado: { fontWeight: '400', color: color.ink500, fontFamily: familia },
+  carroApagado: { fontWeight: '400', color: color.ink600, fontFamily: familia },
   /** Small 12/17 en el acento de texto: en el v1 lo que actúa es rojo. */
   cambiar: { fontSize: 12, lineHeight: 17, fontWeight: '500', color: color.rojo700, fontFamily: familia },
   verLasOtras: { fontSize: 12.5, lineHeight: 17, fontWeight: '500', color: color.azul700, fontFamily: familia },
@@ -1447,7 +1452,7 @@ const estilos = StyleSheet.create({
   },
   paradaNombre: { flex: 1, fontSize: 14, lineHeight: 20.3, fontWeight: '500', letterSpacing: -0.21, color: color.ink900, fontFamily: familia },
   paradaIntermedia: { flex: 1, fontSize: 14, lineHeight: 20.3, letterSpacing: -0.21, color: color.ink900, fontFamily: familia },
-  paradaHora: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, ...tabular, fontFamily: familia },
+  paradaHora: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, ...tabular, fontFamily: familia },
   /* 40 de toque con el círculo de 22 dentro: quitar una parada por error es
      peor que fallar el toque, pero fallarlo tres veces también molesta. */
   quitar: {
@@ -1591,13 +1596,13 @@ const estilos = StyleSheet.create({
     gap: 12,
     paddingVertical: 8,
   },
-  libreEtiqueta: { fontSize: 13, lineHeight: 18, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  libreEtiqueta: { fontSize: 13, lineHeight: 18, fontWeight: '400', color: color.ink600, fontFamily: familia },
   libreValor: { fontSize: 15, lineHeight: 20, fontWeight: '600', letterSpacing: -0.22, color: color.ink900, fontFamily: familia },
   filaPrecioLibre: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  unidadLibre: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink600, fontFamily: familia },
+  unidadLibre: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink500, fontFamily: familia },
   precioLibre: { fontSize: 22, lineHeight: 24, fontWeight: '600', letterSpacing: -0.77, color: color.ink900, fontFamily: familia },
-  notaLibre: { fontSize: 12, lineHeight: 17, fontWeight: '400', color: color.ink500, marginTop: 10, fontFamily: familia },
+  notaLibre: { fontSize: 12, lineHeight: 17, fontWeight: '400', color: color.ink600, marginTop: 10, fontFamily: familia },
   pieLibre: { paddingHorizontal: espacio.gutter, paddingTop: 16, gap: 12 },
 
-  notaPie: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.125, color: color.ink500, marginTop: 10, fontFamily: familia },
+  notaPie: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.125, color: color.ink600, marginTop: 10, fontFamily: familia },
 });

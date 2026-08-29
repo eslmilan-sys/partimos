@@ -283,7 +283,7 @@ const estilos = StyleSheet.create({
   precioSimbolo: { fontSize: 17, lineHeight: 15.3, fontWeight: '500' },
 
   filaEquipaje: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 12 },
-  equipaje: { fontSize: 12.5, lineHeight: 18.125, color: color.ink600, fontFamily: familia },
+  equipaje: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
 
   raya: { height: 1, backgroundColor: color.bordeSutil, marginTop: 18 },
 
@@ -313,13 +313,13 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   filaNota: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  nota: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  nota: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
 
   notaPie: {
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 12,
     fontFamily: familia,
   },
@@ -332,7 +332,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   verTodo: { fontSize: 12.5, lineHeight: 18.125, fontWeight: '600', color: color.rojo600, fontFamily: familia },
@@ -353,7 +353,7 @@ const estilos = StyleSheet.create({
     width: 52,
     fontSize: 13.5,
     lineHeight: interlinea(13.5),
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },

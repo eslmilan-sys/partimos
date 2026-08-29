@@ -34,7 +34,7 @@ import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
-import { Boton, Epigrafe, Interruptor, Pastilla } from '@/ui/controles';
+import { Boton, Epigrafe, Interruptor, Pastilla, Stepper } from '@/ui/controles';
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, hora } from '@/ui/fechas';
@@ -196,42 +196,13 @@ export default function Reservar() {
                   : `Quedan ${datos.puestosLibres} en este carro`}
               </Text>
             </View>
-            <View style={estilos.contador}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Un puesto menos"
-                disabled={puestos <= 1}
-                onPress={() => setPuestos((n) => Math.max(1, n - 1))}
-                style={({ pressed }) => [
-                  estilos.paso,
-                  puestos <= 1 && estilos.pasoApagado,
-                  pressed && puestos > 1 ? pulsado.celda : null,
-                ]}
-              >
-                <Text style={[estilos.pasoSigno, puestos <= 1 && estilos.pasoSignoApagado]}>−</Text>
-              </Pressable>
-              <Text style={estilos.cifra}>{puestos}</Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Un puesto más"
-                disabled={puestos >= datos.puestosLibres}
-                onPress={() => setPuestos((n) => Math.min(datos.puestosLibres, n + 1))}
-                style={({ pressed }) => [
-                  estilos.paso,
-                  puestos >= datos.puestosLibres && estilos.pasoApagado,
-                  pressed && puestos < datos.puestosLibres ? pulsado.celda : null,
-                ]}
-              >
-                <Text
-                  style={[
-                    estilos.pasoSigno,
-                    puestos >= datos.puestosLibres && estilos.pasoSignoApagado,
-                  ]}
-                >
-                  +
-                </Text>
-              </Pressable>
-            </View>
+            <Stepper
+              valor={puestos}
+              alCambiar={setPuestos}
+              min={1}
+              max={datos.puestosLibres}
+              etiquetaAccesible="Cuántos puestos pido"
+            />
           </View>
         </View>
 
@@ -254,49 +225,13 @@ export default function Reservar() {
                   <Text style={estilos.claseTitulo}>{COMO_LO_DICE[cual].titulo}</Text>
                   <Text style={estilos.claseDetalle}>{COMO_LO_DICE[cual].detalle}</Text>
                 </View>
-                <View style={estilos.contador}>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`Quitar ${COMO_LO_DICE[cual].uno}`}
-                    disabled={equipaje[cual] === 0}
-                    onPress={() => setEquipaje(cambiar(equipaje, cual, -1))}
-                    style={({ pressed }) => [
-                      estilos.paso,
-                      equipaje[cual] === 0 && estilos.pasoApagado,
-                      pressed && equipaje[cual] > 0 ? pulsado.celda : null,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        estilos.pasoSigno,
-                        equipaje[cual] === 0 && estilos.pasoSignoApagado,
-                      ]}
-                    >
-                      −
-                    </Text>
-                  </Pressable>
-                  <Text style={estilos.cifra}>{equipaje[cual]}</Text>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`Añadir ${COMO_LO_DICE[cual].uno}`}
-                    disabled={equipaje[cual] === TOPE_POR_CLASE}
-                    onPress={() => setEquipaje(cambiar(equipaje, cual, +1))}
-                    style={({ pressed }) => [
-                      estilos.paso,
-                      equipaje[cual] === TOPE_POR_CLASE && estilos.pasoApagado,
-                      pressed && equipaje[cual] < TOPE_POR_CLASE ? pulsado.celda : null,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        estilos.pasoSigno,
-                        equipaje[cual] === TOPE_POR_CLASE && estilos.pasoSignoApagado,
-                      ]}
-                    >
-                      +
-                    </Text>
-                  </Pressable>
-                </View>
+                <Stepper
+                  valor={equipaje[cual]}
+                  alCambiar={(n) => setEquipaje(cambiar(equipaje, cual, n - equipaje[cual]))}
+                  min={0}
+                  max={TOPE_POR_CLASE}
+                  etiquetaAccesible={`Cuántos ${COMO_LO_DICE[cual].titulo.toLowerCase()} llevo`}
+                />
               </View>
             ))}
           </View>
@@ -403,7 +338,7 @@ const estilos = StyleSheet.create({
     marginTop: 8,
     fontSize: 12.5,
     lineHeight: 18,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   pantalla: {
@@ -483,7 +418,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  paradaHora: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
+  paradaHora: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
 
   /** Una fila por clase, separadas por un pelo: es una lista, no tarjetas. */
   clases: { marginTop: 8 },
@@ -501,38 +436,8 @@ const estilos = StyleSheet.create({
     marginTop: 2,
     fontSize: 12.5,
     lineHeight: 17,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
-  },
-  /** El mismo control de ± que usa `publicar` para los puestos. */
-  contador: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  paso: {
-    width: 34,
-    height: 34,
-    borderRadius: radio.icono,
-    backgroundColor: color.lavado,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  /** Apagado sigue OPACO: lo que se apaga es el signo, no la superficie. */
-  pasoApagado: { backgroundColor: color.inerteFondo },
-  pasoSigno: {
-    fontSize: 19,
-    lineHeight: 22,
-    fontWeight: '600',
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  pasoSignoApagado: { color: color.inerteTinta },
-  cifra: {
-    minWidth: 26,
-    textAlign: 'center',
-    fontSize: 16.5,
-    lineHeight: 22,
-    fontWeight: '600',
-    color: color.ink900,
-    fontFamily: familia,
-    ...tabular,
   },
 
   tarjetaEquipaje: {
@@ -561,7 +466,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  etiquetaApagada: { fontWeight: '400', color: color.ink500 },
+  etiquetaApagada: { fontWeight: '400', color: color.ink600 },
   nota: {
     flexDirection: 'row',
     gap: 8,
@@ -571,7 +476,7 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
   },
-  notaTexto: { flex: 1, fontSize: 12.5, lineHeight: 18.125, color: color.ink600, fontFamily: familia },
+  notaTexto: { flex: 1, fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
 
   pie: {
     paddingHorizontal: espacio.gutter,
@@ -591,5 +496,5 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  notaPie: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.12, color: color.ink500, marginTop: 10, fontFamily: familia },
+  notaPie: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.12, color: color.ink600, marginTop: 10, fontFamily: familia },
 });

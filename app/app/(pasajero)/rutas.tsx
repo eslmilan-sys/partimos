@@ -111,7 +111,7 @@ export default function Rutas() {
                   <Text style={estilos.cuando}>{r.cuando}</Text>
                 </Text>
                 <Text
-                  style={[estilos.estado, { color: r.hayViajes ? color.azul700 : color.ink500 }]}
+                  style={[estilos.estado, { color: r.hayViajes ? color.azul700 : color.ink600 }]}
                 >
                   {r.estado}
                 </Text>
@@ -224,7 +224,7 @@ const estilos = StyleSheet.create({
   cuando: {
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },
@@ -280,7 +280,7 @@ const estilos = StyleSheet.create({
     fontSize: 12.5,
     // 1.5 aquí, no la interlínea del cuerpo: el diseño le da aire a la nota.
     lineHeight: 18.75,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 });

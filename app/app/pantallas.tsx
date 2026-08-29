@@ -120,7 +120,7 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
   titulo: { ...texto.titular, color: color.ink900, marginTop: 40 },
-  sub: { ...texto.cuerpo, color: color.ink600, marginTop: 6 },
+  sub: { ...texto.cuerpo, color: color.ink500, marginTop: 6 },
 
   tablero: { marginTop: espacio.seccion },
   nombreTablero: { ...texto.epigrafe, color: color.rojo600, marginBottom: 10 },

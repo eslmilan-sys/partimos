@@ -101,16 +101,16 @@ export default function PuntoDeRecogida() {
         {sitio !== puesto.origen ? <Text style={estilos.ciudad}>{puesto.origen}</Text> : null}
 
         <View style={estilos.datos}>
-          <Dato icono={<Calendario tamano={20} tinta={color.ink600} />} rotulo="Cuándo">
+          <Dato icono={<Calendario tamano={20} tinta={color.ink500} />} rotulo="Cuándo">
             {`${diaLargo(puesto.cuando)}, ${hora(puesto.cuando)}`}
           </Dato>
 
-          <Dato icono={<Persona tamano={20} tinta={color.ink600} />} rotulo="Quién maneja">
+          <Dato icono={<Persona tamano={20} tinta={color.ink500} />} rotulo="Quién maneja">
             {puesto.conductor}
           </Dato>
 
           {carro ? (
-            <Dato icono={<Carro tamano={20} tinta={color.ink600} />} rotulo="Qué carro">
+            <Dato icono={<Carro tamano={20} tinta={color.ink500} />} rotulo="Qué carro">
               {[carro.modelo, carro.color].filter(Boolean).join(' ')}
               {carro.placa ? `\nPlaca ${carro.placa}` : ''}
             </Dato>
@@ -119,7 +119,7 @@ export default function PuntoDeRecogida() {
 
         {/* La regla, dicha donde se necesita: el punto no lo pone la app. */}
         <View style={estilos.nota}>
-          <PinLleno tamano={17} tinta={color.ink500} />
+          <PinLleno tamano={17} tinta={color.ink600} />
           <Text style={estilos.notaTexto}>
             {`Este punto lo acordaste con ${puesto.conductor.split(' ')[0]} por el chat. Si algo cambia —una calle cerrada, un retraso— díselo ahí: lo que se escribe queda.`}
           </Text>
@@ -198,7 +198,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -216,7 +216,7 @@ const estilos = StyleSheet.create({
     marginTop: 4,
     fontSize: 15.5,
     lineHeight: 22,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
 
@@ -245,7 +245,7 @@ const estilos = StyleSheet.create({
   rotulo: {
     fontSize: 12,
     lineHeight: 17,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   valor: {
@@ -267,7 +267,7 @@ const estilos = StyleSheet.create({
     flex: 1,
     fontSize: 13.5,
     lineHeight: 20,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 

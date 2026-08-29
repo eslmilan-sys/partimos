@@ -256,7 +256,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   tituloFuerte: { color: color.ink900 },
-  bajada: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  bajada: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink600, fontFamily: familia },
 
 
   campos: { paddingTop: 20, paddingHorizontal: espacio.gutter, gap: 14 },
@@ -300,11 +300,11 @@ const estilos = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
     fontWeight: '400',
-    color: color.ink600,
+    color: color.ink500,
     textAlign: 'center',
     fontFamily: familia,
   },
   legalFuerte: { color: color.ink900, fontWeight: '500' },
-  crear: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  crear: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink600, fontFamily: familia },
   crearFuerte: { color: color.rojo600, fontWeight: '600' },
 });

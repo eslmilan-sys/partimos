@@ -208,14 +208,14 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  tarjetaTexto: { fontSize: 13.5, lineHeight: 19.5, color: color.ink600, marginTop: 3, fontFamily: familia },
+  tarjetaTexto: { fontSize: 13.5, lineHeight: 19.5, color: color.ink500, marginTop: 3, fontFamily: familia },
 
   acciones: { flexDirection: 'row', gap: 9, marginTop: 8 },
 
   pieTexto: {
     fontSize: 12.5,
     lineHeight: 19,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 6,
     fontFamily: familia,
   },

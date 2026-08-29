@@ -133,7 +133,7 @@ export default function Puerta() {
             Pedir el puesto
           </Boton>
           <View style={estilos.filaPromesa}>
-            <Escudo tamano={15} tinta={color.ink500} />
+            <Escudo tamano={15} tinta={color.ink600} />
             <Text style={estilos.promesa}>Una vez, y ya. Nada de anuncios ni llamadas.</Text>
           </View>
           {quePaso ? <Aviso>{quePaso}</Aviso> : null}
@@ -196,8 +196,8 @@ const estilos = StyleSheet.create({
     marginTop: 5,
   },
   paradaNombre: { fontSize: 15.5, lineHeight: 23.2, letterSpacing: -0.29, color: color.ink900, fontFamily: familia },
-  paradaDetalle: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, marginTop: 3, fontFamily: familia },
-  paradaHora: { fontSize: 13.5, lineHeight: 19.57, color: color.ink600, fontFamily: familia, ...tabular },
+  paradaDetalle: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, marginTop: 3, fontFamily: familia },
+  paradaHora: { fontSize: 13.5, lineHeight: 19.57, color: color.ink500, fontFamily: familia, ...tabular },
 
   velo: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(38,35,43,.48)' },
 
@@ -230,7 +230,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   tituloFuerte: { fontWeight: '600' },
-  explicacion: { fontSize: 14, lineHeight: 21, color: color.ink600, marginTop: 12, fontFamily: familia },
+  explicacion: { fontSize: 14, lineHeight: 21, color: color.ink500, marginTop: 12, fontFamily: familia },
 
   filaTelefono: { flexDirection: 'row', gap: 9 },
   prefijo: {
@@ -263,6 +263,6 @@ const estilos = StyleSheet.create({
   } as never,
 
   filaPromesa: { flexDirection: 'row', alignItems: 'center', gap: 10, justifyContent: 'center' },
-  promesa: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
+  promesa: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },
 
 });

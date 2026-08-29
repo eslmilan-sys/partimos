@@ -177,14 +177,14 @@ const estilos = StyleSheet.create({
   sinNada: {
     fontSize: 14,
     lineHeight: 21,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     marginTop: 12,
   },
   sinResenas: {
     fontSize: 14,
     lineHeight: 21,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     marginTop: 12,
   },
@@ -269,7 +269,7 @@ const estilos = StyleSheet.create({
     borderTopColor: color.bordeSutil,
   },
   carroModelo: { fontSize: 14, lineHeight: interlinea(14), fontWeight: '500', color: color.ink700, fontFamily: familia },
-  carroPunto: { fontSize: 14, lineHeight: interlinea(14), color: color.ink500, fontFamily: familia },
+  carroPunto: { fontSize: 14, lineHeight: interlinea(14), color: color.ink600, fontFamily: familia },
   carroColor: { fontSize: 14, lineHeight: interlinea(14), color: color.ink700, fontFamily: familia },
   placa: {
     marginLeft: 'auto',
@@ -293,7 +293,7 @@ const estilos = StyleSheet.create({
   filaAutor: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   autor: { flex: 1, fontSize: 14, lineHeight: interlinea(14.5), fontWeight: '500', color: color.ink900, fontFamily: familia },
   filaEstrella: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  nota: { fontSize: 12.5, lineHeight: interlinea(12.5), color: color.ink600, fontFamily: familia, ...tabular },
+  nota: { fontSize: 12.5, lineHeight: interlinea(12.5), color: color.ink500, fontFamily: familia, ...tabular },
   textoResena: { fontSize: 13.5, lineHeight: 19.57, color: color.ink700, marginTop: 5, fontFamily: familia },
   verTodas: {
     textAlign: 'center',

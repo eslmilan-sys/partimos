@@ -154,12 +154,12 @@ export default function Conversaciones() {
             cuál era, y desplazar una lista para encontrar un nombre no es
             buscar. */}
         <View style={estilos.buscador}>
-          <Lupa tamano={18} tinta={color.ink500} />
+          <Lupa tamano={18} tinta={color.ink600} />
           <TextInput
             value={busca}
             onChangeText={setBusca}
             placeholder="Buscar por nombre o destino"
-            placeholderTextColor={color.ink500}
+            placeholderTextColor={color.ink600}
             accessibilityLabel="Buscar una conversación"
             style={estilos.entrada}
           />
@@ -449,10 +449,10 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  cuando: { fontSize: 11.5, lineHeight: 17, color: color.ink500, fontFamily: familia, ...tabular },
+  cuando: { fontSize: 11.5, lineHeight: 17, color: color.ink600, fontFamily: familia, ...tabular },
 
   filaUltimo: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
-  ultimo: { flex: 1, fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia },
+  ultimo: { flex: 1, fontSize: 13.5, lineHeight: 19, color: color.ink500, fontFamily: familia },
   ultimoNuevo: { color: color.ink900, fontWeight: '500' },
 
   filaContexto: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5 },
@@ -469,10 +469,10 @@ const estilos = StyleSheet.create({
     fontSize: 10.5,
     lineHeight: 15,
     fontWeight: '600',
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
-  contexto: { flex: 1, fontSize: 11.5, lineHeight: 17, color: color.ink500, fontFamily: familia },
+  contexto: { flex: 1, fontSize: 11.5, lineHeight: 17, color: color.ink600, fontFamily: familia },
   pastillaSinLeer: {
     minWidth: 20,
     height: 20,
@@ -508,7 +508,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink600, fontFamily: familia },
+  vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink500, fontFamily: familia },
   botonVacio: {
     height: 46,
     marginTop: 6,
@@ -528,7 +528,7 @@ const estilos = StyleSheet.create({
   pieTexto: {
     fontSize: 12.5,
     lineHeight: 19,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 8,
     fontFamily: familia,
   },

@@ -230,7 +230,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  ayuda: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, marginTop: 2, fontFamily: familia, ...tabular },
+  ayuda: { fontSize: 12.5, lineHeight: 18.125, color: color.ink600, marginTop: 2, fontFamily: familia, ...tabular },
   aporte: {
     fontSize: 24,
     lineHeight: 22.8,
@@ -257,7 +257,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   tarjeta: {
@@ -274,7 +274,7 @@ const estilos = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 14,
   },
-  cuando: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  cuando: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
   bloquePrecio: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
   precio: {
     fontSize: 24,
@@ -300,14 +300,14 @@ const estilos = StyleSheet.create({
   },
 
   filaEquipaje: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 12 },
-  equipaje: { fontSize: 12.5, lineHeight: 18.125, color: color.ink600, fontFamily: familia },
+  equipaje: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
 
   pie: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 26 },
   notaPie: {
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 10,
     fontFamily: familia,
   },

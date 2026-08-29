@@ -149,7 +149,7 @@ export default function Solicitante() {
           <Epigrafe>Lo que pide</Epigrafe>
 
           <View style={estilos.filaPide}>
-            <Pin tamano={15} tinta={color.ink600} />
+            <Pin tamano={15} tinta={color.ink500} />
             <Text style={estilos.punto}>{solicitud.punto}</Text>
             <Text style={estilos.desvio}>{solicitud.minutosDeDesvio ? `+${solicitud.minutosDeDesvio} min` : ''}</Text>
           </View>
@@ -267,7 +267,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  desde: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, marginTop: 3, fontFamily: familia },
+  desde: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, marginTop: 3, fontFamily: familia },
 
   distintivos: {
     flexDirection: 'row',
@@ -312,7 +312,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  cifraEtiqueta: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, marginTop: 2, fontFamily: familia },
+  cifraEtiqueta: { fontSize: 12.5, lineHeight: 17.4, color: color.ink600, marginTop: 2, fontFamily: familia },
 
   filaPide: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 11 },
   punto: {
@@ -324,7 +324,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  desvio: { fontSize: 14, lineHeight: 20.3, color: color.ink500, fontFamily: familia, ...tabular },
+  desvio: { fontSize: 14, lineHeight: 20.3, color: color.ink600, fontFamily: familia, ...tabular },
   equipaje: { flex: 1, fontSize: 14, lineHeight: 20.3, color: color.ink700, fontFamily: familia },
   aporte: {
     fontSize: 17,

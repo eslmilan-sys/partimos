@@ -205,7 +205,7 @@ const estilos = StyleSheet.create({
     marginTop: 10,
     fontSize: 14,
     lineHeight: 20,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   /** El límite, en su propia caja: se lee aparte de la promesa. */
@@ -218,7 +218,7 @@ const estilos = StyleSheet.create({
   limiteTexto: {
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -228,6 +228,6 @@ const estilos = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
   },
-  ayudaTexto: { fontSize: 14, lineHeight: 20, color: color.ink500, fontFamily: familia },
+  ayudaTexto: { fontSize: 14, lineHeight: 20, color: color.ink600, fontFamily: familia },
   ayudaFuerte: { color: color.rojo600, fontWeight: '600' },
 });

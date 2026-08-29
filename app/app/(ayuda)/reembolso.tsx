@@ -383,7 +383,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  /* ink700 y no ink600: esta línea va sobre arena 300, donde el 600 se
+  /* ink700 y no ink500: esta línea va sobre arena 300, donde el 600 se
      queda en 4,43:1. */
   plazo: { fontWeight: '400', color: color.ink700 },
   cambiar: {

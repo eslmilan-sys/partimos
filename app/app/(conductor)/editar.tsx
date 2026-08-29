@@ -196,10 +196,10 @@ export default function Editar() {
 function Candado({ tamano }: { tamano: number }) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
-      <Rect x={4.6} y={10.4} width={14.8} height={9.6} rx={2.4} stroke={color.ink500} strokeWidth={1.7} />
+      <Rect x={4.6} y={10.4} width={14.8} height={9.6} rx={2.4} stroke={color.ink600} strokeWidth={1.7} />
       <Path
         d="M8.2 10.4V7.8a3.8 3.8 0 0 1 7.6 0v2.6"
-        stroke={color.ink500}
+        stroke={color.ink600}
         strokeWidth={1.7}
         strokeLinecap="round"
       />
@@ -280,11 +280,11 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  etiquetaSuave: { fontWeight: '400', color: color.ink500 },
+  etiquetaSuave: { fontWeight: '400', color: color.ink600 },
   valor: {
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 1,
     fontFamily: familia,
     ...tabular,
@@ -345,7 +345,7 @@ const estilos = StyleSheet.create({
     marginTop: 18,
   },
   notaRoja: { backgroundColor: color.rojo50 },
-  notaTexto: { fontSize: 12.5, lineHeight: 18.75, color: color.ink600, fontFamily: familia },
+  notaTexto: { fontSize: 12.5, lineHeight: 18.75, color: color.ink500, fontFamily: familia },
   notaTextoRojo: { color: color.rojo700 },
 
   pie: {

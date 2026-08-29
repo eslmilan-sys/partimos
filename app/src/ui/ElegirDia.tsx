@@ -316,7 +316,7 @@ const estilos = StyleSheet.create({
     fontSize: 11.5,
     lineHeight: 16,
     fontWeight: '600',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -342,7 +342,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13.5,
     lineHeight: 19,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
 });

@@ -314,7 +314,7 @@ const estilos = StyleSheet.create({
   donde: {
     fontSize: 12,
     lineHeight: interlinea(12),
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 3,
     fontFamily: familia,
   },
@@ -384,7 +384,7 @@ const estilos = StyleSheet.create({
   pie: {
     fontSize: 11.5,
     lineHeight: interlinea(12),
-    color: color.ink500,
+    color: color.ink600,
     textAlign: 'center',
     marginTop: 12,
     fontFamily: familia,

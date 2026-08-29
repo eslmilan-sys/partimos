@@ -166,7 +166,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 1,
   },
   marca: {

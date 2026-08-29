@@ -650,12 +650,12 @@ function Camara() {
     <Svg viewBox="0 0 24 24" width={20} height={20} fill="none">
       <Path
         d="M4 8.5h3l1.4-2h7.2L17 8.5h3v10H4z"
-        stroke={color.ink600}
+        stroke={color.ink500}
         strokeWidth={1.7}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Circle cx={12} cy={13.2} r={3.2} stroke={color.ink600} strokeWidth={1.7} />
+      <Circle cx={12} cy={13.2} r={3.2} stroke={color.ink500} strokeWidth={1.7} />
     </Svg>
   );
 }
@@ -733,7 +733,7 @@ const estilos = StyleSheet.create({
     marginTop: 7,
     fontSize: 12,
     lineHeight: 17,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   /** La fecha, o «Verificar»: tabular porque es una cifra comparable. */
@@ -747,7 +747,7 @@ const estilos = StyleSheet.create({
   notaFila: {
     fontSize: 12,
     lineHeight: 17,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 3,
     fontFamily: familia,
   },
@@ -798,7 +798,7 @@ const estilos = StyleSheet.create({
     marginTop: 4,
     fontSize: 12.5,
     lineHeight: 18,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   tituloFoto: { ...texto.fila, color: color.ink900, flex: 1 },
@@ -845,7 +845,7 @@ const estilos = StyleSheet.create({
   textoZona: {
     fontSize: 12.5,
     lineHeight: 17,
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 3,
     textAlign: 'center',
     fontFamily: familia,
@@ -901,7 +901,7 @@ const estilos = StyleSheet.create({
   detalleResumen: {
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     ...tabular,
   },
@@ -932,7 +932,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 10,
     fontFamily: familia,
   },

@@ -225,7 +225,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  apunte: { fontSize: 13.5, lineHeight: 19.575, color: color.ink500, fontFamily: familia },
+  apunte: { fontSize: 13.5, lineHeight: 19.575, color: color.ink600, fontFamily: familia },
   monto: {
     fontSize: 15.5,
     lineHeight: 23.2,
@@ -268,7 +268,7 @@ const estilos = StyleSheet.create({
     marginHorizontal: 4,
     fontSize: 12.5,
     lineHeight: 18.75,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -294,7 +294,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 });

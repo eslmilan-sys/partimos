@@ -235,7 +235,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  carro: { fontSize: 13.5, lineHeight: 19.57, color: color.ink600, marginTop: 2, fontFamily: familia },
+  carro: { fontSize: 13.5, lineHeight: 19.57, color: color.ink500, marginTop: 2, fontFamily: familia },
   separador: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 18 },
 
   recorrido: { position: 'relative' },
@@ -265,8 +265,8 @@ const estilos = StyleSheet.create({
     marginTop: 4,
   },
   paradaNombre: { fontSize: 15.5, lineHeight: 23.2, letterSpacing: -0.29, color: color.ink900, fontFamily: familia },
-  paradaDetalle: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia },
-  paradaHora: { fontSize: 13.5, lineHeight: 19.57, color: color.ink600, fontFamily: familia, ...tabular },
+  paradaDetalle: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia },
+  paradaHora: { fontSize: 13.5, lineHeight: 19.57, color: color.ink500, fontFamily: familia, ...tabular },
 
   avisoPago: {
     marginHorizontal: espacio.gutter,

@@ -292,7 +292,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   /** LLEGA va en el acento de texto: la dirección se marca dos veces. */
@@ -320,7 +320,7 @@ const estilos = StyleSheet.create({
     fontSize: 11.5,
     lineHeight: 15,
     letterSpacing: -0.1,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -348,7 +348,7 @@ const estilos = StyleSheet.create({
     // ese píxel por debajo para que no quede blanco entre los dos.
     marginRight: -1,
   },
-  duracion: { fontSize: 10, lineHeight: 13, fontWeight: '500', color: color.ink600, fontFamily: familia, ...tabular },
+  duracion: { fontSize: 10, lineHeight: 13, fontWeight: '500', color: color.ink500, fontFamily: familia, ...tabular },
   paradas: { fontSize: 10, lineHeight: 13, fontWeight: '400', color: color.ink400, fontFamily: familia },
 
   masUnDia: {
@@ -363,7 +363,7 @@ const estilos = StyleSheet.create({
     lineHeight: 13,
     fontWeight: '600',
     letterSpacing: 0.2,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -382,21 +382,21 @@ const estilos = StyleSheet.create({
   },
   filaNombre: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   filaMeta: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 1 },
-  meta: { fontSize: 11, lineHeight: 15, fontWeight: '400', color: color.ink600, fontFamily: familia, ...tabular },
+  meta: { fontSize: 11, lineHeight: 15, fontWeight: '400', color: color.ink500, fontFamily: familia, ...tabular },
   insignia: {
     paddingHorizontal: 6,
     paddingVertical: 1.5,
     borderRadius: 7,
     backgroundColor: color.lavadoChip,
   },
-  insigniaTexto: { fontSize: 9.5, lineHeight: 13, fontWeight: '600', color: color.ink600, fontFamily: familia },
+  insigniaTexto: { fontSize: 9.5, lineHeight: 13, fontWeight: '600', color: color.ink500, fontFamily: familia },
   /** El oro del sistema — el mismo de las estrellas — en su tinte al 16 %. */
   insigniaTop: { backgroundColor: 'rgba(224,168,60,.16)' },
   insigniaTopTexto: { color: color.esperaTinta },
 
   pilaPrecio: { alignItems: 'flex-end', gap: 2 },
   filaPrecio: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  precioUnidad: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink600, fontFamily: familia },
+  precioUnidad: { fontSize: 12, lineHeight: 16, fontWeight: '500', color: color.ink500, fontFamily: familia },
   precio: {
     fontSize: 22,
     lineHeight: 24,

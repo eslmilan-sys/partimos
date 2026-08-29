@@ -134,11 +134,18 @@ const estilos = StyleSheet.create({
   },
   icono: { width: 23, height: 23, alignItems: 'center', justifyContent: 'center' },
 
+  /**
+   * EL RÓTULO NO VA EN LA TINTA DEL ICONO. `inkIcono` (#6C8A93) contrasta
+   * 3,69:1: suficiente para un icono, que es una forma, y NO para un texto de
+   * 10 px, que pide 4,5:1. Son las cuatro palabras que están en todas las
+   * pantallas de la app y las que dicen dónde estás. El icono se queda en su
+   * gris; el rótulo sube a la tinta de leer (29-08-2026).
+   */
   etiqueta: {
     fontSize: 10,
     lineHeight: 13,
     fontWeight: '400',
-    color: color.inkIcono,
+    color: color.ink500,
     fontFamily: familia,
   },
   etiquetaActiva: { fontWeight: '500', color: color.rojo700 },

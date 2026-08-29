@@ -255,7 +255,7 @@ const estilos = StyleSheet.create({
     alignSelf: 'flex-start',
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 3,
     marginBottom: 4,
     fontFamily: familia,
@@ -290,7 +290,7 @@ const estilos = StyleSheet.create({
     ...tabular,
   },
   /* ink800: esta línea cae sobre la fila elegida, que es más oscura que el
-     blanco, y con ink600 se quedaba en 4,43:1. */
+     blanco, y con ink500 se quedaba en 4,43:1. */
   tarifa: {
     alignSelf: 'flex-start',
     fontSize: 12.5,
@@ -364,7 +364,7 @@ const estilos = StyleSheet.create({
     marginTop: 11,
     fontSize: 12.5,
     lineHeight: 18.75,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 });

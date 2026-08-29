@@ -141,7 +141,7 @@ const estilos = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: 0.9,
     textTransform: 'uppercase',
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   sociales: { paddingTop: 16, flexDirection: 'row', gap: 10 },

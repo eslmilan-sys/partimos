@@ -225,7 +225,7 @@ const estilos = StyleSheet.create({
     color: color.rojo600,
     fontFamily: familia,
   },
-  compartir: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
+  compartir: { fontSize: 12.5, lineHeight: 18.125, color: color.ink600, fontFamily: familia },
 
   paradas: { gap: 2, marginTop: 18 },
   parada: { flexDirection: 'row', gap: 14, paddingBottom: 14 },
@@ -248,13 +248,13 @@ const estilos = StyleSheet.create({
     borderColor: color.ink200,
   },
   nombreParada: { flex: 1, fontSize: 15.5, lineHeight: 23.2, letterSpacing: -0.288, fontFamily: familia },
-  pasada: { fontSize: 15.5, lineHeight: 22.475, letterSpacing: -0.279, color: color.ink600 },
+  pasada: { fontSize: 15.5, lineHeight: 22.475, letterSpacing: -0.279, color: color.ink500 },
   ahora: { fontWeight: '500', color: color.ink900 },
   falta: { color: color.ink900 },
   cuandoParada: {
     fontSize: 13.5,
     lineHeight: interlinea(13.5),
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },
@@ -292,7 +292,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  carro: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  carro: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
 
   aporte: {
     flexDirection: 'row',
@@ -314,5 +314,5 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  aporteNota: { fontSize: 12.5, lineHeight: 18.125, color: color.ink600, fontFamily: familia },
+  aporteNota: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
 });

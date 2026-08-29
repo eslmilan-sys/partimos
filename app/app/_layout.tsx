@@ -92,7 +92,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     fontSize: 13.5,
     lineHeight: interlinea(13),
-    color: color.ink500,
+    color: color.ink600,
     textAlign: 'center',
   },
 });

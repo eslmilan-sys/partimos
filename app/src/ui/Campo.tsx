@@ -88,7 +88,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.1 * 12,
     textTransform: 'uppercase',
-    color: color.ink600,
+    color: color.ink500,
   },
   cajon: {
     height: 58,
@@ -119,7 +119,7 @@ const estilos = StyleSheet.create({
     fontSize: 13.5,
     lineHeight: interlinea(13),
     fontWeight: '600',
-    color: color.ink600,
+    color: color.ink500,
     paddingVertical: 13,
     paddingHorizontal: 10,
   },

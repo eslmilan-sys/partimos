@@ -266,7 +266,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   /* ink800: la fila del método elegido va sobre un fondo más oscuro que el
-     blanco, y con ink600 esta línea se quedaba en 4,43:1. */
+     blanco, y con ink500 esta línea se quedaba en 4,43:1. */
   metodoDetalle: { fontSize: 12.5, lineHeight: 18.12, color: color.ink800, marginTop: 2, fontFamily: familia, ...tabular },
   distintivo: {
     fontSize: 10.5, lineHeight: 15.22,
@@ -297,7 +297,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     paddingBottom: 5,
     fontFamily: familia,
   },
@@ -309,7 +309,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  explicacion: { fontSize: 12.5, lineHeight: 18.125, color: color.ink600, marginTop: 14, fontFamily: familia },
+  explicacion: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, marginTop: 14, fontFamily: familia },
 
   pie: {
     paddingHorizontal: espacio.gutter,
@@ -323,7 +323,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 10,
     fontFamily: familia,
   },

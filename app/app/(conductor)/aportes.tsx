@@ -266,7 +266,7 @@ const estilos = StyleSheet.create({
   detalle: {
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     ...tabular,
   },
@@ -316,7 +316,7 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  cadaCuando: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, fontFamily: familia },
+  cadaCuando: { fontSize: 12.5, lineHeight: 18.125, color: color.ink600, fontFamily: familia },
   cambiar: {
     fontSize: 12,
     lineHeight: 17,

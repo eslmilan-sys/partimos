@@ -91,7 +91,7 @@ function Reloj() {
 function Aspa() {
   return (
     <Svg viewBox="0 0 24 24" width={16} height={16} fill="none" style={{ marginTop: 1 }}>
-      <Path d="M5 5l14 14M19 5L5 19" stroke={color.ink600} strokeWidth={1.7} strokeLinecap="round" />
+      <Path d="M5 5l14 14M19 5L5 19" stroke={color.ink500} strokeWidth={1.7} strokeLinecap="round" />
     </Svg>
   );
 }
@@ -282,7 +282,7 @@ const estilos = StyleSheet.create({
   razonTexto: {
     fontSize: 12.5,
     lineHeight: 17.5,
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 2,
     fontFamily: familia,
   },
@@ -313,7 +313,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 10.5 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     marginBottom: 9,
     fontFamily: familia,
   },
@@ -340,7 +340,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: 17.5,
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 5,
     fontFamily: familia,
   },
@@ -356,7 +356,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     lineHeight: 20.3,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   dialogoSi: {
@@ -382,7 +382,7 @@ const estilos = StyleSheet.create({
     fontSize: 13.5,
     lineHeight: 19.575,
     fontWeight: '600',
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
 });

@@ -232,7 +232,7 @@ const estilos = StyleSheet.create({
   explicacion: {
     fontSize: 13.5,
     lineHeight: 19.575,
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 14,
     fontFamily: familia,
   },

@@ -307,7 +307,7 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
   },
-  etiqueta: { fontSize: 13.5, lineHeight: 19.575, color: color.ink600, fontFamily: familia },
+  etiqueta: { fontSize: 13.5, lineHeight: 19.575, color: color.ink500, fontFamily: familia },
   valor: {
     flexShrink: 1,
     textAlign: 'right',
@@ -324,7 +324,7 @@ const estilos = StyleSheet.create({
     marginTop: espacio.entreTarjetas,
     fontSize: 12.5,
     lineHeight: 18.75,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 

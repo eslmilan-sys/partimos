@@ -382,7 +382,7 @@ const estilos = StyleSheet.create({
   primeraVezTexto: {
     fontSize: 13.5,
     lineHeight: 20,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
 
@@ -390,7 +390,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: interlinea(12),
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 20,
     marginBottom: 14,
     fontFamily: familia,
@@ -422,7 +422,7 @@ const estilos = StyleSheet.create({
   horaBurbuja: {
     fontSize: 10,
     lineHeight: 14,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 4,
     alignSelf: 'flex-end',
     fontFamily: familia,

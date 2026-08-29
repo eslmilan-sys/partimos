@@ -93,7 +93,7 @@ export function ElegirCiudad({ abierto, yo, actual, alElegir, alCerrar }: Props)
           </View>
 
           <View style={estilos.campo}>
-            <Lupa tamano={18} tinta={color.ink500} />
+            <Lupa tamano={18} tinta={color.ink600} />
             <TextInput
               accessibilityLabel="Escribe tu ciudad"
               autoFocus
@@ -103,7 +103,7 @@ export function ElegirCiudad({ abierto, yo, actual, alElegir, alCerrar }: Props)
                 setPedida(null);
               }}
               placeholder="Escribe tu ciudad"
-              placeholderTextColor={color.ink500}
+              placeholderTextColor={color.ink600}
               style={estilos.entrada}
             />
           </View>
@@ -129,7 +129,7 @@ export function ElegirCiudad({ abierto, yo, actual, alElegir, alCerrar }: Props)
                   ]}
                 >
                   <View style={estilos.celdaPin}>
-                    <Pin tamano={16} tinta={color.ink600} />
+                    <Pin tamano={16} tinta={color.ink500} />
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={estilos.nombre} numberOfLines={1}>
@@ -231,7 +231,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
   },
   cerrar: {
     width: 34,
@@ -291,7 +291,7 @@ const estilos = StyleSheet.create({
   provincia: {
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -315,7 +315,7 @@ const estilos = StyleSheet.create({
   faltanteTexto: {
     fontSize: 13,
     lineHeight: 19,
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 4,
     fontFamily: familia,
   },
@@ -362,7 +362,7 @@ const estilos = StyleSheet.create({
   pista: {
     fontSize: 13,
     lineHeight: 19,
-    color: color.ink500,
+    color: color.ink600,
     padding: 12,
     fontFamily: familia,
   },

@@ -55,7 +55,7 @@ export function Atras({ tamano = 23, tinta = color.ink900 }: Props) {
  * modo que el arco que entra en la carrocería ES el guardabarros. La cintura
  * separa la cabina del cuerpo — sin ella el techo parece una joroba.
  */
-export function Carro({ tamano = 19, tinta = color.ink600, grueso }: Props) {
+export function Carro({ tamano = 19, tinta = color.ink500, grueso }: Props) {
   const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
@@ -90,10 +90,37 @@ export function Mas({ tamano = 16, tinta = color.azul700 }: Props) {
   );
 }
 
-export function Cerrar({ tamano = 12, tinta = color.ink600 }: Props) {
+export function Cerrar({ tamano = 12, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path d="M6 6l12 12M18 6L6 18" stroke={tinta} strokeWidth={trazo(tamano)} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/**
+ * BORRAR — la tecla del teclado numérico.
+ *
+ * Se escribía con el carácter «⌫» (U+232B), que el subconjunto de Switzer no
+ * trae: el navegador lo sacaba de otra fuente, con otro peso y otra altura,
+ * en una tecla rodeada de cifras de Switzer. Dibujado, va al trazo del
+ * sistema como los demás iconos.
+ */
+export function Borrar({ tamano = 20, tinta = color.ink700 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path
+        d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7 6-7Z"
+        stroke={tinta}
+        strokeWidth={trazo(tamano)}
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12 9.5l5 5m0-5l-5 5"
+        stroke={tinta}
+        strokeWidth={trazo(tamano)}
+        strokeLinecap="round"
+      />
     </Svg>
   );
 }
@@ -113,7 +140,7 @@ export function Pin({ tamano = 15, tinta = color.azul500 }: Props) {
   );
 }
 
-export function Maleta({ tamano = 15, tinta = color.ink600 }: Props) {
+export function Maleta({ tamano = 15, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Rect x={3} y={7} width={18} height={13} rx={2.5} stroke={tinta} strokeWidth={trazo(tamano)} />
@@ -468,7 +495,7 @@ export function Asiento({ tamano = 20, tinta = '#fff' }: Props) {
 }
 
 /** El bocadillo con la interrogación: la ayuda. */
-export function Ayuda({ tamano = 18, tinta = color.ink600 }: Props) {
+export function Ayuda({ tamano = 18, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Circle cx={12} cy={12} r={8.6} stroke={tinta} strokeWidth={trazo(tamano)} />
@@ -485,7 +512,7 @@ export function Ayuda({ tamano = 18, tinta = color.ink600 }: Props) {
 }
 
 /** La cédula: el rectángulo con la foto y las dos líneas. */
-export function Cedula({ tamano = 20, tinta = color.ink600 }: Props) {
+export function Cedula({ tamano = 20, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Rect x={2.6} y={5} width={18.8} height={14} rx={3} stroke={tinta} strokeWidth={trazo(tamano)} />
@@ -497,7 +524,7 @@ export function Cedula({ tamano = 20, tinta = color.ink600 }: Props) {
 }
 
 /** Cómo se paga: el billete. Ni tarjeta ni moneda — aquí se paga de mano a mano. */
-export function Billete({ tamano = 20, tinta = color.ink600 }: Props) {
+export function Billete({ tamano = 20, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Rect x={2.4} y={6} width={19.2} height={12} rx={2.6} stroke={tinta} strokeWidth={trazo(tamano)} />
@@ -508,7 +535,7 @@ export function Billete({ tamano = 20, tinta = color.ink600 }: Props) {
 }
 
 /** Mis viajes: los dos hilos de una ruta con sus paradas. */
-export function Ruta({ tamano = 20, tinta = color.ink600 }: Props) {
+export function Ruta({ tamano = 20, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path d="M3 7h9a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h9" stroke={tinta} strokeWidth={trazo(tamano)} strokeLinecap="round" strokeLinejoin="round" />
@@ -519,7 +546,7 @@ export function Ruta({ tamano = 20, tinta = color.ink600 }: Props) {
 }
 
 /** Cómo funciona: la brújula. */
-export function Brujula({ tamano = 20, tinta = color.ink600 }: Props) {
+export function Brujula({ tamano = 20, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Circle cx={12} cy={12} r={8.8} stroke={tinta} strokeWidth={trazo(tamano)} />
@@ -529,7 +556,7 @@ export function Brujula({ tamano = 20, tinta = color.ink600 }: Props) {
 }
 
 /** Legal: la hoja con su esquina doblada. */
-export function Documento({ tamano = 20, tinta = color.ink600 }: Props) {
+export function Documento({ tamano = 20, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path d="M13.6 3.2H7a2 2 0 0 0-2 2v13.6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.6z" stroke={tinta} strokeWidth={trazo(tamano)} strokeLinejoin="round" />
@@ -589,7 +616,7 @@ export function PinLleno({ tamano = 13, tinta = color.rojo500 }: Props) {
 }
 
 /** El cigarro tachado: en este carro no se fuma. */
-export function SinHumo({ tamano = 15, tinta = color.ink600 }: Props) {
+export function SinHumo({ tamano = 15, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Rect x={2.6} y={13.4} width={14} height={4.2} rx={1.4} stroke={tinta} strokeWidth={trazo(tamano)} />
@@ -600,7 +627,7 @@ export function SinHumo({ tamano = 15, tinta = color.ink600 }: Props) {
 }
 
 /** La huella: el carro acepta mascota. */
-export function Mascota({ tamano = 15, tinta = color.ink600 }: Props) {
+export function Mascota({ tamano = 15, tinta = color.ink500 }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Circle cx={7} cy={8.4} r={2} stroke={tinta} strokeWidth={trazo(tamano)} />

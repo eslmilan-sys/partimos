@@ -88,7 +88,7 @@ const estilos = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20.3,
     fontWeight: '600',
-    color: color.ink600,
+    color: color.ink500,
     textAlign: 'center',
     fontFamily: familia,
   },

@@ -29,7 +29,7 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { Avatar, Boton, Epigrafe } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { hora, mas } from '@/ui/fechas';
-import { Visto } from '@/ui/iconos';
+import { Borrar, Visto } from '@/ui/iconos';
 import { color, espacio, familia, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, el del traspaso. */
@@ -190,9 +190,11 @@ export default function Abordaje() {
                         pressed && { backgroundColor: color.sand300 },
                       ]}
                     >
-                      <Text style={t === 'borrar' ? estilos.teclaBorrar : estilos.teclaTexto}>
-                        {t === 'borrar' ? '⌫' : t}
-                      </Text>
+                      {t === 'borrar' ? (
+                        <Borrar tamano={21} tinta={color.ink700} />
+                      ) : (
+                        <Text style={estilos.teclaTexto}>{t}</Text>
+                      )}
                     </Pressable>
                   ),
                 )}
@@ -218,7 +220,7 @@ export default function Abordaje() {
                 tamano={36}
                 tono={p.abordado ? 'arena2' : 'azul'}
               />
-              <Text style={[estilos.nombrePasajero, p.abordado && { color: color.ink500 }]}>
+              <Text style={[estilos.nombrePasajero, p.abordado && { color: color.ink600 }]}>
                 {p.nombre}
               </Text>
               {p.cerrado || p.abordado ? (
@@ -307,8 +309,8 @@ const estilos = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  contador: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
-  todosDentro: { fontSize: 13.5, lineHeight: 20, color: color.ink600, fontFamily: familia },
+  contador: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },
+  todosDentro: { fontSize: 13.5, lineHeight: 20, color: color.ink500, fontFamily: familia },
 
   casillas: { flexDirection: 'row', gap: 10 },
   casilla: {
@@ -350,7 +352,6 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  teclaBorrar: { fontSize: 22, lineHeight: 31.9, color: color.ink600, fontFamily: familia },
 
   lista: {
     marginTop: 12,
@@ -362,7 +363,7 @@ const estilos = StyleSheet.create({
   },
   filaPasajero: { flexDirection: 'row', alignItems: 'center', gap: 11 },
   nombrePasajero: { flex: 1, fontSize: 15.5, lineHeight: 21.75, fontWeight: '500', color: color.ink900, fontFamily: familia },
-  puestos: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia },
+  puestos: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia },
   abordo: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   abordoTexto: { fontSize: 13.5, lineHeight: 18.85, fontWeight: '500', color: color.verde500, fontFamily: familia },
 
@@ -375,5 +376,5 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
   },
-  noShow: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
+  noShow: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },
 });

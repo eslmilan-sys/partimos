@@ -31,20 +31,63 @@ export const color = {
    *
    * `ink900` es texto primario Y superficie oscura: el chip «Filtros», el
    * botón de publicar, el bisel del teléfono. Los pasos 500/600 son los
-   * grises con oficio fijo: 500 rotula secciones y meta, 600 lleva unidades
+   * grises con oficio fijo: 600 rotula secciones y meta, 500 lleva unidades
    * y cejas de campo. `ink400` es texto agotado/deshabilitado; `ink300` son
    * guiones, chevrones y raíles apagados — **nunca texto corrido**.
+   *
+   * ── LA ESCALA IBA AL REVÉS ────────────────────────────────────────────
+   *
+   * Hasta el 29-08-2026, `ink500` era **#5A757E** e `ink600` **#7C959D**: el
+   * 500 más OSCURO que el 600. En una escala de tinta el número mayor es más
+   * oscuro —eso es lo único que significan estos nombres—, así que quien
+   * escribía `ink600` buscando bajar un punto de contraste subía dos, y al
+   * revés. Nadie lo elegía por el número: se elegía a ojo, mirando la
+   * pantalla, y por eso los mismos dos grises salían intercambiados de una
+   * pantalla a otra sin ninguna regla.
+   *
+   * Se arregló cambiando los NOMBRES en los 298 sitios que los usan, no los
+   * colores: ese paso no movió un píxel. Los valores se corrigieron después,
+   * y por otra razón —el contraste—, que es lo que cuentan los dos comentarios
+   * de abajo.
+   *
+   * ── CUÁNTO CONTRASTA CADA UNO, sobre el lienzo `sand100` ──────────────
+   *
+   *     ink900 14,5:1   ink800 10,6:1   ink700  8,7:1
+   *     ink600  5,7:1   ink500  4,6:1   ink400  2,3:1   ink300 1,7:1
+   *
+   * El mínimo para leer es 4,5:1 (3:1 de 18,66 px arriba, o de 14 px en
+   * semibold). De 400 para abajo NO se pone texto que haga falta leer.
    */
   ink900: '#0A2731',
   /** El extremo claro del degradado del botón Publicar (160°, hacia ink900). */
   ink800: '#123F4D',
   /** Ink 2 · rótulos de control, cuerpo secundario, nombres de lugar. */
   ink700: '#2A4B55',
-  /** Ink 3 · rótulos de sección, meta, la línea de confianza. */
+  /**
+   * Ink 3 · rótulos de sección, meta, la línea de confianza.
+   * 5,67:1 sobre el lienzo. Era `#5A757E`, 4,56:1 — pasaba, pero justo.
+   */
+  ink600: '#4C666F',
+  /**
+   * Ink 4 · unidades («B/»), meta terciaria, cejas de campo.
+   *
+   * **ERA `#7C959D`: 2,94:1 SOBRE EL LIENZO.** El mínimo para leer un texto
+   * pequeño es 4,5:1, y este gris llevaba la mitad del texto secundario de la
+   * app — la ciudad bajo el sitio, «4,8 · 12 opiniones», «Cancelar mi
+   * puesto», «Ayuda y reembolsos», los rótulos de las pestañas. Un gris a
+   * 2,9:1 se lee en un monitor a oscuras y desaparece en un teléfono al sol,
+   * que es donde se usa esto. Es también la marca de fábrica de una interfaz
+   * que «se ve rara» sin que uno sepa decir por qué (29-08-2026).
+   *
+   * Ahora `#5A757E`: 4,56:1 sobre el lienzo, 4,91:1 sobre blanco. Mismo
+   * matiz, misma familia; sólo deja de estar lavado.
+   */
   ink500: '#5A757E',
-  /** Ink 4 · unidades («B/»), meta terciaria, cejas de campo. */
-  ink600: '#7C959D',
-  /** Ink 5 · texto agotado y deshabilitado. */
+  /**
+   * Ink 5 · texto agotado y deshabilitado.
+   * 2,3:1 — **no vale para leer nada que haga falta**: es la tinta de lo que
+   * está apagado, y su bajo contraste es justamente lo que lo dice.
+   */
   ink400: '#93A8AE',
   /** Ink 6 · guiones, chevrones, raíl deshabilitado. Nunca para leer. */
   ink300: '#B0C1C6',
@@ -319,7 +362,7 @@ export const texto = {
   hora: { fontSize: 19, lineHeight: 23, letterSpacing: -0.57, fontWeight: '600' as const, ...conFuente, ...tabulares },
   /**
    * 22/600/24 · −0.035em, tabular — la cifra del aporte. La precede un «B/»
-   * de 12/500 en `ink600`, sobre la misma línea de base. El precio va en
+   * de 12/500 en `ink500`, sobre la misma línea de base. El precio va en
    * TINTA: el rojo tiene cuatro sentidos y «precio» no es ninguno.
    */
   precio: { fontSize: 22, lineHeight: 24, letterSpacing: -0.77, fontWeight: '600' as const, ...conFuente, ...tabulares },

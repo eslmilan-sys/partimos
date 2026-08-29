@@ -140,7 +140,7 @@ export default function MetodoNuevo() {
                     <Text
                       style={[
                         estilos.pestanaTexto,
-                        { color: elegido ? color.ink900 : color.ink600 },
+                        { color: elegido ? color.ink900 : color.ink500 },
                       ]}
                     >
                       {p.nombre}
@@ -303,7 +303,7 @@ const estilos = StyleSheet.create({
     fontSize: 13.5,
     lineHeight: 15.6,
     fontWeight: '500',
-    color: color.ink600,
+    color: color.ink500,
     marginBottom: 7,
     fontFamily: familia,
   },
@@ -341,7 +341,7 @@ const estilos = StyleSheet.create({
   ejemplo: {
     fontSize: 13.5,
     lineHeight: 19.575,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },
@@ -364,7 +364,7 @@ const estilos = StyleSheet.create({
   notaCandado: {
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     flexShrink: 1,
     fontFamily: familia,
   },
@@ -381,7 +381,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 10,
     fontFamily: familia,
   },

@@ -474,12 +474,12 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  pasoTituloPorVenir: { fontWeight: '500', color: color.ink500 },
+  pasoTituloPorVenir: { fontWeight: '500', color: color.ink600 },
   pasoDetalle: {
     marginTop: 2,
     fontSize: 13,
     lineHeight: 18,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -557,7 +557,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: 17,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 });

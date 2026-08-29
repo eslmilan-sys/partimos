@@ -276,7 +276,7 @@ const estilos = StyleSheet.create({
   vacioTexto: {
     fontSize: 15,
     lineHeight: 22,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   pantalla: {
@@ -334,7 +334,7 @@ const estilos = StyleSheet.create({
     marginTop: 1,
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
     ...tabular,
   },
@@ -427,7 +427,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 });

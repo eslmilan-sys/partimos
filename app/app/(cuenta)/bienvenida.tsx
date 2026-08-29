@@ -94,7 +94,7 @@ export default function Bienvenida() {
                 onPress={() => router.push('/(pasajero)/resultados')}
               >
                 <View style={estilos.puntoVacio} />
-                <Text style={[estilos.destinoTexto, { color: color.ink500 }]}>
+                <Text style={[estilos.destinoTexto, { color: color.ink600 }]}>
                   Chitré, David, Santiago…
                 </Text>
               </Pressable>
@@ -243,7 +243,7 @@ const estilos = StyleSheet.create({
   destinoPista: {
     fontSize: 13.5,
     lineHeight: 18.85,
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 
@@ -285,7 +285,7 @@ const estilos = StyleSheet.create({
     fontSize: 13.5,
     lineHeight: 18.85,
     marginTop: 3,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },
@@ -295,7 +295,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13.5,
     lineHeight: interlinea(13.5),
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   entrar: { fontWeight: '600', color: color.rojo600 },

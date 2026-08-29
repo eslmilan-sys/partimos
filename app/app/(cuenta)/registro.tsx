@@ -483,7 +483,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 11.5 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   valorCiudad: {
@@ -495,7 +495,7 @@ const estilos = StyleSheet.create({
     marginTop: 2,
     fontFamily: familia,
   },
-  valorCiudadVacio: { fontWeight: '400', color: color.ink500 },
+  valorCiudadVacio: { fontWeight: '400', color: color.ink600 },
 
   pantalla: {
     flex: 1,
@@ -558,12 +558,12 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  ayuda: { fontSize: 13.5, lineHeight: 20, color: color.ink600, marginTop: 16, fontFamily: familia },
-  legal: { fontSize: 12.5, lineHeight: 18.125, color: color.ink500, marginTop: 12, textAlign: 'center', fontFamily: familia },
+  ayuda: { fontSize: 13.5, lineHeight: 20, color: color.ink500, marginTop: 16, fontFamily: familia },
+  legal: { fontSize: 12.5, lineHeight: 18.125, color: color.ink600, marginTop: 12, textAlign: 'center', fontFamily: familia },
 
 
   mirar: { marginTop: 20, alignSelf: 'center' },
-  mirarTexto: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  mirarTexto: { fontSize: 14, lineHeight: 20, fontWeight: '400', color: color.ink600, fontFamily: familia },
   mirarFuerte: { color: color.rojo600, fontWeight: '600' },
 
   /* «Mirar los viajes» queda DEBAJO de «Entra» y más callado: entrar es una
@@ -571,7 +571,7 @@ const estilos = StyleSheet.create({
      Su enlace va en tinta — dos rojos seguidos compiten, y el rojo aquí ya
      lo lleva «Entra», que es el espejo de «Regístrate» en la otra. */
   vistazo: { marginTop: 10, alignSelf: 'center' },
-  vistazoTexto: { fontSize: 13, lineHeight: 19, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  vistazoTexto: { fontSize: 13, lineHeight: 19, fontWeight: '400', color: color.ink600, fontFamily: familia },
   vistazoFuerte: { color: color.ink900, fontWeight: '600' },
 
   loQueSigue: { marginTop: 16, gap: 10 },

@@ -121,21 +121,21 @@ export default function Repaso() {
   const condiciones: { texto: string; icono: React.ReactNode }[] = [
     {
       texto: p.maletas ? 'Acepta maletas' : 'Solo mochila',
-      icono: <Maleta tamano={15} tinta={color.ink600} />,
+      icono: <Maleta tamano={15} tinta={color.ink500} />,
     },
     {
       texto: p.mascotas ? 'Acepta mascotas' : 'Sin mascotas',
-      icono: <Mascota tamano={15} tinta={color.ink600} />,
+      icono: <Mascota tamano={15} tinta={color.ink500} />,
     },
     {
       texto: p.fumar ? 'Se puede fumar' : 'No se fuma',
-      icono: <SinHumo tamano={15} tinta={color.ink600} />,
+      icono: <SinHumo tamano={15} tinta={color.ink500} />,
     },
   ];
   if (p.mujeres) {
     condiciones.push({
       texto: 'Solo mujeres',
-      icono: <Persona tamano={15} tinta={color.ink600} />,
+      icono: <Persona tamano={15} tinta={color.ink500} />,
     });
   }
 
@@ -191,7 +191,7 @@ export default function Repaso() {
           <View style={estilos.tarjeta}>
             <View style={estilos.filaCarro}>
               <View style={estilos.cuadroCarro}>
-                <Carro tamano={26} tinta={color.ink500} />
+                <Carro tamano={26} tinta={color.ink600} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.textoCarro} numberOfLines={1}>
@@ -423,7 +423,7 @@ const estilos = StyleSheet.create({
     borderColor: color.ink200,
     marginTop: 6,
   },
-  paradaQue: { fontSize: 12.5, lineHeight: 18.12, color: color.ink500, fontFamily: familia },
+  paradaQue: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },
   paradaNombre: {
     fontSize: 15.5,
     lineHeight: 22.5,
@@ -432,7 +432,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  paradaHora: { fontSize: 14, lineHeight: 23, color: color.ink500, fontFamily: familia, ...tabular },
+  paradaHora: { fontSize: 14, lineHeight: 23, color: color.ink600, fontFamily: familia, ...tabular },
 
   filaCarro: { flexDirection: 'row', alignItems: 'center', gap: 13 },
   cuadroCarro: {
@@ -451,7 +451,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  detalleCarro: { fontSize: 13.5, lineHeight: 18.85, color: color.ink500, fontFamily: familia, ...tabular },
+  detalleCarro: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
   separador: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 15 },
 
   condiciones: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -487,7 +487,7 @@ const estilos = StyleSheet.create({
   topeTexto: { fontSize: 12.5, lineHeight: 17, fontWeight: '600', color: color.azul700, fontFamily: familia },
 
   fila: { flexDirection: 'row', justifyContent: 'space-between', gap: 14, paddingVertical: 6 },
-  filaEtiqueta: { flex: 1, fontSize: 14, lineHeight: 20.3, color: color.ink600, fontFamily: familia },
+  filaEtiqueta: { flex: 1, fontSize: 14, lineHeight: 20.3, color: color.ink500, fontFamily: familia },
   filaValor: { fontSize: 14, lineHeight: 20.3, fontWeight: '500', color: color.ink900, fontFamily: familia, ...tabular },
 
   aviso: {
@@ -518,7 +518,7 @@ const estilos = StyleSheet.create({
   notaPie: {
     fontSize: 12.5,
     lineHeight: 18,
-    color: color.ink500,
+    color: color.ink600,
     textAlign: 'center',
     marginTop: 10,
     fontFamily: familia,

@@ -309,7 +309,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 12 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
   puntoSeccion: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#fff' },
@@ -346,7 +346,7 @@ const estilos = StyleSheet.create({
   detalle: {
     fontSize: 13.5,
     lineHeight: 19,
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 2,
     fontFamily: familia,
     ...tabular,
@@ -385,7 +385,7 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 11 * TRACK_MICRO,
     textTransform: 'uppercase',
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
 

@@ -336,7 +336,7 @@ const estilos = StyleSheet.create({
     color: color.azul700,
     fontFamily: familia,
   },
-  seccionCuenta: { fontSize: 12.5, lineHeight: 18, color: color.ink500, fontFamily: familia },
+  seccionCuenta: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
   seccionEnlace: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 10 },
   seccionEnlaceTexto: {
     fontSize: 13.5,
@@ -419,7 +419,7 @@ const estilos = StyleSheet.create({
     lineHeight: 19.575,
     fontWeight: '600',
     letterSpacing: -0.135,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
   segmentoTextoActivo: { color: color.ink900 },
@@ -435,7 +435,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  pie: { color: color.ink500, marginTop: 1, fontFamily: familia },
+  pie: { color: color.ink600, marginTop: 1, fontFamily: familia },
 
   /** El crenado del rótulo de sección, escrito una vez. */
   _track: { letterSpacing: TRACK_MICRO },

@@ -295,12 +295,12 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  pasoTituloPorVenir: { fontWeight: '400', color: color.ink500 },
+  pasoTituloPorVenir: { fontWeight: '400', color: color.ink600 },
   pasoCuando: {
     fontSize: 12.5,
     lineHeight: 18.125,
     fontWeight: '400',
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 2,
     fontFamily: familia,
     ...tabular,
@@ -348,7 +348,7 @@ const estilos = StyleSheet.create({
     fontSize: 12.5,
     lineHeight: 18.125,
     fontWeight: '400',
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 1,
     fontFamily: familia,
   },
@@ -360,7 +360,7 @@ const estilos = StyleSheet.create({
     // El cierre respira más que el cuerpo: 1.5.
     lineHeight: 18.75,
     fontWeight: '400',
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 });

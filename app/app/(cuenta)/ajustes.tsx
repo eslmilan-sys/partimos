@@ -306,7 +306,7 @@ const estilos = StyleSheet.create({
   resumen: {
     fontSize: 12.5,
     lineHeight: 18.125,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 3,
     marginBottom: 4,
     alignSelf: 'flex-start',
@@ -333,7 +333,7 @@ const estilos = StyleSheet.create({
   filaDatoValor: {
     fontSize: 13.5,
     lineHeight: 19.575,
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
     ...tabular,
   },

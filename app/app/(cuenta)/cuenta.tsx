@@ -158,7 +158,7 @@ export default function TuCuenta() {
     },
     {
       etiqueta: 'Cómo te cuidamos',
-      icono: <Escudo tamano={20} tinta={color.ink600} />,
+      icono: <Escudo tamano={20} tinta={color.ink500} />,
       alPulsar: () => router.push('/(ayuda)/seguridad'),
     },
     {
@@ -293,7 +293,7 @@ export default function TuCuenta() {
             <View style={estilos.tarjeta}>
               <View style={estilos.filaPerfil}>
                 <View style={estilos.cuadroIcono}>
-                  <Escudo tamano={20} tinta={color.ink600} />
+                  <Escudo tamano={20} tinta={color.ink500} />
                 </View>
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={estilos.tituloPerfil}>Mi perfil público</Text>
@@ -460,7 +460,7 @@ const estilos = StyleSheet.create({
   },
   /* Una sola cifra: la fila es ella y el chevrón que la abre. */
   filaRecuperado: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  cifraEtiqueta: { fontSize: 12.5, lineHeight: 17.4, color: color.ink500, fontFamily: familia },
+  cifraEtiqueta: { fontSize: 12.5, lineHeight: 17.4, color: color.ink600, fontFamily: familia },
   cifraValor: {
     fontSize: 22,
     lineHeight: 28,
@@ -474,7 +474,7 @@ const estilos = StyleSheet.create({
   nadieGana: {
     fontSize: 12.5,
     lineHeight: 18.5,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 14,
     paddingTop: 13,
     borderTopWidth: 1,
@@ -532,7 +532,7 @@ const estilos = StyleSheet.create({
   loQueVenEtiqueta: {
     fontSize: 12,
     lineHeight: 17,
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 2,
     fontFamily: familia,
   },
@@ -579,7 +579,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  filaValor: { fontSize: 13.5, lineHeight: 19, color: color.ink500, fontFamily: familia },
+  filaValor: { fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia },
 
   aviso: {
     flexDirection: 'row',

@@ -283,7 +283,7 @@ export default function Reportar() {
 }
 
 const estilos = StyleSheet.create({
-  sinViajeTexto: { fontSize: 15, lineHeight: 22, color: color.ink600, fontFamily: familia },
+  sinViajeTexto: { fontSize: 15, lineHeight: 22, color: color.ink500, fontFamily: familia },
   pantalla: {
     flex: 1,
     backgroundColor: color.sand100,
@@ -354,7 +354,7 @@ const estilos = StyleSheet.create({
   despues: {
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink600,
+    color: color.ink500,
     marginTop: 11,
     fontFamily: familia,
   },
@@ -406,7 +406,7 @@ const estilos = StyleSheet.create({
   consecuenciaTexto: {
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink600,
+    color: color.ink500,
     fontFamily: familia,
   },
 
@@ -435,7 +435,7 @@ const estilos = StyleSheet.create({
   bloqueoDetalle: {
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink500,
+    color: color.ink600,
     marginTop: 1,
     fontFamily: familia,
   },
@@ -465,7 +465,7 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
     lineHeight: interlinea(12.5),
-    color: color.ink500,
+    color: color.ink600,
     fontFamily: familia,
   },
 });
