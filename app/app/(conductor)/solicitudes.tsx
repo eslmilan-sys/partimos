@@ -300,15 +300,7 @@ export default function Solicitudes() {
                 propia línea, y el punto y el equipaje tienen el ancho entero
                 — en dos renglones si hacen falta. */}
             {yaVanContigo.map((c) => (
-              <Pressable
-                key={c.reservaId}
-                accessibilityRole="button"
-                accessibilityLabel={`Ver quién es ${c.nombre}`}
-                onPress={() =>
-                  router.push({ pathname: '/(pasajero)/perfil', params: { perfil: c.id } })
-                }
-                style={({ pressed }) => [estilos.filaConfirmado, pressed && pulsado.celda]}
-              >
+              <View key={c.reservaId} style={estilos.filaConfirmado}>
                 <View style={estilos.filaPersonaConfirmada}>
                   <Avatar nombre={c.nombre} tamano={36} />
                   <View style={{ flex: 1, minWidth: 0 }}>
@@ -317,10 +309,6 @@ export default function Solicitudes() {
                       {`${c.punto} · ${c.equipaje}`}
                     </Text>
                   </View>
-                  <Avanza />
-                </View>
-
-                <View style={estilos.pieConfirmado}>
                   <Insignia
                     punto
                     fondo={c.pagado ? color.hechoFondo : color.sand200}
@@ -328,19 +316,42 @@ export default function Solicitudes() {
                   >
                     {c.pagado ? 'Aporte listo' : 'Aporta al subir'}
                   </Insignia>
+                </View>
+
+                {/* **DOS BOTONES HERMANOS, NO UNO DENTRO DE OTRO** (28-08-2026).
+                    Ayer la fila entera se hizo pulsable y el «Escribir» quedó
+                    DENTRO: en web eso es un `<button>` dentro de otro, que el
+                    HTML no permite — React lo avisaba en un recuadro rojo y,
+                    según el navegador, el de dentro deja de responder. La fila
+                    vuelve a ser una `View` y las dos acciones van abajo, una al
+                    lado de la otra, cada una con su propia zona de toque. */}
+                <View style={estilos.pieConfirmado}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Ver quién es ${c.nombre}`}
+                    onPress={() =>
+                      router.push({ pathname: '/(pasajero)/perfil', params: { perfil: c.id } })
+                    }
+                    style={({ pressed }) => [estilos.accionConfirmado, pressed && pulsado.celda]}
+                  >
+                    <Text style={estilos.accionConfirmadoTexto}>
+                      {`Ver quién es ${c.nombre.split(' ')[0]}`}
+                    </Text>
+                  </Pressable>
+
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={`Escribirle a ${c.nombre}`}
                     onPress={() =>
                       router.push({ pathname: '/(pasajero)/chat', params: { reserva: c.reservaId } })
                     }
-                    style={({ pressed }) => [estilos.escribirle, pressed && pulsado.celda]}
+                    style={({ pressed }) => [estilos.accionConfirmado, pressed && pulsado.celda]}
                   >
-                    <Chat tamano={17} tinta={color.ink700} />
-                    <Text style={estilos.escribirleTexto}>Escribir</Text>
+                    <Chat tamano={16} tinta={color.ink700} />
+                    <Text style={estilos.accionConfirmadoTexto}>Escribir</Text>
                   </Pressable>
                 </View>
-              </Pressable>
+              </View>
             ))}
           </View>
         ) : null}
@@ -473,19 +484,21 @@ const estilos = StyleSheet.create({
   pieConfirmado: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
+    gap: 8,
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
   },
-  escribirle: {
+  /** Las dos acciones, del mismo peso: ninguna manda sobre la otra. */
+  accionConfirmado: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
-    height: 32,
-    paddingHorizontal: 11,
+    height: 36,
+    paddingHorizontal: 10,
     borderRadius: radio.s,
     borderWidth: 1,
     borderColor: color.bordeSutil,
@@ -500,7 +513,7 @@ const estilos = StyleSheet.create({
     color: color.ink500,
     fontFamily: familia,
   },
-  escribirleTexto: {
+  accionConfirmadoTexto: {
     fontSize: 13,
     fontWeight: '500',
     color: color.ink700,

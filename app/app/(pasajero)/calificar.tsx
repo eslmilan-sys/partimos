@@ -18,7 +18,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } fr
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { ATAJOS, type Atajo, calificar, prepararCalificacion, type Calificacion } from '@/servicios/calificaciones';
+import { type Atajo, calificar, prepararCalificacion, type Calificacion } from '@/servicios/calificaciones';
+import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { NoEsta } from '@/ui/NoEsta';
@@ -32,6 +33,10 @@ import { TRACK_MICRO, familia, color, espacio, interlinea, radio } from '@/ui/to
 // Una reserva que ya abordó: sin viaje que pasó no hay nada que calificar.
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
 const DEL_RECORRIDO = '77777777-7777-4777-8777-777777777711';
+/** Sin sesión que preguntar —solo en simulado—, JOSÉ: el pasajero de ESA
+ *  reserva. Estaba puesta Daniela, que no es parte del viaje del traspaso, y
+ *  la pantalla le enseñaba los atajos del lado equivocado. */
+const DEL_PASAJERO_DEL_RECORRIDO = 'aaaaaaa1-0000-4000-8000-000000000002';
 
 const EN_LETRA = ['', 'Una estrella', 'Dos estrellas', 'Tres estrellas', 'Cuatro estrellas', 'Cinco estrellas'];
 
@@ -44,12 +49,29 @@ export default function Calificar() {
      siempre, y en blanco no hay ni por dónde salir. */
   const [noEsta, setNoEsta] = useState(false);
   const [estrellas, setEstrellas] = useState(4);
-  const [elegidos, setElegidos] = useState<Atajo[]>(['puntual', 'manejo']);
+  /**
+   * NADA MARCADO DE ENTRADA (28-08-2026). Venía con «puntual» y «manejo»
+   * puestos, así que quien enviaba sin tocar nada firmaba dos elogios que no
+   * había dicho — y «manejo» ni siquiera existe cuando calificas a un
+   * pasajero. Los atajos son de quien califica, no del formulario.
+   */
+  const [elegidos, setElegidos] = useState<Atajo[]>([]);
   const [comentario, setComentario] = useState('');
 
+  /**
+   * **QUIÉN CALIFICA** (28-08-2026). La pantalla nunca pasaba `yo`, así que el
+   * servicio daba por hecho que el autor era el PASAJERO: si la abría el
+   * conductor para calificar a quien llevó, la reseña se guardaba a nombre del
+   * pasajero y contra el conductor — al revés de lo que la persona acababa de
+   * escribir.
+   */
+  const yo = useMiId(DEL_PASAJERO_DEL_RECORRIDO);
+
   useEffect(() => {
-    prepararCalificacion(reservaId).then(setDatos).catch(() => setNoEsta(true));
-  }, [reservaId]);
+    prepararCalificacion(reservaId, yo ?? undefined)
+      .then(setDatos)
+      .catch(() => setNoEsta(true));
+  }, [reservaId, yo]);
 
   if (noEsta) return <NoEsta />;
   if (!datos) return <Cargando />;
@@ -107,7 +129,7 @@ export default function Calificar() {
           <Text style={estilos.enLetra}>{EN_LETRA[estrellas]}</Text>
 
           <View style={estilos.atajos}>
-            {ATAJOS.map((a) => {
+            {datos.atajos.map((a) => {
               const activo = elegidos.includes(a.clave);
               return (
                 <Pressable
@@ -153,7 +175,7 @@ export default function Calificar() {
       <View style={estilos.pie}>
         <Boton
           alPulsar={async () => {
-            await calificar(reservaId, estrellas, elegidos, comentario);
+            await calificar(reservaId, estrellas, elegidos, comentario, yo ?? undefined);
             router.replace('/(pasajero)');
           }}
         >

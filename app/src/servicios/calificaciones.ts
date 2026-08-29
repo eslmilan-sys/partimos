@@ -14,6 +14,7 @@
  * que sin abordaje no se libera el aporte.
  */
 
+import { type Atajo as Atajo2, type Lado, atajosDe, ejesDe } from '@/dominio/ejes';
 import type { Review } from '@/tipos';
 
 import { nuevoId } from './_id';
@@ -23,22 +24,25 @@ import { ciudadDestino, ciudadOrigen } from './viajes';
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
 
-/** Los ejes que ya existen en la tabla. */
-type Eje = 'puntualidad' | 'manejo' | 'trato' | 'carro' | 'encuentro';
-
-export type Atajo = 'puntual' | 'manejo' | 'punto' | 'conversa' | 'carro';
-
-/** Los cinco atajos de `1j`, cada uno atado al eje donde se guarda. */
-export const ATAJOS: { clave: Atajo; texto: string; eje: Eje }[] = [
-  { clave: 'puntual', texto: 'Puntual', eje: 'puntualidad' },
-  { clave: 'manejo', texto: 'Manejó tranquilo', eje: 'manejo' },
-  { clave: 'punto', texto: 'Punto exacto', eje: 'encuentro' },
-  { clave: 'conversa', texto: 'Buena conversa', eje: 'trato' },
-  { clave: 'carro', texto: 'Carro limpio', eje: 'carro' },
-];
+/**
+ * **LOS ATAJOS DEPENDEN DE A QUIÉN CALIFICAS** (28-08-2026).
+ *
+ * Eran cinco, siempre los mismos, escritos para quien maneja. Al conductor
+ * que califica a su pasajero le habrían salido «Manejó tranquilo» y «Carro
+ * limpio» — de alguien que ni condujo ni puso el carro. La lista por lado, y
+ * en qué eje cae cada una, viven en `dominio/ejes.ts` con sus pruebas.
+ */
+export type Atajo = string;
 
 export type Calificacion = {
   reservaId: string;
+  /**
+   * A QUIÉN ESTÁS CALIFICANDO. Decide los atajos que la pantalla enseña — y
+   * es un dato del viaje, no una suposición de quien dibuja.
+   */
+  lado: Lado;
+  /** Los atajos que valen para ese lado, ya escritos. */
+  atajos: Atajo2[];
   /** A quién se califica: nombre e id. */
   otroId: string;
   otro: string;
@@ -71,7 +75,8 @@ export async function prepararCalificacion(
   if (!viaje) throw new Error(`No existe el viaje ${reserva.trip_id}`);
 
   const autorId = yo ?? reserva.passenger_id;
-  const otroId = autorId === reserva.passenger_id ? viaje.driver_id : reserva.passenger_id;
+  const lado = ladoQueCalificas(autorId, reserva.passenger_id, viaje.driver_id);
+  const otroId = lado === 'conductor' ? viaje.driver_id : reserva.passenger_id;
   const otro = fuente.perfiles.find((p) => p.id === otroId);
 
   const origen = ciudadOrigen(viaje);
@@ -79,6 +84,8 @@ export async function prepararCalificacion(
 
   return demora({
     reservaId,
+    lado,
+    atajos: atajosDe(lado),
     otroId,
     otro: otro ? `${otro.first_name} ${otro.last_initial ?? ''}`.trim() : 'Alguien',
     autorId,
@@ -114,16 +121,17 @@ export async function calificar(
   if (!viaje) throw new Error(`No existe el viaje ${reserva.trip_id}`);
 
   const autorId = yo ?? reserva.passenger_id;
-  const subjectId = autorId === reserva.passenger_id ? viaje.driver_id : reserva.passenger_id;
+  const lado = ladoQueCalificas(autorId, reserva.passenger_id, viaje.driver_id);
+  const subjectId = lado === 'conductor' ? viaje.driver_id : reserva.passenger_id;
 
   if (fuente.resenas.some((r) => r.booking_id === reservaId && r.author_id === autorId)) {
     throw new Error('Este viaje ya está calificado');
   }
 
-  // Un eje marcado se lleva la nota general; uno sin marcar se queda en null,
-  // que no es una mala nota: es que no opinó.
-  const eje = (e: Eje): number | null =>
-    ATAJOS.some((a) => a.eje === e && atajos.includes(a.clave)) ? nota : null;
+  /* Un eje marcado se lleva la nota general; uno sin marcar se queda en null,
+     que no es una mala nota: es que no opinó. Y los ejes que ese lado NO
+     puede juzgar salen en null pase lo que pase (`dominio/ejes`). */
+  const ejes = ejesDe(lado, atajos, nota);
 
   const limpio = comentario.trim();
   const resena: Review = {
@@ -133,11 +141,7 @@ export async function calificar(
     subject_id: subjectId,
     rating: nota,
     comment: limpio === '' ? null : limpio,
-    puntualidad: eje('puntualidad'),
-    manejo: eje('manejo'),
-    trato: eje('trato'),
-    carro: eje('carro'),
-    encuentro: eje('encuentro'),
+    ...ejes,
     created_at: new Date().toISOString(),
   };
 
@@ -157,3 +161,21 @@ function duracion(salida: string, llegada: string | null): string {
 }
 
 
+
+/**
+ * A QUÉ LADO PERTENECE LA PERSONA A LA QUE CALIFICAS.
+ *
+ * Se decidía con un `autorId === passenger_id ? … : …`, que da «pasajero»
+ * para cualquiera que no fuera el pasajero — incluido alguien que no tiene
+ * nada que ver con el viaje. Visto el 28-08-2026: la pasajera abría la
+ * pantalla de una reserva que no era suya y le salían los atajos de calificar
+ * a un pasajero, cuando estaba calificando al conductor.
+ *
+ * Las dos partes se nombran, y quien no es ninguna no califica: una reseña de
+ * un tercero no vale nada y `reviews` ni siquiera la aceptaría.
+ */
+function ladoQueCalificas(autorId: string, pasajeroId: string, conductorId: string): Lado {
+  if (autorId === pasajeroId) return 'conductor';
+  if (autorId === conductorId) return 'pasajero';
+  throw new Error('Solo el conductor y el pasajero de ese viaje pueden calificarlo');
+}

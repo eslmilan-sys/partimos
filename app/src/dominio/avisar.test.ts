@@ -265,3 +265,45 @@ test('un mensaje largo se corta a un renglón', () => {
   const escrito = avisos.find((a) => a.kind === 'mensaje_nuevo')!;
   assert.match(escrito.body, /^«a{69}…» · /);
 });
+
+/* ── El espejo de la calificación (28-08-2026) ───────────────────────── */
+
+test('al conductor también se le pide calificar a su pasajero', () => {
+  const hechos = hechosCon({ status: 'completed', completed_at: dentroDe(-60) });
+  const delConductor = avisosDeLosHechos('andres', hechos).filter((a) => a.kind === 'califica_tu');
+  assert.equal(delConductor.length, 1);
+  assert.equal(delConductor[0].title, 'Califica a Daniela L.');
+  assert.equal(delConductor[0].action_route, '/(pasajero)/calificar?reserva=r1');
+
+  // Y al pasajero se le sigue pidiendo lo suyo, con su propio identificador.
+  const delPasajero = avisosDeLosHechos('daniela', hechos).filter((a) => a.kind === 'califica_tu');
+  assert.equal(delPasajero.length, 1);
+  assert.equal(delPasajero[0].title, 'Califica a Andrés M.');
+  assert.notEqual(delPasajero[0].id, delConductor[0].id);
+});
+
+test('quien ya calificó no vuelve a recibir la petición', () => {
+  const hechos: Hechos = {
+    ...hechosCon({ status: 'completed', completed_at: dentroDe(-60) }),
+    yaCalifico: (_reserva, autor) => autor === 'andres',
+  };
+  assert.equal(
+    avisosDeLosHechos('andres', hechos).filter((a) => a.kind === 'califica_tu').length,
+    0,
+  );
+  assert.equal(
+    avisosDeLosHechos('daniela', hechos).filter((a) => a.kind === 'califica_tu').length,
+    1,
+  );
+});
+
+test('un viaje sin terminar no pide calificación a nadie', () => {
+  const hechos = hechosCon({ status: 'confirmed', confirmed_at: dentroDe(-60) });
+  for (const quien of ['andres', 'daniela']) {
+    assert.equal(
+      avisosDeLosHechos(quien, hechos).filter((a) => a.kind === 'califica_tu').length,
+      0,
+      quien,
+    );
+  }
+});

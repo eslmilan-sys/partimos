@@ -160,6 +160,27 @@ export function avisosDeLosHechos(perfilId: string, hechos: Hechos): AvisoDeriva
           created_at: r.created_at,
         });
       }
+      /**
+       * **Y AL CONDUCTOR TAMBIÉN SE LE PIDE CALIFICAR** (28-08-2026).
+       *
+       * Sólo se le pedía al pasajero, así que «la misma fórmula para los dos
+       * lados» era una frase sin nada detrás: nadie calificaba nunca a un
+       * pasajero, y por eso ningún pasajero tenía nota. La reseña del
+       * conductor es la que hace que la nota de quien viaja exista.
+       */
+      if (r.status === 'completed' && !hechos.yaCalifico(r.id, perfilId)) {
+        salen.push({
+          ...base,
+          id: `av-califica-p-${r.id}`,
+          profile_id: perfilId,
+          kind: 'califica_tu',
+          title: `Califica a ${hechos.nombreDe(r.passenger_id)}`,
+          body: cuando,
+          action_label: 'Calificar',
+          action_route: `/(pasajero)/calificar?reserva=${r.id}`,
+          created_at: r.completed_at ?? r.updated_at,
+        });
+      }
       if (r.released_at) {
         const aporte = r.unit_price_cents * r.seats;
         salen.push({
