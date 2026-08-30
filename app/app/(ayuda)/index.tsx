@@ -30,9 +30,12 @@ import Svg, { Path } from 'react-native-svg';
 
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 
-import { useVolver } from '@/ui/salidas';
+import { abrirCorreo, useVolver } from '@/ui/salidas';
+import { useDecir } from '@/ui/Nota';
 
 import {
+  COMO_SE_HACE,
+  CORREO,
   HORARIO,
   LO_QUE_SALE_MAL,
   PREGUNTAS,
@@ -63,6 +66,21 @@ function Adelante() {
     <Svg viewBox="0 0 24 24" width={16} height={16} fill="none">
       <Path
         d="M9 5l7 7-7 7"
+        stroke={color.ink400}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/** El galón de una fila que se abre en su sitio: apunta abajo si está abierta. */
+function Galon({ abierto }: { abierto: boolean }) {
+  return (
+    <Svg viewBox="0 0 24 24" width={16} height={16} fill="none">
+      <Path
+        d={abierto ? 'M5 9l7 7 7-7' : 'M9 5l7 7-7 7'}
         stroke={color.ink400}
         strokeWidth={1.8}
         strokeLinecap="round"
@@ -126,6 +144,9 @@ export default function Ayuda() {
      dejaba la pantalla girando PARA SIEMPRE a quien no tiene viajes — es
      decir, a todo el que acaba de registrarse. Visto el 25-08. */
   const [buscando, setBuscando] = useState(true);
+  const decir = useDecir();
+  /** Cuál de «cómo se hace» está abierta. Una sola a la vez. */
+  const [abierto, setAbierto] = useState<string | null>(null);
 
   useEffect(() => {
     let vivo = true;
@@ -167,10 +188,14 @@ export default function Ayuda() {
           </Pressable>
           <Text style={estilos.epigrafeCampo}>{HORARIO}</Text>
         </View>
+        {/* **SE LLAMABA «¿QUÉ PASÓ?»** — y a esta pantalla se llega desde una
+            fila del perfil que dice «Ayuda y contacto». Quien la toca la
+            mitad de las veces no viene de un problema, viene de no saber
+            hacer algo, y lo primero que leía era una pregunta que da por
+            hecho que algo salió mal (29-08-2026, pedido del dueño). */}
         <Text style={estilos.titular}>
-          {'¿Qué '}
-          <Text style={texto.titularFuerte}>pasó</Text>
-          {'?'}
+          {'Ayuda y '}
+          <Text style={texto.titularFuerte}>contacto</Text>
         </Text>
       </View>
 
@@ -230,6 +255,32 @@ export default function Ayuda() {
           </View>
         </View>
 
+        {/* **CÓMO SE HACE.** Esto no existía: la ayuda entera era un parte de
+            incidencias. Se abre cada fila donde está, sin cambiar de
+            pantalla, porque son respuestas de tres renglones y mandar a otra
+            pantalla por tres renglones es hacer perder el sitio. */}
+        <View style={estilos.tarjetaPreguntas}>
+          <Text style={estilos.epigrafePreguntas}>Cómo se hace</Text>
+          {COMO_SE_HACE.map((c, i) => {
+            const abierta = abierto === c.titulo;
+            return (
+              <View key={c.titulo} style={i === 0 ? { marginTop: 4 } : null}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: abierta }}
+                  accessibilityLabel={c.titulo}
+                  onPress={() => setAbierto(abierta ? null : c.titulo)}
+                  style={estilos.filaPregunta}
+                >
+                  <Text style={estilos.preguntaTexto}>{c.titulo}</Text>
+                  <Galon abierto={abierta} />
+                </Pressable>
+                {abierta ? <Text style={estilos.respuesta}>{c.texto}</Text> : null}
+              </View>
+            );
+          })}
+        </View>
+
         <View style={estilos.tarjetaPreguntas}>
           <Text style={estilos.epigrafePreguntas}>Preguntas de siempre</Text>
           {PREGUNTAS.map((pregunta, i) => (
@@ -255,17 +306,34 @@ export default function Ayuda() {
       </ScrollView>
 
       <View style={estilos.pie}>
-        {/* Azul, no rojo: el pie es blanco y esto no es «sigue adelante», es la
-            salida de quien no se reconoce en ninguna fila. */}
+        {/* **DECÍA «ESCRIBIRLE A UNA PERSONA» Y ABRÍA EL CHAT CON EL
+            CONDUCTOR.** En la pantalla de ayuda, ese rótulo se lee como
+            «háblame con alguien de Partimos», y lo que hacía era mandarte a
+            hablar con la otra parte del problema. El botón dice ahora a quién
+            escribe; a nosotros se nos escribe al correo de abajo, que es la
+            puerta que faltaba (29-08-2026). */}
         <Boton
-         
           alPulsar={() =>
             router.push({ pathname: '/(pasajero)/chat', params: { reserva: viaje.reservaId } })
           }
         >
-          Escribirle a una persona
+          {`Escribirle a ${viaje.conductor.split(' ')[0]}`}
         </Boton>
-        <Text style={estilos.promesa}>{PROMESA}</Text>
+        {/* **EL CORREO, AL FINAL Y ESCRITO.** No había ninguno en toda la
+            app: el único contacto era «escribirle a una persona», que abre el
+            chat CON EL CONDUCTOR — o sea, para hablar con nosotros no había
+            puerta. Va escrito y no escondido en un botón: un correo que se
+            ve se puede copiar, apuntar o mandar desde otro teléfono. */}
+        <Text style={estilos.promesa}>
+          {`${PROMESA} O escríbenos a `}
+          <Text
+            style={estilos.correo}
+            onPress={() => abrirCorreo(CORREO).then((q) => q === 'copiado' && decir('Correo copiado.'))}
+          >
+            {CORREO}
+          </Text>
+          {'.'}
+        </Text>
       </View>
     </View>
   );
@@ -422,6 +490,15 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
   },
+  respuesta: {
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: color.ink600,
+    paddingBottom: 14,
+    paddingRight: 26,
+    fontFamily: familia,
+  },
+  correo: { color: color.rojo700, fontWeight: '600' },
   promesa: {
     marginTop: 10,
     textAlign: 'center',

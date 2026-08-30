@@ -20,7 +20,7 @@
  * devuelve qué pasó, para que la pantalla pueda decirlo.
  */
 
-import { Platform, Share } from 'react-native';
+import { Linking, Platform, Share } from 'react-native';
 
 import { type Href, useRouter } from 'expo-router';
 
@@ -93,3 +93,31 @@ export const DIJO: Record<Compartido, string | null> = {
   copiado: 'Copiado. Pégalo donde quieras.',
   nada: 'No se pudo compartir desde este navegador.',
 };
+
+/**
+ * ABRIR EL CORREO — y, si no hay dónde abrirlo, copiar la dirección.
+ *
+ * `mailto:` funciona en el teléfono y en casi todos los navegadores, pero no
+ * en todos: en un kiosco o en un navegador sin cliente de correo configurado
+ * no pasa nada y la persona se queda mirando. Igual que `compartir`, esto
+ * prueba lo que haya y devuelve qué pasó, para que la pantalla lo diga.
+ */
+export async function abrirCorreo(
+  direccion: string,
+  asunto = 'Ayuda con Partimos',
+): Promise<'abierto' | 'copiado' | 'nada'> {
+  const enlace = `mailto:${direccion}?subject=${encodeURIComponent(asunto)}`;
+  try {
+    await Linking.openURL(enlace);
+    return 'abierto';
+  } catch {
+    /* Sin cliente de correo: al menos que se lleve la dirección. */
+  }
+  try {
+    const nav = globalThis.navigator as Navigator | undefined;
+    await nav?.clipboard?.writeText(direccion);
+    return 'copiado';
+  } catch {
+    return 'nada';
+  }
+}

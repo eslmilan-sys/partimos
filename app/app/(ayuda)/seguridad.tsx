@@ -21,7 +21,9 @@ import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from
 import { useRouter } from 'expo-router';
 
 import { EMERGENCIAS, EMERGENCIAS_QUIEN } from '@/servicios/seguridad';
-import { useVolver } from '@/ui/salidas';
+import { abrirCorreo, useVolver } from '@/ui/salidas';
+import { useDecir } from '@/ui/Nota';
+import { CORREO } from '@/servicios/ayuda';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
@@ -67,6 +69,7 @@ const LO_QUE_HACEMOS = [
 export default function Seguridad() {
   const router = useRouter();
   const volver = useVolver('/(pasajero)');
+  const decir = useDecir();
 
   const llamar = () => {
     const numero = `tel:${EMERGENCIAS}`;
@@ -99,17 +102,16 @@ export default function Seguridad() {
           </Text>
         </View>
 
-        {/* La emergencia va ARRIBA: en una emergencia nadie desplaza. */}
-        <View style={estilos.tarjetaEmergencia}>
-          <Epigrafe tinta={color.rojo700}>Si estás en peligro ahora</Epigrafe>
-          <View style={{ marginTop: 10 }}>
-            <Boton alPulsar={llamar}>{`Llamar al ${EMERGENCIAS}`}</Boton>
-          </View>
-          <Text style={estilos.notaEmergencia}>
-            {`${EMERGENCIAS_QUIEN}. Después de llamar, cuéntanoslo desde el viaje.`}
-          </Text>
-        </View>
-
+        {/* **ESTA PANTALLA SE LLAMA «CÓMO TE CUIDAMOS», Y EMPEZABA POR EL 911.**
+            Un botón rojo de emergencia a todo lo ancho, con «SI ESTÁS EN
+            PELIGRO AHORA» encima, era lo primero que se leía: la página no se
+            entendía como lo que promete —lo que hacemos para que no te pase
+            nada— sino como un parte de emergencias, y quien entra desde el
+            perfil no está en peligro, está preguntándose de quién se fía
+            (29-08-2026, pedido del dueño).
+            El 911 no se va: baja al final, que es donde uno mira cuando ya
+            leyó todo. Y sigue estando a un toque desde el viaje y desde el
+            chat, que es donde una emergencia ocurre de verdad. */}
         {LO_QUE_HACEMOS.map(({ clave, Glifo, titulo, cuerpo, limite }) => (
           <View key={clave} style={estilos.tarjeta}>
             <View style={estilos.filaTitulo}>
@@ -125,6 +127,17 @@ export default function Seguridad() {
           </View>
         ))}
 
+        {/* Ahora sí, al final. */}
+        <View style={estilos.tarjetaEmergencia}>
+          <Epigrafe tinta={color.rojo700}>Si estás en peligro ahora</Epigrafe>
+          <View style={{ marginTop: 10 }}>
+            <Boton alPulsar={llamar}>{`Llamar al ${EMERGENCIAS}`}</Boton>
+          </View>
+          <Text style={estilos.notaEmergencia}>
+            {`${EMERGENCIAS_QUIEN}. Después de llamar, cuéntanoslo desde el viaje.`}
+          </Text>
+        </View>
+
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Ir a Ayuda"
@@ -136,6 +149,19 @@ export default function Seguridad() {
             <Text style={estilos.ayudaFuerte}>Escríbenos desde Ayuda</Text>
           </Text>
         </Pressable>
+
+        {/* El correo, escrito: la misma puerta que en Ayuda, para quien
+            llegue aquí con una duda que no es una emergencia. */}
+        <Text style={estilos.correoLinea}>
+          {'¿Una duda que no corre prisa? Escríbenos a '}
+          <Text
+            style={estilos.correo}
+            onPress={() => abrirCorreo(CORREO).then((q) => q === 'copiado' && decir('Correo copiado.'))}
+          >
+            {CORREO}
+          </Text>
+          {'.'}
+        </Text>
 
         <View style={{ height: 24 }} />
       </ScrollView>
@@ -228,6 +254,15 @@ const estilos = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
   },
+  correoLinea: {
+    marginTop: 18,
+    paddingHorizontal: 4,
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: color.ink600,
+    fontFamily: familia,
+  },
+  correo: { color: color.rojo700, fontWeight: '600' },
   ayudaTexto: { fontSize: 14, lineHeight: 20, color: color.ink600, fontFamily: familia },
   ayudaFuerte: { color: color.rojo600, fontWeight: '600' },
 });

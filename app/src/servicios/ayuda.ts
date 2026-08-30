@@ -71,8 +71,73 @@ export const LO_QUE_SALE_MAL: CosaQueSaleMal[] = [
 export const PREGUNTAS: { titulo: string; ruta: string }[] = [
   { titulo: 'Cómo se aporta y qué es la tarifa', ruta: '/(ayuda)/pagos' },
   { titulo: 'Cuándo se libera el aporte', ruta: '/(ayuda)/pagos' },
-  { titulo: 'Seguridad y verificación', ruta: '/(ayuda)/reportar' },
+  /* **IBA A `reportar`**, que es el formulario de denunciar un incidente: la
+     fila prometía explicar la seguridad y abría un parte de daños. La
+     pantalla que explica la seguridad es `seguridad` (29-08-2026). */
+  { titulo: 'Cómo te cuidamos', ruta: '/(ayuda)/seguridad' },
 ];
+
+/**
+ * CÓMO SE HACE — lo que la ayuda no tenía.
+ *
+ * La pantalla de ayuda se llamaba «¿Qué pasó?» y era entera un parte de
+ * incidencias: cuatro cosas que salen mal y tres enlaces. Pero desde el
+ * perfil la fila se llama «Ayuda y contacto», y quien la toca la mitad de las
+ * veces no viene de un problema — viene de no saber hacer algo. No había ni
+ * una línea que lo explicara (29-08-2026, pedido del dueño).
+ *
+ * Cada una responde a UNA pregunta, en el orden en que aparecen en la vida de
+ * quien usa la app, y en su voz. Nada de «el sistema permite»: se dice qué
+ * tocas y qué pasa.
+ */
+export type ComoSeHace = { titulo: string; texto: string };
+
+export const COMO_SE_HACE: ComoSeHace[] = [
+  {
+    titulo: 'Pedir un puesto',
+    texto:
+      'Busca a dónde vas, abre el viaje que te sirva y toca «Pedir mi puesto». Eliges dónde te recogen y qué equipaje llevas, y el conductor decide. Hasta que acepte no se cobra nada.',
+  },
+  {
+    titulo: 'El código de subir',
+    texto:
+      'Cuando te aceptan, tu puesto lleva un código de cuatro cifras. Se lo dices al conductor al subir y él lo teclea: eso es lo que prueba que el viaje pasó. Lo tienes en Viajes, en la ficha de tu puesto.',
+  },
+  {
+    titulo: 'Acordar dónde te recogen',
+    texto:
+      'El punto exacto no lo pone la app: lo acuerdas con el conductor por el chat, y ahí queda escrito con la hora. Si algo cambia —una calle cerrada, un retraso— díselo por el mismo chat.',
+  },
+  {
+    titulo: 'Cancelar tu puesto',
+    texto:
+      'Desde la ficha del viaje, mientras no hayas subido y no haya salido. Si el conductor ya había aceptado, cuéntaselo por el chat: el carro sale igual y alguien más puede ocupar tu sitio.',
+  },
+  {
+    titulo: 'Publicar un viaje',
+    texto:
+      'Con el «+» de la barra de abajo. Te pregunta de dónde a dónde, por dónde pasas, qué día y a qué hora, con qué carro y cuántos puestos, y cuánto aporta cada quien. Nada se publica hasta el último paso.',
+  },
+  {
+    titulo: 'Verificar tu cédula',
+    texto:
+      'Hace falta para publicar, no para viajar. Se hace una vez, desde tu perfil, con un proveedor certificado: documento y selfie. Nosotros recibimos si pasó o no, y nada más.',
+  },
+  {
+    titulo: 'Calificar y que te califiquen',
+    texto:
+      'Al terminar el viaje, cada quien califica al otro. Las notas sólo se enseñan a partir de la tercera, para que una mala tarde no marque a nadie de por vida.',
+  },
+];
+
+/**
+ * EL CORREO. Va al final de la ayuda y al final de «Cómo te cuidamos».
+ *
+ * Escrito en un solo sitio a propósito: el día que cambie, cambia aquí.
+ * **Este buzón hay que crearlo**; hasta entonces la app promete algo que no
+ * existe.
+ */
+export const CORREO = 'hola@partimos.app';
 
 export const HORARIO = 'Respondemos de 7 a 21';
 export const PROMESA = 'Contestamos en menos de 2 h dentro del horario.';
