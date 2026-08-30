@@ -9,21 +9,18 @@ El QR no lo imprime este repositorio: lo imprime `npx expo start` en la máquina
 que sirve la app, y el teléfono lo escanea para conectarse a ella. Así que el QR
 tiene que nacer en tu computadora, en tu misma red wifi que el teléfono.
 
-La app vive en la rama `claude/partimos-app-design-9hzmqb`, no en `main`, así
-que la carpeta `partimos-app/` no existe hasta después del `checkout`. Por eso se
-clona la rama directamente, y las órdenes van encadenadas con `&&` para que un
-fallo pare la fila en vez de dejar corriendo las demás en la carpeta equivocada:
+La app vive en `app/`, en `main`. Las órdenes van encadenadas con `&&` para
+que un fallo pare la fila en vez de dejar corriendo las demás en la carpeta
+equivocada:
 
 ```bash
-git clone --branch claude/partimos-app-design-9hzmqb https://github.com/eslmilan-sys/test.git
-cd test/partimos-app && npm install && npx expo start
+git clone https://github.com/eslmilan-sys/partimos.git
+cd partimos/app && npm install && npx expo start
 ```
 
-Si ya tenías el repositorio clonado, no lo vuelvas a clonar:
-
-```bash
-cd ~/test && git checkout claude/partimos-app-design-9hzmqb && cd partimos-app && npm install && npx expo start
-```
+*(Hasta el 21-08-2026 esto vivía en otro repositorio y en una rama aparte;
+las instrucciones de entonces mandaban a `eslmilan-sys/test` y a la rama
+`claude/partimos-app-design-9hzmqb`. Ninguna de las dos existe ya.)*
 
 En la terminal aparece el QR y debajo una dirección `exp://192.168.x.x:8081`.
 Instala **Expo Go** (App Store o Play Store), ábrela y escanea:
@@ -43,21 +40,21 @@ Y sin teléfono, `npx expo start --web` abre lo mismo en `localhost:8081`; el
 
 ## Publicada, sin instalar nada
 
-`/app` en la raíz del repositorio es la app exportada como sitio estático: las 58
-pantallas prerenderizadas, sin servidor. Publicada con GitHub Pages se abre desde
-el teléfono con un enlace, sin Expo Go y sin clonar nada:
+La app se publica en GitHub Pages **desde la CI**, en cada empujón a `main`
+(`.github/workflows/app.yml`). Nunca se commitea el compilado (regla 1 de
+`CLAUDE.md`). Se abre desde el teléfono con un enlace, sin Expo Go y sin
+clonar nada:
 
-    https://eslmilan-sys.github.io/test/app/
+    https://eslmilan-sys.github.io/partimos/app/     ← contra la base real
+    https://eslmilan-sys.github.io/partimos/demo/    ← simulada, recorrido entero
 
-Para rehacerla después de tocar una pantalla:
+La CI exporta **dos veces**, cambiando `EXPO_PUBLIC_FUENTE`. La demo existe
+porque contra la base real hay pantallas que todavía salen vacías (punto 1
+de «Ce qui manque»); se retira cuando ese punto se cierre.
 
-```bash
-npm run export:web
-```
-
-El subcamino `/test/app` entra por `PARTIMOS_BASE_URL` en `app.config.js` y solo
-al exportar, para que `npx expo start` siga sirviendo desde la raíz. Si algún día
-la app cambia de carpeta o de dominio, ese es el único sitio que se toca.
+El subcamino entra por `PARTIMOS_BASE_URL` en `app.config.js` y sólo al
+exportar, para que `npx expo start` siga sirviendo desde la raíz. Si algún
+día la app cambia de carpeta o de dominio, ese es el único sitio que se toca.
 
 Es una carpeta nueva: no toca `partimos/`, que sigue siendo el sitio de siempre.
 
@@ -220,9 +217,14 @@ l'écran d'accueil n'a aucun champ de recherche — seulement des routes
 préréglées. Le site, lui, fusionne LocationIQ **et** Mapbox dans
 `web/src/lib/geosearch.ts` : lire ce fichier avant de faire autrement.
 
-**3 · Trois contrôles ne font rien.** Mesuré en cliquant sur tout :
-35 contrôles sur 38 répondent. Les trois qui ne répondent pas sont
-« Confirmar y pagar » (7b) et deux boutons de l'écran Publier.
+**3 · Les contrôles qui ne font rien.** Mesuré en cliquant sur tout. Le
+compte de l'époque (35 sur 38) est **périmé** : l'app a doublé de taille
+depuis, et cinq boutons morts ont été trouvés et réparés entre le 27 et le
+29-08 — « Escribir » après avoir accepté quelqu'un, « Ver el punto de
+recogida », « Conductores con cédula verificada » (qui était cliquable sans
+le dire), le retour de `puestos` (un cercle gris vide) et la phrase de
+vérification du profil. **À remesurer en entier** : c'est le premier point
+de `REVISION.md`.
 
 **4 · L'hébergement — FAIT (21-08-2026).** GitHub Pages, déployé par CI à
 chaque push sur main (`.github/workflows/app.yml`), jamais en commitant le

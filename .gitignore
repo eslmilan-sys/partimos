@@ -16,3 +16,8 @@ expo-env.d.ts
 
 .DS_Store
 *.tsbuildinfo
+
+# Las sondas de `herramientas/` necesitan playwright-core; se instala a mano
+# donde se vayan a correr y no se versiona.
+herramientas/node_modules/
+herramientas/tiros/

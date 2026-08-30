@@ -1,0 +1,9 @@
+{
+  "name": "partimos-herramientas",
+  "private": true,
+  "type": "module",
+  "description": "Sondes qui mesurent l'app dans un vrai navigateur. Voir README.md.",
+  "dependencies": {
+    "playwright-core": "^1.48.0"
+  }
+}

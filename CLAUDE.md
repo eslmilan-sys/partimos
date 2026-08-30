@@ -6,6 +6,11 @@ le site, l'application, la base et le design. Un seul endroit, une seule vérit�
 **Lis ce fichier en entier avant d'écrire une ligne.** Puis `PRODUCT.md` pour
 les règles métier, et `DESIGN.md` pour ce qui a été constaté dans le code.
 
+Et si tu viens **passer l'app au peigne fin** — chaque bouton, les deux
+parcours de bout en bout : `REVISION.md`. Il donne les écrans dans l'ordre
+où on les traverse, ce qu'on cherche, et ce qui est déjà connu pour ne pas
+le rouvrir comme si c'était neuf.
+
 ## Où est quoi
 
 | Dossier | Ce que c'est |
@@ -14,6 +19,7 @@ les règles métier, et `DESIGN.md` pour ce qui a été constaté dans le code.
 | `app/` | L'application. Expo — un seul code pour le navigateur et le téléphone. |
 | `supabase/` | Les 21 migrations, les politiques RLS, les fonctions Edge, la semence. |
 | `diseno/` | Le design : `Partimos App v6.dc.html` est LA base, le canevas et les 58 écrans Hi-Fi l'entourent. **Référence, pas du code à copier.** |
+| `herramientas/` | Les sondes qui mesurent l'app dans un vrai navigateur — contraste, cibles, cartes sans padding — et le script qui dessine la flèche manquante dans Switzer. Voir son README. |
 
 Chaque intégration a son fichier dans `supabase/` : `DIDIT.md` (vérification
 d'identité), `LUGARES.md` (géocodage), `PAGOS.md`, `LINKEDIN.md`. Ils disent ce
@@ -521,3 +527,119 @@ parler :
   `bookings.mochilas` / `maletas` de la 0026 servent de pont, donc pas de
   migration. Le prix n'est pas touché : l'apport sort de l'essence et des
   péages, le bagage n'y entre ni ne se facture.
+
+## La passe du 29-08-2026 — typographie, contraste, doigt, structure
+
+Une journée entière sur la forme, écran par écran, **mesurée dans le
+navigateur et pas jugée à l'œil**. Ce qui suit est décidé : ne pas le
+défaire sans en parler.
+
+### La flèche n'était pas de Switzer
+
+Le sous-ensemble auto-hébergé (385 glyphes) **ne contient pas U+2192**, et
+l'app écrit la direction avec cette flèche à vingt-cinq endroits —
+« CIUDAD DE PANAMÁ → LAS TABLAS » est l'en-tête de la moitié du produit. Le
+navigateur allait la chercher dans Helvetica : trait fin, autre chasse,
+autre graisse, au milieu d'une ligne de Switzer 600.
+
+Fontshare n'est pas joignable depuis l'environnement, donc **la flèche est
+dessinée** : `herramientas/flecha-en-la-fuente.py`, avec les mesures de la
+police elle-même et de chaque graisse (l'épaisseur du trait d'union, l'axe
+du « + », la pointe à 45°). Le script se lance à la main et son résultat
+est versionné ; il n'est pas dans le build.
+
+Deux autres caractères manquaient et sont devenus des icônes : « ★ » (déjà
+`Estrella`, qui servait ailleurs pour la même note) et « ⌫ » (`Borrar`).
+
+**Avant d'écrire un caractère non-ASCII dans une interface, vérifier qu'il
+est dans la police** — le script dit comment.
+
+### L'échelle d'encre allait à l'envers
+
+`ink500` valait `#5A757E` et `ink600` `#7C959D` : le 500 **plus foncé** que
+le 600. Dans une échelle d'encre le nombre le plus grand est le plus
+foncé — c'est tout ce que ces noms veulent dire. Personne ne les
+choisissait par le nombre : on choisissait à l'œil, et les deux mêmes gris
+sortaient intervertis d'un écran à l'autre.
+
+Corrigé en changeant **les noms** aux 298 endroits qui les utilisent : ce
+pas-là n'a pas bougé un pixel. Les valeurs ont été corrigées ensuite, et
+pour une autre raison.
+
+### Le gris secondaire ne se lisait pas
+
+`#7C959D` contraste **2,94:1** sur le lienzo, et le minimum pour un petit
+texte est 4,5:1. Il portait la moitié du texte secondaire de l'app. Un gris
+à 2,9:1 se lit sur un écran de bureau dans le noir et disparaît sur un
+téléphone au soleil, qui est là où ça sert.
+
+Les rapports actuels, sur `sand100` :
+
+    ink900 14,5  ink800 10,6  ink700 8,7
+    ink600  5,7  ink500  4,6  ink400 2,3  ink300 1,7
+
+**En dessous de `ink400`, aucun texte qu'il faut lire.** `inkIcono`
+(3,69:1) est la teinte d'une **forme**, pas d'un texte : les rótulos
+d'onglet et « 3 cupos » en sortaient.
+
+Avec ça, six titres d'écran étaient **blancs sur le lienzo clair** (1,08:1,
+invisibles) — restes du champ rouge héros retiré, dont l'écran partagé
+`NoEsta` (donc tous les vides de l'app) et le **B/10 à 58 px** de `tope`,
+qui est la donnée pour laquelle cet écran existe. Et dans `destino`, où la
+bande rouge survit, l'inverse : ses trois lignes étaient restées en encre
+de fond clair, à 1,05:1 sur le rouge.
+
+### 44 px, c'est un doigt
+
+Apple et Material disent la même chose. Le ± existait en **trois tailles**
+(40 dans `controles`, 34 dans `reservar`, qui avait sa propre copie du même
+contrôle) ; « Ver quién es », « Filtros », « Ver histórico » étaient sous la
+barre. Un seul ± maintenant, à 44, et `reservar` n'a plus de copie.
+
+### Ce qui se répétait
+
+Un même fait dit deux ou trois fois sur un écran est le défaut le plus
+fréquent de ce dépôt. Retirés le 29-08 : l'apport deux fois sur la fiche du
+trajet, « sin verificar » trois fois sur le profil, la cloche sur deux
+onglets racines, « sin viajes » deux fois sur les résultats, le tope deux
+fois sur `puestos`, « Mi perfil público » à l'intérieur du profil.
+
+### Les décisions de structure
+
+- **Une seule cloche, sur Inicio.** La bandeja (ce qui s'est passé) est en
+  haut à droite de l'accueil ; l'onglet Chats du bas est les conversations,
+  et sa pastille se compte dans `ui/Pestanas.tsx` **et nulle part ailleurs**.
+- **Mis viajes ne montre que ce qui vient.** « Quién pide puesto » est
+  parti : on administre UN trajet, par sa fiche, pas l'idée de conduire.
+  « Rutas guardadas » y reste, à mi-voix.
+- **Le profil est une seule page, et c'est le profil public.** Les onglets
+  « Sobre ti / Cuenta » ont disparu : ils coupaient en deux ce qui tient
+  entier, et cachaient Ajustes et Ayuda derrière une touche. En haut ce que
+  l'autre voit, dessous ce qu'on a récupéré, dessous ce qu'on peut toucher.
+- **Ayuda et « Cómo te cuidamos » faisaient l'inverse de leur nom.** La
+  première s'appelait « ¿Qué pasó? » et était un constat d'incident sans une
+  ligne de « comment on fait » ni un courriel ; la seconde s'ouvrait sur un
+  bouton 911 pleine largeur. Corrigées : `COMO_SE_HACE` dans
+  `servicios/ayuda.ts` (sept réponses), le courriel `CORREO` écrit **à un
+  seul endroit**, et le 911 descendu à la fin de la page qu'il ouvrait.
+  **`hola@partimos.app` n'existe pas encore : la boîte est à créer.**
+- **Une recherche sans un seul trajet** — ni ce jour ni aucun de la tira —
+  cache les chips (on ne filtre pas zéro) et la tira (sept tirets ne sont
+  pas un calendrier), et le vide porte les trois portes : autre date,
+  préviens-moi, **« ¿Lo manejas tú? »**. La dernière est la réponse honnête
+  d'une place de marché vide, et elle ne promet rien (R5).
+- **Le style d'une carte porte son propre padding.** `carro.tsx` avait un
+  `tarjeta` sans padding, complété par un second style à chaque usage : la
+  carte qui l'oubliait sortait collée à ses bords. Un style qu'il faut
+  accompagner d'un autre pour ne pas casser est un style que quelqu'un
+  utilisera seul.
+- **Le rótulo d'une carte n'est jamais plus petit que ses lignes.**
+
+### Comment on mesure ça
+
+Les sondes sont dans `herramientas/` et se lancent contre
+`npx expo start --web` : contraste réel (fond composé, pas le token),
+cibles sous 44 px, texte tronqué, cartes sans padding, contenu coupé par
+une barre fixe, et `button` dans `button`. **Les relancer avant de dire
+qu'un écran va bien** — quatre défauts sur cinq de cette journée ne se
+voyaient pas à l'œil.
