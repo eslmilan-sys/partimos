@@ -116,9 +116,16 @@ export function placaTapada(placa: string): string {
 export type Resumen = { linea: string; detalle: string };
 
 export function resumen(b: BorradorDeCarro): Resumen {
+  /* **EL SEPARADOR SE PONE ENTRE COSAS QUE EXISTEN.** La placa es opcional
+     —se escribe cuando se escribe—, y sin ella la línea empezaba por un
+     punto suelto: «· 2019 · 4 puestos». Un separador colgando delante se lee
+     como que falta algo antes, que es exactamente lo que NO queremos decir:
+     la placa entera no se guarda a propósito (29-08-2026). */
   return {
     linea: `${b.marca} ${b.modelo} ${b.color.toLowerCase()}`,
-    detalle: `${placaTapada(b.placa)} · ${b.anio} · ${b.puestos} puestos`,
+    detalle: [placaTapada(b.placa), b.anio, `${b.puestos} puestos`]
+      .filter(Boolean)
+      .join(' · '),
   };
 }
 

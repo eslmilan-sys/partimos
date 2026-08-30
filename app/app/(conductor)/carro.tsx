@@ -228,7 +228,14 @@ export default function RegistrarCarro() {
     <View style={estilos.pantalla}>
       <BarraDeEstado />
 
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+      {/* El hueco de abajo es el ALTO DEL PIE FIJO más aire: sin él, la última
+          tarjeta —el resumen del carro— quedaba cortada por la mitad detrás
+          del botón de guardar, y con ella la placa y los puestos. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 130 }}
+        showsVerticalScrollIndicator={false}
+      >
         <CampoRojo altura={206} />
 
         <View style={estilos.cabecera}>
@@ -783,16 +790,30 @@ const estilos = StyleSheet.create({
     borderColor: color.azul500,
   },
 
+  /**
+   * **EL RELLENO VA AQUÍ, NO EN CADA TARJETA.**
+   *
+   * `tarjeta` no tenía ninguno: lo ponía un segundo estilo por cada sitio
+   * —`tarjetaFoto`, `tarjetaResumen`— y la de «Lo que tiene tu carro» se
+   * escribió con `tarjeta` a secas. Resultado: el título, los dos textos y
+   * los dos interruptores pegados al borde de la tarjeta, y la pista del
+   * interruptor saliéndose por la derecha. Una tarjeta rota en una pantalla
+   * de tres tarjetas (visto en el teléfono del dueño el 29-08-2026).
+   *
+   * Con el relleno en la tarjeta, la próxima no se puede olvidar de él.
+   */
   tarjeta: {
     marginHorizontal: espacio.gutter,
     marginTop: espacio.entreTarjetas,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: color.bordeSutil,
     borderRadius: radio.l,
   },
 
-  tarjetaFoto: { paddingHorizontal: 18, paddingVertical: 16 },
+  tarjetaFoto: {},
   filaTitulo: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   ayudaComodidad: {
     marginTop: 4,
@@ -801,7 +822,16 @@ const estilos = StyleSheet.create({
     color: color.ink600,
     fontFamily: familia,
   },
-  tituloFoto: { ...texto.fila, color: color.ink900, flex: 1 },
+  /**
+   * **EL RÓTULO DE UNA TARJETA NO PUEDE SER MÁS PEQUEÑO QUE SUS FILAS.**
+   * Iba en `texto.fila` —13/500, frase normal—, y dentro de la tarjeta los
+   * interruptores llevan 16/600: el encabezado susurraba y sus filas
+   * gritaban. Y en la MISMA pantalla, «MARCA», «MODELO», «AÑO», «PLACA»,
+   * «LICENCIA DE CONDUCIR» y «PUESTOS QUE OFRECES» ya son epígrafes en
+   * versalita — dos maneras de rotular a diez píxeles una de otra.
+   * Ahora el epígrafe del sistema, como en el resto de la app.
+   */
+  tituloFoto: { ...texto.epigrafe, color: color.ink600, flex: 1 },
   obligatoria: {
     fontSize: 11.5,
     lineHeight: interlinea(11.5),
@@ -883,7 +913,6 @@ const estilos = StyleSheet.create({
   linea1: { flexDirection: 'row', marginTop: 1 },
 
   tarjetaResumen: {
-    paddingHorizontal: 18,
     paddingVertical: 13,
     flexDirection: 'row',
     alignItems: 'center',
