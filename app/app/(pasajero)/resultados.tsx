@@ -51,7 +51,7 @@ import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { Boton } from '@/ui/controles';
 import { cifraRedonda, tabular } from '@/ui/dinero';
 import { duracionEntre as duracion, diaCorto, diaLargo, hora } from '@/ui/fechas';
-import { Atras, Avanza, Campana, Cerrar, Filtros as IconoFiltros } from '@/ui/iconos';
+import { Atras, Avanza, Calendario, Campana, Carro, Cerrar, Filtros as IconoFiltros } from '@/ui/iconos';
 import { AroDeOrigen, PuntaDeFlecha, TarjetaDeViaje, type ViajeEnTarjeta } from '@/ui/TarjetaDeViaje';
 import { familia, color, espacio, pulsado, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
@@ -242,6 +242,21 @@ export default function Resultados() {
     .filter((d) => d.cuantos > 0 && d.dia !== (dia ?? diaEnPanama(new Date())))
     .slice(0, 3);
 
+  /**
+   * **LA BÚSQUEDA SECA**: ni este día ni ninguno de la tira tienen nada.
+   *
+   * Es un caso distinto de «hoy no hay pero el jueves sí», y la pantalla los
+   * trataba igual. Con la tira entera en rayas, «Filtros» y «Más temprano»
+   * ordenan y filtran cero cosas, los siete días dicen «—» uno detrás de
+   * otro, y el vacío se queda sin nada que ofrecer salvo una frase. Visto en
+   * el teléfono del dueño el 29-08-2026.
+   */
+  const buscandoSeco =
+    !cargando &&
+    viajes.length === 0 &&
+    agotados.length === 0 &&
+    porDia.every((d) => d.cuantos === 0);
+
   const guardarAlerta = async () => {
     if (!yo) {
       router.push('/(cuenta)/entrar');
@@ -306,18 +321,27 @@ export default function Resultados() {
           </View>
         </View>
 
+        {/* **«SIN VIAJES» NO SE DICE DOS VECES.** Esta línea lo escribía, y
+            treinta píxeles más abajo el vacío lo repite en grande y con su
+            razón. Cuando no hay nada, la línea se queda con lo que sí aporta:
+            qué día y para cuánta gente se está buscando. */}
         <Text style={[estilos.meta, tabular]}>
-          {`${cuandoTexto(dia)} · ${ruta.pasajeros} ${ruta.pasajeros === 1 ? 'pasajero' : 'pasajeros'} · ${
+          {`${cuandoTexto(dia)} · ${ruta.pasajeros} ${ruta.pasajeros === 1 ? 'pasajero' : 'pasajeros'}${
             cargando
-              ? 'buscando…'
+              ? ' · buscando…'
               : viajes.length === 0
-                ? 'sin viajes'
-                : `${viajes.length} ${viajes.length === 1 ? 'viaje' : 'viajes'}`
+                ? ''
+                : ` · ${viajes.length} ${viajes.length === 1 ? 'viaje' : 'viajes'}`
           }`}
         </Text>
       </View>
 
-      {/* La barra: Filtros en tinta con su cuenta, el orden, el día. */}
+      {/* La barra: Filtros en tinta con su cuenta, el orden, el día.
+          **No sale cuando no hay NADA que filtrar ni que ordenar** — salvo si
+          hay filtros puestos, porque entonces son la causa del vacío y hay
+          que poder quitarlos. Dos controles que no hacen nada son peores que
+          ninguno: invitan a tocarlos para nada. */}
+      {!buscandoSeco || activos.length > 0 ? (
       <View style={estilos.barraChips}>
         <Pressable
           accessibilityRole="button"
@@ -351,11 +375,16 @@ export default function Resultados() {
         </Pressable>
 
       </View>
+      ) : null}
 
       {/* LA TIRA DE DÍAS, con su cuenta. Los días sin nada se ven apagados
           pero NO se esconden: saber que el jueves está vacío es tan útil
-          como saber que el viernes tiene tres. */}
-      {porDia.length > 0 ? (
+          como saber que el viernes tiene tres.
+          **Salvo cuando NINGUNO tiene nada.** Siete tarjetas seguidas
+          diciendo «—» no son un calendario: son una fila entera que no
+          responde a la pregunta que se le hace. Ahí la puerta al calendario
+          baja al vacío, que es donde se está mirando (29-08-2026). */}
+      {porDia.length > 0 && !buscandoSeco ? (
         <ScrollView
           ref={tira}
           horizontal
@@ -466,11 +495,11 @@ export default function Resultados() {
           </View>
         ) : viajes.length === 0 && agotados.length === 0 ? (
           <View style={estilos.vacio}>
-            <View style={estilos.vacioDibujo}>
-              <AroDeOrigen tinta={color.ink300} />
-              <View style={estilos.vacioLinea} />
-              <PuntaDeFlecha tamano={10} tinta={color.ink300} />
-            </View>
+            {/* **EL DIBUJO SE FUE.** Un aro, una raya y una punta en gris,
+                cien píxeles de alto, en el sitio donde la persona está
+                esperando una respuesta. No decía nada que el título no
+                dijera, y empujaba las salidas hacia abajo. Un vacío se
+                arregla dando qué hacer, no decorándolo (29-08-2026). */}
             {/* Una sola voz: toda ruta existe y se busca; lo único que puede
                 faltar son viajes. El «todavía no hay esa ruta» murió con la
                 apertura de las rutas libres (24-08-2026). */}
@@ -480,7 +509,9 @@ export default function Resultados() {
                 ? 'Nadie ha publicado esta ruta con los filtros aplicados. Quita alguno o mira otro día.'
                 : ruta.pasajeros > 1
                   ? `Nadie lleva ${ruta.pasajeros} puestos juntos ese día. Prueba con menos puestos o con otro día.`
-                  : 'Nadie sale ese día.'}
+                  : buscandoSeco
+                    ? `Nadie ha publicado esta ruta en los próximos días. Es normal al principio: los viajes los pone la gente.`
+                    : 'Nadie sale ese día.'}
             </Text>
 
             {/* «MIRA OTRO DÍA» AHORA DICE CUÁL. El texto lo aconsejaba desde
@@ -508,6 +539,66 @@ export default function Resultados() {
                 ))}
               </View>
             ) : null}
+
+            {/* **LO QUE SE PUEDE HACER, AQUÍ Y NO ABAJO DEL TODO.**
+                El vacío ofrecía una frase y punto; el aviso de ruta vivía
+                flotando al final de la pantalla, a media pantalla de
+                distancia de la única persona que lo necesita, y el
+                calendario sólo existía dentro de una tira que aquí no sale.
+                Las tres puertas van juntas y en el orden en que sirven:
+                mirar otro día, que te avisemos, o llevarlo tú. */}
+            <View style={estilos.salidasDelVacio}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Elegir otra fecha"
+                onPress={() => setEligiendoDia(true)}
+                style={({ pressed }) => [estilos.salidaVacio, pressed && pulsado.celda]}
+              >
+                <Calendario tamano={18} tinta={color.ink600} />
+                <Text style={[estilos.salidaVacioTexto, { flex: 1 }]}>Elegir otra fecha</Text>
+                <Avanza tamano={15} />
+              </Pressable>
+
+              {!guardada ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Avísame cuando alguien publique esta ruta"
+                  onPress={guardarAlerta}
+                  style={({ pressed }) => [estilos.salidaVacio, pressed && pulsado.celda]}
+                >
+                  <Campana tamano={18} tinta={color.ink600} />
+                  <Text style={[estilos.salidaVacioTexto, { flex: 1 }]}>
+                    Avísame si alguien publica
+                  </Text>
+                  <Avanza tamano={15} />
+                </Pressable>
+              ) : null}
+
+              {/* **SI NADIE VA, PUEDES IR TÚ.** Es la respuesta honesta de
+                  este producto a una ruta vacía: los viajes los pone la
+                  gente, y quien buscaba ir a Chitré el viernes muchas veces
+                  puede llevarse a alguien. No promete nada —R5— porque no
+                  hay nada que ganar: dice lo que es, compartir el costo. */}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Publicar este viaje yo"
+                onPress={() => router.push('/(conductor)/publicar')}
+                style={({ pressed }) => [
+                  estilos.salidaVacio,
+                  estilos.salidaVacioSigue,
+                  pressed && pulsado.celda,
+                ]}
+              >
+                <Carro tamano={18} tinta={color.ink600} />
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={estilos.salidaVacioTexto}>¿Lo manejas tú?</Text>
+                  <Text style={estilos.salidaVacioPie}>
+                    Publica el viaje y comparte la gasolina.
+                  </Text>
+                </View>
+                <Avanza tamano={15} />
+              </Pressable>
+            </View>
           </View>
         ) : (
           <View style={{ gap: 16 }}>
@@ -595,8 +686,12 @@ export default function Resultados() {
       </ScrollView>
 
       {/* Fijo abajo: la alerta de ruta. Blanca cuando está por poner, teñida
-          del acento cuando ya quedó puesta. */}
-      {origen && destino ? (
+          del acento cuando ya quedó puesta.
+          **No cuando la búsqueda está seca**: ahí el vacío ya la ofrece, en la
+          mitad de la pantalla donde se está mirando y no flotando abajo del
+          todo. Dos botones iguales en una pantalla que no tiene nada más
+          era lo único que sobraba de sobra (29-08-2026). */}
+      {origen && destino && !buscandoSeco ? (
         <View style={estilos.pieAlerta}>
           {guardada ? (
             <View style={[estilos.alerta, estilos.alertaPuesta]}>
@@ -1349,7 +1444,39 @@ const estilos = StyleSheet.create({
   esqueletoLinea: { flex: 1, height: 7, borderRadius: 4, backgroundColor: 'rgba(10,39,49,.05)' },
   esqueletoAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(10,39,49,.07)' },
 
-  vacio: { alignItems: 'center', paddingTop: 24, gap: 6 },
+  vacio: { alignItems: 'center', paddingTop: 30, gap: 6 },
+  /** Las salidas del vacío: filas anchas, no botones sueltos centrados. */
+  salidasDelVacio: {
+    alignSelf: 'stretch',
+    marginTop: 22,
+    backgroundColor: color.blanco,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+  },
+  salidaVacio: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    minHeight: 58,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  salidaVacioSigue: { borderTopWidth: 1, borderTopColor: color.bordeSutil },
+  salidaVacioTexto: {
+    fontSize: 14.5,
+    lineHeight: 20,
+    fontWeight: '500',
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  salidaVacioPie: {
+    marginTop: 2,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: color.ink500,
+    fontFamily: familia,
+  },
   vacioDibujo: {
     width: 64,
     height: 64,
