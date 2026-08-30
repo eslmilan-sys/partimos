@@ -48,14 +48,12 @@ import { TRACK_MICRO, color, espacio, familia, radio, sombra } from '@/ui/tokens
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
 
-type Solapa = 'ti' | 'cuenta';
 
 export default function TuCuenta() {
   const router = useRouter();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<Cuenta | null>(null);
   const [noEsta, setNoEsta] = useState(false);
-  const [solapa, setSolapa] = useState<Solapa>('ti');
 
   useEffect(() => {
     if (!yo) return;
@@ -133,12 +131,21 @@ export default function TuCuenta() {
       icono: <Documento />,
       alPulsar: () => router.push('/(cuenta)/ajustes'),
     },
-    {
-      etiqueta: 'Verificación',
-      valor: datos.cedula,
-      icono: <Cedula />,
-      alPulsar: () => router.push('/(conductor)/cedula'),
-    },
+    /* **LA VERIFICACIÓN, UNA PUERTA A LA VEZ.** Sin verificar, arriba está
+       ya la fila «Verificar mi cédula · Sin esto no puedes publicar viajes»,
+       que va al mismo sitio y encima dice por qué. Dos filas al mismo destino
+       en la misma pantalla, una de ellas sin la razón, es la de menos.
+       Verificada, esta se queda: es donde se mira cuándo vence. */
+    ...(datos.verificado
+      ? [
+          {
+            etiqueta: 'Verificación',
+            valor: datos.cedula,
+            icono: <Cedula />,
+            alPulsar: () => router.push('/(conductor)/cedula'),
+          },
+        ]
+      : []),
     {
       etiqueta: 'Mi carro',
       valor: datos.carro ?? 'Sin carro',
@@ -151,11 +158,10 @@ export default function TuCuenta() {
       icono: <Billete />,
       alPulsar: () => router.push('/(pasajero)/metodos'),
     },
-    {
-      etiqueta: 'Lo que recuperas',
-      icono: <Billete />,
-      alPulsar: () => router.push('/(conductor)/aportes'),
-    },
+    /* **«LO QUE RECUPERAS» SE FUE**: abría `aportes`, que es exactamente lo
+       que abre «Ver histórico» en la tarjeta de arriba — y esa tarjeta ya
+       enseña la cifra. Dos filas de la misma pantalla al mismo sitio, una de
+       ellas sin el dato (29-08-2026). */
     {
       etiqueta: 'Cómo te cuidamos',
       icono: <Escudo tamano={20} tinta={color.ink500} />,
@@ -205,54 +211,34 @@ export default function TuCuenta() {
           </View>
         </View>
 
-        {/* El estado de la cédula, arriba y no enterrado en la lista: es lo
-            único que decide si puedes publicar. */}
-        {/* Es un ESTADO, no un botón: quien no está verificado tiene la fila
-            de abajo para hacerlo, y con la razón. Dos puertas al mismo sitio,
-            una de ellas sin decir a dónde va, es lo que había. */}
-        <View
-          accessibilityRole="text"
-          accessibilityLabel={datos.verificado ? 'Cédula verificada' : 'Cédula sin verificar'}
-          style={[estilos.chipEstado, datos.verificado ? estilos.chipVerde : estilos.chipClaro]}
-        >
-          <Cedula tamano={15} tinta={datos.verificado ? color.hechoTinta : color.campoTexto} />
-          <Text
-            style={[
-              estilos.chipEstadoTexto,
-              { color: datos.verificado ? color.hechoTinta : color.campoTexto },
-            ]}
-          >
-            {datos.verificado ? 'Verificado' : 'Sin verificar'}
-          </Text>
+        {/* **ESTA CABECERA ES TU PERFIL PÚBLICO, Y NO HACE FALTA DECIRLO
+            DOS VECES** (29-08-2026, pedido del dueño).
+            Había una pastilla «VERIFICADO» aquí, y más abajo una tarjeta
+            entera titulada «Mi perfil público · Lo que ve el otro antes de
+            subirse» con las mismas tres cifras. Pero entrar en Perfil YA es
+            mirarse: nadie necesita que le anuncien, dentro de su perfil, que
+            está viendo su perfil. Las tres cifras suben aquí, pegadas al
+            nombre y a la foto, que es como las ve el otro; y la pastilla se
+            va, porque la cédula ya está en la tercera columna. */}
+        <View style={estilos.loQueVen}>
+          {loQueVen.map((v) => (
+            <View key={v.etiqueta} style={estilos.loQueVenColumna}>
+              <Text style={estilos.loQueVenValor}>{v.valor}</Text>
+              <Text style={estilos.loQueVenEtiqueta}>{v.etiqueta}</Text>
+            </View>
+          ))}
         </View>
+        <Text style={estilos.esloQueVen}>Esto es lo que ve el otro antes de subirse.</Text>
       </View>
 
       <View style={estilos.contenido}>
-        {/* Las dos solapas montan sobre el borde del campo, que es donde el
-            arquetipo pone la hoja blanca. */}
-        <View style={estilos.solapas}>
-          {(
-            [
-              ['ti', 'Sobre ti'],
-              ['cuenta', 'Cuenta'],
-            ] as const
-          ).map(([clave, etiqueta]) => (
-            <Pressable
-              key={clave}
-              accessibilityRole="button"
-              accessibilityState={{ selected: solapa === clave }}
-              onPress={() => setSolapa(clave)}
-              style={[estilos.solapa, solapa === clave && estilos.solapaActiva]}
-            >
-              <Text style={[estilos.solapaTexto, solapa === clave && estilos.solapaTextoActivo]}>
-                {etiqueta}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {solapa === 'ti' ? (
-          <>
+        {/* **SIN SOLAPAS** (29-08-2026, pedido del dueño). Había dos, «Sobre
+            ti» y «Cuenta», y partían en dos lo que cabe entero: arriba lo que
+            eres, abajo lo que puedes cambiar. Nadie entra a su perfil sin
+            querer las dos mitades, y con la de «Cuenta» escondida detrás de
+            un toque, Ajustes y Ayuda no existían para quien no la descubriera.
+            Ahora una sola página, en el orden en que se mira: quién eres, qué
+            has recuperado, y qué puedes tocar. */}
             {/* UNA CIFRA, NO TRES. «Aportado» se va por pedido del dueño
                 (26-08-2026) y la razón se sostiene sola: puestas juntas, lo
                 que pusiste y lo que recuperaste se leen como un balance —
@@ -288,33 +274,6 @@ export default function TuCuenta() {
               </Pressable>
             </View>
 
-            {/* **MI PERFIL PÚBLICO, DENTRO DE LA PÁGINA** (27-08-2026, pedido
-                del dueño). Era una fila con galón que abría tu propio perfil
-                en modo visitante — un viaje de ida y vuelta para ver cuatro
-                datos que caben aquí. Se enseña lo que el otro ve ANTES de
-                subirse, que es de lo que trata: tu nota, tus viajes y lo que
-                llevas verificado. */}
-            <View style={estilos.tarjeta}>
-              <View style={estilos.filaPerfil}>
-                <View style={estilos.cuadroIcono}>
-                  <Escudo tamano={20} tinta={color.ink500} />
-                </View>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={estilos.tituloPerfil}>Mi perfil público</Text>
-                  <Text style={estilos.filaValor}>Lo que ve el otro antes de subirse</Text>
-                </View>
-              </View>
-
-              <View style={estilos.loQueVen}>
-                {loQueVen.map((v) => (
-                  <View key={v.etiqueta} style={estilos.loQueVenColumna}>
-                    <Text style={estilos.loQueVenValor}>{v.valor}</Text>
-                    <Text style={estilos.loQueVenEtiqueta}>{v.etiqueta}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-
             {/* **LO QUE FALTA SE PUEDE HACER DESDE AQUÍ.**
                 Era una frase suelta con un escudo al lado — «Verifica tu
                 cédula para poder publicar viajes.» —, con pinta de botón y sin
@@ -339,8 +298,6 @@ export default function TuCuenta() {
                 <Avanza />
               </Pressable>
             ) : null}
-          </>
-        ) : (
           <View style={estilos.lista}>
             {filas.map((f, i) => (
               <Pressable
@@ -365,7 +322,6 @@ export default function TuCuenta() {
               </Pressable>
             ))}
           </View>
-        )}
 
         {/* **CERRAR SESIÓN NO ES LO QUE SE VIENE A HACER AQUÍ**, y era el
             control más fuerte de la pantalla: 56 px de alto, a todo el ancho,
@@ -458,26 +414,10 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  contenido: { paddingHorizontal: espacio.gutter, paddingTop: 20, paddingBottom: 26 },
+  /* El hueco de abajo es el ALTO DE LA BARRA DE PESTAÑAS más aire: con 26 px
+     la última fila —«Ayuda y contacto»— quedaba debajo de la barra. */
+  contenido: { paddingHorizontal: espacio.gutter, paddingTop: 20, paddingBottom: 96 },
 
-  solapas: {
-    flexDirection: 'row',
-    padding: 5,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
-    ...sombra.hoja,
-  },
-  solapa: { flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: radio.pastilla },
-  solapaActiva: { backgroundColor: color.azul500 },
-  solapaTexto: {
-    fontSize: 15.5,
-    lineHeight: 21.75,
-    fontWeight: '600',
-    letterSpacing: -0.15,
-    color: color.ink700,
-    fontFamily: familia,
-  },
-  solapaTextoActivo: { color: '#fff' },
 
   tarjeta: {
     marginTop: 14,
@@ -533,12 +473,21 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   /** Las tres cifras que el otro mira antes de subirse, en columnas iguales. */
+  /* Ahora vive en la cabecera, sobre el lienzo y no dentro de una tarjeta:
+     el filete de arriba lo separa del nombre. */
   loQueVen: {
     flexDirection: 'row',
-    marginTop: 16,
-    paddingTop: 14,
+    marginTop: 18,
+    paddingTop: 15,
     borderTopWidth: 1,
     borderTopColor: color.bordeSutil,
+  },
+  esloQueVen: {
+    marginTop: 12,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: color.ink500,
+    fontFamily: familia,
   },
   loQueVenColumna: { flex: 1, minWidth: 0 },
   loQueVenValor: {

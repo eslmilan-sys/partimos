@@ -51,7 +51,6 @@ import {
   misViajesConduciendo,
 } from '@/servicios/panel';
 import { cerrarLasVencidas } from '@/servicios/abordaje';
-import { bandeja } from '@/servicios/avisos';
 import { cuantasAvisando } from '@/servicios/rutas';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -61,13 +60,14 @@ import { Pestanas } from '@/ui/Pestanas';
 import { Avatar, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaAbrev, diaSemana, hora, mesAbrev, numeroDeDia } from '@/ui/fechas';
-import { Avanza, Campana, Carro, Chat, Compartir, Estrella, Visto } from '@/ui/iconos';
+import { Avanza, Carro, Chat, Compartir, Estrella, Visto } from '@/ui/iconos';
 import {
   TRACK_MICRO,
   color,
   espacio,
   familia,
   interlinea,
+  pulsado,
   radio,
   zonaDeToque,
 } from '@/ui/tokens';
@@ -111,7 +111,6 @@ export default function MisViajesPantalla() {
   const router = useRouter();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<MisViajes | null>(null);
-  const [avisos, setAvisos] = useState(0);
   /** Cuántas rutas guardadas están avisando, para la puerta de abajo. */
   const [avisando, setAvisando] = useState(0);
   const [manejando, setManejando] = useState<{
@@ -128,7 +127,6 @@ export default function MisViajesPantalla() {
       .then(() => misViajes(yo).then(setDatos))
       .catch(() => misViajes(yo).then(setDatos));
     misViajesConduciendo(yo).then(setManejando);
-    bandeja(yo).then((b) => setAvisos(b.sinLeer));
     cuantasAvisando(yo).then(setAvisando);
   }, [yo]);
 
@@ -172,19 +170,12 @@ export default function MisViajesPantalla() {
             <Text style={estilos.bajada}>Consulta y administra tus próximos viajes.</Text>
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={avisos > 0 ? `Avisos, ${avisos} sin leer` : 'Avisos'}
-            onPress={() => router.push('/(avisos)/avisos')}
-            style={estilos.circulo}
-          >
-            <Campana tamano={18} />
-            {avisos > 0 ? (
-              <View style={estilos.chincheta}>
-                <Text style={estilos.chinchetaTexto}>{avisos > 9 ? '9+' : avisos}</Text>
-              </View>
-            ) : null}
-          </Pressable>
+          {/* **LA CAMPANA NO VA AQUÍ.** Estaba en Inicio Y en esta pantalla:
+              dos campanas en dos pestañas raíz para una sola bandeja, y con
+              dos cuentas que hay que mantener iguales. La decisión ya estaba
+              tomada el 28-08 —«los mensajes abajo a la derecha; los avisos en
+              la home, arriba a la derecha»—: esta era la que sobraba
+              (29-08-2026, pedido del dueño). */}
           {/* AQUÍ NO VA EL AVATAR. La cuenta ya tiene su pestaña abajo, en la
               barra, en todas las pantallas: repetirla arriba a la derecha era
               un segundo camino al mismo sitio, y de los dos el de arriba es el
@@ -273,33 +264,37 @@ export default function MisViajesPantalla() {
             </Pressable>
           ) : null}
 
-          {/* Las dos del conductor bajan aquí: vivían en la mitad «Conduzco»
-              del selector, y esa mitad ya no existe. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Quién pide puesto en mis viajes"
-            onPress={() => router.push('/(conductor)/panel')}
-            style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
-          >
-            <Text style={estilos.puertaTexto}>Quién pide puesto</Text>
-            <Avanza />
-          </Pressable>
+          {/* **«QUIÉN PIDE PUESTO» SE FUE** (29-08-2026, pedido del dueño).
+              Era una fila fija que llevaba al panel del conductor, y estaba
+              aquí tuvieras o no un viaje publicado: en una pantalla que se
+              llama «Mis viajes» y que promete «tus próximos viajes», una
+              puerta a la administración de algo que quizá no existe no es un
+              viaje próximo.
+              A las solicitudes se llega por el viaje que las tiene: cada
+              viaje que conduces está en la lista de arriba, y su ficha lleva
+              a «Administrar mi viaje». Se administra UN viaje, no la idea de
+              conducir. */}
 
           {/* **RUTAS GUARDADAS, AQUÍ** (27-08-2026, pedido del dueño). Vivía
               en Ajustes, dentro de un grupo «Avisos», y era el único camino
               para llegar: una ruta guardada es un viaje que todavía no
-              existe, no una preferencia de la cuenta. */}
+              existe, no una preferencia de la cuenta.
+
+              **Y VA EN PEQUEÑO** (29-08-2026): tenía el mismo peso que «Mi
+              código para subir», y no son lo mismo. El código se necesita
+              hoy, en la acera, con el carro esperando; una ruta guardada es
+              un aviso para dentro de dos semanas. Mismo sitio, media voz. */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={
               avisando > 0 ? `Rutas guardadas, ${avisando} avisando` : 'Rutas guardadas'
             }
             onPress={() => router.push('/(pasajero)/rutas')}
-            style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
+            style={({ pressed }) => [estilos.puertaChica, pressed && pulsado.celda]}
           >
-            <Text style={estilos.puertaTexto}>Rutas guardadas</Text>
+            <Text style={estilos.puertaChicaTexto}>Rutas guardadas</Text>
             {avisando > 0 ? <Text style={estilos.cuantos}>{`${avisando} avisando`}</Text> : null}
-            <Avanza />
+            <Avanza tamano={15} />
           </Pressable>
         </View>
       </View>
@@ -624,34 +619,6 @@ const estilos = StyleSheet.create({
     marginTop: 4,
     fontFamily: familia,
   },
-  circulo: {
-    width: espacio.tap,
-    height: espacio.tap,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.campoControl,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chincheta: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    minWidth: 17,
-    height: 17,
-    paddingHorizontal: 4,
-    borderRadius: radio.pastilla,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chinchetaTexto: {
-    fontSize: 10.5,
-    lineHeight: 13,
-    fontWeight: '700',
-    color: color.rojo600,
-    fontFamily: familia,
-    ...tabular,
-  },
 
 
   cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 16, paddingBottom: 20, gap: 10 },
@@ -917,6 +884,23 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
     borderWidth: 1,
     borderColor: color.bordeSutil,
+  },
+  /** La fila menor: sin caja, un renglón discreto bajo las puertas. */
+  puertaChica: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minHeight: espacio.tap,
+    paddingHorizontal: 6,
+    marginTop: 2,
+  },
+  puertaChicaTexto: {
+    flex: 1,
+    fontSize: 13.5,
+    lineHeight: 20,
+    fontWeight: '500',
+    color: color.ink600,
+    fontFamily: familia,
   },
   puertaTexto: {
     flex: 1,
