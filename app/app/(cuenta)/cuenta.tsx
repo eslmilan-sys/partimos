@@ -271,10 +271,12 @@ export default function TuCuenta() {
               <Text style={estilos.cifraValor}>
                 {formatearDineroRedondo(datos.recuperadoCentavos)}
               </Text>
-              <Text style={estilos.nadieGana}>
-                Nadie gana dinero con esto: unos ponen y otros recuperan.
-              </Text>
-
+              {/* Aquí iba «Nadie gana dinero con esto: unos ponen y otros
+                  recuperan.», con su filete encima. Fuera el 29-08-2026 a
+                  pedido del dueño. La regla se sigue diciendo donde decide
+                  algo —en la ayuda y en el repaso antes de publicar—; en tu
+                  propio perfil, debajo de tu cifra, no decidía nada y le
+                  quitaba sitio a lo único que sí hay que tocar aquí. */}
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Ver el histórico, viaje por viaje"
@@ -498,16 +500,6 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     ...tabular,
   },
-  nadieGana: {
-    fontSize: 12.5,
-    lineHeight: 18.5,
-    color: color.ink600,
-    marginTop: 14,
-    paddingTop: 13,
-    borderTopWidth: 1,
-    borderTopColor: color.bordeSutil,
-    fontFamily: familia,
-  },
 
   /** Pequeño y de contorno: abre una segunda pantalla, no ES la tarjeta. */
   verHistorico: {
@@ -515,7 +507,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 4,
-    marginTop: 14,
+    marginTop: 18,
     // 44, el mínimo de un dedo. Iba a 34.
     height: 44,
     paddingLeft: 15,
