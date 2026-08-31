@@ -4,6 +4,10 @@ Ce fichier est fait pour **une session qui vient tout vérifier** : chaque
 bouton, chaque texte, et les deux parcours de bout en bout — celui qui
 cherche une place et celui qui conduit.
 
+Et si tu viens **chercher ce qui empêche l'app de marcher** plutôt que ce
+qui est cassé sur un écran : `AUDITORIA.md`. Quatre problèmes de fond,
+quatre petits, chacun avec le fichier où le vérifier.
+
 Lire `CLAUDE.md` d'abord. Les six règles non négociables et les divergences
 assumées y sont : **beaucoup de choses qui ont l'air d'un défaut sont des
 décisions**, et la section du 29-08-2026 dit lesquelles.

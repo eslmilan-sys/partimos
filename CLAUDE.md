@@ -7,7 +7,9 @@ le site, l'application, la base et le design. Un seul endroit, une seule vérit�
 les règles métier, et `DESIGN.md` pour ce qui a été constaté dans le code.
 
 Et si tu viens **passer l'app au peigne fin** — chaque bouton, les deux
-parcours de bout en bout : `REVISION.md`. Il donne les écrans dans l'ordre
+parcours de bout en bout : `REVISION.md`. Pour ce qui empêche le produit de
+marcher — la liquidité, le silence hors de l'app, la rencontre, la
+semence — : `AUDITORIA.md`. Il donne les écrans dans l'ordre
 où on les traverse, ce qu'on cherche, et ce qui est déjà connu pour ne pas
 le rouvrir comme si c'était neuf.
 
