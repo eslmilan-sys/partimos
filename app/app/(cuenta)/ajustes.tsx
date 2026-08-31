@@ -87,7 +87,9 @@ export default function Ajustes() {
 
   // El servicio promete los tres grupos en este orden, y ese orden es la
   // pantalla: cambiarlo allí cambia esto, que es lo que queremos.
-  const [viaje, dinero, salida] = grupos;
+  /* CUATRO GRUPOS desde el 31-08-2026: la ayuda bajó aquí desde el perfil,
+     que se podó a cuatro filas de lo que es tuyo. */
+  const [viaje, dinero, ayuda, salida] = grupos;
 
   return (
     <View style={estilos.pantalla}>
@@ -130,7 +132,11 @@ export default function Ajustes() {
             de verdad se cambia aquí: de dónde sales. */}
         <View style={estilos.hoja}>
           <Text style={estilos.epigrafe}>{viaje.titulo}</Text>
-          <Text style={estilos.resumen}>Lo que cambia lo que ves al buscar</Text>
+          {/* **«Lo que cambia lo que ves al buscar» no decía nada** (dueño,
+              31-08-2026, y con razón: era una frase construida al revés que
+              hay que leer dos veces para no entenderla). Lo que hace falta
+              debajo de un rótulo de grupo es qué guarda ese grupo. */}
+          <Text style={estilos.resumen}>Tu carro y de dónde sales</Text>
 
           {/* De dónde sales normalmente (0043). Se pregunta en el inicio, pero
               tiene que poder cambiarse desde algún sitio fijo: allí el enlace
@@ -217,6 +223,25 @@ export default function Ajustes() {
                     <Adelante />
                   </>
                 )}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <View style={estilos.tarjeta}>
+          <Text style={[estilos.epigrafe, { marginBottom: 10 }]}>{ayuda.titulo}</Text>
+          {ayuda.filas.map((fila, i) => {
+            const ultima = i === ayuda.filas.length - 1;
+            return (
+              <Pressable
+                key={fila.etiqueta}
+                accessibilityRole="button"
+                accessibilityLabel={fila.etiqueta}
+                onPress={fila.ruta ? () => router.push(fila.ruta as Href) : undefined}
+                style={[estilos.filaDato, { paddingTop: 11, paddingBottom: ultima ? 0 : 11 }]}
+              >
+                <Text style={estilos.filaDatoEtiqueta}>{fila.etiqueta}</Text>
+                <Adelante />
               </Pressable>
             );
           })}

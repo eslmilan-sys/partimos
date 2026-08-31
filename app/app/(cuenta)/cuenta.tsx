@@ -1,10 +1,30 @@
 /**
  * `6a` Tu perfil — quién eres y qué puedes tocar.
  *
- * ── La maqueta del 31-08-2026 ────────────────────────────────────────────
+ * ── La arquitectura del 31-08-2026 ───────────────────────────────────────
  *
- * El dueño mandó una maqueta y dijo «apply this exact same page». Lo que
- * cambia respecto de lo que había, y por qué cada cosa está donde está:
+ * Segunda vuelta sobre la maqueta, y el diagnóstico del dueño era el bueno:
+ * **el problema no era el dibujo, era el inventario.** La lista tenía siete
+ * filas donde caben cuatro, y varias llevaban a sitios que la barra de abajo
+ * ya abre. Un perfil no es un segundo menú de navegación: es tu centro de
+ * control personal.
+ *
+ * **Lo que se fue, y a dónde:**
+ *
+ * · «Mis viajes» → **la pestaña Viajes**, que está a un dedo en esta misma
+ *   pantalla. Perfil → Mis viajes y barra → Viajes eran dos caminos al mismo
+ *   sitio, dibujados a diez centímetros uno del otro.
+ * · «Lo que te han aportado» y «Cómo se aporta» → **una sola fila, “Aportes
+ *   y pagos”**, con el resumen en el subtítulo: «B/54 recibido · Yappy».
+ *   Eran dos filas de dinero seguidas, y quien busca «dónde está mi plata»
+ *   no sabe cuál de las dos abrir.
+ * · «Ayuda y contacto» → **dentro de Ajustes**, que es donde se busca.
+ * · «Cerrar sesión» → **sólo en Ajustes**. Estaba en las dos pantallas.
+ *
+ * Quedan cuatro: **verificación, carro, dinero y seguridad.** Las cuatro son
+ * cosas TUYAS que sólo se administran desde aquí.
+ *
+ * Y el resto de lo que cambia:
  *
  * · **La foto manda.** Avatar grande con su insignia de verificado encima,
  *   el nombre con la pastilla verde al lado, y debajo dos líneas: desde
@@ -17,8 +37,14 @@
  *   qué eran, pegadas a una tarjeta de dinero.
  * · **Ajustes sube al engranaje** de arriba a la derecha. Era la primera
  *   fila de la lista por pedido del 26-08 —«Ajustes should be on top»— y
- *   arriba del todo es más arriba todavía; además deja la lista para lo que
- *   de verdad es tuyo: tu verificación, tus viajes, tu carro, tu dinero.
+ *   arriba del todo es más arriba todavía.
+ * · **La cabecera entera se pulsa y abre «Editar perfil»** (`6b`). Tocar tu
+ *   propia foto para cambiarla es el gesto que todo el mundo tiene
+ *   aprendido; una fila «Editar perfil» aparte habría sido una fila más en
+ *   la lista que acabamos de podar.
+ * · **«Verificado» significa cédula Y licencia.** Con la cédula sola se
+ *   viaja de pasajero; para llevar a alguien hace falta la licencia, y decir
+ *   «verificado» sin ella promete lo que no se comprobó.
  *
  * **Tres cosas de la maqueta NO se copiaron, y son decisiones, no olvidos:**
  *
@@ -29,17 +55,15 @@
  * 2. **«Invita y gana · Gana B/.2.00 por cada amigo que viaje» no se puede
  *    escribir.** R5 prohíbe «gana dinero» en la interfaz, y aquí no era una
  *    forma de hablar: era un pago por referido, que convertiría a cada
- *    usuario en comisionista de una plataforma que no cobra comisiones. El
- *    bloque se queda en el mismo sitio y con el mismo peso, diciendo lo que
- *    sí es verdad: **comparte la app y su enlace**.
+ *    usuario en comisionista de una plataforma que no cobra comisiones. En
+ *    su sitio, **«Invita a tus amigos»** — y en voz baja, al final y sin
+ *    fondo de color: es una acción de crecimiento secundaria, no la
+ *    conclusión de tu perfil.
  * 3. **El botón de escanear (arriba, junto al engranaje) no existe.** No hay
  *    nada que escanear en este producto. Un control muerto es el peor
  *    defecto de este repositorio —`REVISION.md` lo pone el primero de la
  *    lista—, así que se dibuja sólo el engranaje.
  *
- * Y una fila que la maqueta no trae pero que se queda: **«Ayuda y
- * contacto»**. Sin ella no hay ninguna puerta a la ayuda desde el perfil, y
- * el dueño la pidió expresamente el 29-08 con su correo al final.
  */
 
 import { useEffect, useState } from 'react';
@@ -109,6 +133,8 @@ export default function TuCuenta() {
    * tinta. La nota se calla mientras no haya ninguna: «sin nota» no es un
    * defecto de quien acaba de entrar, y escribir un 0 sería mentir.
    */
+  const verificadoDeltodo = datos.verificado && datos.licenciaAlDia;
+
   const loQueVen = [
     { valor: String(datos.viajes), etiqueta: datos.viajes === 1 ? 'Viaje' : 'Viajes' },
     {
@@ -117,8 +143,9 @@ export default function TuCuenta() {
       estrella: datos.calificacion != null,
     },
     {
-      valor: datos.verificado ? 'Verificada' : 'Pendiente',
-      etiqueta: 'Cédula',
+      /* «Verificado» son las DOS. Ver la cabecera del archivo. */
+      valor: verificadoDeltodo ? 'Verificado' : 'Pendiente',
+      etiqueta: 'Cédula y licencia',
     },
   ];
 
@@ -128,63 +155,52 @@ export default function TuCuenta() {
    * Cada una con su valor a la derecha cuando lo tiene: «Sin carro» invita a
    * entrar, un hueco no.
    */
+  /**
+   * CUATRO FILAS, NI UNA MÁS. Ver la cabecera del archivo: las tres que se
+   * fueron llevaban a sitios que la barra de abajo o Ajustes ya abren, o
+   * partían el dinero en dos puertas.
+   */
   const filas: {
     etiqueta: string;
     debajo: string;
-    valor?: string | null;
-    pastilla?: boolean;
+    pastilla?: string;
     icono: React.ReactNode;
     alPulsar: () => void;
   }[] = [
     {
       etiqueta: 'Verificación',
-      debajo: datos.verificado ? 'Tu cédula está al día' : 'Sin esto no publicas',
-      valor: datos.verificado ? 'Completada' : 'Pendiente',
-      pastilla: true,
+      debajo: verificadoDeltodo
+        ? 'Cédula y licencia verificadas'
+        : datos.verificado
+          ? 'Cédula lista · falta la licencia'
+          : 'Falta tu cédula',
+      pastilla: verificadoDeltodo ? 'Completada' : 'Pendiente',
+      /* La cédula y no un escudo: el escudo es de Seguridad, dos filas más
+         abajo, y dos escudos en la misma lista no distinguen nada. */
       icono: <Cedula />,
       alPulsar: () => router.push('/(conductor)/cedula'),
     },
     {
-      etiqueta: 'Mis viajes',
-      debajo: 'Los que vienen y los pasados',
-      icono: <Ruta />,
-      alPulsar: () => router.push('/(conductor)/misviajes'),
-    },
-    {
       etiqueta: 'Mi carro',
-      debajo: datos.carro ?? 'Todavía no registraste ninguno',
+      debajo: datos.carro ?? 'Añadir mi carro',
       icono: <Carro tamano={20} />,
       alPulsar: () => router.push('/(conductor)/carro'),
     },
-    /* **AQUÍ VIVE EL DINERO AHORA.** Era una tarjeta suelta encima de la
-       lista —«Lo que has recuperado · B/0» con su botón— y en la maqueta ese
-       sitio lo ocupaba el bloque del CO₂, que se va. Como fila con su cifra a
-       la derecha dice lo mismo en un renglón y abre el mismo detalle. */
     {
-      etiqueta: 'Lo que te han aportado',
-      debajo: 'Viaje por viaje',
-      valor: formatearDineroRedondo(datos.recuperadoCentavos),
-      icono: <Cartera />,
+      /* UNA SOLA PUERTA AL DINERO, con el resumen en el subtítulo: cuánto te
+         ha llegado y por dónde te llega. Eran dos filas seguidas —«Lo que te
+         han aportado» y «Cómo se aporta»— y quien busca su plata no sabía
+         cuál abrir. */
+      etiqueta: 'Aportes y pagos',
+      debajo: `${formatearDineroRedondo(datos.recuperadoCentavos)} recibido · ${datos.metodo}`,
+      icono: <Billete />,
       alPulsar: () => router.push('/(conductor)/aportes'),
     },
     {
-      etiqueta: 'Cómo se aporta',
-      debajo: 'Tu método de siempre',
-      valor: datos.metodo,
-      icono: <Billete />,
-      alPulsar: () => router.push('/(pasajero)/metodos'),
-    },
-    {
-      etiqueta: 'Cómo te cuidamos',
-      debajo: 'Notas, verificación y emergencias',
+      etiqueta: 'Seguridad',
+      debajo: 'Contactos de confianza · SOS',
       icono: <Escudo tamano={20} tinta={color.ink500} />,
       alPulsar: () => router.push('/(ayuda)/seguridad'),
-    },
-    {
-      etiqueta: 'Ayuda y contacto',
-      debajo: 'Cómo se hacen las cosas',
-      icono: <Ayuda tamano={20} />,
-      alPulsar: () => router.push('/(ayuda)'),
     },
   ];
 
@@ -214,7 +230,16 @@ export default function TuCuenta() {
             </Pressable>
           </View>
 
-          <View style={estilos.filaPersona}>
+          {/* LA CABECERA ENTERA ABRE «EDITAR PERFIL» (`6b`). Tocar tu propia
+              foto para cambiarla es el gesto que todo el mundo tiene
+              aprendido, y una fila «Editar perfil» aparte sería una fila más
+              en la lista que acabamos de podar a cuatro. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Editar mi perfil"
+            onPress={() => router.push('/(cuenta)/editar')}
+            style={({ pressed }) => [estilos.filaPersona, pressed && estilos.pulsada]}
+          >
             <View style={estilos.avatar}>
               <Text style={estilos.avatarTexto}>{datos.iniciales}</Text>
               {/* La insignia sobre la foto, como la lleva cualquier perfil
@@ -255,8 +280,15 @@ export default function TuCuenta() {
                   </Text>
                 </View>
               ) : null}
+
+              {/* La invitación a tocar, pequeña y explícita: sin ella la
+                  cabecera es pulsable y no lo parece. */}
+              <View style={estilos.editar}>
+                <Text style={estilos.editarTexto}>Editar perfil</Text>
+                <Avanza tamano={13} />
+              </View>
             </View>
-          </View>
+          </Pressable>
         </View>
 
         <View style={estilos.contenido}>
@@ -299,7 +331,7 @@ export default function TuCuenta() {
               <Pressable
                 key={f.etiqueta}
                 accessibilityRole="button"
-                accessibilityLabel={f.valor ? `${f.etiqueta}, ${f.valor}` : f.etiqueta}
+                accessibilityLabel={`${f.etiqueta}, ${f.pastilla ?? f.debajo}`}
                 onPress={f.alPulsar}
                 style={({ pressed }) => [
                   estilos.fila,
@@ -316,73 +348,58 @@ export default function TuCuenta() {
                     {f.debajo}
                   </Text>
                 </View>
-                {f.valor && f.pastilla ? (
-                  <View style={[estilos.pastillaFila, !datos.verificado && estilos.pastillaTibia]}>
+                {f.pastilla ? (
+                  <View
+                    style={[estilos.pastillaFila, !verificadoDeltodo && estilos.pastillaTibia]}
+                  >
                     <Text
                       style={[
                         estilos.pastillaFilaTexto,
-                        !datos.verificado && estilos.pastillaTibiaTexto,
+                        !verificadoDeltodo && estilos.pastillaTibiaTexto,
                       ]}
                     >
-                      {f.valor}
+                      {f.pastilla}
                     </Text>
                   </View>
-                ) : f.valor ? (
-                  <Text style={[estilos.filaValor, tabular]} numberOfLines={1}>
-                    {f.valor}
-                  </Text>
                 ) : null}
                 <Avanza />
               </Pressable>
             ))}
           </View>
 
-          {/* **COMPARTIR, NO «GANAR».** Ver la nota 2 de la cabecera. El sitio
-              y el peso son los de la maqueta; lo que promete, no. Y lo que
-              ofrece es cierto: en una app de viajes compartidos, un amigo más
-              publicando es un viaje más para todos — que es exactamente el
-              problema que tiene hoy este producto. */}
+          {/* **INVITAR, NO «GANAR», Y EN VOZ BAJA.** Ver la nota 2 de la
+              cabecera: no hay programa de referidos que pagar, así que no se
+              promete uno. Y va sin fondo de color, al final de todo: es una
+              acción de crecimiento secundaria, no la conclusión de tu perfil
+              (pedido del dueño: «I would not make this card too prominent»). */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Compartir Partimos con un amigo"
+            accessibilityLabel="Invitar a mis amigos a Partimos"
             onPress={() =>
               compartir(
-                `Te comparto Partimos: para bajar al interior compartiendo el carro y los gastos, sin terminal.${
+                `Estoy usando Partimos para compartir viajes en Panamá. Únete y encuentra personas que van en tu misma dirección.${
                   enlace ? ` ${enlace}` : ''
                 }`,
               ).then((c) => decir(DIJO[c]))
             }
-            style={({ pressed }) => [estilos.comparte, pressed && { opacity: 0.9 }]}
+            style={({ pressed }) => [estilos.comparte, pressed && estilos.pulsada]}
           >
             <View style={estilos.cuadroRegalo}>
-              <Regalo tamano={21} />
+              <Regalo tamano={20} tinta={color.ink500} />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={estilos.comparteTitulo}>Comparte Partimos</Text>
+              <Text style={estilos.comparteTitulo}>Invita a tus amigos</Text>
               <Text style={estilos.comparteTexto}>
-                Un amigo más publicando es un viaje más para todos.
+                Comparte Partimos con quienes viajan por tu misma ruta.
               </Text>
             </View>
-            <Text style={estilos.comparteAccion}>Compartir</Text>
-            <Avanza tinta={color.rojo600} />
+            <Avanza />
           </Pressable>
 
-          {/* **CERRAR SESIÓN NO ES LO QUE SE VIENE A HACER AQUÍ**, y era el
-              control más fuerte de la pantalla: 56 px de alto, a todo el
-              ancho, con borde rojo. El rojo tiene cuatro sentidos en este
-              sistema y salir no es ninguno. Se queda al final, en voz baja. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Cerrar sesión"
-            onPress={async () => {
-              await salir();
-              router.replace('/(cuenta)/apertura');
-            }}
-            style={({ pressed }) => [estilos.cerrar, pressed && { backgroundColor: color.rojo50 }]}
-          >
-            <Salir tamano={17} tinta={color.ink600} />
-            <Text style={estilos.cerrarTexto}>Cerrar sesión</Text>
-          </Pressable>
+          {/* **CERRAR SESIÓN SE FUE A AJUSTES**, donde ya estaba. Estaba en
+              las dos pantallas, y la de Ajustes se abre desde el engranaje de
+              esta misma cabecera: dos botones de salir a dos toques de
+              distancia son uno de más. */}
         </View>
       </ScrollView>
 
@@ -415,7 +432,16 @@ const estilos = StyleSheet.create({
     ...sombra.s,
   },
 
-  filaPersona: { flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 10 },
+  filaPersona: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginTop: 10,
+    marginHorizontal: -8,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderRadius: radio.hoja,
+  },
   avatar: {
     width: 82,
     height: 82,
@@ -479,6 +505,14 @@ const estilos = StyleSheet.create({
   },
   desde: { fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia, marginTop: 4 },
   filaCiudad: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
+  editar: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 7 },
+  editarTexto: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: color.rojo700,
+    fontFamily: familia,
+  },
   ciudad: { fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia },
 
   contenido: { paddingHorizontal: espacio.gutter, paddingTop: 20, paddingBottom: 110 },
@@ -577,20 +611,24 @@ const estilos = StyleSheet.create({
   pastillaTibia: { backgroundColor: color.sand200 },
   pastillaTibiaTexto: { color: color.ink700 },
 
+  /* Blanco y no rojo: es secundaria. Con el fondo rosado pesaba más que las
+     cuatro filas de arriba, que son lo que se viene a hacer aquí. */
   comparte: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 13,
-    marginTop: 18,
+    marginTop: 14,
     padding: 15,
     borderRadius: radio.hoja,
-    backgroundColor: color.rojo50,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
   },
   cuadroRegalo: {
     width: 40,
     height: 40,
     borderRadius: radio.icono,
-    backgroundColor: color.rojo100,
+    backgroundColor: color.sand100,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -602,14 +640,7 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  comparteTexto: { fontSize: 12.5, lineHeight: 18, color: color.ink700, fontFamily: familia },
-  comparteAccion: {
-    fontSize: 13.5,
-    lineHeight: 19,
-    fontWeight: '600',
-    color: color.rojo700,
-    fontFamily: familia,
-  },
+  comparteTexto: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
 
   cerrar: {
     flexDirection: 'row',

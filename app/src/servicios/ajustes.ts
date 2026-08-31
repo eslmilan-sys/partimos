@@ -12,7 +12,8 @@
 import { NOMBRE_DEL_CANAL } from '@/dominio/tarifas';
 
 import { fuente } from './_fuente';
-import { estadoDeCedula } from './seguridad';
+import { estadoDeLicencia } from '@/dominio/licencia';
+import { estadoDeCedula, licenciaDe } from './seguridad';
 
 const demora = <T,>(valor: T, ms = 120): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(valor), ms));
@@ -42,6 +43,19 @@ export type Cuenta = {
    * `miCiudad` vino a arreglar.
    */
   ciudad: string | null;
+  /** Lo que se cuenta de ti, en tus palabras. `profiles.bio`. */
+  bio: string;
+  /** Verificado y nunca público: sirve para avisarte, no para enseñarte. */
+  telefono: string | null;
+  /**
+   * LA LICENCIA, al lado de la cédula.
+   *
+   * «Verificado» en el perfil significa las DOS (pedido del dueño el
+   * 31-08-2026: «its cédula and the licencia if they want to drive»). Con la
+   * cédula sola se puede viajar de pasajero; para llevar a alguien hace falta
+   * la licencia, y decir «verificado» sin ella promete lo que no se comprobó.
+   */
+  licenciaAlDia: boolean;
   cedula: string;
   /** La línea que cierra: lo que puedes hacer, o lo que te falta. */
   queTeFalta: string;
@@ -54,6 +68,7 @@ export async function cuenta(perfilId: string): Promise<Cuenta> {
   const rep = fuente.reputacion[perfilId];
   const carro = fuente.vehiculos.find((v) => v.owner_id === perfilId && v.is_active);
   const cedula = await estadoDeCedula(perfilId);
+  const licencia = estadoDeLicencia(await licenciaDe(perfilId));
 
   const recuperado = fuente.libro
     .filter((e) => e.profile_id === perfilId && e.account === 'driver_payable')
@@ -80,6 +95,9 @@ export async function cuenta(perfilId: string): Promise<Cuenta> {
       ? [carro.make, carro.model, carro.color?.toLowerCase()].filter(Boolean).join(' ')
       : null,
     metodo: NOMBRE_DEL_CANAL[p.preferred_pay_channel ?? 'yappy_app'],
+    bio: p.bio ?? '',
+    telefono: p.phone ?? null,
+    licenciaAlDia: licencia === 'al-dia' || licencia === 'por-vencer',
     ciudad: p.home_city_id
       ? (fuente.ciudades.find((c) => c.id === p.home_city_id)?.name ?? null)
       : null,
@@ -110,20 +128,43 @@ export type GrupoDeAjustes = {
  */
 export async function ajustes(perfilId: string): Promise<GrupoDeAjustes[]> {
   const cedula = await estadoDeCedula(perfilId);
+  const licencia = estadoDeLicencia(await licenciaDe(perfilId));
+  const perfil = fuente.perfiles.find((p) => p.id === perfilId);
 
   return demora([
     {
+      /* **«MIS VIAJES» SE FUE** (31-08-2026). Está en la barra de abajo, en
+         esta misma pantalla, y estaba además en el perfil: tres caminos al
+         mismo sitio. Ajustes es donde se CAMBIA algo, no un atajo más. */
       titulo: 'Viaje',
       filas: [
         { etiqueta: 'Mi carro', valor: fuente.vehiculos.find((v) => v.owner_id === perfilId)?.model ?? 'Ninguno', ruta: '/(conductor)/carro' },
-        { etiqueta: 'Mis viajes', ruta: '/(conductor)/misviajes' },
       ],
     },
     {
-      titulo: 'Dinero y cuenta',
+      titulo: 'Cuenta',
       filas: [
-        { etiqueta: 'Cédula', valor: cedula.puedePublicar ? 'Verificada' : cedula.etiqueta, ruta: '/(conductor)/cedula' },
-        { etiqueta: 'Ayuda y reembolsos', ruta: '/(ayuda)' },
+        { etiqueta: 'Mis datos', valor: 'Nombre, ciudad, teléfono', ruta: '/(cuenta)/editar' },
+        {
+          etiqueta: 'Verificación',
+          valor: cedula.puedePublicar && (licencia === 'al-dia' || licencia === 'por-vencer')
+            ? 'Cédula y licencia'
+            : cedula.puedePublicar
+              ? 'Falta la licencia'
+              : cedula.etiqueta,
+          ruta: '/(conductor)/cedula',
+        },
+        { etiqueta: 'Cómo se aporta', valor: NOMBRE_DEL_CANAL[perfil?.preferred_pay_channel ?? 'yappy_app'], ruta: '/(pasajero)/metodos' },
+      ],
+    },
+    {
+      /* **LA AYUDA VIVE AQUÍ** (31-08-2026). Estaba también en el perfil, y
+         el perfil se podó a cuatro filas de lo que es tuyo. Quien busca ayuda
+         mira en Ajustes: es donde la pone todo el mundo. */
+      titulo: 'Ayuda',
+      filas: [
+        { etiqueta: 'Cómo se hacen las cosas', ruta: '/(ayuda)' },
+        { etiqueta: 'Cómo te cuidamos', ruta: '/(ayuda)/seguridad' },
       ],
     },
     {

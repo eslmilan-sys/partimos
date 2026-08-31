@@ -134,3 +134,33 @@ function comoResena(r: Review): Resena {
     texto: r.comment ?? '',
   };
 }
+
+/**
+ * LO QUE SE PUEDE CAMBIAR DE TU PROPIO PERFIL.
+ *
+ * Sólo las columnas que existen de verdad: nombre, inicial del apellido y la
+ * presentación. La ciudad tiene su propio camino (`miCiudad.guardarMiCiudad`)
+ * porque además rescata ciudades que no estaban, y la foto no está aquí
+ * porque no hay dónde subirla todavía — una fila «Foto» que no guarda nada
+ * sería el control muerto de siempre.
+ *
+ * El apellido se guarda como INICIAL y con su punto: en público nunca se
+ * enseña entero, y quien escriba «Pérez» debe ver «P.» al volver.
+ */
+export async function guardarMiPerfil(
+  perfilId: string,
+  cambios: { nombre?: string; apellido?: string; bio?: string },
+): Promise<void> {
+  const limpio: { first_name?: string; last_initial?: string; bio?: string } = {};
+  if (cambios.nombre != null) limpio.first_name = cambios.nombre.trim();
+  if (cambios.apellido != null) limpio.last_initial = comoInicial(cambios.apellido);
+  if (cambios.bio != null) limpio.bio = cambios.bio.trim();
+  if (Object.keys(limpio).length === 0) return;
+  await fuente.actualizarPerfil(perfilId, limpio);
+}
+
+/** «Pérez» → «P.» · «P.» → «P.» · «» → «». */
+export function comoInicial(apellido: string): string {
+  const letra = apellido.trim().charAt(0).toUpperCase();
+  return letra ? `${letra}.` : '';
+}

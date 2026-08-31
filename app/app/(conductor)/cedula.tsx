@@ -40,8 +40,10 @@ import {
   LO_QUE_DA_LA_CEDULA,
   PASOS_DE_LA_CEDULA,
   estadoDeCedula,
+  licenciaDe,
   pedirVerificacion,
 } from '@/servicios/seguridad';
+import { type Licencia, comoSeDice, estadoDeLicencia } from '@/dominio/licencia';
 import { abrirVerificacion } from '@/servicios/identidad';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
@@ -50,7 +52,7 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { Atras } from '@/ui/iconos';
-import { familia, color, espacio, radio, sombra } from '@/ui/tokens';
+import { familia, color, espacio, radio, sombra, zonaDeToque } from '@/ui/tokens';
 
 /**
  * Quien se está haciendo conductor. Andrés la tiene verificada desde hace
@@ -94,6 +96,7 @@ export default function Cedula() {
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<EstadoDeCedula | null>(null);
   const [abriendo, setAbriendo] = useState(false);
+  const [licencia, setLicencia] = useState<Licencia>({ vence: null });
 
   const decir = useDecir();
 
@@ -176,16 +179,62 @@ export default function Cedula() {
     }
   }, [yo, abriendo, mirar, decir]);
 
+  /**
+   * EMPEZAR CON LA LICENCIA. Es el mismo camino que la cédula con otro
+   * documento; `didit-start` decide el flujo. En simulado no hay a quién
+   * llamar, así que se dice — mejor que un botón que parece hacer algo.
+   */
+  const empezarLicencia = useCallback(async () => {
+    if (abriendo) return;
+    setAbriendo(true);
+    try {
+      if (SIMULADO) {
+        decir('En la demo no hay proveedor al que llamar. Contra la base real se abre Didit.');
+        return;
+      }
+      const r = await abrirVerificacion('licencia');
+      if ('error' in r) {
+        decir(
+          r.error === 'ya-verificado'
+            ? 'Tu licencia ya está verificada.'
+            : 'No se pudo abrir la verificación de la licencia. Escríbenos desde Ayuda.',
+        );
+        return;
+      }
+      if (!r.ligada) {
+        decir('La verificación todavía no está conectada a las cuentas. Escríbenos desde Ayuda.');
+        return;
+      }
+      if (Platform.OS === 'web') window.location.assign(r.url);
+      else await Linking.openURL(r.url);
+    } catch {
+      decir('No se pudo abrir la verificación. Revisa la conexión.');
+    } finally {
+      setAbriendo(false);
+    }
+  }, [abriendo, decir]);
+
   useEffect(() => {
     // SOLO LEE. Antes escribía una fila `pending` al montarse: bastaba con
     // abrir la pantalla para «haber mandado la cédula», que es mentira.
     mirar();
   }, [mirar]);
 
+  /* LA LICENCIA VA AL LADO DE LA CÉDULA (31-08-2026, pedido del dueño: «its
+     cédula and the licencia if they want to drive»). Son dos verificaciones
+     distintas y hasta hoy esta pantalla sólo contaba una: quien la tenía en
+     regla se iba creyendo que ya podía llevar gente. */
+  useEffect(() => {
+    if (!yo) return;
+    licenciaDe(yo).then(setLicencia);
+  }, [yo]);
+
   if (!datos) return <Cargando />;
 
   const hasta = HASTA_DONDE[datos.estado];
   const insignia = TINTA_DEL_ESTADO[datos.estado];
+  const deLaLicencia = estadoDeLicencia(licencia);
+  const licenciaLista = deLaLicencia === 'al-dia' || deLaLicencia === 'por-vencer';
 
   return (
     <View style={estilos.pantalla}>
@@ -208,13 +257,19 @@ export default function Cedula() {
           >
             <Atras />
           </Pressable>
-          <Epigrafe tinta={color.campoTexto}>Verificación</Epigrafe>
+          <Epigrafe tinta={color.campoTexto}>Mi cuenta</Epigrafe>
         </View>
 
-        <Text style={estilos.titular}>
-          {'Tu cédula se'}
-          {'\n'}
-          <Text style={estilos.titularFuerte}>verifica fuera de aquí</Text>
+        {/* **UN TÍTULO NOMBRA LA PANTALLA, NO LA EXPLICA** (31-08-2026, visto
+            por el dueño: «why is this title like this, it doesn't mean to be
+            a title»). Decía «Tu cédula se verifica fuera de aquí» a 24 px y
+            en dos renglones: es una frase de cuerpo puesta de titular, y
+            además dejaba el rótulo de arriba diciendo «Verificación», que es
+            el nombre que le faltaba al título. Ahora el título es el nombre y
+            la frase baja a donde iba, debajo. */}
+        <Text style={estilos.titular}>Verificación</Text>
+        <Text style={estilos.bajada}>
+          Tu cédula y tu licencia se verifican fuera de aquí, con un proveedor certificado.
         </Text>
       </View>
 
@@ -280,6 +335,47 @@ export default function Cedula() {
           </Text>
         </View>
 
+        {/* LAS DOS VERIFICACIONES, UNA DEBAJO DE OTRA. Con la cédula se
+            viaja de pasajero; para llevar a alguien hace falta además la
+            licencia, y hasta hoy esta pantalla no la nombraba. */}
+        <View style={estilos.beneficios}>
+          <Epigrafe>Tus dos verificaciones</Epigrafe>
+          <View style={[estilos.documento, estilos.documentoPartido]}>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={estilos.documentoNombre}>Cédula</Text>
+              <Text style={estilos.documentoDetalle}>Para viajar, y para que confíen en ti</Text>
+            </View>
+            <View style={[estilos.insignia, { backgroundColor: insignia.fondo }]}>
+              <Text style={[estilos.insigniaTexto, { color: insignia.tinta }]}>
+                {datos.etiqueta}
+              </Text>
+            </View>
+          </View>
+          <View style={estilos.documento}>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={estilos.documentoNombre}>Licencia de conducir</Text>
+              <Text style={estilos.documentoDetalle}>
+                {comoSeDice(licencia) ?? 'Sólo hace falta si vas a manejar'}
+              </Text>
+            </View>
+            <View
+              style={[
+                estilos.insignia,
+                { backgroundColor: licenciaLista ? color.hechoFondo : color.sand200 },
+              ]}
+            >
+              <Text
+                style={[
+                  estilos.insigniaTexto,
+                  { color: licenciaLista ? color.hechoTinta : color.ink700 },
+                ]}
+              >
+                {licenciaLista ? 'Verificada' : 'Pendiente'}
+              </Text>
+            </View>
+          </View>
+        </View>
+
         <View style={estilos.beneficios}>
           <Epigrafe>Con la cédula verificada</Epigrafe>
           {LO_QUE_DA_LA_CEDULA.map((linea, i) => (
@@ -310,14 +406,43 @@ export default function Cedula() {
             </Boton>
             <Text style={estilos.notaPie}>Con buena luz y el documento completo en el marco.</Text>
           </>
+        ) : datos.estado === 'verificada' && !licenciaLista ? (
+          /* La cédula está: lo que falta es la licencia, y el botón lo dice.
+             Antes decía «Ver el estado otra vez» — mirar un estado que ya
+             está no lleva a ninguna parte. */
+          <>
+            <Boton desactivado={abriendo} alPulsar={empezarLicencia}>
+              {abriendo ? 'Abriendo…' : 'Verificar mi licencia'}
+            </Boton>
+            <Text style={estilos.notaPie}>
+              Con la cédula ya puedes viajar de pasajero. Para llevar gente falta la licencia.
+            </Text>
+          </>
+        ) : datos.estado === 'verificada' ? (
+          /**
+           * TODO HECHO: NINGÚN BOTÓN ROJO.
+           *
+           * «¿Por qué querría ver el estado otra vez?» (dueño, 31-08-2026).
+           * Tenía razón: el rojo es la acción de seguir adelante y aquí no
+           * hay nada hacia donde seguir. Queda la línea que dice que ya está
+           * y, en voz baja, la forma de volver a preguntar — que sirve el día
+           * que el proveedor tarde en contestar, no todos los demás.
+           */
+          <>
+            <Text style={estilos.listo}>Todo listo. Ya puedes publicar viajes.</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Volver a comprobar el estado"
+              onPress={mirarYDecir}
+              style={[{ alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 12 }, zonaDeToque]}
+            >
+              <Text style={estilos.volverAMirar}>Volver a comprobar</Text>
+            </Pressable>
+          </>
         ) : (
           <>
             <Boton alPulsar={mirarYDecir}>Ver el estado otra vez</Boton>
-            <Text style={estilos.notaPie}>
-              {datos.estado === 'verificada'
-                ? 'Ya puedes publicar viajes.'
-                : 'Te avisamos en cuanto llegue el resultado.'}
-            </Text>
+            <Text style={estilos.notaPie}>Te avisamos en cuanto llegue el resultado.</Text>
           </>
         )}
       </View>
@@ -372,16 +497,48 @@ const estilos = StyleSheet.create({
      de calcar una maqueta píxel a píxel: un cuerpo de 27 con interlínea 30
      aprieta las dos líneas hasta tocarse, y ese tracking cierra las letras.
      La escala del sistema es 26/31. */
+  bajada: {
+    fontSize: 13.5,
+    lineHeight: 19,
+    color: color.campoTexto,
+    fontFamily: familia,
+    marginTop: 6,
+  },
+  documento: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
+  documentoPartido: { borderBottomWidth: 1, borderBottomColor: color.bordeSutil },
+  documentoNombre: {
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: '600',
+    letterSpacing: -0.24,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  documentoDetalle: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
+  listo: {
+    textAlign: 'center',
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: '600',
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  volverAMirar: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: color.azul700,
+    fontFamily: familia,
+  },
   titular: {
     fontSize: 26,
     lineHeight: 31,
     letterSpacing: -0.9,
     fontWeight: '700',
-    color: color.ink400,
+    color: color.ink900,
     marginTop: 14,
     fontFamily: familia,
   },
-  titularFuerte: { color: color.ink900 },
 
   /* Sin `flex: 1` ni `overflow: 'hidden'`: quien desplaza es el ScrollView.
      El hueco de abajo deja sitio al pie fijo. */

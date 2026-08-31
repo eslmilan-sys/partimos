@@ -865,3 +865,55 @@ pas d'un `verde50` inventé pour l'occasion : un deuxième vert pour le même
 L'argent — « Lo que has recuperado » — était une carte à part au-dessus de la
 liste ; il est maintenant **une ligne avec son chiffre à droite**, à la place
 qu'occupait le CO₂. Même destination, un renglón au lieu d'une carte.
+
+### Le profil, deuxième passe : l'inventaire avant le dessin — 31-08-2026
+
+Le propriétaire, après avoir vu la maquette appliquée : *« le vrai problème
+c'est l'architecture de l'information, pas le visuel. Trop d'entrées qui
+représentent le même concept, et certaines sont déjà dans la barre du bas. »*
+Il avait raison, et c'est le diagnostic qui a guidé toute la passe.
+
+**Le profil est un centre de contrôle personnel, pas un second menu.**
+Sept lignes sont devenues **quatre** : Verificación · Mi carro · Aportes y
+pagos · Seguridad. Ce qui est parti, et où :
+
+| Ligne | Décision | Où |
+|---|---|---|
+| Mis viajes | supprimée | l'onglet **Viajes** de la barre du bas |
+| Lo que te han aportado | fusionnée | **Aportes y pagos** |
+| Cómo se aporta | fusionnée | dedans, en bas de l'écran |
+| Ayuda y contacto | déplacée | **Ajustes → Ayuda** |
+| Cerrar sesión | supprimée | elle était déjà dans Ajustes |
+
+**Nouveau : `(cuenta)/editar`** — s'ouvre en touchant la cabecera du profil,
+pas par une ligne de plus. Nom, initiale du nom de famille, présentation,
+ville ; le téléphone se montre et ne se touche pas (il est vérifié). Pas de
+champ photo : il n'y a pas encore où la téléverser, et une ligne qui ne
+garde rien est un contrôle mort.
+
+**« Verificado » veut dire cédula ET licence.** Avec la cédula seule on
+voyage comme passager ; pour emmener quelqu'un il faut la licence. `Cuenta`
+porte `licenciaAlDia`, et `(conductor)/cedula` montre les **deux** états.
+
+**L'écran de la cédula** : son titre était une phrase — « Tu cédula se
+verifica fuera de aquí » — mise en 26 px sur deux lignes. Un titre nomme
+l'écran ; la phrase est descendue en sous-titre et le titre est
+« Verificación ». Et **plus de bouton rouge quand tout est fait** : « Ver el
+estado otra vez » n'allait nulle part (« why would I want to see status
+again? »). Quand la cédula est là mais pas la licence, le bouton dit
+« Verificar mi licencia ».
+
+**Ajustes** : « Lo que cambia lo que ves al buscar » ne voulait rien dire —
+une phrase construite à l'envers qu'il faut lire deux fois pour ne pas la
+comprendre. Trois groupes deviennent quatre : Viaje · Cuenta · Ayuda ·
+déconnexion.
+
+**Et le partage.** « Invita y gana » a disparu pour de bon : il n'y a pas de
+programme de parrainage, donc on n'en promet pas un. C'est **« Invita a tus
+amigos »**, sans fond de couleur et tout en bas — une action de croissance
+secondaire, pas la conclusion du profil.
+
+Reste ouvert, et c'est une bonne idée du propriétaire : **le profil devrait
+s'adapter au rôle**. « Mi carro » ne dit rien à quelqu'un qui ne fait que
+réserver des places. Aujourd'hui la ligne est toujours là, avec « Añadir mi
+carro » quand il n'y en a pas.

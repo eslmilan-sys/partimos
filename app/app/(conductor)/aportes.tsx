@@ -51,7 +51,7 @@ import { CampoRojo, Brillo } from '@/ui/CampoRojo';
 import { Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { mesAbrev, mesLargo, numeroDeDia } from '@/ui/fechas';
-import { Atras } from '@/ui/iconos';
+import { Atras, Avanza } from '@/ui/iconos';
 import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
@@ -111,8 +111,8 @@ export default function AportesPantalla() {
         </View>
 
         <Text style={estilos.titular}>
-          {'Te han '}
-          <Text style={estilos.titularFuerte}>aportado</Text>
+          {'Aportes y '}
+          <Text style={estilos.titularFuerte}>pagos</Text>
         </Text>
       </View>
 
@@ -371,6 +371,26 @@ const estilos = StyleSheet.create({
   /* La primera fila no lleva raya: una raya justo debajo del epígrafe pinta
      un renglón vacío entre el rótulo y su lista. */
   primeraFila: { marginTop: 4, borderTopWidth: 0 },
+  mas: {
+    backgroundColor: color.blanco,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    marginTop: 11,
+    paddingHorizontal: 18,
+  },
+  filaMas: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52 },
+  filaMasPartida: { borderBottomWidth: 1, borderBottomColor: color.bordeSutil },
+  pulsadaMas: { backgroundColor: color.lavado },
+  filaMasEtiqueta: {
+    flex: 1,
+    fontSize: 14.5,
+    lineHeight: 21,
+    fontWeight: '500',
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  filaMasValor: { fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia },
   sinViajes: {
     marginTop: 8,
     fontSize: 13.5,
