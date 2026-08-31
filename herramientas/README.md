@@ -1,6 +1,6 @@
 # Sondes
 
-Huit scripts qui **mesurent** l'app dans un vrai navigateur, plus un qui
+Neuf scripts qui **mesurent** l'app dans un vrai navigateur, plus un qui
 répare la police. Ils ne remplacent pas de regarder l'écran : ils trouvent ce
 que l'œil ne voit pas.
 
@@ -56,13 +56,14 @@ versionné.
 | `publicar-tiros.mjs` | une capture par étape de `(conductor)/publicar` |
 | `publicar-hojas.mjs` | le sélecteur d'heure ouvert, et les sièges qu'on retire |
 | `publicar-auditar.mjs` | `auditar.mjs`, mais aux huit étapes de l'assistant |
+| `repaso-tiro.mjs` | l'écran de relecture, avec un commentaire écrit |
 
 **Pourquoi trois de plus pour un seul écran.** `auditar.mjs` charge une route
 et mesure ce qu'il voit ; les étapes 2 à 8 de `publicar` n'existent qu'après
 des clics, donc elles n'étaient mesurées par personne. Deux cibles sous
 44 px y dormaient.
 
-**Un faux positif connu** : au pas `carro`, le contraste des chiffres écrits
+**Le faux positif qui reste** : au pas `carro`, le contraste des chiffres écrits
 dans les sièges sort à 1:1. Le fond du texte est un `<rect>` SVG **derrière**
 le bouton, pas un parent CSS ; la sonde remonte les parents et trouve le
 blanc de la carte. En vrai c'est du blanc sur `ink900`, à 15:1.

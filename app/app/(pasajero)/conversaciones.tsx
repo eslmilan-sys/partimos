@@ -19,8 +19,6 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 
 import { useRouter } from 'expo-router';
 
-import { useVolver } from '@/ui/salidas';
-
 import { type HiloDelViaje, hiloDelViaje, hilosDePregunta } from '@/servicios/mensajes';
 import { type PuestoMio, misViajes } from '@/servicios/panel';
 import { useMiIdOEntrar } from '@/servicios/sesion';
@@ -32,7 +30,7 @@ import { Avatar } from '@/ui/controles';
 import { Chip } from '@/ui/piezas';
 import { tabular } from '@/ui/dinero';
 import { diaAbrev, esHoy, hora } from '@/ui/fechas';
-import { Atras, Lupa, Marca, Visto } from '@/ui/iconos';
+import { Lupa, Marca, Visto } from '@/ui/iconos';
 import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
@@ -59,7 +57,6 @@ type Filtro = 'todos' | 'sinLeer';
 
 export default function Conversaciones() {
   const router = useRouter();
-  const volver = useVolver();
   const yo = useMiIdOEntrar(YO_DEL_RECORRIDO);
   const [filas, setFilas] = useState<Fila[] | null>(null);
   const [busca, setBusca] = useState('');
@@ -119,6 +116,12 @@ export default function Conversaciones() {
   if (!filas) return <Cargando altura={206} tarjetas={4} />;
 
   const sinLeer = filas.filter(sinLeerDe).length;
+  /* Buscar entre cinco hilos es buscar; entre dos es leerlos. */
+  const hayBuscador = filas.length >= 5;
+  const hayFiltros = sinLeer > 0;
+  /* La fila de Partimos no es de nadie y nunca está sin leer: filtrando por
+     «sin leer» no tiene nada que hacer ahí, y buscando «Julien» tampoco. */
+  const seVeLoNuestro = filtro === 'todos' && busca.trim() === '';
 
   return (
     <View style={estilos.pantalla}>
@@ -132,61 +135,74 @@ export default function Conversaciones() {
         showsVerticalScrollIndicator={false}
       >
 
-      <CampoRojo altura={214} motivo="hibisco" />
+      <CampoRojo altura={hayFiltros ? 214 : 176} motivo="hibisco" />
 
       <View style={estilos.cabecera}>
-        <View style={estilos.filaSuperiorCampo}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Atrás"
-            onPress={() => volver()}
-            style={estilos.circulo}
-          >
-            <Atras />
-          </Pressable>
-          <Text style={estilos.epigrafeCampo}>
-            {sinLeer === 0 ? 'Todo leído' : sinLeer === 1 ? '1 sin leer' : `${sinLeer} sin leer`}
-          </Text>
-        </View>
+        {/* **SIN BOTÓN ATRÁS Y SIN EPÍGRAFE** (30-08-2026, visto por el
+            dueño: «its weird why a back button?»). Dos errores en una fila
+            de 40 px:
+
+            1. Mensajes es una PESTAÑA RAÍZ — está en la barra de abajo, al
+               lado de Buscar y Perfil. Una raíz no tiene «atrás»: no hay
+               nada detrás de ella, y `router.back()` devuelve a la última
+               pantalla que se mirara, que puede ser cualquiera. Sus dos
+               hermanas, Inicio y Panel, nunca lo tuvieron.
+            2. El epígrafe decía «TODO LEÍDO» — un ESTADO donde el sistema
+               pone un SITIO («CONDUCTOR · ANDRÉS M.»), y encima el mismo
+               dato que la pastilla «Sin leer 0» de dos dedos más abajo. Un
+               hecho dicho dos veces en la misma pantalla. */}
         <Text style={estilos.titular}>Mensajes</Text>
 
-        {/* El buscador, sobre el campo: a los seis hilos ya no te acuerdas de
-            cuál era, y desplazar una lista para encontrar un nombre no es
-            buscar. */}
-        <View style={estilos.buscador}>
-          <Lupa tamano={18} tinta={color.ink600} />
-          <TextInput
-            value={busca}
-            onChangeText={setBusca}
-            placeholder="Buscar por nombre o destino"
-            placeholderTextColor={color.ink600}
-            accessibilityLabel="Buscar una conversación"
-            style={estilos.entrada}
-          />
-        </View>
+        {/* EL BUSCADOR APARECE CUANDO HAY QUE BUSCAR. Su propio comentario lo
+            decía —«a los SEIS hilos ya no te acuerdas de cuál era»— y salía
+            igual con uno: un campo de 52 px de alto para elegir entre dos
+            filas que caben enteras en pantalla. */}
+        {hayBuscador ? (
+          <View style={estilos.buscador}>
+            <Lupa tamano={18} tinta={color.ink600} />
+            <TextInput
+              value={busca}
+              onChangeText={setBusca}
+              placeholder="Buscar por nombre o destino"
+              placeholderTextColor={color.ink600}
+              accessibilityLabel="Buscar una conversación"
+              style={estilos.entrada}
+            />
+          </View>
+        ) : null}
 
-        {/* **Los filtros van aquí, no en el cuerpo.** Estaban dentro del
-            `ScrollView`, que empieza donde acaba la cabecera: la mitad de
-            arriba de cada chip caía sobre el rojo y la de abajo sobre la
-            arena, partidos por el borde del campo. Puestos en la cabecera se
-            apoyan enteros sobre el rojo, que es lo que hace la fila de
-            filtros de cualquier bandeja. */}
-        <View style={estilos.filtros}>
-          <Chip
-            activo={filtro === 'todos'}
-            cuenta={filas.length}
-            alPulsar={() => setFiltro('todos')}
-          >
-            Todos
-          </Chip>
-          <Chip
-            activo={filtro === 'sinLeer'}
-            cuenta={sinLeer}
-            alPulsar={() => setFiltro('sinLeer')}
-          >
-            Sin leer
-          </Chip>
-        </View>
+        {/* **LOS FILTROS SÓLO EXISTEN SI FILTRAN ALGO.** Se enseñaban siempre,
+            y con la bandeja al día quedaba un «Sin leer 0» pulsable que sólo
+            podía llevar a una lista vacía — un callejón sin salida dibujado
+            como un control. Con todo leído no hay nada que separar; con algo
+            sin leer, los dos chips valen.
+
+            Van en la cabecera y no en el cuerpo: dentro del `ScrollView`, que
+            empieza donde acaba la cabecera, la mitad de arriba de cada chip
+            caía sobre el rojo y la de abajo sobre la arena. */}
+        {hayFiltros ? (
+          <View style={estilos.filtros}>
+            {/* La cuenta incluye la fila de Partimos, que es una fila más de
+                la lista aunque no salga de `messages`. «Todos 1» con DOS
+                filas debajo es el mismo defecto que ya se corrigió en la
+                chincheta el 29-08: un número que no cuadra con lo que se ve
+                al lado le quita el crédito al que sí es cierto. */}
+            <Chip
+              activo={filtro === 'todos'}
+              cuenta={filas.length + 1}
+              alPulsar={() => setFiltro('todos')}
+            >
+              Todos
+            </Chip>
+            <Chip
+              activo={filtro === 'sinLeer'}
+              cuenta={sinLeer}
+              alPulsar={() => setFiltro('sinLeer')}
+            >
+              Sin leer
+            </Chip>
+          </View>
+        ) : null}
       </View>
 
       <View style={estilos.cuerpo}>
@@ -202,23 +218,24 @@ export default function Conversaciones() {
             que no cuadra con lo que se ve al lado le quita el crédito a los
             otros dos, que sí son ciertos (29-08-2026).
             Se queda fijo arriba, sin chincheta y diciendo lo que es. */}
+        {seVeLoNuestro ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Mensaje de Partimos: bienvenido a bordo"
           onPress={() => router.push('/(pasajero)/partimos')}
-          style={({ pressed }) => [estilos.fila, pressed && estilos.pulsada]}
+          style={({ pressed }) => [estilos.fila, estilos.filaNuestra, pressed && estilos.pulsada]}
         >
           <View style={estilos.marcaCuadro}>
             <Marca tamano={20} tinta={color.rojo600} />
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
-            <View style={estilos.filaSuperior}>
-              <Text style={estilos.nombre} numberOfLines={1}>
-                Partimos
-              </Text>
-              <Text style={estilos.cuando}>ahora</Text>
-            </View>
-            <Text style={estilos.ultimo} numberOfLines={1}>
+            {/* SIN HORA. Decía «ahora», y no era ahora: es un texto fijo que
+                lleva ahí desde que se abrió la cuenta. Una hora falsa en una
+                bandeja es de las mentiras más baratas de cometer. */}
+            <Text style={estilos.nombre} numberOfLines={1}>
+              Partimos
+            </Text>
+            <Text style={[estilos.ultimo, estilos.ultimoNuestro]} numberOfLines={1}>
               Bienvenido a bordo. Las tres cosas que puedes hacer desde ya.
             </Text>
             <View style={estilos.filaContexto}>
@@ -228,6 +245,7 @@ export default function Conversaciones() {
             </View>
           </View>
         </Pressable>
+        ) : null}
 
         {visibles.map(({ clave, hilo, destino, cuando, params, soloPregunta }) => {
           const ultimo = hilo.mensajes[hilo.mensajes.length - 1];
@@ -305,10 +323,16 @@ export default function Conversaciones() {
           </View>
         ) : null}
 
-        <Text style={estilos.pieTexto}>
-          Puedes preguntar antes de pedir puesto: preguntar no ocupa nada. Los chats se cierran
-          48 h después de la llegada, y todo lo que se acuerde aquí queda por escrito.
-        </Text>
+        {/* Una línea, no tres, y sólo cuando hay hilos: la explicación de por
+            qué un chat viejo deja de responder sólo le importa a quien tiene
+            chats. Lo de «preguntar no ocupa nada» ya se dice donde se
+            pregunta, en la ficha del viaje. */}
+        {visibles.length > 0 ? (
+          <Text style={estilos.pieTexto}>
+            Los chats se cierran 48 h después de la llegada. Lo que se acuerde aquí queda por
+            escrito.
+          </Text>
+        ) : null}
       </View>
       </ScrollView>
 
@@ -337,26 +361,18 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 4, paddingBottom: 18 },
-  filaSuperiorCampo: { flexDirection: 'row', alignItems: 'center', gap: 13 },
-  circulo: {
-    width: 40,
-    height: 40,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.campoControl,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  epigrafeCampo: {
-    fontSize: 12.5,
-    lineHeight: 17.4,
+  /* 18 arriba y no 4: sus hermanas cuelgan el título de una fila de epígrafe
+     («CONDUCTOR · ANDRÉS M.») que aquí no dice nada — una bandeja no tiene
+     rol ni dueño que anunciar—, así que el aire lo pone el relleno. */
+  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 18, paddingBottom: 18 },
+  titular: {
+    fontSize: 22,
+    lineHeight: 26,
+    letterSpacing: -0.77,
     fontWeight: '600',
-    letterSpacing: 12 * TRACK_MICRO,
-    textTransform: 'uppercase',
-    color: color.campoTexto,
+    color: color.ink900,
     fontFamily: familia,
   },
-  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 12, },
 
   buscador: {
     flexDirection: 'row',
@@ -435,6 +451,15 @@ const estilos = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.bordeSutil,
   },
+  /* En arena y no en blanco: es un aviso nuestro, no una conversación.
+     Con el mismo blanco que las demás se leía como una persona más — con
+     avatar, hora y previsualización — hasta la línea que dice que ahí no
+     contestamos. */
+  filaNuestra: { backgroundColor: color.sand200, borderColor: 'transparent' },
+  /* `ink500` daba 4,39:1 sobre el arena de esta fila —pasaba sobre blanco y
+     no aquí—, por debajo del 4,5 que pide la WCAG a 13,5 px. Medido con
+     `herramientas/auditar.mjs`. */
+  ultimoNuestro: { color: color.ink600 },
   pulsada: { backgroundColor: color.sand100, borderColor: color.bordePorDefecto },
   marcaCuadro: {
     width: 44,
@@ -475,7 +500,10 @@ const estilos = StyleSheet.create({
     fontSize: 10.5,
     lineHeight: 15,
     fontWeight: '600',
-    color: color.ink500,
+    /* `ink500` sobre el lavado de la pastilla ronda el 4,5:1 justo — el
+       mínimo que pide la WCAG a 10,5 px, sin margen. `ink700` lo deja en
+       ~7:1 y sigue siendo una etiqueta llana, no una alarma. */
+    color: color.ink700,
     fontFamily: familia,
   },
   contexto: { flex: 1, fontSize: 11.5, lineHeight: 17, color: color.ink600, fontFamily: familia },

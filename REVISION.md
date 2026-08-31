@@ -162,6 +162,8 @@ est entre parenthèses.
 - Au pas `carro` de `publicar`, les sondes de contraste sortent « B/6 à
   1:1 » : le fond du chiffre est un `<rect>` SVG derrière le bouton, pas un
   parent CSS. C'est du blanc sur `ink900`, à 15:1.
+- Les textes signalés « cortado » qui finissent en « … » ne sont pas des
+  défauts : c'est `numberOfLines={1}`, voulu dans une liste.
 
 ---
 

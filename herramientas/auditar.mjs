@@ -23,8 +23,27 @@ for (const r of RUTAS) {
       const lum = (c) => { const m = c.match(/[\d.]+/g).map(Number).slice(0,3)
         .map(v => { v/=255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); });
         return .2126*m[0] + .7152*m[1] + .0722*m[2]; };
-      const fondoDe = (e) => { let n = e; while (n) { const bg = getComputedStyle(n).backgroundColor;
-        if (bg && !/rgba\(0, 0, 0, 0\)|transparent/.test(bg)) return bg; n = n.parentElement; } return 'rgb(255,255,255)'; };
+      /* Les fonds translucides sont COMPOSÉS sur ce qu'il y a derrière.
+         Sans ça, une pastille en `rgba(10,39,49,.06)` — un lavis d'encre à
+         6 % qui rend un blanc cassé — était lue comme un fond presque noir,
+         et chaque texte posé dessus ressortait en faux positif. C'est la
+         limite que le README annonçait ; elle n'a plus lieu d'être. */
+      const enRGBA = (c) => { const m = (c || '').match(/[\d.]+/g); return m ? m.map(Number) : null; };
+      const fondoDe = (e) => {
+        const capas = [];
+        let n = e;
+        while (n) {
+          const v = enRGBA(getComputedStyle(n).backgroundColor);
+          if (v) { const a = v.length > 3 ? v[3] : 1; if (a > 0) { capas.push([v[0], v[1], v[2], a]); if (a >= 1) break; } }
+          n = n.parentElement;
+        }
+        // Du fond vers l'avant : chaque couche se pose sur le résultat précédent.
+        let [r, g, b] = [255, 255, 255];
+        for (const [cr, cg, cb, ca] of capas.reverse()) {
+          r = cr * ca + r * (1 - ca); g = cg * ca + g * (1 - ca); b = cb * ca + b * (1 - ca);
+        }
+        return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+      };
       for (const e of document.querySelectorAll('button,[role=button]')) {
         const b = e.getBoundingClientRect();
         if (b.width > 0 && (b.height < 44 || b.width < 44)) {
