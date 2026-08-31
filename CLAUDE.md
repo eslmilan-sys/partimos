@@ -780,3 +780,19 @@ parties — un document qu'on lit de haut en bas avant de le signer — et
 l'argent y est dit **comme un partage** : entre combien, combien chacun.
 Deux chiffres côte à côte, celui du conducteur plus gros que celui des
 passagers. La question ne peut plus se poser.
+
+### « Abordar · teclear los códigos » était écrit du mauvais siège
+
+*Abordar*, c'est ce que fait le passager. Celui qui lit le panneau ne monte
+dans rien : il ramasse des gens et tape ce qu'ils lui montrent. Et la ligne
+sortait **toujours**, même sur un trajet où personne n'avait réservé — elle
+menait à un écran qui répondait « El viaje está cerrado. Cada aporte ya salió
+hacia ti » sur un trajet où personne n'est jamais monté.
+
+`ViajePublicado` porte maintenant `porSubir`, `porBajar` et `aBordo`
+(`servicios/panel.ts`, une seule fonction pour les deux sources), et la ligne
+dit le moment où on est : **« ¿Recogiste a alguien? · Teclea el código que te
+enseña · falta 1 de 3 »**, puis **« ¿Alguien se bajó? »** quand tout le monde
+est monté, puis rien quand le trajet est fermé. Elle est aussi sur les
+trajets déjà partis, ce que le commentaire de « Ya salieron » promettait
+depuis le 27-08 sans que ce soit vrai.

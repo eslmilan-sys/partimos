@@ -218,20 +218,69 @@ function Hoy({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
         </Pressable>
       ) : null}
 
-      {/* Subir a la gente: la pantalla de los dos códigos. Existía y no se
-          llegaba a ella desde ningún sitio de la app. */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Abordar: teclear los códigos"
-        onPress={() =>
-          router.push({ pathname: '/(conductor)/abordaje', params: { viaje: viaje.id } })
-        }
-        style={estilos.abordar}
-      >
-        <Text style={estilos.abordarTexto}>Abordar · teclear los códigos</Text>
-        <Galon />
-      </Pressable>
+      <Codigos viaje={viaje} router={router} />
     </View>
+  );
+}
+
+/**
+ * LOS CÓDIGOS, DICHOS DESDE EL LADO DE QUIEN MANEJA.
+ *
+ * Decía **«Abordar · teclear los códigos»** (visto por el dueño el
+ * 30-08-2026: «they are going to board and you are the chauffeur»). Dos
+ * cosas mal en cuatro palabras:
+ *
+ * 1. *Abordar* es lo que hace el pasajero. Quien lee esta pantalla no aborda
+ *    nada: recoge gente y teclea lo que ellos le enseñan. El rótulo estaba
+ *    escrito desde el asiento equivocado.
+ * 2. *Los códigos*, en plural y sin dueño, no dice de quién ni para qué. Son
+ *    cuatro dígitos que la persona enseña en su teléfono al subirse, y otros
+ *    cuatro al bajarse.
+ *
+ * Y salía **siempre**, también en un viaje donde no había reservado nadie:
+ * llevaba a una pantalla que contestaba «El viaje está cerrado. Cada aporte
+ * ya salió hacia ti» sobre un viaje al que no se subió nunca nadie. Ahora la
+ * fila sólo existe cuando hay alguien a bordo, y dice el momento en el que
+ * está: recoger, o cerrar al bajar.
+ */
+function Codigos({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
+  // Sin nadie con el puesto asegurado no hay ningún código que teclear.
+  if (viaje.aBordo === 0) return null;
+  // Todos subieron y todos bajaron: el viaje cerró, no queda nada que hacer.
+  if (viaje.porSubir === 0 && viaje.porBajar === 0) return null;
+
+  const subiendo = viaje.porSubir > 0;
+  const cuantos = subiendo ? viaje.porSubir : viaje.porBajar;
+  /* «Falta 1», no «faltan 1». El plural de una cuenta se acuerda con la
+     cuenta, y este renglón sale con un 1 en la última persona que sube. */
+  const faltan = cuantos === 1 ? 'Falta' : 'Faltan';
+  const quedan = cuantos === 1 ? 'Queda' : 'Quedan';
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={
+        subiendo
+          ? `Recogiste a alguien: teclear su código. ${faltan} ${cuantos} de ${viaje.aBordo}`
+          : `Alguien se bajó: teclear su código de llegada. ${quedan} ${cuantos}`
+      }
+      onPress={() =>
+        router.push({ pathname: '/(conductor)/abordaje', params: { viaje: viaje.id } })
+      }
+      style={estilos.codigos}
+    >
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={estilos.codigosTitulo}>
+          {subiendo ? '¿Recogiste a alguien?' : '¿Alguien se bajó?'}
+        </Text>
+        <Text style={estilos.codigosPie}>
+          {subiendo
+            ? `Teclea el código que te enseña · ${faltan.toLowerCase()} ${cuantos} de ${viaje.aBordo}`
+            : `Su aporte sale hacia ti al teclear el código de llegada · ${quedan.toLowerCase()} ${cuantos}`}
+        </Text>
+      </View>
+      <Galon />
+    </Pressable>
   );
 }
 
@@ -291,6 +340,12 @@ function Proximo({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
           <Text style={estilos.enlaceFuerte}>Compartir el viaje</Text>
         </Pressable>
       </View>
+
+      {/* Y aquí también. El comentario de «Ya salieron» decía «desde aquí se
+          teclean los códigos de quien todavía no ha subido» y era falso: la
+          fila sólo existía en la tarjeta de hoy, así que un viaje que salió
+          con gente a medio marcar no tenía por dónde cerrarse. */}
+      <Codigos viaje={viaje} router={router} />
     </View>
   );
 }
@@ -476,11 +531,14 @@ const estilos = StyleSheet.create({
   },
 
   // La única caja roja de la pantalla, y por eso es la que se mira primero.
-  abordar: {
+  /* Dos renglones y no uno: el rótulo pregunta, el pie dice qué teclear y
+     cuánto queda. Sin altura fija — el pie envuelve en un teléfono estrecho
+     y una caja de 54 lo habría cortado. */
+  codigos: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    height: 54,
+    paddingVertical: 13,
     paddingHorizontal: 15,
     marginTop: 12,
     borderRadius: radio.l,
@@ -488,12 +546,18 @@ const estilos = StyleSheet.create({
     borderColor: color.azul200,
     backgroundColor: color.azul50,
   },
-  abordarTexto: {
-    flex: 1,
+  codigosTitulo: {
     fontSize: 14,
     lineHeight: 21,
     fontWeight: '600',
+    letterSpacing: -0.2175,
     color: color.azul700,
+    fontFamily: familia,
+  },
+  codigosPie: {
+    fontSize: 12.5,
+    lineHeight: 18.125,
+    color: color.ink600,
     fontFamily: familia,
   },
   solicitudes: {

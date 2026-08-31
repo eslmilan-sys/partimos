@@ -37,6 +37,21 @@ export type ViajePublicado = {
   /** Solicitudes sin responder, con la que expira antes. */
   solicitudes: number;
   expiraLaPrimera: string | null;
+  /**
+   * EN QUÉ MOMENTO DEL VIAJE VA LA GENTE — para que el panel diga lo que el
+   * conductor está haciendo AHORA y no un rótulo fijo.
+   *
+   * `panel` ofrecía «Abordar · teclear los códigos» en todos los viajes,
+   * también en uno donde no había reservado nadie: llevaba a una pantalla que
+   * respondía «El viaje está cerrado. Cada aporte ya salió hacia ti», sobre un
+   * viaje al que no se ha subido nadie nunca (visto por el dueño el
+   * 30-08-2026). Con estas dos cuentas la fila sabe si toca subir gente, si
+   * toca cerrar, o si no hay nada que teclear y no debe salir.
+   */
+  porSubir: number;
+  porBajar: number;
+  /** Personas con el puesto asegurado: las que de verdad van a bordo. */
+  aBordo: number;
   /** Se puede editar mientras nadie haya pagado. */
   editable: boolean;
   /** La hora de salida ya pasó: el viaje está en marcha o terminado. */
@@ -205,6 +220,12 @@ function comoPublicado(v: ViajeFila): ViajePublicado {
   const vendidos = v.seats_offered - puestosLibresDe(v.id);
   const yaSalio = new Date(v.departure_at).getTime() < Date.now();
 
+  /* Los códigos sólo existen para quien tiene el puesto asegurado: una
+     solicitud pendiente no sube a nadie al carro. */
+  const aseguradas = reservas.filter(
+    (r) => r.status === 'confirmed' || r.status === 'completed',
+  );
+
   return {
     id: v.id,
     cuando: v.departure_at,
@@ -219,6 +240,9 @@ function comoPublicado(v: ViajeFila): ViajePublicado {
     aporteCentavos: v.price_cents,
     solicitudes: pendientes.length,
     expiraLaPrimera: pendientes[0]?.expires_at ?? null,
+    porSubir: aseguradas.filter((r) => r.boarded_at == null).length,
+    porBajar: aseguradas.filter((r) => r.boarded_at != null && r.released_at == null).length,
+    aBordo: aseguradas.length,
     editable: reservas.every((r) => r.status !== 'confirmed'),
     yaSalio,
     sePuedeEditar: reservas.every((r) => r.status !== 'confirmed') && !yaSalio,
