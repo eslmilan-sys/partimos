@@ -38,9 +38,11 @@ test('el tope de la ruta a Chitré es 10 $', () => {
   assert.equal(topeDeRuta(costoDelViaje(CHITRE)), 1000);
 });
 
-test('el aporte por defecto con 3 puestos es 8 $', () => {
+test('el aporte por defecto con 3 puestos es 7 $', () => {
   const costo = costoDelViaje(CHITRE);
-  assert.equal(aporteCalculado(costo, 3, topeDeRuta(costo)), 800);
+  // 29,19 entre cuatro ocupantes son 7,29: al dólar de ABAJO, 7. Los 29
+  // centavos que no se dividen los pone quien maneja. Ver `aDolarAbajo`.
+  assert.equal(aporteCalculado(costo, 3, topeDeRuta(costo)), 700);
 });
 
 test('el aporte baja al añadir puestos y nunca pasa del tope', () => {
@@ -48,21 +50,63 @@ test('el aporte baja al añadir puestos y nunca pasa del tope', () => {
   const tope = topeDeRuta(costo);
   assert.deepEqual(
     [1, 2, 3, 4].map((p) => aporteCalculado(costo, p, tope)),
-    [1000, 1000, 800, 600],
+    [1000, 900, 700, 500],
   );
 });
 
-test('el aporte nunca baja del suelo de 3 $', () => {
-  const coronado = costoDelViaje({ distanciaKm: 85, peajeCentavos: 200, consumoL100km: 8 });
-  assert.equal(aporteCalculado(coronado, 4, topeDeRuta(coronado)), 300);
+/**
+ * LA PREGUNTA DEL DUEÑO, 30-08-2026, convertida en invariante:
+ * «si todos ponen 7, ¿por qué yo pago 4,86?».
+ *
+ * Con el redondeo hacia arriba que había, lo que le quedaba al conductor caía
+ * SIEMPRE por debajo de lo que ponía cada pasajero — no era un caso raro,
+ * era la aritmética. Esto lo barre: cualquier costo, cualquier número de
+ * puestos.
+ */
+test('el conductor nunca pone menos que un pasajero', () => {
+  for (let costo = 500; costo <= 9000; costo += 37) {
+    const tope = topeDeRuta(costo);
+    for (let puestos = 1; puestos <= 4; puestos++) {
+      const aporte = aporteCalculado(costo, puestos, tope);
+      const suyo = costo - loQueRecuperas(aporte, puestos);
+      assert.ok(
+        suyo >= aporte,
+        `con ${costo} y ${puestos} puestos: cada pasajero pone ${aporte} y el conductor ${suyo}`,
+      );
+    }
+  }
 });
 
-test('con el carro lleno el conductor recupera 24 $ de 29,19 $ y pone 5,19 $', () => {
+/**
+ * R1 POR LA PUERTA DE ATRÁS. El tope se calcula sobre TRES puestos de
+ * referencia; un carro que ofrece cuatro podía pedirlo en los cuatro y
+ * recuperar más de lo que gastó. Alcanzable con el deslizador de `5c`.
+ */
+test('ni con el carro lleno y el aporte al máximo se recupera el viaje entero', () => {
+  for (let costo = 500; costo <= 9000; costo += 37) {
+    const tope = topeDeRuta(costo);
+    for (let puestos = 1; puestos <= 4; puestos++) {
+      const aporte = aporteCalculado(costo, puestos, tope);
+      assert.ok(loQueRecuperas(aporte, puestos) < costo, `${costo} con ${puestos} puestos`);
+    }
+  }
+});
+
+test('el suelo de 3 $ no sube el reparto: subirlo haría ganar dinero', () => {
+  const coronado = costoDelViaje({ distanciaKm: 85, peajeCentavos: 200, consumoL100km: 8 });
+  assert.equal(coronado, 1150);
+  // El reparto entre cinco da 2,30. A 3 $ el conductor recuperaría 12 de 11,50.
+  const aporte = aporteCalculado(coronado, 4, topeDeRuta(coronado));
+  assert.equal(aporte, 200);
+  assert.ok(loQueRecuperas(aporte, 4) < coronado);
+});
+
+test('con el carro lleno el conductor recupera 21 $ de 29,19 $ y pone 8,19 $', () => {
   const costo = costoDelViaje(CHITRE);
-  const recupera = loQueRecuperas(800, 3);
-  assert.equal(recupera, 2400);
-  // R1 en una línea: ni lleno recupera lo que gastó.
-  assert.equal(loQuePonesDeTuBolsillo(costo, recupera), 519);
+  const recupera = loQueRecuperas(700, 3);
+  assert.equal(recupera, 2100);
+  // R1 en una línea: ni lleno recupera lo que gastó — y pone más que ellos.
+  assert.equal(loQuePonesDeTuBolsillo(costo, recupera), 819);
 });
 
 test('la pastilla dice de dónde sale la cifra', () => {
@@ -81,9 +125,10 @@ test('ofrecer menos puestos NO sube el aporte: sería un recargo por el último'
   const conDos = aporteCalculado(costo, 2, tope);
   // El reparto crudo sí sube al ofrecer menos…
   assert.ok(costo / 2 > costo / 3);
-  // …pero el tope de la ruta lo corta, y el aporte se queda igual (R3).
-  assert.equal(conUno, conDos);
+  // …pero el tope de la ruta lo corta antes de que se dispare: con un solo
+  // puesto el reparto daría 14,59 y sale el tope, 10.
   assert.equal(conUno, tope);
+  assert.ok(conUno - conDos <= 100);
   // Y la pantalla puede decir por qué.
   assert.equal(elTopeMuerde(costo, 1, tope), true);
   assert.equal(elTopeMuerde(costo, 3, tope), false);

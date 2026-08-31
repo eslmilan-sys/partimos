@@ -51,7 +51,15 @@ export const PRECIO_GASOLINA_CENTAVOS_POR_LITRO = 127;
 /** Margen sobre el recorrido para cubrir los desvíos de recogida. `price_rules.detour_tolerance_pct`. */
 export const MARGEN_DESVIO_PCT = 10;
 
-/** Suelo del aporte. Por debajo no se publica, aunque el reparto dé menos. */
+/**
+ * Suelo del aporte: el fondo del deslizador de `5c`.
+ *
+ * **No sube el reparto** (30-08-2026). Decía «por debajo no se publica,
+ * aunque el reparto dé menos», y se aplicaba con un `Math.max`: en un
+ * Panamá → Coronado de 11,50 $ con cuatro puestos, el reparto justo da 2,30
+ * y el suelo lo subía a 3 — cuatro por tres son 12, más de lo que costó el
+ * viaje. El conductor ganaba 50 centavos. Ver `aporteCalculado`.
+ */
 export const APORTE_MINIMO_CENTAVOS = 300;
 
 /**
@@ -63,6 +71,28 @@ export const OCUPACION_DE_REFERENCIA = 3;
 
 /** Redondeo al dólar hacia arriba. El producto no enseña centavos en el aporte. */
 const aDolarArriba = (centavos: number): number => Math.ceil(centavos / 100) * 100;
+
+/**
+ * Redondeo al dólar hacia ABAJO — el del aporte por puesto.
+ *
+ * **Por qué abajo, y por qué importa** (30-08-2026, pregunta del dueño con
+ * la captura delante: «si todos ponen 7, ¿por qué yo pago 4,86?»).
+ *
+ * El reparto de un Panamá → Las Tablas de 32,86 $ entre cinco ocupantes da
+ * 6,57 $. Redondeando hacia arriba, cada pasajero pone 7 y al conductor le
+ * queda 32,86 − 28 = 4,86: **menos que cualquiera de los que lleva**. Y no
+ * era el caso raro sino la regla — con `ceil`, lo que le queda al conductor
+ * es siempre `costo − puestos × redondeo`, que por construcción cae por
+ * debajo del reparto justo. Hasta el viaje de referencia de este archivo lo
+ * tenía: 5,19 el conductor contra 6,00 cada pasajero.
+ *
+ * Hacia abajo, la aritmética se da la vuelta y se queda dada la vuelta:
+ * `costo − puestos × ⌊costo/(puestos+1)⌋ ≥ ⌊costo/(puestos+1)⌋` para todo
+ * número de puestos. **Los centavos que no se dividen los pone quien
+ * maneja**, que es la única versión de «el conductor cuenta como uno más»
+ * que se sostiene mirando la pantalla.
+ */
+const aDolarAbajo = (centavos: number): number => Math.floor(centavos / 100) * 100;
 
 /** Centavos por kilómetro que gasta un carro: litros a los 100 km × precio del litro. */
 export function tasaPorKm(
@@ -104,16 +134,36 @@ export function topeDeRuta(costoDeReferenciaCentavos: number): number {
 }
 
 /**
- * El aporte que proponemos: el costo entre los ocupantes — el conductor cuenta
- * como uno más que paga — sujeto al suelo de 3 $ y al tope de la ruta.
+ * EL APORTE POR PUESTO: el costo entre los ocupantes —el conductor cuenta como
+ * uno más que paga— al dólar de abajo, y nunca por encima del tope de la ruta.
+ *
+ * **Es a la vez lo que proponemos y lo máximo que se puede pedir.** Antes eran
+ * dos cifras: esta, y un techo aparte que era el tope de la ruta. El tope se
+ * calcula sobre una ocupación de referencia de tres puestos
+ * (`OCUPACION_DE_REFERENCIA`), así que un carro que ofrece CUATRO podía
+ * ponerlo en los cuatro: 4 × 11 = 44 $ sobre un viaje de 32,86 $. El
+ * conductor salía ganando 11 $ — R1 rota, y alcanzable con dos toques del
+ * deslizador. `loQuePonesDeTuBolsillo` lo tapaba con un `Math.max(0, …)`.
+ *
+ * Ahora el techo es el reparto justo, y el tope de la ruta sólo baja: pedir
+ * más que tu propia parte es exactamente lo que no se puede hacer aquí. Es
+ * además, palabra por palabra, lo que promete el sitio — «puedes pedir menos,
+ * nunca más».
+ *
+ * **El suelo de 3 $ no sube este número.** En una ruta corta con el carro
+ * lleno el reparto puede dar 2,30, y subirlo a 3 pondría al conductor a
+ * recuperar 12 $ de un viaje de 11,50: otra vez ganando. El suelo se queda
+ * como lo que de verdad es —el fondo del deslizador y la señal de que un
+ * viaje así igual no vale la pena publicarlo—, no como una corrección al
+ * alza del reparto.
  */
 export function aporteCalculado(
   costoCentavos: number,
   puestos: number,
   topeCentavos: number,
 ): number {
-  const reparto = aDolarArriba(costoCentavos / (puestos + 1));
-  return Math.min(topeCentavos, Math.max(APORTE_MINIMO_CENTAVOS, reparto));
+  const justo = aDolarAbajo(costoCentavos / (puestos + 1));
+  return Math.min(topeCentavos, justo);
 }
 
 /**
@@ -169,7 +219,7 @@ export function elTopeMuerde(
   puestos: number,
   topeCentavos: number,
 ): boolean {
-  return aDolarArriba(costoCentavos / (puestos + 1)) > topeCentavos;
+  return aDolarAbajo(costoCentavos / (puestos + 1)) > topeCentavos;
 }
 
 /** Lo que el conductor recupera si se llena el carro. */
@@ -177,7 +227,15 @@ export function loQueRecuperas(aporteCentavos: number, puestos: number): number 
   return aporteCentavos * puestos;
 }
 
-/** Lo que el conductor pone de su bolsillo aunque lo llene. Nunca baja de cero. */
+/**
+ * Lo que el conductor pone de su bolsillo aunque lo llene.
+ *
+ * El `Math.max(0, …)` **ya no puede dispararse**: desde que el aporte no pasa
+ * del reparto justo (`aporteCalculado`), lo que le queda es siempre al menos
+ * una parte. Se queda como red: el día que alguien vuelva a tocar la fórmula,
+ * es preferible enseñar un cero raro que un número negativo — pero si este
+ * cero aparece, el fallo está arriba, no aquí.
+ */
 export function loQuePonesDeTuBolsillo(costoCentavos: number, recuperaCentavos: number): number {
   return Math.max(0, costoCentavos - recuperaCentavos);
 }

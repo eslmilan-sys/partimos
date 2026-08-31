@@ -963,30 +963,46 @@ export default function Publicar() {
           </View>
 
           {/* LA REGLA, no el ±. Ver `ui/Regula`: enseña el recorrido entero
-              —el suelo, el tope de la ruta y la marca de lo sugerido— en vez
-              de descubrirlos al chocar. Los ± siguen en sus extremos. */}
+              —el suelo y el techo— en vez de descubrirlos al chocar. Los ±
+              siguen en sus extremos.
+
+              **El tope de la regla es `calculado`, no el tope de la ruta**
+              (30-08-2026). El tope de la ruta se calcula sobre TRES puestos
+              de referencia: un carro que ofrece cuatro podía ponerlo en los
+              cuatro y recuperar 44 $ de un viaje de 32,86 $. Aquí sólo se
+              baja, que es lo que el producto promete en todas partes:
+              «puedes pedir menos, nunca más». */}
           <View style={estilos.regula}>
             <Regula
               valor={Math.round(aporte / 100)}
-              min={Math.round(APORTE_MINIMO_CENTAVOS / 100)}
-              max={Math.round(datos.topeCentavos / 100)}
-              marca={Math.round(calculado / 100)}
+              /* El suelo cede ante el techo: en una ruta corta con el carro
+                 lleno el reparto puede dar 2, y un mínimo de 3 por encima del
+                 máximo dejaría el deslizador al revés. */
+              min={Math.min(
+                Math.round(APORTE_MINIMO_CENTAVOS / 100),
+                Math.round(calculado / 100),
+              )}
+              max={Math.round(calculado / 100)}
               alCambiar={(v) => setAporteElegido(v * 100)}
-              rotuloIzquierda={`Mínimo ${formatearDineroRedondo(APORTE_MINIMO_CENTAVOS)}`}
-              rotuloDerecha={`Tope ${formatearDineroRedondo(datos.topeCentavos)}`}
+              rotuloIzquierda={`Mínimo ${formatearDineroRedondo(Math.min(APORTE_MINIMO_CENTAVOS, calculado))}`}
+              rotuloDerecha={`Tu parte ${formatearDineroRedondo(calculado)}`}
               etiquetaAccesible="Aporte por puesto"
               comoSeDice={(v) => `${v} balboas por puesto`}
             />
           </View>
 
 
-          {/* La cifra del costo una sola vez: repetirla al final de la misma
-              frase — «B/30,94 … de B/30,94» — era leerla dos veces sin
-              aprender nada nuevo. */}
+          {/* EL REPARTO DICHO COMO UN REPARTO (30-08-2026, pregunta del
+              dueño: «si todos ponen 7, ¿por qué yo pago 4,86?»). Decía
+              «gasolina y peajes B/32,86 · con 4 puestos recuperas B/28,00»,
+              que son dos cifras verdaderas de las que hay que deducir la
+              tercera —la suya— restando. Ahora se dice entre cuántos se
+              parte y cuánto pone cada quien, incluido él. */}
           <Text style={estilos.cuenta}>
-            {`Gasolina y peajes: ${formatearDinero(cuenta.costoCentavos)} · con ${puestos} ${
-              puestos === 1 ? 'puesto recuperas' : 'puestos recuperas'
-            } ${formatearDinero(cuenta.recuperasCentavos)}${cuenta.cubreElViaje ? ' y cubres el viaje' : ''}.`}
+            {`El viaje cuesta ${formatearDinero(cuenta.costoCentavos)} y se reparte entre ${puestos + 1}, contándote a ti.`}
+          </Text>
+          <Text style={estilos.cuenta}>
+            {`Cada pasajero pone ${formatearDineroRedondo(aporte)}. Tú pones ${formatearDinero(cuenta.deTuBolsilloCentavos)}: el aporte se redondea al dólar de abajo, y la diferencia la pones tú.`}
           </Text>
 
           {/* **POR QUÉ EL APORTE NO SUBE AL QUITAR PUESTOS.** El reparto entre

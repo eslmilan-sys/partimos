@@ -162,6 +162,21 @@ la consommation qui fait foi**, la colonne `rate_per_km_cents` est à retirer.
 Voir `supabase/CONSUMO.md` — l'argument, les cinq catégories, la liste des
 modèles et ce qui reste à migrer.)*
 
+**L'apport s'arrondit au dollar, et cet arrondi coûte cher au conducteur.**
+Depuis le 30-08-2026 il s'arrondit **vers le bas** : c'est la seule direction
+où celui qui conduit ne met jamais moins qu'un passager (avant, un
+Panamá → Las Tablas donnait 7 $ par passager et 4,86 $ pour lui). Mais sur un
+Panamá → Chitré à 29,39 $ le partage juste vaut 5,88 $ et devient 5 $ : les
+quatre passagers mettent 20 au lieu de 23,51, et le conducteur récupère
+3,51 $ de moins **à cause de l'arrondi, pas de la règle**.
+
+Arrondir **au quart de dollar** — 5,75 $ — garderait la garantie et
+diviserait la perte par quatre ; le quarter est la pièce la plus courante du
+pays, donc ça reste payable en liquide. Ça touche en revanche la décision du
+Sistema v6 « l'apport ne montre pas de centimes », qui vaut pour tout l'app.
+**À trancher par le propriétaire** : une ligne de `dominio/aporte.ts`
+(`aDolarAbajo`) et le format de `ui/dinero.tsx`.
+
 ## Divergences assumées entre le design et la production
 
 Elles sont décidées, documentées, et il ne faut pas les « corriger » sans en
@@ -706,3 +721,62 @@ partout : le changer est une passe à lui seul.
 `herramientas/publicar-tiros.mjs`, `publicar-hojas.mjs` et
 `publicar-auditar.mjs` traversent l'assistant étape par étape ; `auditar.mjs`
 ne voit que la première, puisque les suivantes n'existent qu'après des clics.
+
+## La passe du 30-08-2026 (soir) — l'argent, et le repaso
+
+### R1 était contournable, et l'arrondi penchait du mauvais côté
+
+Le propriétaire, capture à l'appui : **« si tout le monde met 7, pourquoi
+moi je paie 4,86 ? »**. C'était vrai, et ce n'était pas un cas particulier.
+
+`aporteCalculado` arrondissait le partage **vers le haut**. Or si `a =
+⌈C/(N+1)⌉`, ce qui reste au conducteur est `C − N·a`, qui est **toujours**
+inférieur ou égal à la part juste — donc toujours inférieur à ce que met
+chaque passager. Même le trajet de référence du fichier l'avait : 5,19 pour
+lui contre 6,00 pour chacun d'eux. Arrondi **vers le bas**, l'inégalité se
+retourne et reste retournée : les centimes qui ne se divisent pas sont pour
+celui qui conduit.
+
+Et pire, trouvé en tirant le fil : **le tope de la route se calcule sur
+TROIS places de référence** (`OCUPACION_DE_REFERENCIA`). Une voiture qui en
+offre quatre pouvait le demander sur les quatre — 4 × 11 = 44 $ sur un
+trajet de 32,86 $. Le conducteur gagnait 11 $. R1 cassée, atteignable en
+deux gestes sur le curseur, et `loQuePonesDeTuBolsillo` la masquait avec un
+`Math.max(0, …)`. Le plafond est maintenant le partage juste ; le tope de la
+route ne peut que le baisser. C'est mot pour mot ce que promet le site :
+« puedes pedir menos, nunca más ».
+
+Le plancher de 3 $ ne remonte plus l'apport non plus : sur un Coronado à
+11,50 $ avec quatre places, il faisait récupérer 12 $.
+
+**Deux invariants tiennent ça maintenant**, balayés sur toutes les formes
+(`dominio/aporte.test.ts`) : le conducteur ne met jamais moins qu'un
+passager, et voiture pleine au maximum il ne récupère jamais le trajet
+entier.
+
+### Le repaso, refait
+
+Trois défauts vus sur la même capture, plus le mot de la fin :
+
+- **Le commentaire n'apparaissait pas.** L'écran qui existe pour tout relire
+  avant de s'engager était le seul à ne pas montrer la seule chose que le
+  conducteur écrit avec ses mots.
+- **La puce d'arrivée n'était pas au bout de la ligne.** La ligne était un
+  `View` absolu avec `top: 10, bottom: 22` — deux nombres à l'œil contre une
+  hauteur de ligne qui dépend de la typographie. Chaque parada dessine
+  maintenant le brin qui descend vers la suivante, et **la dernière n'en
+  dessine aucun** : ça ne peut plus dépasser.
+- **« Un carré blanc cassé posé sur un dégradé. Pourquoi ? »** Il avait
+  raison et il n'y avait pas de réponse : une `Bandera` (le champ rouge avec
+  le dessin de la destination) et par-dessus une `hoja` à coins arrondis
+  remontée de 30 px, **de la même couleur que la page**. Le procédé ne se lit
+  que si la feuille est d'une autre couleur ; ici il ne restait qu'un bord
+  arrondi coupant un dégradé sans raison. Et sur le fond : c'est le pas NEUF
+  de l'assistant, pas la fiche d'une destination à vendre. Même en-tête que
+  les huit autres, ni feuille ni bandeau.
+
+L'écran est désormais **une seule surface** avec des filets entre ses
+parties — un document qu'on lit de haut en bas avant de le signer — et
+l'argent y est dit **comme un partage** : entre combien, combien chacun.
+Deux chiffres côte à côte, celui du conducteur plus gros que celui des
+passagers. La question ne peut plus se poser.

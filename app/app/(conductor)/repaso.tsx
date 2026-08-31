@@ -9,8 +9,42 @@
  * No se decide nada aquí: todo lo que sale es lo que ya elegiste. Es una
  * lectura, con una sola acción al final y la puerta de atrás para corregir.
  *
- * La cuenta de abajo repite en voz alta lo que la ley exige que sea cierto:
- * el carro lleno no cubre el viaje entero, porque tú también pones tu parte.
+ * ── La refundición del 30-08-2026 ────────────────────────────────────────
+ *
+ * Cuatro cosas, las cuatro vistas por el dueño en su teléfono.
+ *
+ * 1. **El comentario no salía.** Lo escribes en el octavo paso, viaja en los
+ *    parámetros, se guarda en `trips.notes`… y la pantalla que existe para
+ *    leerlo todo antes de comprometerse era la única que no lo enseñaba. Lo
+ *    único que el conductor escribe con sus palabras.
+ *
+ * 2. **La bolita de la llegada no caía al final de la línea.** La línea era
+ *    un `View` absoluto sobre toda la columna, con `top: 10, bottom: 22`:
+ *    dos números a ojo contra una altura de fila que depende de la
+ *    tipografía. Ahora **no hay línea suelta**: cada parada dibuja el tramo
+ *    que baja hacia la siguiente, y la última no dibuja ninguno porque no
+ *    tiene siguiente. Es exacto por construcción, no por medida.
+ *
+ * 3. **«Un cuadrado blanco roto encima de un degradado. ¿Por qué?»** Tenía
+ *    razón y no había respuesta. La pantalla llevaba una `Bandera` —el campo
+ *    rojo con el dibujo del destino— y encima una `hoja` de esquinas
+ *    redondeadas subida 30 px… **del mismo color que la página**. El truco
+ *    de la hoja que sube sólo se lee si la hoja es de otro color; siendo el
+ *    mismo, lo único que se veía era un canto redondeado cortando un
+ *    degradado sin motivo. Y de fondo: este es el paso NUEVE del asistente
+ *    de publicar, no la ficha de un destino que hay que vender. Ahora lleva
+ *    la misma cabecera que los ocho pasos anteriores y ni hoja ni bandera.
+ *
+ * 4. **«Si todos ponen 7, ¿por qué yo pago 4,86?»** Era verdad y era un
+ *    defecto del cálculo, no de la pantalla: está arreglado en
+ *    `dominio/aporte.ts` (el reparto redondea hacia abajo, y los centavos
+ *    que no se dividen los pone quien maneja). Aquí lo que cambia es que el
+ *    dinero **se dice como un reparto** —entre cuántos, cuánto cada quien—
+ *    en vez de tres cifras de las que había que deducir la suya restando.
+ *
+ * Y una sola superficie en vez de cuatro tarjetas flotando: esto es un
+ * documento que se lee de arriba abajo antes de firmarlo, con filetes entre
+ * sus partes. Menos cantos, más tipografía.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -32,13 +66,13 @@ import {
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
-import { Bandera, motivoDe } from '@/ui/CampoRojo';
+import { CampoRojo, motivoDe } from '@/ui/CampoRojo';
 import { NoEsta } from '@/ui/NoEsta';
 import { Boton, Epigrafe } from '@/ui/controles';
 import { formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaLargo, hora, mas } from '@/ui/fechas';
-import { Atras, Carro, Escudo, Maleta, Mascota, Persona, SinHumo } from '@/ui/iconos';
-import { TRACK_MICRO, color, espacio, familia, radio } from '@/ui/tokens';
+import { Atras, Carro, Maleta, Mascota, Persona, SinHumo } from '@/ui/iconos';
+import { TRACK_MICRO, color, espacio, familia, interlinea, radio, texto } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
@@ -87,6 +121,7 @@ export default function Repaso() {
   const paradas = indicesParadas.length;
   const puestos = Number(p.puestos ?? 3);
   const aporteElegido = p.aporte ? Number(p.aporte) : null;
+  const comentario = (p.comentario ?? '').trim();
 
   /* Los dos extremos, si vinieron: en ruta libre son lo único que dice qué
      se publica. `deParams` es el mismo des-serializador de resultados. */
@@ -139,71 +174,91 @@ export default function Repaso() {
     });
   }
 
+  /* El recorrido, ya montado. Cada parada sabe si es la última: la última no
+     dibuja hilo, y por eso la línea no puede pasarse de su bolita. */
+  const delCamino = [
+    { que: 'Salida', nombre: datos.origen, cuando: hora(salida), tipo: 'salida' as const },
+    ...enMedio.map((x) => ({
+      que: 'Parada',
+      nombre: x.nombre,
+      cuando: hora(mas(salida, x.minutos)),
+      tipo: 'media' as const,
+    })),
+    { que: 'Llegada', nombre: datos.destino, cuando: hora(llegada), tipo: 'llegada' as const },
+  ];
+
   return (
     <View style={estilos.pantalla}>
+      {/* La misma cabecera que los ocho pasos anteriores: este es el noveno.
+          Antes llevaba `Bandera` —el campo rojo con el dibujo del destino—
+          y encima una hoja redondeada del color de la página. */}
+      <CampoRojo altura={206} motivo={motivoDe(slugDe(datos.destino))} />
+
+      <BarraDeEstado />
+
+      <View style={estilos.cabecera}>
+        <View style={estilos.filaSuperior}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Atrás, corregir"
+            onPress={() => volver()}
+            style={estilos.circulo}
+          >
+            <Atras />
+          </Pressable>
+          <Text style={estilos.epigrafeCampo}>Antes de publicar</Text>
+        </View>
+
+        <Text style={estilos.titular} numberOfLines={2}>
+          {`${datos.origen} → ${datos.destino}`}
+        </Text>
+        <Text style={estilos.subtitulo}>{`${diaLargo(datos.salida)} · ${hora(salida)}`}</Text>
+      </View>
+
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={estilos.contenido}
         showsVerticalScrollIndicator={false}
       >
-        <Bandera altura={230} motivo={motivoDe(slugDe(datos.destino))}>
-          <BarraDeEstado />
-          <View style={estilos.chrome}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Atrás, corregir"
-              onPress={() => volver()}
-              style={estilos.circulo}
-            >
-              <Atras />
-            </Pressable>
-          </View>
-          <View style={estilos.cabecera}>
-            <Text style={estilos.epigrafeCampo}>Antes de publicar</Text>
-            <Text style={estilos.titular} numberOfLines={2}>
-              {`${datos.origen} → `}
-              <Text style={estilos.titularFuerte}>{datos.destino}</Text>
-            </Text>
-            <Text style={estilos.subtitulo}>
-              {`${diaLargo(datos.salida)} · ${hora(salida)}`}
-            </Text>
-          </View>
-        </Bandera>
-
-        <View style={estilos.hoja}>
-          <View style={estilos.tarjeta}>
-            <Epigrafe>Ruta del viaje</Epigrafe>
+        {/* UNA SOLA SUPERFICIE. Eran cuatro tarjetas blancas con borde, una
+            por tema; leídas seguidas, tres cantos de más entre cosas que se
+            leen del tirón. Un documento, con filetes entre sus partes. */}
+        <View style={estilos.pliego}>
+          <View style={estilos.seccion}>
+            <Epigrafe>El camino</Epigrafe>
             <View style={estilos.recorrido}>
-              <View style={estilos.linea} />
-              <Parada que="Salida" nombre={datos.origen} cuando={hora(salida)} primera />
-              {enMedio.map((x) => (
+              {delCamino.map((x, i) => (
                 <Parada
-                  key={x.nombre}
-                  que="Parada"
+                  key={`${x.nombre}-${i}`}
+                  que={x.que}
                   nombre={x.nombre}
-                  cuando={hora(mas(salida, x.minutos))}
+                  cuando={x.cuando}
+                  tipo={x.tipo}
+                  ultima={i === delCamino.length - 1}
                 />
               ))}
-              <Parada que="Llegada" nombre={datos.destino} cuando={hora(llegada)} ultima />
             </View>
           </View>
 
-          <View style={estilos.tarjeta}>
+          <View style={estilos.filete} />
+
+          <View style={estilos.seccion}>
+            <Epigrafe>Quién viene, y en qué</Epigrafe>
             <View style={estilos.filaCarro}>
               <View style={estilos.cuadroCarro}>
                 <Carro tamano={26} tinta={color.ink600} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.textoCarro} numberOfLines={1}>
-                  {`${datos.carro.make ?? ''} ${datos.carro.model ?? ''} ${datos.carro.color ?? ''}`.trim()}
+                  {[datos.carro.make, datos.carro.model, datos.carro.color?.toLowerCase()]
+                    .filter(Boolean)
+                    .join(' ')}
                 </Text>
                 <Text style={estilos.detalleCarro}>
-                  {`${puestos} ${puestos === 1 ? 'puesto libre' : 'puestos libres'} de ${datos.puestosMaximos}`}
+                  {`${puestos} ${puestos === 1 ? 'puesto' : 'puestos'} de ${datos.puestosMaximos}`}
                 </Text>
               </View>
             </View>
-
-            <View style={estilos.separador} />
 
             <View style={estilos.condiciones}>
               {condiciones.map((c) => (
@@ -215,56 +270,73 @@ export default function Repaso() {
             </View>
           </View>
 
-          {/* El dinero, y lo que la ley exige que sea verdad. */}
-          <View style={estilos.tarjeta}>
-            <View style={estilos.filaAporte}>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Epigrafe>Aporte por puesto</Epigrafe>
-                <Text style={estilos.precio}>{formatearDineroRedondo(aporte)}</Text>
+          <View style={estilos.filete} />
+
+          {/* EL DINERO, DICHO COMO UN REPARTO. Antes eran tres renglones
+              —costo, lo que recuperas, de tu bolsillo— de los que había que
+              deducir restando cuánto pone cada quien. La pregunta del dueño
+              («si todos ponen 7, ¿por qué yo pago 4,86?») nacía justo ahí. */}
+          <View style={estilos.seccion}>
+            <Epigrafe>El aporte</Epigrafe>
+
+            <Text style={estilos.repartoEntre}>
+              {`El viaje cuesta ${formatearDinero(cuenta.costoCentavos)} y se reparte entre ${puestos + 1}, contándote a ti.`}
+            </Text>
+
+            <View style={estilos.reparto}>
+              <View style={estilos.parte}>
+                <Text style={estilos.parteQuien}>
+                  {puestos === 1 ? 'El pasajero' : 'Cada pasajero'}
+                </Text>
+                <Text style={[estilos.parteCifra, tabular]}>
+                  {formatearDineroRedondo(aporte)}
+                </Text>
               </View>
-              <View style={estilos.tope}>
-                <Text style={estilos.topeTexto}>
-                  {`Tope de la ruta ${formatearDineroRedondo(datos.topeCentavos)}`}
+              <View style={estilos.parteFilete} />
+              <View style={estilos.parte}>
+                <Text style={estilos.parteQuien}>Tú</Text>
+                <Text style={[estilos.parteCifra, tabular]}>
+                  {formatearDinero(cuenta.deTuBolsilloCentavos)}
                 </Text>
               </View>
             </View>
 
-            <View style={estilos.separador} />
-
-            <Fila etiqueta="Gasolina y peajes" valor={formatearDinero(cuenta.costoCentavos)} />
-            <Fila
-              etiqueta={`Con ${puestos} ${puestos === 1 ? 'puesto' : 'puestos'} recuperas`}
-              valor={formatearDinero(cuenta.recuperasCentavos)}
-            />
-            <Fila
-              etiqueta="De tu bolsillo"
-              valor={formatearDinero(cuenta.deTuBolsilloCentavos)}
-              fuerte
-            />
-
-            <View style={estilos.aviso}>
-              <Escudo tamano={18} tinta={color.azul500} />
-              <Text style={estilos.avisoTexto}>
-                Tú también pones tu parte del viaje, así que el carro lleno nunca cubre el costo
-                entero. Nadie gana dinero con esto.
-              </Text>
-            </View>
+            {/* LA REGLA, con su razón al lado (invariante 7). Y ya no es una
+                promesa que haya que creerse: las dos cifras de arriba la
+                enseñan — la de quien maneja es la más grande de las dos. */}
+            <Text style={estilos.porQue}>
+              Pones más que ellos porque el aporte se redondea al dólar de abajo, nunca al de
+              arriba. Nadie gana dinero con esto: el carro lleno nunca cubre el viaje entero.
+            </Text>
           </View>
 
-          {quePaso ? <Text style={estilos.error}>{quePaso}</Text> : null}
+          {/* LO QUE ESCRIBISTE, que era lo único que no salía. Va al final
+              porque es lo último que se escribe y lo primero que ellos leen
+              en la ficha: cerrar el repaso con tus propias palabras es lo
+              más parecido a releer un mensaje antes de mandarlo. */}
+          {comentario ? (
+            <>
+              <View style={estilos.filete} />
+              <View style={estilos.seccion}>
+                <Epigrafe>Lo que les dices</Epigrafe>
+                <Text style={estilos.comentario}>{comentario}</Text>
+              </View>
+            </>
+          ) : null}
         </View>
+
+        {quePaso ? <Text style={estilos.error}>{quePaso}</Text> : null}
       </ScrollView>
 
       <View style={estilos.pie}>
         <Boton
-         
           desactivado={publicando}
           alPulsar={async () => {
             if (!yo || !p.salida || (!p.ruta && !libre)) return;
             setPublicando(true);
             setQuePaso(null);
             try {
-              const viaje = await publicarViaje({
+              await publicarViaje({
                 conductorId: yo,
                 carroId: datos.carro.id,
                 corredorSlug: p.ruta ?? '',
@@ -303,39 +375,60 @@ export default function Repaso() {
   );
 }
 
-/** Una parada del repaso: qué es, cómo se llama y a qué hora. */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Una parada del repaso: qué es, cómo se llama, a qué hora — y el hilo que
+ * baja hasta la siguiente.
+ *
+ * **El hilo es de la parada, y la última no tiene.** Antes era un `View`
+ * absoluto sobre toda la columna, con `top: 10, bottom: 22`: dos números a
+ * ojo contra una altura de fila que depende de la tipografía, y que se
+ * pasaba de la bolita de la llegada (visto por el dueño el 30-08-2026).
+ * Ahora cada parada dibuja el tramo que va hacia la de abajo, y como la
+ * última no dibuja ninguno, la línea **no puede** sobresalir.
+ *
+ * Los dos márgenes negativos de 5 meten el hilo dentro de las tapas hasta
+ * tocar el borde de cada bolita: la tapa mide 20 y la bolita 10.
+ */
 function Parada({
   que,
   nombre,
   cuando,
-  primera = false,
-  ultima = false,
+  tipo,
+  ultima,
 }: {
   que: string;
   nombre: string;
   cuando: string;
-  primera?: boolean;
-  ultima?: boolean;
+  tipo: 'salida' | 'media' | 'llegada';
+  ultima: boolean;
 }) {
   return (
-    <View style={[estilos.parada, ultima && { paddingBottom: 0 }]}>
-      <View style={primera ? estilos.puntoLleno : ultima ? estilos.puntoFinal : estilos.puntoMedio} />
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Text style={[estilos.paradaQue, primera && { color: color.rojo600 }]}>{que}</Text>
+    <View style={estilos.parada}>
+      <View style={estilos.columna}>
+        {/* La bolita, centrada en una tapa de la altura de la primera línea:
+            así cae a la altura del rótulo sin un `marginTop` a ojo. */}
+        <View style={estilos.tapa}>
+          <View
+            style={
+              tipo === 'salida'
+                ? estilos.puntoLleno
+                : tipo === 'llegada'
+                  ? estilos.puntoFinal
+                  : estilos.puntoMedio
+            }
+          />
+        </View>
+        {ultima ? null : <View style={estilos.hilo} />}
+      </View>
+      <View style={[estilos.textoParada, ultima && { paddingBottom: 0 }]}>
+        <Text style={[estilos.paradaQue, tipo === 'salida' && { color: color.rojo600 }]}>
+          {que}
+        </Text>
         <Text style={estilos.paradaNombre}>{nombre}</Text>
       </View>
       <Text style={estilos.paradaHora}>{cuando}</Text>
-    </View>
-  );
-}
-
-function Fila({ etiqueta, valor, fuerte = false }: { etiqueta: string; valor: string; fuerte?: boolean }) {
-  return (
-    <View style={estilos.fila}>
-      <Text style={[estilos.filaEtiqueta, fuerte && { color: color.ink900, fontWeight: '600' }]}>
-        {etiqueta}
-      </Text>
-      <Text style={[estilos.filaValor, fuerte && { fontWeight: '700' }]}>{valor}</Text>
     </View>
   );
 }
@@ -358,9 +451,10 @@ const estilos = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
   },
-  contenido: { paddingBottom: 190 },
+  contenido: { paddingHorizontal: espacio.gutter, paddingTop: 18, paddingBottom: 190 },
 
-  chrome: { paddingHorizontal: espacio.gutter, paddingTop: 10 },
+  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 4 },
+  filaSuperior: { flexDirection: 'row', alignItems: 'center', gap: 13 },
   circulo: {
     width: 40,
     height: 40,
@@ -369,8 +463,8 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 6 },
   epigrafeCampo: {
+    flex: 1,
     fontSize: 11.5,
     lineHeight: 15.95,
     fontWeight: '600',
@@ -379,32 +473,35 @@ const estilos = StyleSheet.create({
     color: color.campoTexto,
     fontFamily: familia,
   },
-  titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 12, },
-  titularFuerte: { fontWeight: '600' },
-  subtitulo: { fontSize: 14, lineHeight: 20.3, color: color.campoTexto, marginTop: 8, fontFamily: familia },
-
-  hoja: {
-    marginTop: -30,
-    backgroundColor: color.sand100,
-    borderTopLeftRadius: radio.hoja,
-    borderTopRightRadius: radio.hoja,
-    paddingHorizontal: espacio.gutter,
-    paddingTop: 22,
+  titular: { ...texto.titular, color: color.ink900, marginTop: 12 },
+  subtitulo: {
+    fontSize: 14,
+    lineHeight: 20.3,
+    color: color.campoTexto,
+    marginTop: 6,
+    fontFamily: familia,
   },
-  tarjeta: {
+
+  /** El pliego: una sola superficie, con filetes entre sus partes. */
+  pliego: {
     backgroundColor: color.blanco,
+    borderRadius: radio.hoja,
     borderWidth: 1,
     borderColor: color.bordeSutil,
-    borderRadius: radio.l,
-    paddingVertical: 16,
     paddingHorizontal: 18,
-    marginBottom: 12,
   },
+  seccion: { paddingVertical: 18 },
+  filete: { height: 1, backgroundColor: color.bordeSutil },
 
-  recorrido: { position: 'relative', marginTop: 14 },
-  linea: { position: 'absolute', left: 4.25, top: 10, bottom: 22, width: 1.5, backgroundColor: color.rojo300 },
-  parada: { flexDirection: 'row', alignItems: 'flex-start', gap: 13, paddingBottom: 16 },
-  puntoLleno: { width: 10, height: 10, borderRadius: radio.pastilla, backgroundColor: color.rojo500, marginTop: 6 },
+  recorrido: { marginTop: 12 },
+  /** `stretch`: la columna de la izquierda tiene que llegar hasta abajo del
+      todo para que el hilo alcance la parada siguiente. */
+  parada: { flexDirection: 'row', alignItems: 'stretch', gap: 13 },
+  columna: { width: 10, alignItems: 'center' },
+  textoParada: { flex: 1, minWidth: 0, paddingBottom: 18 },
+  /** La altura de la primera línea del rótulo: la bolita se centra en ella. */
+  tapa: { height: 20, justifyContent: 'center' },
+  puntoLleno: { width: 10, height: 10, borderRadius: radio.pastilla, backgroundColor: color.rojo500 },
   puntoMedio: {
     width: 10,
     height: 10,
@@ -412,18 +509,23 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
     borderWidth: 2,
     borderColor: color.azul500,
-    marginTop: 6,
   },
+  /* Relleno y no aro: el aro en `ink200` sobre blanco casi no se veía, y es
+     el punto donde el viaje TERMINA — lo que cierra la línea. */
   puntoFinal: {
     width: 10,
     height: 10,
     borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
-    borderWidth: 2,
-    borderColor: color.ink200,
-    marginTop: 6,
+    backgroundColor: color.ink900,
   },
-  paradaQue: { fontSize: 12.5, lineHeight: 18.12, color: color.ink600, fontFamily: familia },
+  hilo: {
+    flex: 1,
+    width: 1.5,
+    backgroundColor: color.rojo300,
+    marginTop: -5,
+    marginBottom: -5,
+  },
+  paradaQue: { fontSize: 12.5, lineHeight: 20, color: color.ink600, fontFamily: familia },
   paradaNombre: {
     fontSize: 15.5,
     lineHeight: 22.5,
@@ -432,14 +534,14 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  paradaHora: { fontSize: 14, lineHeight: 23, color: color.ink600, fontFamily: familia, ...tabular },
+  paradaHora: { fontSize: 14, lineHeight: 20, color: color.ink600, fontFamily: familia, ...tabular },
 
-  filaCarro: { flexDirection: 'row', alignItems: 'center', gap: 13 },
+  filaCarro: { flexDirection: 'row', alignItems: 'center', gap: 13, marginTop: 12 },
   cuadroCarro: {
     width: 52,
     height: 40,
     borderRadius: radio.control,
-    backgroundColor: color.sand200,
+    backgroundColor: color.sand100,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -451,10 +553,15 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  detalleCarro: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
-  separador: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 15 },
+  detalleCarro: {
+    fontSize: 13.5,
+    lineHeight: 18.85,
+    color: color.ink600,
+    fontFamily: familia,
+    ...tabular,
+  },
 
-  condiciones: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  condiciones: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
   condicion: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -462,46 +569,66 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: radio.pastilla,
-    backgroundColor: color.sand200,
+    backgroundColor: color.sand100,
   },
-  condicionTexto: { fontSize: 12.5, lineHeight: 17, fontWeight: '500', color: color.ink700, fontFamily: familia },
-
-  filaAporte: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
-  precio: {
-    fontSize: 33,
-    lineHeight: 36,
-    fontWeight: '700',
-    letterSpacing: -1.53,
-    color: color.ink900,
-    marginTop: 6,
+  condicionTexto: {
+    fontSize: 12.5,
+    lineHeight: 17,
+    fontWeight: '500',
+    color: color.ink700,
     fontFamily: familia,
-    ...tabular,
   },
-  tope: {
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.azul100,
-    maxWidth: 150,
+
+  repartoEntre: {
+    marginTop: 12,
+    fontSize: 14,
+    lineHeight: interlinea(14),
+    color: color.ink700,
+    fontFamily: familia,
   },
-  topeTexto: { fontSize: 12.5, lineHeight: 17, fontWeight: '600', color: color.azul700, fontFamily: familia },
-
-  fila: { flexDirection: 'row', justifyContent: 'space-between', gap: 14, paddingVertical: 6 },
-  filaEtiqueta: { flex: 1, fontSize: 14, lineHeight: 20.3, color: color.ink500, fontFamily: familia },
-  filaValor: { fontSize: 14, lineHeight: 20.3, fontWeight: '500', color: color.ink900, fontFamily: familia, ...tabular },
-
-  aviso: {
+  /** Las dos partes, una al lado de la otra: se comparan sin restar nada. */
+  reparto: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 11,
+    alignItems: 'stretch',
     marginTop: 14,
-    padding: 14,
-    borderRadius: radio.l,
-    backgroundColor: color.azul50,
+    borderRadius: radio.control,
+    backgroundColor: color.sand100,
+    paddingVertical: 14,
   },
-  avisoTexto: { flex: 1, fontSize: 13.5, lineHeight: 19.5, color: color.azul700, fontFamily: familia },
+  parte: { flex: 1, alignItems: 'center', gap: 4, paddingHorizontal: 8 },
+  parteFilete: { width: 1, backgroundColor: color.bordeSutil },
+  parteQuien: { fontSize: 12.5, lineHeight: 17, color: color.ink600, fontFamily: familia },
+  parteCifra: {
+    fontSize: 24,
+    lineHeight: 29,
+    fontWeight: '700',
+    letterSpacing: -0.84,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  porQue: {
+    marginTop: 12,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: color.ink600,
+    fontFamily: familia,
+  },
 
-  error: { fontSize: 13.5, lineHeight: 20, color: color.rojo700, fontFamily: familia, marginBottom: 12 },
+  comentario: {
+    marginTop: 10,
+    fontSize: 14.5,
+    lineHeight: 21,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+
+  error: {
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: color.rojo700,
+    fontFamily: familia,
+    marginTop: 12,
+  },
 
   pie: {
     position: 'absolute',
