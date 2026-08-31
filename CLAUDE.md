@@ -798,3 +798,32 @@ enseña · falta 1 de 3 »**, puis **« ¿Alguien se bajó? »** quand tout le m
 est monté, puis rien quand le trajet est fermé. Elle est aussi sur les
 trajets déjà partis, ce que le commentaire de « Ya salieron » promettait
 depuis le 27-08 sans que ce soit vrai.
+
+### La passe du 31-08-2026 — l'heure par défaut, et « pourquoi 11 ? »
+
+**L'assistant se bloquait tous les jours à partir de 6 h 01.** `publicar`
+partait sur `dia = aujourd'hui` et `hora = '06:00'`, deux constantes : passé
+six heures du matin, le départ tombait dans le passé et « Continuar »
+s'éteignait au quatrième pas avec *« La salida no puede quedar en el
+pasado »*. Trouvé en essayant de reproduire autre chose à 9 h. L'heure sort
+maintenant de l'horloge — le quart d'heure suivant avec une heure de marge —
+et bascule à demain 6 h quand la journée ne suffit plus
+(`cuandoSalePorDefecto`).
+
+**« ¿Por qué si son 30 $ pagan 11? »** — la question du propriétaire avec
+l'écran devant lui, et l'écran ne la traitait pas. Deux phrases se
+contredisaient : « se reparte entre 2 » puis un plafond qui n'est pas un
+partage ; et « el aporte se redondea al dólar de abajo » alors que de 16,43 à
+11 il n'y a pas un arrondi mais un tope. Le recuadro disait *« es el tope de
+esta ruta : B/11 »*, ce qui est circulaire — c'est 11 parce que c'est le
+plafond, et le plafond est 11.
+
+Les deux cas disent maintenant leur propre raison, et le recuadro fait la
+comparaison que le conducteur fait de tête : *« Entre 2 saldría a B/14,70
+cada uno, pero el tope de esta ruta es B/10,00 por puesto y no sube porque
+queden pocos puestos »*. À retenir : **le tope ne mord plus que sur un seul
+siège offert** — au-delà, c'est le partage juste qui plafonne (30-08).
+
+Et le libellé droit de la règle disait « Tu parte B/11 » : c'est le maximum
+demandable, pas sa part à lui — qui vaut 21,86 sur le même écran. Un nombre
+donné pour un autre, juste à côté du vrai.

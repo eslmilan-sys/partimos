@@ -85,7 +85,10 @@ export default function TuCuenta() {
       valor: String(datos.viajes),
     },
     {
-      etiqueta: datos.calificacion == null ? 'todavía sin nota' : 'de nota',
+      /* «sin nota» y no «todavía sin nota»: en una fila de tres columnas el
+         rótulo más largo estira su columna y las otras dos se apiñan. Lo de
+         «todavía» lo dice el guion que hay encima. */
+      etiqueta: datos.calificacion == null ? 'sin nota' : 'de nota',
       valor: datos.calificacion == null ? '—' : enTexto(datos.calificacion),
     },
     {
@@ -221,8 +224,14 @@ export default function TuCuenta() {
             nombre y a la foto, que es como las ve el otro; y la pastilla se
             va, porque la cédula ya está en la tercera columna. */}
         <View style={estilos.loQueVen}>
-          {loQueVen.map((v) => (
-            <View key={v.etiqueta} style={estilos.loQueVenColumna}>
+          {loQueVen.map((v, i) => (
+            <View
+              key={v.etiqueta}
+              style={[
+                estilos.loQueVenColumna,
+                i === loQueVen.length - 1 && estilos.loQueVenUltima,
+              ]}
+            >
               <Text style={estilos.loQueVenValor}>{v.valor}</Text>
               <Text style={estilos.loQueVenEtiqueta}>{v.etiqueta}</Text>
             </View>
@@ -253,10 +262,18 @@ export default function TuCuenta() {
                 una segunda cosa, no la misma. Ahora es un botón pequeño
                 debajo, que es lo que es. */}
             <View style={estilos.tarjeta}>
-              <Text style={estilos.cifraEtiqueta}>Lo que has recuperado</Text>
-              <Text style={estilos.cifraValor}>
-                {formatearDineroRedondo(datos.recuperadoCentavos)}
-              </Text>
+              {/* LA CIFRA Y SU PUERTA, EN EL MISMO RENGLÓN (30-08-2026,
+                  pedido del dueño). El botón colgaba debajo, a 18 px, en una
+                  tarjeta que sólo tiene esas dos cosas: dos líneas y un vacío
+                  para decir «B/0» y «ver el detalle». Al lado, la tarjeta
+                  mide lo que dice. */}
+              <View style={estilos.filaRecuperado}>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={estilos.cifraEtiqueta}>Lo que has recuperado</Text>
+                  <Text style={estilos.cifraValor}>
+                    {formatearDineroRedondo(datos.recuperadoCentavos)}
+                  </Text>
+                </View>
               {/* Aquí iba «Nadie gana dinero con esto: unos ponen y otros
                   recuperan.», con su filete encima. Fuera el 29-08-2026 a
                   pedido del dueño. La regla se sigue diciendo donde decide
@@ -272,6 +289,7 @@ export default function TuCuenta() {
                 <Text style={estilos.verHistoricoTexto}>Ver histórico</Text>
                 <Avanza tamano={15} />
               </Pressable>
+              </View>
             </View>
 
             {/* **LO QUE FALTA SE PUEDE HACER DESDE AQUÍ.**
@@ -445,9 +463,7 @@ const estilos = StyleSheet.create({
   verHistorico: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
     gap: 4,
-    marginTop: 18,
     // 44, el mínimo de un dedo. Iba a 34.
     height: 44,
     paddingLeft: 15,
@@ -475,8 +491,17 @@ const estilos = StyleSheet.create({
   /** Las tres cifras que el otro mira antes de subirse, en columnas iguales. */
   /* Ahora vive en la cabecera, sobre el lienzo y no dentro de una tarjeta:
      el filete de arriba lo separa del nombre. */
+  /* **DISTRIBUIDAS, NO EN TERCIOS IGUALES** (30-08-2026, «0 viajes is not
+     align»). Cada columna era `flex: 1`: con «0», «—» y «Verificada» dentro,
+     los tres bloques empiezan en su tercio pero acaban donde les da la gana,
+     y la fila se lee torcida. Repartidas por su propio ancho, la primera cae
+     a plomo con el nombre y la última con el canto derecho — que es contra lo
+     que el ojo mide si algo está alineado. */
   loQueVen: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 12,
     marginTop: 18,
     paddingTop: 15,
     borderTopWidth: 1,
@@ -489,7 +514,9 @@ const estilos = StyleSheet.create({
     color: color.ink500,
     fontFamily: familia,
   },
-  loQueVenColumna: { flex: 1, minWidth: 0 },
+  loQueVenColumna: { flexShrink: 1 },
+  /** La última se alinea por su canto derecho, como el borde de la tarjeta. */
+  loQueVenUltima: { alignItems: 'flex-end' },
   loQueVenValor: {
     fontSize: 16.5,
     lineHeight: 22,

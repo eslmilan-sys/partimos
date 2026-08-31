@@ -56,7 +56,7 @@ import { useVolver } from '@/ui/salidas';
 import { deParams } from '@/dominio/lugar';
 import { ciudadesConocidas } from '@/servicios/lugares';
 
-import { aporteCalculado } from '@/dominio/aporte';
+import { aporteCalculado, elTopeMuerde } from '@/dominio/aporte';
 import {
   type PublicacionPreparada,
   prepararPublicacion,
@@ -149,6 +149,10 @@ export default function Repaso() {
 
   const aporte = aporteElegido ?? aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos);
   const cuenta = repartoDelCosto(datos.costoCentavos, aporte, puestos);
+  /* ¿La cifra sale del reparto o del tope de la ruta? Las dos razones por las
+     que el conductor pone más que ellos son distintas, y decir la que no es
+     deja la pantalla mintiendo. */
+  const topeMuerde = elTopeMuerde(datos.costoCentavos, puestos, datos.topeCentavos);
   const salida = new Date(datos.salida);
   const llegada = mas(salida, datos.duracionMin + paradas * MINUTOS_POR_PARADA);
   const enMedio = indicesParadas.map((i) => datos.paradasOfrecidas[i]).filter(Boolean);
@@ -280,7 +284,9 @@ export default function Repaso() {
             <Epigrafe>El aporte</Epigrafe>
 
             <Text style={estilos.repartoEntre}>
-              {`El viaje cuesta ${formatearDinero(cuenta.costoCentavos)} y se reparte entre ${puestos + 1}, contándote a ti.`}
+              {topeMuerde
+                ? `El viaje cuesta ${formatearDinero(cuenta.costoCentavos)}. Van ${puestos + 1} personas, contándote a ti.`
+                : `El viaje cuesta ${formatearDinero(cuenta.costoCentavos)} y se reparte entre ${puestos + 1}, contándote a ti.`}
             </Text>
 
             <View style={estilos.reparto}>
@@ -304,9 +310,15 @@ export default function Repaso() {
             {/* LA REGLA, con su razón al lado (invariante 7). Y ya no es una
                 promesa que haya que creerse: las dos cifras de arriba la
                 enseñan — la de quien maneja es la más grande de las dos. */}
+            {/* LAS DOS RAZONES SON DISTINTAS y hay que decir la que toca.
+                Con el tope mordiendo, «se redondea al dólar de abajo» es
+                falso: de 16,43 a 11 no hay redondeo, hay un tope. Es la
+                pregunta del dueño del 30-08 con la pantalla delante — «¿por
+                qué si son 30 $ pagan 11?». */}
             <Text style={estilos.porQue}>
-              Pones más que ellos porque el aporte se redondea al dólar de abajo, nunca al de
-              arriba. Nadie gana dinero con esto: el carro lleno nunca cubre el viaje entero.
+              {topeMuerde
+                ? `Entre ${puestos + 1} saldría a ${formatearDinero(Math.round(cuenta.costoCentavos / (puestos + 1)))} cada uno, pero el tope de esta ruta es ${formatearDinero(datos.topeCentavos)} por puesto: nadie paga de más por ser el único que va contigo. El resto lo pones tú, y nadie gana dinero con esto.`
+                : 'Pones más que ellos porque el aporte se redondea al dólar de abajo, nunca al de arriba. Nadie gana dinero con esto: el carro lleno nunca cubre el viaje entero.'}
             </Text>
           </View>
 

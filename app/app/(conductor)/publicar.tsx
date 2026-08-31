@@ -76,16 +76,45 @@ const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
  * las tres se eligen, y la lista de rutas es la de los corredores abiertos.
  */
 /**
+ * CUÁNDO SALE, POR DEFECTO — y por qué no son las seis de la mañana.
+ *
+ * Era `dia = hoy` y `hora = '06:00'`, fijas. **A partir de las seis y un
+ * minuto, el asistente se bloqueaba en su cuarto paso**: la salida quedaba en
+ * el pasado y «Continuar» se apagaba con «La salida no puede quedar en el
+ * pasado». Quien abre la app a las nueve de la mañana —o sea, casi todo el
+ * mundo— tenía que descubrir que la culpa era de un valor que nunca eligió.
+ * Encontrado el 30-08-2026 al intentar reproducir otra cosa a las 09:00.
+ *
+ * Ahora sale del reloj: el siguiente cuarto de hora con una hora de margen
+ * —nadie publica un viaje que sale en diez minutos— y, si ya no cabe hoy,
+ * mañana a las seis.
+ */
+function cuandoSalePorDefecto(ahora: Date = new Date()): { dia: string; hora: string } {
+  const MARGEN_MIN = 60;
+  const [h, m] = horaDePanama(ahora).split(':').map(Number);
+  const cuarto = Math.ceil((h * 60 + m + MARGEN_MIN) / 15) * 15;
+  if (cuarto > 23 * 60 + 45) {
+    const manana = new Date(ahora.getTime() + 24 * 3600_000);
+    return { dia: diaEnPanama(manana), hora: '06:00' };
+  }
+  const dosCifras = (n: number) => String(n).padStart(2, '0');
+  return {
+    dia: diaEnPanama(ahora),
+    hora: `${dosCifras(Math.floor(cuarto / 60))}:${dosCifras(cuarto % 60)}`,
+  };
+}
+
+/**
  * LA HORA DE PANAMÁ, en 'HH:MM'. Es el suelo del selector cuando el viaje
  * sale hoy: el teléfono puede estar en cualquier huso y la salida no.
  */
-function horaDePanama(): string {
+function horaDePanama(cuando: Date = new Date()): string {
   return new Intl.DateTimeFormat('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
     timeZone: 'America/Panama',
-  }).format(new Date());
+  }).format(cuando);
 }
 
 
@@ -180,8 +209,9 @@ export default function Publicar() {
   const [hacia, setHacia] = useState<Lugar | null>(null);
   const [buscandoLugar, setBuscandoLugar] = useState<'desde' | 'hacia' | null>(null);
   const [rutaGuardada, setRutaGuardada] = useState(false);
-  const [dia, setDia] = useState(() => diaEnPanama(new Date()));
-  const [horaSalida, setHoraSalida] = useState('06:00');
+  /* La salida por defecto: ver `cuandoSalePorDefecto`. */
+  const [dia, setDia] = useState(() => cuandoSalePorDefecto().dia);
+  const [horaSalida, setHoraSalida] = useState(() => cuandoSalePorDefecto().hora);
   const [eligiendo, setEligiendo] = useState<'dia' | 'hora' | null>(null);
   const [datos, setDatos] = useState<PublicacionPreparada | null>(null);
   /**
@@ -950,7 +980,13 @@ export default function Publicar() {
           {/* El epígrafe va en su propia línea, no al lado del stepper: en un
               teléfono de 390 le quedaban 180 px y «APORTE POR PUESTO» se
               partía en dos, chocando con los botones de al lado. */}
-          <Epigrafe>Aporte por puesto</Epigrafe>
+          {/* «AJUSTA», no sólo «aporte» (30-08-2026, pedido del dueño:
+              «ajustas el precio»). El rótulo nombraba la cifra y no decía que
+              se toca: la regla de abajo es un control, pero un control que
+              nadie sabe que puede mover es un dibujo. Con el verbo delante,
+              el mismo renglón dice qué es el número y qué se puede hacer con
+              él. «Aporte» y no «precio»: aquí nadie cobra un pasaje (R5). */}
+          <Epigrafe>Ajusta el aporte por puesto</Epigrafe>
           <View style={estilos.cifraFila}>
             {/* La cifra del paso, no la de una tarjeta de resultados:
                 `texto.precio` (22) es el precio dentro de una lista de
@@ -985,7 +1021,11 @@ export default function Publicar() {
               max={Math.round(calculado / 100)}
               alCambiar={(v) => setAporteElegido(v * 100)}
               rotuloIzquierda={`Mínimo ${formatearDineroRedondo(Math.min(APORTE_MINIMO_CENTAVOS, calculado))}`}
-              rotuloDerecha={`Tu parte ${formatearDineroRedondo(calculado)}`}
+              /* «Máximo», no «tu parte»: lo que el conductor pone es OTRA
+                 cifra —con un solo puesto, B/21,86 contra un tope de B/11— y
+                 llamar «tu parte» al techo del deslizador era decir un número
+                 por otro justo al lado del que sí es suyo. */
+              rotuloDerecha={`Máximo ${formatearDineroRedondo(calculado)}`}
               etiquetaAccesible="Aporte por puesto"
               comoSeDice={(v) => `${v} balboas por puesto`}
             />
@@ -999,10 +1039,22 @@ export default function Publicar() {
               tercera —la suya— restando. Ahora se dice entre cuántos se
               parte y cuánto pone cada quien, incluido él. */}
           <Text style={estilos.cuenta}>
-            {`El viaje cuesta ${formatearDinero(cuenta.costoCentavos)} y se reparte entre ${puestos + 1}, contándote a ti.`}
+            {/* Con el tope mordiendo, «se reparte entre 2» y el recuadro de
+                abajo se contradicen en dos renglones: no se reparte entre
+                dos, se topa. Aquí sólo dice cuántos van. */}
+            {topeMuerde
+              ? `El viaje cuesta ${formatearDinero(cuenta.costoCentavos)}. Van ${puestos + 1} personas, contándote a ti.`
+              : `El viaje cuesta ${formatearDinero(cuenta.costoCentavos)} y se reparte entre ${puestos + 1}, contándote a ti.`}
           </Text>
+          {/* **Y POR QUÉ NO SALE A PARTES IGUALES.** Con el tope mordiendo,
+              la frase de siempre —«se redondea al dólar de abajo»— era falsa:
+              de 16,43 a 11 no hay un redondeo, hay un tope. El dueño lo
+              preguntó con la pantalla delante: «¿por qué si son 30 $ pagan
+              11?». Cada caso dice su propia razón. */}
           <Text style={estilos.cuenta}>
-            {`Cada pasajero pone ${formatearDineroRedondo(aporte)}. Tú pones ${formatearDinero(cuenta.deTuBolsilloCentavos)}: el aporte se redondea al dólar de abajo, y la diferencia la pones tú.`}
+            {topeMuerde
+              ? `Cada pasajero pone ${formatearDineroRedondo(aporte)} y tú el resto, ${formatearDinero(cuenta.deTuBolsilloCentavos)}.`
+              : `Cada pasajero pone ${formatearDineroRedondo(aporte)}. Tú pones ${formatearDinero(cuenta.deTuBolsilloCentavos)}: el aporte se redondea al dólar de abajo, y la diferencia la pones tú.`}
           </Text>
 
           {/* **POR QUÉ EL APORTE NO SUBE AL QUITAR PUESTOS.** El reparto entre
@@ -1018,8 +1070,13 @@ export default function Publicar() {
           {topeMuerde ? (
             <View style={estilos.notaTope}>
               <Escudo tamano={17} tinta={color.azul500} />
+              {/* DE DÓNDE SALE ESA CIFRA, no sólo que existe. Decía «es el
+                  tope de esta ruta: B/11,00 por puesto», que es circular: es
+                  11 porque es el tope, y el tope es 11. Lo que falta es la
+                  comparación — a cuánto saldría el reparto sin tope — porque
+                  es la resta que el conductor está haciendo de cabeza. */}
               <Text style={estilos.notaTopeTexto}>
-                {`Es el tope de esta ruta: ${formatearDinero(datos.topeCentavos)} por puesto. Ofrecer menos puestos no lo sube — el precio no depende de cuántos queden.`}
+                {`Entre ${puestos + 1} saldría a ${formatearDinero(Math.round(cuenta.costoCentavos / (puestos + 1)))} cada uno, pero el tope de esta ruta es ${formatearDinero(datos.topeCentavos)} por puesto y no sube porque queden pocos puestos: nadie paga de más por ser el único que va contigo.`}
               </Text>
             </View>
           ) : null}
