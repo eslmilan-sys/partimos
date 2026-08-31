@@ -35,9 +35,17 @@ export type Aportes = {
   /** La frase que le da sentido al número. */
   resumen: string;
   viajes: AporteDeViaje[];
-  /** Dónde cae, ya escrito: «Yappy · 7788». */
-  donde: string;
-  cadaCuando: string;
+  /**
+   * LOS ÚLTIMOS DÍGITOS DEL YAPPY, o `null` si no hay ninguno guardado.
+   *
+   * Antes salían de aquí dos frases hechas —«Yappy · 7788» y «Se envía cada
+   * lunes»— que la pantalla sólo tenía que pintar. El resultado, en la
+   * captura del dueño del 30-08-2026, era una tarjeta con una «Y» y dos
+   * renglones que no decían **cuánto** ni **cuándo**: aparecía después del
+   * histórico sin venir a cuento. La frase la escribe ahora la pantalla, con
+   * el envío que de verdad está pendiente (`proximoEnvio`).
+   */
+  yappy: string | null;
 };
 
 const MESES = [
@@ -96,8 +104,8 @@ export async function aportes(conductorId: string, tramo: Tramo = 'mes'): Promis
       centavos: e.amount_cents,
       cuando: e.occurred_at,
     })),
-    donde: `Yappy · ${fuente.yappyDelConductor[conductorId as keyof typeof fuente.yappyDelConductor] ?? ''}`,
-    cadaCuando: 'Se envía cada lunes',
+    yappy:
+      fuente.yappyDelConductor[conductorId as keyof typeof fuente.yappyDelConductor] ?? null,
   });
 }
 

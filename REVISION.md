@@ -91,7 +91,12 @@ est entre parenthèses.
 3. `(conductor)/publicar` — **les huit étapes**, une par écran : route,
    paradas, jour, heure, carro et places, apport, apport par tronçon,
    conditions, commentaire. Vérifier que l'heure passée se refuse **à
-   l'étape de l'heure**, et que les paradas sortent aussi en route libre
+   l'étape de l'heure**, et que les paradas sortent aussi en route libre.
+   Depuis le 30-08 : l'heure a des **minutes** (grille de 24 heures + les
+   quarts), le pas du carro est **une voiture 2D où l'on touche les
+   sièges**, et l'apport a **une règle** au lieu d'un ±. Les trois sondes
+   `herramientas/publicar-*.mjs` traversent l'assistant : `auditar.mjs` ne
+   voit que la première étape
 4. `(conductor)/repaso` → publié
 5. `(conductor)/panel` — ses trajets publiés, « Editar », « Compartir »,
    « Publicar de nuevo »
@@ -99,8 +104,12 @@ est entre parenthèses.
    qu'on **ne puisse pas accepter une demande sur un trajet déjà parti**
 7. `(conductor)/solicitante` — la fiche de qui demande
 8. `(conductor)/abordaje` — taper les codes
-9. `(conductor)/aportes` — l'historique, `(conductor)/tope`,
-   `(conductor)/puestos`, `(conductor)/editar`
+9. `(conductor)/aportes` — l'historique (avec la date de chaque trajet) et,
+   au-dessus, **l'envoi Yappy qui est en attente** : la somme, la semaine
+   couverte, le lundi où il part. Vérifier que la phrase « seul ce qui a été
+   payé dans l'app passe par là » y est : sans elle, un conducteur payé en
+   liquide attend un virement qui ne viendra jamais. Puis
+   `(conductor)/tope`, `(conductor)/puestos`, `(conductor)/editar`
 
 ## Le reste
 
@@ -147,6 +156,12 @@ est entre parenthèses.
 - Pas de push téléphone fermé : il manque un cron et un canal.
 - Le bouton « Cuéntame », en bas à droite de l'écran, est l'outil de test :
   il se retire en enlevant une ligne de `_layout.tsx`.
+- **Le rond « Atrás » fait 40×40 partout**, sous les 44 px du doigt. C'est
+  le style `circulo`, répété sur tous les écrans : le corriger est une passe
+  à lui seul, pas un défaut par écran. Inutile de le signaler 55 fois.
+- Au pas `carro` de `publicar`, les sondes de contraste sortent « B/6 à
+  1:1 » : le fond du chiffre est un `<rect>` SVG derrière le bouton, pas un
+  parent CSS. C'est du blanc sur `ink900`, à 15:1.
 
 ---
 

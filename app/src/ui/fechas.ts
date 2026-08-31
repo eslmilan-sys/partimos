@@ -90,6 +90,13 @@ export function numeroDeDia(d: Date | string): string {
   return soloNumero.format(new Date(d));
 }
 
+const mesEntero = new Intl.DateTimeFormat('es-PA', { month: 'long', timeZone: ZONA });
+
+/** «agosto» — el mes entero en minúscula, para meterlo en una frase. */
+export function mesLargo(d: Date | string): string {
+  return mesEntero.format(new Date(d));
+}
+
 /** «Sep» — el mes en tres letras, con mayúscula y sin punto. */
 export function mesAbrev(d: Date | string): string {
   const m = soloMes.format(new Date(d)).replace('.', '');

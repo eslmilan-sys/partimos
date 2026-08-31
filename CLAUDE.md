@@ -643,3 +643,66 @@ cibles sous 44 px, texte tronqué, cartes sans padding, contenu coupé par
 une barre fixe, et `button` dans `button`. **Les relancer avant de dire
 qu'un écran va bien** — quatre défauts sur cinq de cette journée ne se
 voyaient pas à l'œil.
+
+## La passe du 30-08-2026 — publier comme BlaBlaCar, et l'argent qui arrive
+
+Sept points, tous partis de captures du téléphone. Ce qu'il faut en retenir
+avant de « corriger » quoi que ce soit ici :
+
+### Les paradas d'une route libre ne dépendent plus de l'écran
+
+`prepararPublicacion` recevait le couple `libre` **que l'écran voulait bien
+lui passer** : `publicar.tsx` ne l'envoie que quand son état `ruta` est vide,
+et cet état est posé par un *autre* effet du même rendu. Le temps d'un
+peinture, la route affichée et la route calculée pouvaient différer — et si
+c'est cet appel-là qui gagnait la course de promesses, l'écran disait
+« Ciudad de Panamá → Las Tablas » et dessous « no conocemos ninguna ciudad
+entre las dos ». **Non reproductible en local**, ce qui est exactement ce qui
+rend le motif dangereux.
+
+`paradasQueSeOfrecen` prend maintenant **les deux points déjà résolus** — les
+mêmes qui ont servi à mesurer les kilomètres, les mêmes dont les noms sont
+dans l'en-tête. Il n'y a plus de chemin par lequel l'en-tête dise une paire
+et les arrêts se calculent sur une autre. Et `dondeCae` complète les
+coordonnées depuis le catalogue quand la ville arrive avec `lat: null`.
+
+### Trois contrôles neufs, dans `src/ui/`
+
+| | |
+|---|---|
+| `ElegirHora.tsx` | Les 24 heures en grille de six, les quarts dessous. **Les heures pleines seules, c'était mentir d'une demi-heure.** Ce qui est passé sort éteint, comme les jours passés du calendrier. |
+| `CarroConPuestos.tsx` | La voiture vue de dessus, en SVG. On touche un siège pour l'offrir, et **ce que ce siège rapporte est écrit dedans**. Remplace deux steppers « Adelante ± / Atrás ± » qui comptaient sans montrer. Le siège du volant ne s'offre jamais : il a son volant et son « Tú ». |
+| `Regula.tsx` | La règle du prix. Le plancher, le plafond de la route et la marque du suggéré, d'un coup d'œil ; les ± restent aux deux bouts, parce qu'un doigt n'attrape pas un dollar exact sur 280 px. **Pas de zone rouge, contrairement à BlaBlaCar** : ici le bout droit est le tope et on ne peut pas le dépasser (R1). |
+
+Les deux couches de `CarroConPuestos` — le SVG qui dessine, les `Pressable`
+qui touchent — **lisent la même géométrie** (`VOLANTE`, `COPILOTO`, `BANCO`).
+Si elles se séparaient, le toucher tomberait à côté du siège.
+
+### Les mots
+
+- La pastille de l'apport disait « calculado » et « lo pusiste tú ». Le
+  premier est le participe d'une machine, le second fait de *poner* un verbe
+  de prix. Maintenant **« sugerido »** et **« lo cambiaste »**. « Tope de la
+  ruta » reste : c'est le nom propre d'une chose qui a son écran.
+
+### `(conductor)/aportes` : ce qui arrive, avant ce qui est arrivé
+
+La carte Yappy en bas de l'historique ne disait ni combien ni quand — une
+marque de banque posée là sans raison. Elle porte maintenant **l'envoi
+réellement en attente** (`proximoEnvio`, qui était calculé et que personne ne
+lisait) : la somme, la semaine couverte, le lundi où il part. Et surtout la
+phrase qui manquait partout : **seul ce qui a été payé dans l'app passe par
+là** ; l'espèce et le Yappy direct sont déjà dans la poche. Sans elle, un
+conducteur payé en liquide attend un lundi qui ne viendra pas.
+
+L'historique porte enfin **la date de chaque trajet**.
+
+### Ce qui reste, et qui n'est pas de cette passe
+
+Le rond « Atrás » fait 40×40 sur **tous** les écrans — le seul défaut de
+cible que les sondes trouvent encore. C'est un choix de `circulo` répété
+partout : le changer est une passe à lui seul.
+
+`herramientas/publicar-tiros.mjs`, `publicar-hojas.mjs` et
+`publicar-auditar.mjs` traversent l'assistant étape par étape ; `auditar.mjs`
+ne voit que la première, puisque les suivantes n'existent qu'après des clics.

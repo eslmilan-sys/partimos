@@ -509,25 +509,41 @@ function dondeCae(l: Lugar | null | undefined): { lat: number; lng: number } | n
   return null;
 }
 
+/**
+ * LAS PARADAS SALEN DE LOS DOS EXTREMOS QUE LA PANTALLA ENSEÑA, y de nada
+ * más.
+ *
+ * Antes recibía el par `libre` que le pasaba la pantalla, y ahí estaba la
+ * fragilidad: `publicar` sólo manda `libre` cuando su estado `ruta` está
+ * vacío, y ese estado lo pone OTRO efecto en el mismo render. Durante un
+ * pintado, la ruta que se enseña y la que se usa para calcular pueden ser
+ * distintas — y si esa llamada es la que gana la carrera de promesas, sale
+ * una pantalla que dice «Ciudad de Panamá → Las Tablas» y debajo «no
+ * conocemos ninguna ciudad entre las dos» (visto por el dueño el 30-08-2026;
+ * no reproducible en local, que es justo lo que hace peligroso el patrón).
+ *
+ * Ahora recibe los DOS PUNTOS ya resueltos, los mismos con los que se
+ * calcularon los kilómetros y los mismos cuyos nombres van en la cabecera.
+ * No hay forma de que la cabecera diga un par y las paradas se calculen de
+ * otro: es el mismo dato.
+ */
 function paradasQueSeOfrecen(
   corredorSlug: string,
-  desde: Lugar | null | undefined,
-  hasta: Lugar | null | undefined,
+  a: { lat: number; lng: number } | null,
+  b: { lat: number; lng: number } | null,
+  extremos: (string | null | undefined)[],
 ): { etiqueta: string; fraccion: number }[] {
   const declaradas = fuente.paradasDeLaRuta[corredorSlug];
   if (declaradas && declaradas.length > 0) return declaradas;
-
-  const a = dondeCae(desde);
-  const b = dondeCae(hasta);
   if (!a || !b) return [];
 
   /* Los dos extremos no son paradas del camino: son el camino. Se van por
-     `citySlug` y no por nombre, porque el conductor pudo escribir «Costa
-     del Este» y la ciudad seguir siendo Ciudad de Panamá. */
-  const extremos = new Set([desde?.citySlug, hasta?.citySlug].filter(Boolean));
+     `slug` y no por nombre, porque el conductor pudo escribir «Costa del
+     Este» y la ciudad seguir siendo Ciudad de Panamá. */
+  const fuera = new Set(extremos.filter(Boolean));
   const candidatas = fuente.ciudades.filter(
     (c): c is typeof c & { lat: number; lng: number } =>
-      c.lat != null && c.lng != null && !extremos.has(c.slug),
+      c.lat != null && c.lng != null && !fuera.has(c.slug),
   );
 
   return paradasEnElCamino(a, b, candidatas).map((p) => ({
@@ -630,6 +646,28 @@ export async function prepararPublicacion(
   const punto = (l: Lugar | undefined) =>
     l && l.lat != null && l.lng != null ? { lat: l.lat, lng: l.lng } : null;
 
+  /* LOS DOS EXTREMOS, RESUELTOS UNA SOLA VEZ. Es el par con el que se
+     midieron los kilómetros y el par cuyos nombres van en la cabecera; las
+     paradas salen de él y de nada más. Con corredor son sus dos ciudades; sin
+     corredor, los dos lugares elegidos —completados desde el almacén cuando
+     llegan sin coordenadas (`dondeCae`). */
+  const ciudadDeId = (id: string) => fuente.ciudades.find((c) => c.id === id) ?? null;
+  const ciudadA = corredor ? ciudadDeId(corredor.origin_city_id) : null;
+  const ciudadB = corredor ? ciudadDeId(corredor.destination_city_id) : null;
+  const extremoA = corredor
+    ? ciudadA && ciudadA.lat != null && ciudadA.lng != null
+      ? { lat: ciudadA.lat, lng: ciudadA.lng }
+      : null
+    : dondeCae(libre!.desde);
+  const extremoB = corredor
+    ? ciudadB && ciudadB.lat != null && ciudadB.lng != null
+      ? { lat: ciudadB.lat, lng: ciudadB.lng }
+      : null
+    : dondeCae(libre!.hacia);
+  const slugsDeLosExtremos = corredor
+    ? [ciudadA?.slug, ciudadB?.slug]
+    : [libre!.desde.citySlug, libre!.hacia.citySlug];
+
   return demora({
     corredor,
     origenCiudadId: corredor ? corredor.origin_city_id : ciudadId(libre?.desde.citySlug),
@@ -656,7 +694,12 @@ export async function prepararPublicacion(
        salen aquí, donde se conoce la duración. Así una parada al 60 % de un
        viaje de tres horas cae a las 1 h 48, y no en un número escrito a mano
        que deja de valer en cuanto cambia la ruta. */
-    paradasOfrecidas: paradasQueSeOfrecen(corredorSlug, libre?.desde, libre?.hacia).map((p) => ({
+    paradasOfrecidas: paradasQueSeOfrecen(
+      corredorSlug,
+      extremoA,
+      extremoB,
+      slugsDeLosExtremos,
+    ).map((p) => ({
       nombre: p.etiqueta,
       minutos: Math.round(p.fraccion * duracionMin),
     })),

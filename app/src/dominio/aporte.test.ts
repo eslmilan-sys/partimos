@@ -66,11 +66,11 @@ test('con el carro lleno el conductor recupera 24 $ de 29,19 $ y pone 5,19 $', (
 });
 
 test('la pastilla dice de dónde sale la cifra', () => {
-  assert.equal(origenDelAporte(null, 600, 700), 'calculado');
-  assert.equal(origenDelAporte(500, 500, 700), 'lo pusiste tú');
+  assert.equal(origenDelAporte(null, 600, 700), 'sugerido');
+  assert.equal(origenDelAporte(500, 500, 700), 'lo cambiaste');
   assert.equal(origenDelAporte(700, 700, 700), 'tope de la ruta');
-  // Topado SIN que nadie haya escrito la cifra: la pastilla dice el tope, no
-  // «calculado». Es la pregunta de «¿por qué de 1 a 2 puestos no cambia?».
+  // Topado SIN que nadie haya tocado la cifra: la pastilla dice el tope, no
+  // «sugerido». Es la pregunta de «¿por qué de 1 a 2 puestos no cambia?».
   assert.equal(origenDelAporte(null, 700, 700), 'tope de la ruta');
 });
 

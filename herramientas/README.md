@@ -1,6 +1,6 @@
 # Sondes
 
-Cinq scripts qui **mesurent** l'app dans un vrai navigateur, plus un qui
+Huit scripts qui **mesurent** l'app dans un vrai navigateur, plus un qui
 répare la police. Ils ne remplacent pas de regarder l'écran : ils trouvent ce
 que l'œil ne voit pas.
 
@@ -20,7 +20,15 @@ node graves.mjs  "(ayuda)" "(conductor)/tope"
 node relleno.mjs "(conductor)/carro"
 node tapado.mjs  "(conductor)/panel"
 node barrido.mjs "(pasajero)/viaje"        # + captures dans tiros/
+
+node publicar-tiros.mjs                    # l'assistant, une capture par étape
+node publicar-hojas.mjs                    # l'heure et les sièges, qu'il faut ouvrir
+node publicar-auditar.mjs                  # contraste et cibles À CHAQUE étape
 ```
+
+Les trois derniers ne prennent pas de route : ils **traversent** l'assistant
+de publication. `publicar-tiros.mjs` accepte deux villes en arguments
+(`node publicar-tiros.mjs "Ciudad de Panamá" David`).
 
 Sans argument ils ne font rien : on leur passe les routes à regarder. La
 liste complète des routes sort de `find app/app -name '*.tsx'`.
@@ -45,6 +53,19 @@ versionné.
 | `relleno.mjs` | cartes sans padding |
 | `tapado.mjs` | contenu coupé par une barre fixe |
 | `barrido.mjs` | captures + `button` dans `button`, débordement |
+| `publicar-tiros.mjs` | une capture par étape de `(conductor)/publicar` |
+| `publicar-hojas.mjs` | le sélecteur d'heure ouvert, et les sièges qu'on retire |
+| `publicar-auditar.mjs` | `auditar.mjs`, mais aux huit étapes de l'assistant |
+
+**Pourquoi trois de plus pour un seul écran.** `auditar.mjs` charge une route
+et mesure ce qu'il voit ; les étapes 2 à 8 de `publicar` n'existent qu'après
+des clics, donc elles n'étaient mesurées par personne. Deux cibles sous
+44 px y dormaient.
+
+**Un faux positif connu** : au pas `carro`, le contraste des chiffres écrits
+dans les sièges sort à 1:1. Le fond du texte est un `<rect>` SVG **derrière**
+le bouton, pas un parent CSS ; la sonde remonte les parents et trouve le
+blanc de la carte. En vrai c'est du blanc sur `ink900`, à 15:1.
 
 ## Et la police
 

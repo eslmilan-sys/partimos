@@ -116,7 +116,21 @@ export function aporteCalculado(
   return Math.min(topeCentavos, Math.max(APORTE_MINIMO_CENTAVOS, reparto));
 }
 
-export type OrigenDelAporte = 'calculado' | 'lo pusiste tú' | 'tope de la ruta';
+/**
+ * DE DÓNDE SALE LA CIFRA, dicho como se dice hablando.
+ *
+ * Eran «calculado», «lo pusiste tú» y «tope de la ruta» (30-08-2026, pedido
+ * del dueño: «needs something that is more natural»). «Calculado» es el
+ * participio de una máquina — nadie le dice a un amigo que su aporte está
+ * calculado—, y «lo pusiste tú» hace de *poner* un verbo de precios que en
+ * español no lo es; además señala a la persona en una pastilla que no acusa
+ * a nadie, sólo dice de dónde viene el número.
+ *
+ * «Sugerido» y «lo cambiaste» son las dos frases que se dirían de verdad.
+ * «Tope de la ruta» se queda: no es jerga nuestra sino el nombre propio de
+ * una cosa que tiene su pantalla —`(conductor)/tope`— y su explicación.
+ */
+export type OrigenDelAporte = 'sugerido' | 'lo cambiaste' | 'tope de la ruta';
 
 /**
  * La pastilla que va al lado de la cifra en `5c`.
@@ -140,7 +154,7 @@ export function origenDelAporte(
   topeCentavos: number,
 ): OrigenDelAporte {
   if (aporteCentavos >= topeCentavos) return 'tope de la ruta';
-  return elegidoPorElConductor == null ? 'calculado' : 'lo pusiste tú';
+  return elegidoPorElConductor == null ? 'sugerido' : 'lo cambiaste';
 }
 
 /**

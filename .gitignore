@@ -21,3 +21,4 @@ expo-env.d.ts
 # donde se vayan a correr y no se versiona.
 herramientas/node_modules/
 herramientas/tiros/
+herramientas/package-lock.json

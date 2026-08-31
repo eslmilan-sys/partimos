@@ -4,7 +4,7 @@
  *
  * Aquí vive el modelo entero. Mover el stepper de puestos recalcula el aporte,
  * reescribe el botón y reescribe la cuenta de abajo. La pastilla dice de dónde
- * sale la cifra: calculado, lo pusiste tú, o tope de la ruta.
+ * sale la cifra: sugerido, lo cambiaste, o tope de la ruta.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -14,10 +14,16 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
 
-import { CONSUMO_L_100KM, aporteCalculado, costoDelViaje, elTopeMuerde, origenDelAporte } from '@/dominio/aporte';
+import {
+  APORTE_MINIMO_CENTAVOS,
+  CONSUMO_L_100KM,
+  aporteCalculado,
+  costoDelViaje,
+  elTopeMuerde,
+  origenDelAporte,
+} from '@/dominio/aporte';
 import {
   type Reparto,
-  cambiarReparto,
   comodidadDeAtras,
   cuantosPuestos,
   puedeOfrecerSoloMujeres,
@@ -48,9 +54,12 @@ import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
 import { Cargando } from '@/ui/Cargando';
+import { Regula } from '@/ui/Regula';
+import { CarroConPuestos } from '@/ui/CarroConPuestos';
 import { Brillo, CampoRojo } from '@/ui/CampoRojo';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { ElegirDia, diaEnChip } from '@/ui/ElegirDia';
+import { ElegirHora, franjaDelDia } from '@/ui/ElegirHora';
 import { Boton, Epigrafe, Interruptor, Pastilla, Stepper } from '@/ui/controles';
 import { cifraRedonda, formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, hora, mas } from '@/ui/fechas';
@@ -66,7 +75,18 @@ const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
  * conductor solo podía publicar Panamá → Chitré, ese día, a esa hora. Ahora
  * las tres se eligen, y la lista de rutas es la de los corredores abiertos.
  */
-const HORAS = Array.from({ length: 19 }, (_, i) => `${String(i + 5).padStart(2, '0')}:00`);
+/**
+ * LA HORA DE PANAMÁ, en 'HH:MM'. Es el suelo del selector cuando el viaje
+ * sale hoy: el teléfono puede estar en cualquier huso y la salida no.
+ */
+function horaDePanama(): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'America/Panama',
+  }).format(new Date());
+}
 
 
 /** Lo que cuesta desviarse a recoger en cada parada. */
@@ -689,25 +709,50 @@ export default function Publicar() {
             >
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.eleccionEtiqueta}>Recojo a las</Text>
-                <Text style={[estilos.eleccionValorGrande, tabular]}>{horaSalida}</Text>
+                {/* La franja al lado de la cifra, no sólo dentro de la hoja:
+                    en un reloj de 24 h «18:30» y «06:30» se confunden de
+                    reojo, y aquí es donde se comprueba antes de seguir. */}
+                <View style={estilos.filaValor}>
+                  <Text style={[estilos.eleccionValorGrande, tabular]}>{horaSalida}</Text>
+                  <Text style={estilos.franjaDelDia}>{franjaDelDia(horaSalida)}</Text>
+                </View>
               </View>
               <Avanza tinta={color.ink300} />
             </Pressable>
             <Text style={estilos.notaParadas}>
-              {`Llegas sobre las ${llegada}. Es una estimación con las paradas que elegiste.`}
+              {saleEnElPasado
+                ? 'Esa hora ya pasó. Elige una más tarde, o cambia el día.'
+                : `Llegas sobre las ${llegada}. Es una estimación con las paradas que elegiste.`}
             </Text>
           </>
           ) : null}
 
           {paso === 'carro' ? (
           <>
-          <View style={estilos.filaCarro}>
-            <Carro />
-            <Text style={estilos.textoCarro} numberOfLines={1}>
-              {`${datos.carro.model} ${datos.carro.color} · `}
-              <Text style={tabular}>{datos.placa}</Text>
-              <Text style={estilos.carroApagado}>{` · ${datos.puestosMaximos} puestos`}</Text>
-            </Text>
+          {/* LA TARJETA DEL CARRO, arriba y aparte (30-08-2026, pedido del
+              dueño: «make it more like the blablacar infrastructure»). Era un
+              renglón único —«Elantra gris · ··· · 4 puestos»— que mezclaba
+              tres cosas de distinto peso en la misma línea, y donde faltaba
+              una salía el hueco: la captura del dueño enseña «Elantra gris ·
+              · 4 puestos», con el separador de la placa que no existe.
+              Nombre arriba, lo demás debajo, y cada trozo que falta
+              desaparece con su separador. */}
+          <View style={estilos.tarjetaCarro}>
+            <View style={estilos.iconoCarro}>
+              <Carro />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={estilos.nombreCarro} numberOfLines={1}>
+                {[datos.carro.make, datos.carro.model, datos.carro.color?.toLowerCase()]
+                  .filter(Boolean)
+                  .join(' ')}
+              </Text>
+              <Text style={[estilos.detalleCarro, tabular]} numberOfLines={1}>
+                {[datos.placa, `${datos.carro.seats_total} plazas`]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Text>
+            </View>
             {/**
              * «Cambiar» era un `Text` suelto: no era pulsable en absoluto, ni
              * con el dedo ni con lector de pantalla. Es uno de los tres
@@ -730,56 +775,31 @@ export default function Publicar() {
                   ? setEligiendoCarro(true)
                   : router.push('/(conductor)/carro')
               }
-              style={[{ marginLeft: 'auto', paddingHorizontal: 6 }, zonaDeToque]}
+              style={[{ marginLeft: 'auto', paddingHorizontal: 10 }, zonaDeToque]}
             >
               <Text style={estilos.cambiar}>{misCarros.length > 1 ? 'Elegir' : 'Cambiar'}</Text>
             </Pressable>
           </View>
 
-          {/* **CUÁNTOS PUESTOS Y DÓNDE** (0045). Antes era un solo número, y
-              el sitio importa: tres atrás van apretados, dos van cómodos, y
-              el de adelante es otro viaje. Dicho así, «máx. 2 personas atrás»
-              deja de ser una casilla aparte — es haber puesto 2 atrás. */}
-          <View style={estilos.filaPuestos}>
-            {/* Sólo «Adelante» y «Atrás». Llevaban una coletilla cada uno
-                —«· junto a ti», «· el banco lleva 3»— que no decidía nada:
-                el conductor sabe dónde va sentado y cuánta gente le cabe
-                atrás, y el propio ± ya no le deja pasarse. Quitadas el
-                29-08-2026 a pedido del dueño. */}
-            <Text style={estilos.textoPuestos}>Adelante</Text>
-            <Stepper
-              valor={reparto.adelante}
-              alCambiar={(v) => {
-                setReparto((r) => cambiarReparto(r, 'adelante', v - r.adelante));
+          {/* **CUÁNTOS PUESTOS Y DÓNDE**, sobre el carro dibujado (0045, y
+              30-08-2026 el dibujo). Eran dos steppers, «Adelante −/+» y
+              «Atrás −/+»: dos contadores sobre un carro que no se veía, con
+              lo que cada quien aporta a dos pasos de distancia. Ahora se toca
+              el asiento, y la cifra está escrita dentro. Ver
+              `ui/CarroConPuestos`. */}
+          <Epigrafe>Toca los puestos que ofreces</Epigrafe>
+          <View style={estilos.dibujoDelCarro}>
+            <CarroConPuestos
+              maximos={datos.puestosMaximos}
+              reparto={reparto}
+              aporteCentavos={aporte}
+              nota={comodidadDeAtras(reparto)}
+              alCambiar={(r) => {
+                setReparto(r);
                 setAporteElegido(null);
               }}
-              min={0}
-              max={1}
-              etiquetaAccesible="Puestos adelante"
             />
           </View>
-
-          <View style={estilos.filaPuestos}>
-            <Text style={estilos.textoPuestos}>Atrás</Text>
-            <Stepper
-              valor={reparto.atras}
-              alCambiar={(v) => {
-                setReparto((r) => cambiarReparto(r, 'atras', v - r.atras));
-                setAporteElegido(null);
-              }}
-              min={0}
-              max={Math.min(3, Math.max(0, datos.puestosMaximos - reparto.adelante))}
-              etiquetaAccesible="Puestos atrás"
-            />
-          </View>
-
-          <Text style={estilos.cuenta}>
-            {puestos === 0
-              ? 'Sin puestos no hay viaje que publicar: pon al menos uno.'
-              : `${puestos === 1 ? 'Ofreces 1 puesto' : `Ofreces ${puestos} puestos`}${
-                  comodidadDeAtras(reparto) ? ` · ${comodidadDeAtras(reparto)}` : ''
-                }.`}
-          </Text>
           </>
           ) : null}
 
@@ -931,25 +951,31 @@ export default function Publicar() {
               teléfono de 390 le quedaban 180 px y «APORTE POR PUESTO» se
               partía en dos, chocando con los botones de al lado. */}
           <Epigrafe>Aporte por puesto</Epigrafe>
-          <View style={estilos.filaAporte}>
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <View style={estilos.cifraFila}>
-                {/* La cifra del paso, no la de una tarjeta de resultados:
-                    `texto.precio` (22) es el precio dentro de una lista de
-                    viajes, donde compite con otros ocho. Aquí es LA respuesta
-                    de la pantalla y va como las demás respuestas del asistente. */}
-                <Text style={[estilos.cifraDelAporte, tabular]}>
-                  {formatearDineroRedondo(aporte)}
-                </Text>
-                <Pastilla estilo={{ marginBottom: 3 }}>{origen}</Pastilla>
-              </View>
-            </View>
-            <Stepper
+          <View style={estilos.cifraFila}>
+            {/* La cifra del paso, no la de una tarjeta de resultados:
+                `texto.precio` (22) es el precio dentro de una lista de
+                viajes, donde compite con otros ocho. Aquí es LA respuesta
+                de la pantalla y va como las demás respuestas del asistente. */}
+            <Text style={[estilos.cifraDelAporte, tabular]}>
+              {formatearDineroRedondo(aporte)}
+            </Text>
+            <Pastilla estilo={{ marginBottom: 3 }}>{origen}</Pastilla>
+          </View>
+
+          {/* LA REGLA, no el ±. Ver `ui/Regula`: enseña el recorrido entero
+              —el suelo, el tope de la ruta y la marca de lo sugerido— en vez
+              de descubrirlos al chocar. Los ± siguen en sus extremos. */}
+          <View style={estilos.regula}>
+            <Regula
               valor={Math.round(aporte / 100)}
-              alCambiar={(v) => setAporteElegido(v * 100)}
-              min={3}
+              min={Math.round(APORTE_MINIMO_CENTAVOS / 100)}
               max={Math.round(datos.topeCentavos / 100)}
-              etiquetaAccesible="Aporte por puesto, en dólares"
+              marca={Math.round(calculado / 100)}
+              alCambiar={(v) => setAporteElegido(v * 100)}
+              rotuloIzquierda={`Mínimo ${formatearDineroRedondo(APORTE_MINIMO_CENTAVOS)}`}
+              rotuloDerecha={`Tope ${formatearDineroRedondo(datos.topeCentavos)}`}
+              etiquetaAccesible="Aporte por puesto"
+              comoSeDice={(v) => `${v} balboas por puesto`}
             />
           </View>
 
@@ -1221,15 +1247,15 @@ export default function Publicar() {
         alElegir={setDia}
         alCerrar={() => setEligiendo(null)}
       />
-      <HojaDeEleccion
+      <ElegirHora
         abierta={eligiendo === 'hora'}
         titulo="A qué hora sales"
-        opciones={HORAS.map((h) => ({ valor: h, etiqueta: h }))}
         elegido={horaSalida}
-        alElegir={(v) => {
-          setHoraSalida(v);
-          setEligiendo(null);
-        }}
+        /* Sólo si sales HOY: entonces lo que ya pasó sale apagado en la
+           rejilla, en vez de dejarse elegir para que el botón de seguir se
+           apague dos líneas más abajo. Cualquier otro día, todas valen. */
+        minimo={dia === diaEnPanama(new Date()) ? horaDePanama() : undefined}
+        alElegir={setHoraSalida}
         alCerrar={() => setEligiendo(null)}
       />
     </View>
@@ -1358,6 +1384,8 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
+  filaValor: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  franjaDelDia: { fontSize: 14, lineHeight: 20, color: color.ink500, fontFamily: familia },
   separadorHoja: { height: 1, backgroundColor: color.bordeSutil, marginVertical: 14 },
 
   cuentaParadas: {
@@ -1373,7 +1401,11 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    height: 34,
+    /* 44, no 34: es el control MÁS pulsado de este paso —dieciséis ciudades
+       para elegir dos— y era el único de la pantalla por debajo del mínimo
+       de un dedo (Apple y Material piden 44). Medido con
+       `herramientas/publicar-auditar.mjs`. */
+    height: 44,
     paddingLeft: 9,
     paddingRight: 12,
     borderRadius: radio.ficha,
@@ -1408,15 +1440,27 @@ const estilos = StyleSheet.create({
     color: color.ink600,
     fontFamily: familia,
   },
-  filaCarro: {
+  /** La tarjeta del carro: el icono en su cuadro, y dos renglones al lado. */
+  tarjetaCarro: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 11,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: color.bordeSutil,
+    gap: 12,
+    padding: 12,
+    marginBottom: 16,
+    borderRadius: radio.control,
+    backgroundColor: color.sand100,
   },
-  textoCarro: { flex: 1, ...texto.fila, color: color.ink900 },
+  iconoCarro: {
+    width: 42,
+    height: 42,
+    borderRadius: radio.icono,
+    backgroundColor: color.blanco,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nombreCarro: { ...texto.fila, fontWeight: '600', color: color.ink900 },
+  detalleCarro: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
+  dibujoDelCarro: { marginTop: 12 },
   carroApagado: { fontWeight: '400', color: color.ink600, fontFamily: familia },
   /** Small 12/17 en el acento de texto: en el v1 lo que actúa es rojo. */
   cambiar: { fontSize: 12, lineHeight: 17, fontWeight: '500', color: color.rojo700, fontFamily: familia },
@@ -1493,7 +1537,8 @@ const estilos = StyleSheet.create({
     overflow: 'hidden',
   },
   filaAporte: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 },
-  cifraFila: { flexDirection: 'row', alignItems: 'flex-end', gap: 7 },
+  cifraFila: { flexDirection: 'row', alignItems: 'flex-end', gap: 7, marginTop: 8 },
+  regula: { marginTop: 12, marginBottom: 4 },
   cifraDelAporte: {
     fontSize: 32,
     lineHeight: 37,
