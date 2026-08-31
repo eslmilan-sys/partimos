@@ -829,3 +829,39 @@ siège offert** — au-delà, c'est le partage juste qui plafonne (30-08).
 Et le libellé droit de la règle disait « Tu parte B/11 » : c'est le maximum
 demandable, pas sa part à lui — qui vaut 21,86 sur le même écran. Un nombre
 donné pour un autre, juste à côté du vrai.
+
+### La maquette du profil — 31-08-2026
+
+Le propriétaire a envoyé une maquette de `(cuenta)/cuenta` et demandé de
+l'appliquer telle quelle. C'est fait : avatar large avec son insigne de
+vérification, nom + pastille verte, ville, **carte de statistiques en encre**
+(trajets · note · cédula) séparée par deux filets, rótulo « Mi cuenta », liste
+à icônes avec sous-titre et valeur, bloc de partage, déconnexion à voix basse.
+Ajustes est monté dans **l'engrenage en haut à droite**.
+
+**Trois choses de la maquette n'ont pas été copiées, et ce sont des
+décisions :**
+
+1. **Le bloc « Resumen de tu aporte · 35 kg de CO₂ » est parti** — demandé
+   dans le même message. On n'a ni la donnée ni de quoi la calculer
+   honnêtement.
+2. **« Invita y gana · Gana B/.2,00 por cada amigo que viaje » ne peut pas
+   s'écrire.** R5 interdit « gana dinero » dans l'interface, et ici ce n'était
+   pas une façon de parler : c'était un paiement au parrainage, qui ferait de
+   chaque utilisateur le commissionnaire d'une plateforme qui ne prend pas de
+   commission. Le bloc garde sa place et son poids et dit ce qui est vrai :
+   **partage l'app et son lien**.
+3. **Le bouton « scanner » n'existe pas.** Il n'y a rien à scanner dans ce
+   produit, et un contrôle mort est le premier défaut de la liste de
+   `REVISION.md`.
+
+Et une ligne que la maquette ne porte pas mais qui reste : **« Ayuda y
+contacto »**. Sans elle il n'y a aucune porte vers l'aide depuis le profil.
+
+**Le vert vient du système** (`hechoFondo`/`hechoTinta`, la paire de « fait »),
+pas d'un `verde50` inventé pour l'occasion : un deuxième vert pour le même
+état, ce sont deux verts qui finissent par diverger.
+
+L'argent — « Lo que has recuperado » — était une carte à part au-dessus de la
+liste ; il est maintenant **une ligne avec son chiffre à droite**, à la place
+qu'occupait le CO₂. Même destination, un renglón au lieu d'une carte.

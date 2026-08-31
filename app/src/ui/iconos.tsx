@@ -565,6 +565,57 @@ export function Documento({ tamano = 20, tinta = color.ink500 }: Props) {
   );
 }
 
+/** Ajustes: la rueda dentada. Vive arriba a la derecha del perfil. */
+export function Engranaje({ tamano = 20, tinta = color.ink700 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      {/* Aro, cubo y ocho dientes POR FUERA del aro. Dibujados por dentro
+          —como estaban— se cruzaban con él y a 20 px la rueda salía como una
+          mancha. */}
+      <Circle cx={12} cy={12} r={6.8} stroke={tinta} strokeWidth={trazo(tamano)} />
+      <Circle cx={12} cy={12} r={2.5} stroke={tinta} strokeWidth={trazo(tamano)} />
+      <Path
+        d="M12 5.2V3M12 18.8V21M18.8 12H21M5.2 12H3M16.8 7.2l1.6-1.6M5.6 18.4l1.6-1.6M16.8 16.8l1.6 1.6M5.6 5.6l1.6 1.6"
+        stroke={tinta}
+        strokeWidth={trazo(tamano)}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+/** La cartera de «cómo se aporta»: el billete se guarda en otro sitio. */
+export function Cartera({ tamano = 20, tinta = color.ink500 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path
+        d="M4.4 8.2a2 2 0 0 1 2-2h11.2a2 2 0 0 1 2 2v9.4a2 2 0 0 1-2 2H6.4a2 2 0 0 1-2-2z"
+        stroke={tinta}
+        strokeWidth={trazo(tamano)}
+        strokeLinejoin="round"
+      />
+      <Path d="M4.4 10.4h4.2a1.6 1.6 0 0 1 0 3.2H4.4" stroke={tinta} strokeWidth={trazo(tamano)} strokeLinejoin="round" />
+      <Path d="M6.6 6.2 15.4 4a1.6 1.6 0 0 1 2 1.6v.6" stroke={tinta} strokeWidth={trazo(tamano)} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** El regalo de «comparte Partimos»: la caja con su lazo. */
+export function Regalo({ tamano = 20, tinta = color.rojo600 }: Props) {
+  return (
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
+      <Path d="M4.4 10.6h15.2v8.2a1.6 1.6 0 0 1-1.6 1.6H6a1.6 1.6 0 0 1-1.6-1.6z" stroke={tinta} strokeWidth={trazo(tamano)} strokeLinejoin="round" />
+      <Path d="M3.4 7.4h17.2v3.2H3.4zM12 7.4v13" stroke={tinta} strokeWidth={trazo(tamano)} strokeLinejoin="round" />
+      <Path
+        d="M12 7.4S10.9 3.4 8.7 3.4a2 2 0 0 0 0 4zM12 7.4s1.1-4 3.3-4a2 2 0 0 1 0 4z"
+        stroke={tinta}
+        strokeWidth={trazo(tamano)}
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 /** Cerrar sesión: la puerta con la flecha que sale. */
 export function Salir({ tamano = 20, tinta = color.rojo600 }: Props) {
   return (

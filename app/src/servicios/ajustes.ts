@@ -33,6 +33,15 @@ export type Cuenta = {
   kilometros: number;
   carro: string | null;
   metodo: string;
+  /**
+   * DÓNDE VIVE, para la línea de debajo del nombre en `6a`.
+   *
+   * Sale de `profiles.home_city_id`, que ya se pregunta en el inicio
+   * (`servicios/miCiudad`). Nula mientras no haya contestado: la línea se
+   * calla en vez de inventarle la capital, que es justo el defecto que
+   * `miCiudad` vino a arreglar.
+   */
+  ciudad: string | null;
   cedula: string;
   /** La línea que cierra: lo que puedes hacer, o lo que te falta. */
   queTeFalta: string;
@@ -65,8 +74,15 @@ export async function cuenta(perfilId: string): Promise<Cuenta> {
     aportadoCentavos: aportado,
     recuperadoCentavos: recuperado,
     kilometros: kilometrosDe(perfilId),
-    carro: carro?.model ?? null,
+    /* Marca, modelo y color, como lo dice quien se va a subir: «Elantra» a
+       secas no distingue el carro de nadie. */
+    carro: carro
+      ? [carro.make, carro.model, carro.color?.toLowerCase()].filter(Boolean).join(' ')
+      : null,
     metodo: NOMBRE_DEL_CANAL[p.preferred_pay_channel ?? 'yappy_app'],
+    ciudad: p.home_city_id
+      ? (fuente.ciudades.find((c) => c.id === p.home_city_id)?.name ?? null)
+      : null,
     cedula: cedula.puedePublicar ? 'al día' : cedula.etiqueta.toLowerCase(),
     queTeFalta: cedula.puedePublicar
       ? 'Tu cédula está verificada. Puedes publicar viajes.'

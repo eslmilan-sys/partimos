@@ -56,6 +56,23 @@ export type Compartido = 'compartido' | 'copiado' | 'nada';
  * del navegador donde exista —Safari y Chrome de Android la tienen—, y el
  * portapapeles como último recurso, que al menos deja el texto en la mano.
  */
+/**
+ * LA DIRECCIÓN DE LA APP, para compartirla.
+ *
+ * En la web sale del propio navegador: una copia escrita a mano se queda
+ * vieja el día que cambie el dominio, y compartir un enlace muerto es peor
+ * que no compartir nada. Fuera de la web todavía no hay ficha de tienda, así
+ * que se comparte sin enlace — el mensaje se sostiene igual.
+ *
+ * Es el mismo cálculo que `servicios/cuenta.volverA`, que arma la dirección
+ * de vuelta del correo de confirmación.
+ */
+export function direccionDeLaApp(): string | null {
+  if (Platform.OS !== 'web') return null;
+  const base = (process.env.EXPO_BASE_URL ?? '/').replace(/\/?$/, '/');
+  return `${globalThis.location?.origin ?? ''}${base}`;
+}
+
 export async function compartir(mensaje: string, titulo = 'Partimos'): Promise<Compartido> {
   if (Platform.OS !== 'web') {
     try {
