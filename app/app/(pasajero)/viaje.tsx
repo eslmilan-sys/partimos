@@ -444,7 +444,9 @@ export default function DetalleDelViaje() {
                   </>
                 )}
               </View>
-              <Avanza />
+              {/* Sin galón (01-09-2026, pedido del dueño): la tarjeta entera
+                  ya se pulsa, y dos flechas en la misma tarjeta —una arriba,
+                  una aquí— prometían dos destinos donde hay uno. */}
             </View>
           </Pressable>
 
@@ -541,13 +543,16 @@ export default function DetalleDelViaje() {
               return n === 1 ? '1 puesto' : `${n} puestos`;
             })()}
           </Pastilla>
-          {/* «Aporte directo» y no «pago seguro»: la plataforma no guarda la
-              plata de nadie, y decir lo contrario sería la única mentira que
-              este producto no se puede permitir. */}
-          <View style={estilos.filaDirecto}>
-            <Escudo tamano={15} tinta={color.ink500} />
-            <Text style={estilos.directo}>{esMio ? 'Tu viaje' : 'Aporte directo'}</Text>
-          </View>
+          {/* «Aporte directo» SE FUE (01-09-2026, pedido del dueño): al lado
+              del precio no explicaba nada y ocupaba la barra. Queda sólo
+              «Tu viaje» cuando el viaje es tuyo, que sí cambia lo que la
+              barra ofrece. */}
+          {esMio ? (
+            <View style={estilos.filaDirecto}>
+              <Escudo tamano={15} tinta={color.ink500} />
+              <Text style={estilos.directo}>Tu viaje</Text>
+            </View>
+          ) : null}
         </View>
 
         {/* **Preguntar vive al lado de pedir** (27-08-2026). Estaba en una

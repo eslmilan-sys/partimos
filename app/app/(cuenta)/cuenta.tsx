@@ -96,10 +96,10 @@ import {
   Billete,
   Carro,
   Cedula,
+  Compartir,
   Escudo,
   Estrella,
   Pin,
-  Regalo,
   Salir,
   Visto,
 } from '@/ui/iconos';
@@ -218,10 +218,13 @@ export default function TuCuenta() {
   /* Lo único de la difunta pantalla de Ajustes que no estaba ya arriba. */
   const ayuda: Fila[] = [
     {
+      /* A SU PROPIA PANTALLA (01-09-2026, pedido del dueño): llevaba a la
+         ayuda de incidencias, y quien toca «cómo funciona» no viene de un
+         problema — viene a entender. Ahora abre el paso a paso. */
       etiqueta: 'Cómo funciona Partimos',
-      debajo: 'Aportes, cancelaciones y reembolsos',
+      debajo: 'El paso a paso, del puesto al aporte',
       icono: <Ayuda tamano={20} tinta={color.ink500} />,
-      alPulsar: () => router.push('/(ayuda)'),
+      alPulsar: () => router.push('/(ayuda)/como'),
     },
   ];
 
@@ -358,8 +361,11 @@ export default function TuCuenta() {
             }
             style={({ pressed }) => [estilos.comparte, pressed && estilos.pulsada]}
           >
+            {/* EL ICONO ES EL DE COMPARTIR, no un regalo (01-09-2026, pedido
+                del dueño): aquí no se regala nada — se comparte la app, y el
+                botón hace literalmente eso. */}
             <View style={estilos.cuadroRegalo}>
-              <Regalo tamano={20} tinta={color.ink500} />
+              <Compartir tamano={20} tinta={color.ink500} />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={estilos.comparteTitulo}>Invita a tus amigos</Text>
@@ -370,17 +376,17 @@ export default function TuCuenta() {
             <Avanza />
           </Pressable>
 
-          {/* **CERRAR SESIÓN VUELVE AQUÍ**, que es donde se busca y donde
-              ahora es el único sitio: la pantalla de Ajustes se disolvió.
-              Abajo del todo, en tinta y sin caja — salirse no es una de las
-              cosas que se vienen a hacer a esta pantalla. */}
+          {/* **CERRAR SESIÓN ES UN BOTÓN** (01-09-2026, pedido del dueño).
+              Iba en tinta y sin caja y se leía como una nota al pie: con
+              borde y fondo blanco se ve que se puede pulsar. Sigue abajo del
+              todo y sin rojo — salirse no es la acción de esta pantalla. */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Cerrar sesión"
             onPress={() => salir().then(() => router.replace('/(cuenta)/apertura'))}
             style={({ pressed }) => [estilos.cerrar, pressed && estilos.pulsada]}
           >
-            <Salir tamano={17} tinta={color.ink600} />
+            <Salir tamano={17} tinta={color.ink700} />
             <Text style={estilos.cerrarTexto}>Cerrar sesión</Text>
           </Pressable>
         </View>
@@ -674,21 +680,26 @@ const estilos = StyleSheet.create({
   },
   comparteTexto: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
 
+  /* Un botón de verdad: caja blanca con borde, como las listas de arriba.
+     Neutro a propósito — ni rojo ni tinta llena: salirse no es «sigue». */
   cerrar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 9,
     marginTop: 22,
-    height: 44,
+    height: 48,
     borderRadius: radio.control,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
   },
   cerrarTexto: {
-    fontSize: 14,
-    lineHeight: interlinea(14),
-    fontWeight: '500',
+    fontSize: 14.5,
+    lineHeight: interlinea(14.5),
+    fontWeight: '600',
     letterSpacing: 14 * TRACK_MICRO,
-    color: color.ink600,
+    color: color.ink800,
     fontFamily: familia,
   },
 });

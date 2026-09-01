@@ -51,7 +51,8 @@ import { CampoRojo, Brillo } from '@/ui/CampoRojo';
 import { Epigrafe, Pastilla } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { mesAbrev, mesLargo, numeroDeDia } from '@/ui/fechas';
-import { Atras, Avanza } from '@/ui/iconos';
+import { Atras } from '@/ui/iconos';
+import { Pestanas } from '@/ui/Pestanas';
 import { color, espacio, familia, interlinea, radio, TRACK_MICRO, zonaDeToque } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
@@ -183,14 +184,11 @@ export default function AportesPantalla() {
               : 'Nada en camino esta semana.'}
           </Text>
 
-          {/* LO QUE NO PASA POR AQUÍ, dicho SIEMPRE y no sólo cuando el envío
-              está vacío: en el mismo mes se cobra de las dos formas, y sin
-              esta línea el conductor cuadra mal sus cuentas. Es la regla del
-              producto —el pago es de la mano a la mano— con su consecuencia
-              práctica al lado (invariante 7). */}
+          {/* LA REGLA, EN UNA FRASE (01-09-2026, «make this page simpler»):
+              eran dos renglones y medio de contabilidad. Lo que hay que
+              saber cabe en uno — el efectivo ya lo tienes en la mano. */}
           <Text style={estilos.soloLoDeLaApp}>
-            Sólo pasa por aquí lo que te pagaron dentro de la app. El efectivo y el Yappy
-            directo ya los tienes: no vuelven a llegarte.
+            Aquí sólo llega lo pagado dentro de la app; el efectivo ya lo tienes en la mano.
           </Text>
 
           {/* «CAMBIAR» LLEVABA AL SITIO EQUIVOCADO. Esta tarjeta dice por
@@ -211,10 +209,13 @@ export default function AportesPantalla() {
               datos.yappy ? 'Este no es mi Yappy, escribirles' : 'Darles mi número de Yappy'
             }
             onPress={() => router.push('/(ayuda)')}
-            style={[estilos.enlaceYappy, zonaDeToque]}
+            style={({ pressed }) => [estilos.enlaceYappy, zonaDeToque, pressed && { backgroundColor: color.lavado }]}
           >
+            {/* CON PINTA DE BOTÓN (01-09-2026): era una línea de texto azul
+                que nadie leía como pulsable, y guardar el número es lo único
+                que esta tarjeta pide hacer. */}
             <Text style={estilos.cambiar}>
-              {datos.yappy ? '¿No es tuyo? Escríbenos' : 'Dinos tu número'}
+              {datos.yappy ? '¿No es tuyo? Escríbenos' : 'Guardar mi número de Yappy'}
             </Text>
           </Pressable>
         </View>
@@ -249,6 +250,12 @@ export default function AportesPantalla() {
         </View>
       </View>
       </ScrollView>
+
+      {/* LA BARRA SE QUEDA (01-09-2026, pedido del dueño: «the menu shall
+          always be present»). Esta pantalla se abre desde Perfil y no tiene
+          acción propia abajo: sin la barra, volver al resto de la app
+          costaba un «atrás» que nadie debe adivinar. */}
+      <Pestanas valor="Perfil" yo={yo} />
     </View>
   );
 }
@@ -302,7 +309,7 @@ const estilos = StyleSheet.create({
   titular: { fontSize: 22, lineHeight: 26, letterSpacing: -0.77, fontWeight: '600', color: color.ink900, fontFamily: familia, marginTop: 12, },
   titularFuerte: { fontWeight: '600' },
 
-  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 22, paddingBottom: 20 },
+  cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 22, paddingBottom: 110 },
   hoja: {
     backgroundColor: color.blanco,
     borderRadius: 28,
@@ -478,7 +485,16 @@ const estilos = StyleSheet.create({
     color: color.ink600,
     fontFamily: familia,
   },
-  enlaceYappy: { alignSelf: 'flex-start', marginTop: 4 },
+  enlaceYappy: {
+    alignSelf: 'flex-start',
+    marginTop: 10,
+    paddingHorizontal: 14,
+    borderRadius: radio.pastilla,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+    backgroundColor: color.blanco,
+    justifyContent: 'center',
+  },
   marcaYappy: {
     width: 34,
     height: 34,

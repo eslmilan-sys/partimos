@@ -38,7 +38,7 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe, Insignia } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { cuando, diaLargo, esHoy } from '@/ui/fechas';
-import { Atras, Avion, Ayuda, Mas } from '@/ui/iconos';
+import { Atras, Avion, Ayuda } from '@/ui/iconos';
 import { familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
@@ -130,7 +130,16 @@ export default function Chat() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Ayuda y reembolsos"
-          onPress={() => router.push('/(ayuda)')}
+          /* CON LA RESERVA EN LA MANO. Iba a `/(ayuda)` sin decirle de qué
+             puesto se hablaba, y la ayuda tenía que adivinarlo: contra la
+             base real adivinaba mal y la pantalla se quedaba girando. */
+          onPress={() =>
+            router.push(
+              reservaId
+                ? { pathname: '/(ayuda)', params: { reserva: reservaId } }
+                : { pathname: '/(ayuda)' },
+            )
+          }
           style={estilos.circulo}
         >
           <Ayuda tamano={20} tinta={color.ink700} />
@@ -217,23 +226,10 @@ export default function Chat() {
         </ScrollView>
 
         <View style={estilos.barraEscribir}>
-          {/* El punto de recogida es de lo que más se habla aquí, así que el
-              «más» abre el mapa en vez de un adjunto: no hay módulo de archivos
-              en el proyecto, y un botón que no hace nada es peor que uno que
-              hace lo útil. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Ver el punto de recogida"
-            onPress={() =>
-              router.push({
-                pathname: '/(pasajero)/punto',
-                params: reservaId ? { reserva: reservaId } : {},
-              })
-            }
-            style={estilos.adjuntar}
-          >
-            <Mas tamano={19} tinta={color.ink700} />
-          </Pressable>
+          {/* SIN «+» (01-09-2026, pedido del dueño). Abría el punto de
+              recogida, que ya tiene su sitio en la ficha del puesto: aquí
+              parecía un adjunto y no lo era. El campo se queda con todo el
+              ancho, que es lo que un chat necesita. */}
           <View style={estilos.campoMensaje}>
             <TextInput
               accessibilityLabel="Escribe un mensaje"
@@ -435,15 +431,6 @@ const estilos = StyleSheet.create({
     gap: 10,
     paddingTop: 14,
     paddingBottom: 26,
-  },
-  /** La celda de icono del v6: 44, radio 14, lavado al pulsar. */
-  adjuntar: {
-    width: 44,
-    height: 44,
-    borderRadius: radio.icono,
-    backgroundColor: color.lavado,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   /** El campo del v6: superficie de campo, sin borde. */
   campoMensaje: {

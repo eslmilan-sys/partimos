@@ -43,6 +43,7 @@ import { guardarRutaBuscada } from '@/servicios/rutas';
 import { preferencias } from '@/servicios/preferencias';
 import { useMiId } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
+import { Pestanas } from '@/ui/Pestanas';
 import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
@@ -716,6 +717,11 @@ export default function Resultados() {
           )}
         </View>
       ) : null}
+
+      {/* LA BARRA NO SE VA (01-09-2026, pedido del dueño): los resultados son
+          una pantalla de primer nivel — se llega desde Buscar y se vive en
+          ella — y sin la barra la app entera desaparecía debajo. */}
+      <Pestanas valor="Buscar" />
 
       <HojaDeFiltros
         abierta={hojaAbierta}

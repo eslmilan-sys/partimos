@@ -151,11 +151,17 @@ export default function Ayuda() {
   useEffect(() => {
     let vivo = true;
     setBuscando(true);
-    viajeDeAyuda(reservaId).then((v) => {
-      if (!vivo) return;
-      setViaje(v);
-      setBuscando(false);
-    });
+    /* CON `.catch`, O LA PANTALLA GIRA PARA SIEMPRE. Contra la base real,
+       un identificador que no existe —el del recorrido, o una reserva
+       borrada— hacía fallar la promesa, `buscando` nunca bajaba y el «?»
+       del chat parecía no hacer nada. Un fallo aquí ES «sin viaje». */
+    viajeDeAyuda(reservaId)
+      .catch(() => null)
+      .then((v) => {
+        if (!vivo) return;
+        setViaje(v);
+        setBuscando(false);
+      });
     return () => {
       vivo = false;
     };
