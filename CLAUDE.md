@@ -978,3 +978,60 @@ Ce qui manquait et qui y est :
   **un vide qui se touche** (le bouton Publicar au lieu d'une phrase grise).
 - Les heures ne sont plus écrites deux fois : `20:56 → 00:26 · 3 h 30` en
   tête, et le rail garde les lieux.
+
+### Publicar : la vraie adresse, la van de sept places, trois arrêts — 01-09-2026
+
+**1 · Les deux extrémités en gris clair, et le formulaire qui n'arrive plus
+rempli.** Demandé ainsi : *« faut que quand il publicar tu dois mettre depart
+et arrivee avec faible opacité pour inciter à ce qu'ils mettent la vraie
+adresse »*. Les champs vides montrent maintenant un exemple — *Calle 50, Bella
+Vista* / *Parque Unión, Chitré* — en `ink500` (pas `ink400` : à 22 px il
+tombait sous le 3:1), plus une ligne qui dit pourquoi : *« Escribe el punto
+exacto —una calle, una gasolinera, un parque—, no sólo la ciudad. Es donde te
+van a esperar. »* Aucun des deux exemples n'est un terminal de bus ;
+`PRODUCT.md` les interdit comme point de rendez-vous et un exemple est une
+consigne déguisée.
+
+**Mais le placeholder ne servait à rien tant que les champs n'étaient jamais
+vides.** Un `useEffect` remplissait les deux avec **le premier corridor de la
+liste** — Ciudad de Panamá → Chitré, pour tout le monde, à chaque ouverture.
+D'où le vrai défaut : on passait l'étape 1 sans y toucher et le trajet
+partait publié au niveau de la ville, sans point précis. L'autoremplissage est
+parti (et `lugarDeCiudad` avec lui). Conséquence technique : `datos` vient de
+`prepararPublicacion`, qui exige les deux extrémités, donc l'écran tournait
+en squelette pour toujours ; il y a maintenant **un premier écran qui se
+dessine sans `datos`**, et les deux champs vivent dans un seul composant
+`CamposDeRuta` partagé par cet écran et l'étape « ruta » de l'assistant.
+
+**2 · « C'est 4 puestos, pas 5 ».** Le sélecteur de voiture écrivait
+`${v.seats_total} puestos` et la carte `${seats_total} plazas` : cinq places
+pour une voiture qui en offre quatre — la cinquième est celle du volant, et
+elle ne s'offre jamais. Les deux disent maintenant les puestos offrables,
+c'est-à-dire ce que le dessin juste en dessous laisse toucher.
+
+**3 · La troisième rangée.** Le catalogue savait déjà qu'un Rush ou un
+Outlander offrent six places, mais `MAXIMO_ATRAS` valait 3 et le dessin
+n'avait qu'une banquette : impossible d'offrir sa troisième rangée. Le domaine
+porte maintenant `ASIENTOS_POR_BANCO = 3` et `MAXIMO_BANCOS = 2`, donc
+`MAXIMO_ATRAS = 6` ; `CarroConPuestos` calcule son plan à partir du nombre de
+sièges arrière — chaque banquette se centre toute seule et la carrosserie
+s'allonge avec elle. `seats_back` reste **une seule colonne** (personne ne
+réserve « la troisième rangée » ; on demande une place à l'arrière), donc la
+migration **0049** se contente d'élargir le CHECK de la 0045 de `0..3` à
+`0..6`. Et la deuxième voiture d'Andrés, un RAV4 que le catalogue ne connaît
+pas, devient un **Toyota Rush de sept places** : sans van dans le simulé, la
+troisième rangée n'était visible nulle part dans la démo.
+
+Une conséquence sur les mots : `comodidadDeAtras` se tait au-delà de trois à
+l'arrière. « Máx. 2 personas atrás » parle d'une banquette ; sur deux rangées
+la phrase serait fausse.
+
+**4 · Trois arrêts au lieu de deux.** `const MAX_INTERMEDIAS = 2` était écrit
+dans l'écran, sans raison à côté. Le nombre vit maintenant dans
+`dominio/paradas.ts` avec la règle qui le fixe : **jamais plus de quatre
+points de prise en charge par trajet** (`PRODUCT.md`), et **l'origine est
+l'un des quatre** — d'où trois arrêts intermédiaires, pas quatre. La
+destination ne compte pas : personne n'y monte. Le texte qui expliquait le
+plafond disait « avec le départ et l'arrivée, ça fait quatre points de prise
+en charge », ce qui était faux dans les deux moitiés ; il est réécrit et
+calculé à partir des constantes.

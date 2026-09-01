@@ -25,8 +25,29 @@
 
 /** Como mucho uno adelante: el otro asiento delantero es el del volante. */
 export const MAXIMO_ADELANTE = 1;
-/** Tres atrás es el banco lleno. */
-export const MAXIMO_ATRAS = 3;
+
+/** Un banco lleva tres. Es el ancho de un carro, no una decisión nuestra. */
+export const ASIENTOS_POR_BANCO = 3;
+
+/**
+ * DOS BANCOS, PORQUE HAY CARROS DE SIETE.
+ *
+ * Pedido del dueño el 01-09-2026: *«si il met un grand voiture de plus de
+ * place arrière doit avoir l'option d'avoir plus de place»*. El catálogo ya
+ * sabía que un Rush o un Outlander ofrecen seis puestos, pero el dominio
+ * cortaba en tres atrás y el dibujo sólo tenía un banco: quien registraba una
+ * de siete plazas no podía ofrecer su tercera fila, y el formulario le
+ * contestaba con un carro que no era el suyo.
+ *
+ * **`atras` sigue siendo UNA cifra** —la suma de las dos filas— y no dos.
+ * Es lo que guarda la base (`trips.seats_back`), y partirlo en dos columnas
+ * pediría una migración para distinguir algo que nadie pregunta: quien
+ * reserva pide un puesto atrás, no el de la tercera fila. El dibujo reparte
+ * la cifra en filas de tres, que es como se sienta la gente.
+ */
+export const MAXIMO_BANCOS = 2;
+/** Seis atrás: dos bancos llenos. Una van de siete plazas, sin el volante. */
+export const MAXIMO_ATRAS = ASIENTOS_POR_BANCO * MAXIMO_BANCOS;
 
 export type Reparto = { adelante: number; atras: number };
 
@@ -38,7 +59,10 @@ export type Reparto = { adelante: number; atras: number };
  * que es como viaja la gente cuando puede elegir.
  */
 export function repartoPorDefecto(puestosDelCarro: number): Reparto {
-  const ofrecibles = Math.max(0, Math.min(4, puestosDelCarro - 1));
+  const ofrecibles = Math.max(
+    0,
+    Math.min(MAXIMO_ADELANTE + MAXIMO_ATRAS, puestosDelCarro - 1),
+  );
   const adelante = Math.min(MAXIMO_ADELANTE, ofrecibles);
   return { adelante, atras: Math.min(MAXIMO_ATRAS, ofrecibles - adelante) };
 }
@@ -73,6 +97,10 @@ export function cambiarReparto(r: Reparto, fila: keyof Reparto, paso: number): R
  * vuelta a la frase.
  */
 export function comodidadDeAtras(r: Reparto): string | null {
+  /* Con dos bancos la frase no vale: cuatro atrás en una van no es un banco
+     apretado, es dos filas holgadas, y «máx. 2 atrás» sería falso. La promesa
+     sólo existe mientras quepa en un solo banco. */
+  if (r.atras > ASIENTOS_POR_BANCO) return null;
   if (r.atras === 2) return 'Máx. 2 personas atrás';
   if (r.atras === 1) return 'Solo 1 persona atrás';
   return null;

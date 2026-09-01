@@ -293,16 +293,23 @@ export const vehiculos: Vehicle[] = [
    * elegir: el conductor de verdad tiene el sedán entre semana y la camioneta
    * cuando baja con la familia, y hasta el 27-08-2026 sólo se podía publicar
    * con el primero que la base devolviera.
+   *
+   * **Era un RAV4 de cinco plazas y ahora es un Rush de siete** (01-09-2026).
+   * Dos razones. Una, el RAV4 no está en el catálogo —Toyota ofrece Corolla,
+   * Yaris, Hilux y Rush—, así que era un carro que la app no deja registrar.
+   * Y dos, sin ninguna van de siete en el simulado no había forma de VER la
+   * tercera fila que se acaba de abrir: el dibujo del segundo banco no salía
+   * en ninguna pantalla de la demo.
    */
   {
     id: 'cccccccc-0000-4000-8000-00000000000a',
     owner_id: ANDRES_ID,
     category_code: 'suv',
     make: 'Toyota',
-    model: 'RAV4',
+    model: 'Rush',
     color: 'negro',
     year: 2021,
-    seats_total: 5,
+    seats_total: 7,
     plate_last3: '871',
     is_active: true,
     created_at: '2026-05-19T09:10:00+00:00',

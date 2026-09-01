@@ -22,6 +22,7 @@ import {
   elTopeMuerde,
   origenDelAporte,
 } from '@/dominio/aporte';
+import { MAXIMO_PARADAS_INTERMEDIAS, MAXIMO_PUNTOS_DE_RECOGIDA } from '@/dominio/paradas';
 import {
   type Reparto,
   comodidadDeAtras,
@@ -65,6 +66,16 @@ import { cifraRedonda, dineroEnVoz, formatearDinero, formatearDineroRedondo, tab
 import { diaCorto, hora, mas } from '@/ui/fechas';
 import { Atras, Avanza, Carro, Cerrar, Escudo, Mas } from '@/ui/iconos';
 import { familia, color, espacio, radio, texto, zonaDeToque } from '@/ui/tokens';
+
+/**
+ * LOS EJEMPLOS QUE SE VEN EN GRIS mientras los campos están vacíos.
+ *
+ * Enseñan lo que se espera: **una dirección, no una ciudad**. Ninguno de los
+ * dos es una terminal de bus — `PRODUCT.md` las prohíbe como punto de
+ * encuentro, y un ejemplo es una instrucción con otra cara.
+ */
+const EJEMPLO_DE_SALIDA = 'Calle 50, Bella Vista';
+const EJEMPLO_DE_LLEGADA = 'Parque Unión, Chitré';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
@@ -121,17 +132,96 @@ function horaDePanama(cuando: Date = new Date()): string {
 /** Lo que cuesta desviarse a recoger en cada parada. */
 const MINUTOS_POR_PARADA = 5;
 
-/** Una ciudad del catálogo, con la forma que esperan los campos de lugar. */
-function lugarDeCiudad(nombre: string, slug: string): Lugar {
-  return {
-    nombre,
-    citySlug: slug || null,
-    tipo: 'ciudad',
-    fuente: 'catalogo',
-    contexto: 'Panamá',
-    lat: null,
-    lng: null,
-  };
+/* `lugarDeCiudad` se fue con el autorrelleno del 01-09-2026: era la pieza
+   que convertía el primer corredor de la lista en una respuesta ya escrita
+   en los dos campos. Sin él, el paso uno se contesta. */
+
+/**
+ * LOS DOS EXTREMOS DEL VIAJE, dibujados una sola vez.
+ *
+ * Se ven en dos sitios —la pantalla del primer paso, que existe antes de que
+ * haya nada que calcular, y el paso «ruta» del asistente cuando se vuelve
+ * atrás— y son el mismo control. Escritos dos veces habrían empezado igual y
+ * habrían terminado distintos.
+ *
+ * **El ejemplo en gris claro** (01-09-2026, pedido del dueño: poner salida y
+ * llegada «avec faible opacité pour inciter à ce qu'ils mettent la vraie
+ * adresse»). El campo vacío era un renglón en blanco: no decía qué se espera
+ * ahí, y quien no sabe escribe la ciudad a secas. Un ejemplo con calle y
+ * esquina enseña de un vistazo que aquí cabe el punto exacto — y ninguno de
+ * los dos es una terminal de bus, que `PRODUCT.md` prohíbe como punto de
+ * encuentro y un ejemplo es una instrucción con otra cara.
+ */
+function CamposDeRuta({
+  desde,
+  hacia,
+  alTocar,
+}: {
+  desde: Lugar | null;
+  hacia: Lugar | null;
+  alTocar: (cual: 'desde' | 'hacia') => void;
+}) {
+  return (
+    <>
+      {/* FILAS con filete, no burbujas con borde: cuatro rectángulos
+          delineados casi tocándose leían como un formulario ruidoso (visto en
+          el teléfono, 25-08). Es el mismo lenguaje de la tarjeta de búsqueda
+          del Inicio: la tarjeta ya es el contorno, dentro solo hacen falta
+          líneas de pelo. */}
+      <Pressable
+        accessibilityRole="button"
+        /* El rótulo empieza SIEMPRE por «Salgo de», tenga valor o no: para
+           un lector de pantalla el campo no cambia de nombre porque esté
+           vacío. */
+        accessibilityLabel={
+          desde ? `Salgo de ${desde.nombre}. Cambiar` : 'Salgo de: sin elegir. Toca para elegir'
+        }
+        onPress={() => alTocar('desde')}
+        style={({ pressed }) => [estilos.eleccion, pressed && estilos.eleccionPulsada]}
+      >
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={estilos.eleccionEtiqueta}>Salgo de</Text>
+          <Text
+            style={[estilos.eleccionValor, !desde && estilos.eleccionFantasma]}
+            numberOfLines={1}
+          >
+            {desde?.nombre ?? EJEMPLO_DE_SALIDA}
+          </Text>
+        </View>
+        <Avanza tinta={color.ink300} />
+      </Pressable>
+
+      <View style={estilos.filete} />
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={
+          hacia ? `Voy a ${hacia.nombre}. Cambiar` : 'Voy a: sin elegir. Toca para elegir'
+        }
+        onPress={() => alTocar('hacia')}
+        style={({ pressed }) => [estilos.eleccion, pressed && estilos.eleccionPulsada]}
+      >
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={estilos.eleccionEtiqueta}>Voy a</Text>
+          <Text
+            style={[estilos.eleccionValor, !hacia && estilos.eleccionFantasma]}
+            numberOfLines={1}
+          >
+            {hacia?.nombre ?? EJEMPLO_DE_LLEGADA}
+          </Text>
+        </View>
+        <Avanza tinta={color.ink300} />
+      </Pressable>
+
+      {/* Dicho una vez, debajo: el ejemplo enseña, esta línea explica por qué.
+          Sin punto exacto, quien pide puesto no sabe dónde pararse y acaba
+          preguntándolo por chat. */}
+      <Text style={estilos.pistaDelPunto}>
+        Escribe el punto exacto —una calle, una gasolinera, un parque—, no sólo la ciudad. Es
+        donde te van a esperar.
+      </Text>
+    </>
+  );
 }
 
 /**
@@ -249,17 +339,22 @@ export default function Publicar() {
   /**
    * LAS PARADAS ELEGIDAS, por índice — no un contador. Con el contador solo
    * se podía añadir «la siguiente»: quien quería parar en Penonomé pero NO
-   * en La Chorrera no tenía cómo decirlo (pedido el 25-08). Máximo dos:
-   * cuatro puntos de recogida por viaje es regla del producto.
+   * en La Chorrera no tenía cómo decirlo (pedido el 25-08).
+   *
+   * El techo son TRES (01-09-2026, pedido del dueño: «should be able to
+   * select more paradas, not just 2»). Eran dos por un `MAX_INTERMEDIAS = 2`
+   * escrito aquí sin razón al lado; el número que manda vive ahora en
+   * `dominio/paradas`, con la regla de `PRODUCT.md` que lo fija: nunca más de
+   * cuatro puntos de recogida por viaje, y el origen es uno de los cuatro.
    */
   const [elegidas, setElegidas] = useState<number[]>([]);
   /**
    * SI SE VE EL CAMINO ENTERO O SÓLO SU PRINCIPIO.
    *
    * Panamá → Las Tablas atraviesa DIECISÉIS ciudades del catálogo, y de ellas
-   * caben dos. Enseñar las dieciséis de golpe es empujar el resto de la
+   * caben tres. Enseñar las dieciséis de golpe es empujar el resto de la
    * pantalla —el recorrido, la llegada, el botón— fuera de la vista para
-   * elegir dos. Se abren las primeras del camino, que son las que un viaje
+   * elegir tres. Se abren las primeras del camino, que son las que un viaje
    * desde Panamá recoge de verdad, y las demás quedan a un toque, contadas.
    */
   const [verTodasLasParadas, setVerTodasLasParadas] = useState(false);
@@ -329,13 +424,20 @@ export default function Publicar() {
     });
   }, [deViaje]);
 
-  useEffect(() => {
-    if (rutas.length === 0 || desde || hacia || deViaje) return;
-    const primera = rutas[0];
-    setRuta(primera.slug);
-    setDesde(lugarDeCiudad(primera.origen, primera.origenSlug));
-    setHacia(lugarDeCiudad(primera.destino, primera.destinoSlug));
-  }, [rutas, desde, hacia, deViaje]);
+  /**
+   * **EL FORMULARIO YA NO LLEGA CONTESTADO** (01-09-2026).
+   *
+   * Aquí había un efecto que rellenaba los dos campos con el PRIMER corredor
+   * de la lista —Ciudad de Panamá → Chitré, para todo el mundo, siempre—.
+   * Nadie viaja a Chitré por casualidad, y la consecuencia estaba a la vista
+   * en cada captura: el paso uno se pasaba de largo sin tocarlo, y el viaje
+   * salía publicado a nivel de ciudad, sin punto exacto, porque el campo ya
+   * traía algo escrito y nadie corrige lo que parece correcto.
+   *
+   * Vacíos, los dos campos enseñan su ejemplo en gris —una calle con su
+   * esquina— y «Continuar» espera. Es un toque más y es el toque que hace
+   * falta: el punto de recogida es el dato que decide si alguien se sube.
+   */
 
   /** El par elegido manda: corredor abierto si casa, ruta libre si no. */
   const estimacion = desde && hacia ? estimarRuta(desde, hacia, puestos) : null;
@@ -537,6 +639,72 @@ export default function Publicar() {
     );
   }
 
+  /**
+   * **EL PRIMER PASO SE DIBUJA SIN `datos`** (01-09-2026).
+   *
+   * `datos` sale de preparar una publicación, y para eso hacen falta los dos
+   * extremos. Mientras el formulario llegaba contestado —con el primer
+   * corredor de la lista— eso no se notaba; al quitar el autorrelleno, la
+   * pantalla se quedaba girando en un esqueleto para siempre, sin enseñar
+   * los dos campos que había que rellenar para salir de él.
+   *
+   * Con el par ya elegido, el esqueleto se queda como estaba: ahí sí se está
+   * calculando algo.
+   */
+  if (!desde || !hacia) {
+    return (
+      <View style={estilos.pantalla}>
+        <CampoRojo altura={206} motivo="palmera" />
+        <BarraDeEstado />
+
+        <View style={estilos.cabecera}>
+          <View style={estilos.filaEpigrafe}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Atrás"
+              onPress={volver}
+              style={estilos.circulo}
+            >
+              <Atras />
+            </Pressable>
+            <Text style={estilos.epigrafeCampo}>{`Paso 1 de ${PASOS.length - 1}`}</Text>
+          </View>
+
+          <View style={estilos.avance}>
+            {PASOS.filter((x) => x !== 'tramos').map((clave, i) => (
+              <View key={clave} style={[estilos.segmento, i === 0 && estilos.segmentoHecho]} />
+            ))}
+          </View>
+
+          <Text style={estilos.titular} numberOfLines={2}>
+            {COMO_SE_LLAMA_EL_PASO.ruta}
+          </Text>
+        </View>
+
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 18 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={estilos.hoja}>
+            <CamposDeRuta desde={desde} hacia={hacia} alTocar={setBuscandoLugar} />
+          </View>
+        </ScrollView>
+
+        <View style={estilos.pie}>
+          <Boton ancho desactivado>
+            Continuar
+          </Boton>
+          <Text style={estilos.notaPie}>
+            Nada se publica todavía. Puedes volver atrás en cualquier momento.
+          </Text>
+        </View>
+
+        {buscador}
+      </View>
+    );
+  }
+
   if (!datos || !cuenta) return <Cargando />;
 
   /**
@@ -566,7 +734,7 @@ export default function Publicar() {
 
   const origen = origenDelAporte(aporteElegido, aporte, datos.topeCentavos);
   const salida = new Date(datos.salida);
-  const MAX_INTERMEDIAS = 2;
+  const MAX_INTERMEDIAS = MAXIMO_PARADAS_INTERMEDIAS;
   const enOrden = [...elegidas].sort((a, b) => a - b).slice(0, MAX_INTERMEDIAS);
   const paradas = enOrden.length;
   const paradasVisibles = enOrden
@@ -669,42 +837,7 @@ export default function Publicar() {
         {['ruta', 'dia', 'hora', 'carro', 'paradas'].includes(paso) ? (
         <View style={estilos.hoja}>
           {paso === 'ruta' ? (
-          <>
-          {/* De dónde sales y a dónde vas — FILAS con filete, no burbujas con
-              borde: cuatro rectángulos delineados casi tocándose leían como
-              un formulario ruidoso (visto en el teléfono, 25-08). Es el mismo
-              lenguaje de la tarjeta de búsqueda del Inicio: la tarjeta ya es
-              el contorno, dentro solo hacen falta líneas de pelo. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Salgo de ${desde?.nombre ?? ''}. Cambiar`}
-            onPress={() => setBuscandoLugar('desde')}
-            style={({ pressed }) => [estilos.eleccion, pressed && estilos.eleccionPulsada]}
-          >
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={estilos.eleccionEtiqueta}>Salgo de</Text>
-              <Text style={estilos.eleccionValor} numberOfLines={1}>
-                {desde?.nombre ?? ''}
-              </Text>
-            </View>
-            <Avanza tinta={color.ink300} />
-          </Pressable>
-          <View style={estilos.filete} />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Voy a ${hacia?.nombre ?? ''}. Cambiar`}
-            onPress={() => setBuscandoLugar('hacia')}
-            style={({ pressed }) => [estilos.eleccion, pressed && estilos.eleccionPulsada]}
-          >
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={estilos.eleccionEtiqueta}>Voy a</Text>
-              <Text style={estilos.eleccionValor} numberOfLines={1}>
-                {hacia?.nombre ?? ''}
-              </Text>
-            </View>
-            <Avanza tinta={color.ink300} />
-          </Pressable>
-          </>
+            <CamposDeRuta desde={desde} hacia={hacia} alTocar={setBuscandoLugar} />
           ) : null}
 
           {paso === 'dia' ? (
@@ -778,7 +911,13 @@ export default function Publicar() {
                   .join(' ')}
               </Text>
               <Text style={[estilos.detalleCarro, tabular]} numberOfLines={1}>
-                {[datos.placa, `${datos.carro.seats_total} plazas`]
+                {/* **LOS PUESTOS QUE PUEDES OFRECER, no las plazas del
+                    carro** (01-09-2026, pedido del dueño: «c'est 4 puestos de
+                    disponible, pas 5»). Un carro de cinco plazas ofrece
+                    cuatro: la quinta es la del volante, y esa no se ofrece
+                    nunca. Decir «5» justo encima de un dibujo con cuatro
+                    asientos tocables era contarse mal a sí mismo. */}
+                {[datos.placa, `${datos.puestosMaximos} puestos`]
                   .filter(Boolean)
                   .join(' · ')}
               </Text>
@@ -889,7 +1028,7 @@ export default function Publicar() {
           </View>
 
           {/* PASTILLAS, no filas. La ruta ofrece hasta doce ciudades y sólo
-              caben dos: doce renglones a lo ancho obligaban a desplazar la
+              caben tres: doce renglones a lo ancho obligaban a desplazar la
               pantalla entera para ver el camino. En pastillas, EN EL ORDEN
               EN QUE SE PASAN, el conductor lee su ruta de un vistazo y toca
               la que quiere. Con el cupo lleno no desaparecen —esconderlas
@@ -953,7 +1092,7 @@ export default function Publicar() {
               <Text style={estilos.notaParadas}>
                 {hayHueco
                   ? 'En el orden en que las pasas. El punto exacto lo acuerdas con cada pasajero.'
-                  : 'Ya llevas dos paradas, el máximo del viaje: con la salida y la llegada son cuatro puntos de recogida. Quita una para cambiarla.'}
+                  : `Ya llevas ${MAX_INTERMEDIAS} paradas, el máximo: contando de dónde sales son ${MAXIMO_PUNTOS_DE_RECOGIDA} sitios donde alguien puede subirse. Quita una para cambiarla.`}
               </Text>
             </>
           ) : (
@@ -1327,7 +1466,9 @@ export default function Publicar() {
           ...misCarros.map((v) => ({
             valor: v.id,
             etiqueta: `${v.make} ${v.model}${v.color ? ` ${v.color.toLowerCase()}` : ''}`,
-            debajo: `${v.plate_last3 ? `Placa ···${v.plate_last3} · ` : ''}${v.seats_total} puestos`,
+            /* Igual que en la tarjeta: los puestos son las plazas menos la
+               del volante. Aquí decía «5 puestos» de un carro que ofrece 4. */
+            debajo: `${v.plate_last3 ? `Placa ···${v.plate_last3} · ` : ''}${Math.max(1, v.seats_total - 1)} puestos`,
           })),
           { valor: 'nuevo', etiqueta: 'Registrar otro carro', debajo: 'Se guarda en tu perfil' },
         ]}
@@ -1659,6 +1800,21 @@ const estilos = StyleSheet.create({
   textoPuestos: { flex: 1, ...texto.fila, color: color.ink900 },
   kmDelTramo: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
   cuenta: { fontSize: 12.5, lineHeight: 18.125, color: color.ink700, marginTop: 10, fontFamily: familia },
+  /**
+   * El ejemplo de dirección: mismo tamaño que la respuesta, en tinta clara.
+   * `ink500` y no `ink400` — a 22 px `ink400` da 2,5:1 sobre el blanco, por
+   * debajo del 3:1 que la WCAG pide incluso al texto grande. Sigue leyéndose
+   * como un ejemplo y no como una respuesta: la de verdad va en `ink900` y en
+   * semibold.
+   */
+  eleccionFantasma: { color: color.ink500, fontWeight: '400' },
+  pistaDelPunto: {
+    fontSize: 12.5,
+    lineHeight: 18.125,
+    color: color.ink600,
+    fontFamily: familia,
+    marginTop: 12,
+  },
   /** Azul: informa, no reclama. El rojo tiene sus cuatro sentidos exactos. */
   notaTope: {
     flexDirection: 'row',

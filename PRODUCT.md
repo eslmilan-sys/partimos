@@ -105,7 +105,10 @@ Autres contraintes confirmées :
   donc le coût, donc le plafond calculé par la même formule. L'écart est porté
   par le passager qui l'a demandé, et s'exprime en kilomètres, jamais en
   dollars.
-- Maximum 4 points de prise en charge par trajet.
+- Maximum 4 points de prise en charge par trajet. **L'origine en est un** :
+  cela fait donc trois arrêts intermédiaires au plus. La destination ne compte
+  pas — personne n'y monte. Codé une seule fois dans `dominio/paradas.ts`
+  (`MAXIMO_PUNTOS_DE_RECOGIDA`), avec son test.
 - Les annulations sont asymétriques : aucune pénalité financière au conducteur
   (ce serait une relation commerciale avec la plateforme) ; la sanction est
   réputationnelle.

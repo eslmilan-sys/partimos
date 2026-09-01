@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  ASIENTOS_POR_BANCO,
   MAXIMO_ATRAS,
   cambiarReparto,
   comodidadDeAtras,
@@ -16,6 +17,25 @@ test('un sedán de cinco ofrece cuatro: uno adelante y tres atrás', () => {
   /* Por defecto se ofrece lo que el carro da; bajar a dos atrás para ir
      cómodos es una decisión del conductor, no la nuestra. */
   assert.deepEqual(repartoPorDefecto(5), { adelante: 1, atras: 3 });
+});
+
+/**
+ * LA VAN DE SIETE PLAZAS (01-09-2026). El catálogo ya decía que un Rush
+ * ofrece seis, pero el dominio cortaba en cuatro: quien la registraba no
+ * podía ofrecer su tercera fila.
+ */
+test('una van de siete ofrece seis: uno adelante y cinco atrás', () => {
+  assert.deepEqual(repartoPorDefecto(7), { adelante: 1, atras: 5 });
+  assert.equal(cuantosPuestos(repartoPorDefecto(7)), 6);
+  // Y el sedán de siempre no se mueve.
+  assert.deepEqual(repartoPorDefecto(5), { adelante: 1, atras: 3 });
+});
+
+test('con dos bancos no se promete «máx. 2 atrás»: sería falso', () => {
+  // Cuatro atrás son tres en un banco y uno en el otro. Nadie va apretado,
+  // pero tampoco es la promesa de un banco con el sitio del medio libre.
+  assert.equal(comodidadDeAtras({ adelante: 1, atras: 4 }), null);
+  assert.equal(comodidadDeAtras({ adelante: 1, atras: ASIENTOS_POR_BANCO }), null);
 });
 
 test('el conductor nunca se ofrece a sí mismo', () => {
