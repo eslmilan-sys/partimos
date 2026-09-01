@@ -222,6 +222,12 @@ export default function MisViajesPantalla() {
               alDetalle={() =>
                 router.push({ pathname: '/(pasajero)/viaje', params: { viaje: proximo.viajeId } })
               }
+              alCodigo={() =>
+                router.push({
+                  pathname: '/(pasajero)/codigo',
+                  params: { reserva: proximo.reservaId },
+                })
+              }
             />
           </>
         ) : null}
@@ -317,24 +323,10 @@ export default function MisViajesPantalla() {
         ) : null}
 
         <View style={estilos.puertas}>
-          {proximo ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ver mi código para subir"
-              onPress={() =>
-                router.push({
-                  pathname: '/(pasajero)/codigo',
-                  params: { reserva: proximo.reservaId },
-                })
-              }
-              style={({ pressed }) => [estilos.puerta, pressed && { backgroundColor: color.sand100 }]}
-            >
-              {/* El código de SUBIR: es el único que hay desde el 27-08-2026,
-                  y es el que hace falta antes del viaje, no después. */}
-              <Text style={estilos.puertaTexto}>Mi código para subir</Text>
-              <Avanza />
-            </Pressable>
-          ) : null}
+          {/* **«MI CÓDIGO PARA SUBIR» SE MUDÓ AL BOLETO** (01-09-2026,
+              pedido del dueño): vive dentro de la ficha grande, como banda
+              de talón con el código escrito. Aquí era un botón suelto que
+              obligaba a mirar dos sitios para una sola cosa. */}
 
           {/* **«QUIÉN PIDE PUESTO» SE FUE** (29-08-2026, pedido del dueño).
               Era una fila fija que llevaba al panel del conductor, y estaba
@@ -383,10 +375,12 @@ function FichaGrande({
   puesto,
   alChat,
   alDetalle,
+  alCodigo,
 }: {
   puesto: PuestoMio;
   alChat: () => void;
   alDetalle: () => void;
+  alCodigo: () => void;
 }) {
   const decir = useDecir();
   const estado = ESTADO[puesto.estado] ?? ESTADO.confirmed;
@@ -501,6 +495,26 @@ function FichaGrande({
           </View>
         ) : null}
       </View>
+
+      {/* **EL CÓDIGO VIVE EN EL BOLETO** (01-09-2026, pedido del dueño:
+          «shall be in the card, not a button below»). Es la banda de talón
+          de un pase de abordar: raya discontinua, el código escrito — que es
+          lo que hay que tener en la mano en la acera — y la puerta a verlo
+          en grande. Fuera de la tarjeta era un ajuste más de la pantalla;
+          dentro, es parte del viaje. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Mi código para subir: ${puesto.codigo.split('').join(' ')}. Verlo en grande`}
+        onPress={alCodigo}
+        style={({ pressed }) => [estilos.talon, pressed && { backgroundColor: color.sand100 }]}
+      >
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={estilos.epigrafeMini}>Código para subir</Text>
+          <Text style={[estilos.codigoDelTalon, tabular]}>{puesto.codigo}</Text>
+        </View>
+        <Text style={estilos.verloGrande}>Verlo en grande</Text>
+        <Avanza tamano={15} />
+      </Pressable>
 
       <View style={estilos.acciones}>
         {/* Los dos secundarios son cuadrados y sin rótulo: con «Chat» y
@@ -867,6 +881,33 @@ const estilos = StyleSheet.create({
   },
   carroDetalle: { fontSize: 11.5, lineHeight: 16.675, color: color.ink600, fontFamily: familia },
 
+  /** La banda de talón: como un pase de abordar, con su raya discontinua. */
+  talon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: color.bordePorDefecto,
+    borderStyle: 'dashed',
+  },
+  codigoDelTalon: {
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '700',
+    letterSpacing: 3,
+    color: color.ink900,
+    fontFamily: familia,
+    marginTop: 1,
+  },
+  verloGrande: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: color.azul700,
+    fontFamily: familia,
+  },
   acciones: {
     flexDirection: 'row',
     gap: 8,

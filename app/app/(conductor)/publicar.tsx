@@ -281,6 +281,26 @@ const COMO_SE_LLAMA_EL_PASO: Record<Paso, string> = {
   comentario: '¿Algo que decirles?',
 };
 
+/**
+ * LA LÍNEA DE DEBAJO DE LA PREGUNTA (01-09-2026, pedido del dueño:
+ * «structure and architecture are important for the eye»). Cada paso lleva,
+ * SIEMPRE en el mismo sitio, una frase que dice qué decide esta pantalla —
+ * la arquitectura constante es lo que deja al ojo descansar: pregunta,
+ * consecuencia, control, y el botón abajo. Corta a propósito: orienta, no
+ * explica — las explicaciones viven junto a cada control.
+ */
+const QUE_DECIDE_EL_PASO: Record<Paso, string> = {
+  ruta: 'Los dos extremos deciden el camino, la distancia y el aporte.',
+  paradas: 'Cada parada abre tu viaje a quien sube en el camino.',
+  dia: 'Se puede cambiar hasta el momento de publicar.',
+  hora: 'La hora a la que recoges en el punto de salida.',
+  carro: 'El carro que verán, y los puestos que de verdad ofreces.',
+  aporte: 'Tu gasolina y tus peajes, repartidos entre los que van.',
+  tramos: 'Menos camino, menos aporte: cada tramo lleva su tope.',
+  condiciones: 'Lo que se puede y lo que no, dicho antes de que pidan.',
+  comentario: 'Lo último: tus palabras, tal cual, en la ficha del viaje.',
+};
+
 export default function Publicar() {
   const router = useRouter();
   const volver = useVolver('/(conductor)/panel');
@@ -693,6 +713,7 @@ export default function Publicar() {
           <Text style={estilos.titular} numberOfLines={2}>
             {COMO_SE_LLAMA_EL_PASO.ruta}
           </Text>
+          <Text style={estilos.bajadaPaso}>{QUE_DECIDE_EL_PASO.ruta}</Text>
         </View>
 
         <ScrollView
@@ -840,6 +861,7 @@ export default function Publicar() {
         <Text style={estilos.titular} numberOfLines={2}>
           {COMO_SE_LLAMA_EL_PASO[paso]}
         </Text>
+        <Text style={estilos.bajadaPaso}>{QUE_DECIDE_EL_PASO[paso]}</Text>
       </View>
 
       <ScrollView
@@ -1559,6 +1581,14 @@ const estilos = StyleSheet.create({
   },
   epigrafeCampo: { ...texto.epigrafe, color: color.campoTexto, flex: 1 },
   titular: { ...texto.titular, color: color.ink900, marginTop: 12 },
+  /** La misma frase de orientación, en el mismo sitio, en los nueve pasos. */
+  bajadaPaso: {
+    marginTop: 6,
+    fontSize: 13.5,
+    lineHeight: 19,
+    color: color.ink700,
+    fontFamily: familia,
+  },
 
   /** La barra de avance: un segmento por paso, el mismo lenguaje del registro. */
   avance: { flexDirection: 'row', gap: 4, marginTop: 14 },
@@ -1797,16 +1827,23 @@ const estilos = StyleSheet.create({
   },
   anadirTexto: { fontSize: 13.5, lineHeight: 19.57, fontWeight: '600', color: color.azul700, fontFamily: familia },
 
+  /* LA MISMA HOJA QUE LOS DEMAS PASOS (01-09-2026): aporte, tramos,
+     condiciones y comentario iban en tarjetas planas con borde, más abajo y
+     más apagadas que los cinco primeros pasos. Nueve pasos, un solo
+     lenguaje: la hoja blanca que monta sobre el campo, con su sombra. */
   tarjetaAporte: {
     marginHorizontal: espacio.gutter,
-    marginTop: 8,
-    borderRadius: radio.l,
-    borderWidth: 1,
-    borderColor: color.bordeSutil,
+    marginTop: 18,
+    borderRadius: radio.hoja,
     paddingHorizontal: 18,
     paddingVertical: 14,
     backgroundColor: color.blanco,
     overflow: 'hidden',
+    shadowColor: 'rgb(120,10,30)',
+    shadowOpacity: 0.28,
+    shadowRadius: 40,
+    shadowOffset: { width: 0, height: 18 },
+    elevation: 6,
   },
   filaAporte: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 },
   cifraFila: { flexDirection: 'row', alignItems: 'flex-end', gap: 7, marginTop: 8 },
@@ -1866,14 +1903,17 @@ const estilos = StyleSheet.create({
 
   tarjetaInterruptores: {
     marginHorizontal: espacio.gutter,
-    marginTop: 8,
+    marginTop: 18,
     backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderColor: color.bordeSutil,
-    borderRadius: radio.l,
+    borderRadius: radio.hoja,
     paddingHorizontal: 18,
     paddingTop: 10,
     paddingBottom: 2,
+    shadowColor: 'rgb(120,10,30)',
+    shadowOpacity: 0.28,
+    shadowRadius: 40,
+    shadowOffset: { width: 0, height: 18 },
+    elevation: 6,
   },
   /* La misma distancia del texto a la línea por ARRIBA y por ABAJO: antes
      el filete llevaba 9 debajo y nada encima, y quedaba pegado al renglón

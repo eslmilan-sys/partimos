@@ -38,7 +38,7 @@ import { CampoRojo } from '@/ui/CampoRojo';
 import { Epigrafe, Insignia } from '@/ui/controles';
 import { tabular } from '@/ui/dinero';
 import { cuando, diaLargo, esHoy } from '@/ui/fechas';
-import { Atras, Avion, Ayuda } from '@/ui/iconos';
+import { Atras, Avanza, Avion, Ayuda } from '@/ui/iconos';
 import { familia, color, espacio, interlinea, radio } from '@/ui/tokens';
 
 /** Sin parámetro de ruta —solo al abrir la pantalla suelta—, la del traspaso. */
@@ -117,9 +117,32 @@ export default function Chat() {
           <Text style={estilos.nombre} numberOfLines={1}>
             {hilo.otro.nombre}
           </Text>
-          <Text style={estilos.contexto} numberOfLines={1}>
-            {`${hilo.ruta} · ${cuando(hilo.cuando).toLowerCase()}`}
-          </Text>
+          {/* **LA RUTA ABRE EL VIAJE** (01-09-2026, pedido del dueño): quien
+              está escribiendo necesita mirar la ficha — la hora, el punto, el
+              aporte — sin salir a buscarla. La línea que ya dice de qué viaje
+              se habla es la puerta natural, con su galón para que se sepa. */}
+          {hilo.viajeId ?? viaje ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ver los detalles del viaje"
+              onPress={() =>
+                router.push({
+                  pathname: '/(pasajero)/viaje',
+                  params: { viaje: hilo.viajeId ?? viaje ?? '' },
+                })
+              }
+              style={estilos.filaContexto}
+            >
+              <Text style={estilos.contextoEnlace} numberOfLines={1}>
+                {`${hilo.ruta} · ${cuando(hilo.cuando).toLowerCase()}`}
+              </Text>
+              <Avanza tamano={13} tinta={color.ink400} />
+            </Pressable>
+          ) : (
+            <Text style={estilos.contexto} numberOfLines={1}>
+              {`${hilo.ruta} · ${cuando(hilo.cuando).toLowerCase()}`}
+            </Text>
+          )}
         </View>
 
         {/* **AYUDA, DONDE APARECE EL PROBLEMA** (27-08-2026, decidido por el
@@ -317,6 +340,16 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   contexto: { fontSize: 12.5, lineHeight: interlinea(12.5), color: color.campoTexto, fontFamily: familia, ...tabular },
+  filaContexto: { flexDirection: 'row', alignItems: 'center', gap: 3, alignSelf: 'flex-start', maxWidth: '100%' },
+  contextoEnlace: {
+    flexShrink: 1,
+    fontSize: 12.5,
+    lineHeight: interlinea(12.5),
+    fontWeight: '600',
+    color: color.ink700,
+    fontFamily: familia,
+    ...tabular,
+  },
 
   cuerpo: { flex: 1, paddingHorizontal: espacio.gutter },
   tarjetaPuesto: {

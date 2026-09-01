@@ -36,7 +36,11 @@ export type MensajeEnHilo = {
 export type HiloDelViaje = {
   /** La reserva de la que cuelga el hilo. Nulo si todavía es una pregunta. */
   reservaId: string | null;
-  /** El viaje del que se pregunta. Nulo si el hilo ya cuelga de una reserva. */
+  /**
+   * El viaje del que se habla — SIEMPRE, cuelgue el hilo de donde cuelgue
+   * (01-09-2026): la cabecera del chat abre la ficha del viaje con él. En
+   * un hilo de pregunta es media clave del hilo; en uno de reserva, contexto.
+   */
   viajeId: string | null;
   /**
    * Quien preguntó: la otra mitad de la clave del hilo, junto con el viaje.
@@ -80,7 +84,7 @@ export async function hiloDelViaje(reservaId: string, yo: string): Promise<HiloD
 
   return demora({
     reservaId,
-    viajeId: null,
+    viajeId: reserva.trip_id,
     conId: null,
     otro: { id: otroId, nombre, iniciales: iniciales(nombre) },
     ruta: rutaCorta(viaje),
