@@ -37,8 +37,9 @@
  *
  * 4. **«Si todos ponen 7, ¿por qué yo pago 4,86?»** Era verdad y era un
  *    defecto del cálculo, no de la pantalla: está arreglado en
- *    `dominio/aporte.ts` (el reparto redondea hacia abajo, y los centavos
- *    que no se dividen los pone quien maneja). Aquí lo que cambia es que el
+ *    `dominio/aporte.ts` — y arreglado dos veces, porque el primer arreglo
+ *    dejaba la diferencia del otro lado. Hoy el reparto va al centavo y las
+ *    dos cifras de abajo salen iguales. Aquí lo que cambia es que el
  *    dinero **se dice como un reparto** —entre cuántos, cuánto cada quien—
  *    en vez de tres cifras de las que había que deducir la suya restando.
  *
@@ -307,18 +308,23 @@ export default function Repaso() {
               </View>
             </View>
 
-            {/* LA REGLA, con su razón al lado (invariante 7). Y ya no es una
-                promesa que haya que creerse: las dos cifras de arriba la
-                enseñan — la de quien maneja es la más grande de las dos. */}
-            {/* LAS DOS RAZONES SON DISTINTAS y hay que decir la que toca.
-                Con el tope mordiendo, «se redondea al dólar de abajo» es
-                falso: de 16,43 a 11 no hay redondeo, hay un tope. Es la
-                pregunta del dueño del 30-08 con la pantalla delante — «¿por
-                qué si son 30 $ pagan 11?». */}
+            {/* LA REGLA, con su razón al lado (invariante 7), y las dos
+                razones son distintas: hay que decir la que toca.
+
+                Con el tope mordiendo, «se redondea» es falso — de 16,43 a 11
+                no hay redondeo, hay un tope (pregunta del dueño del 30-08:
+                «¿por qué si son 30 $ pagan 11?»).
+
+                Y sin tope, la frase también cambió el 01-09: decía «pones más
+                que ellos porque el aporte se redondea al dólar de abajo», y
+                eran 2,19 $ de diferencia dentro del mismo carro. El reparto
+                va ahora al centavo, así que lo que hay que decir es lo
+                contrario — que todos ponen lo mismo — y por qué eso no
+                significa que el viaje salga gratis. */}
             <Text style={estilos.porQue}>
               {topeMuerde
                 ? `Entre ${puestos + 1} saldría a ${formatearDinero(Math.round(cuenta.costoCentavos / (puestos + 1)))} cada uno, pero el tope de esta ruta es ${formatearDinero(datos.topeCentavos)} por puesto: nadie paga de más por ser el único que va contigo. El resto lo pones tú, y nadie gana dinero con esto.`
-                : 'Pones más que ellos porque el aporte se redondea al dólar de abajo, nunca al de arriba. Nadie gana dinero con esto: el carro lleno nunca cubre el viaje entero.'}
+                : `El costo se parte entre los ${puestos + 1} que van y todos ponen lo mismo, tú incluido. Por eso el carro lleno nunca cubre el viaje entero: tu parte siempre se queda dentro.`}
             </Text>
           </View>
 

@@ -1,5 +1,5 @@
 /**
- * Tu cuenta y tus ajustes — pantallas `6a` (cuenta) y `8a` (ajustes).
+ * Tu cuenta — pantalla `6a`. (La `8a`, Ajustes, se borró: ver abajo.)
  *
  * `6a` dice quién eres y **qué te falta**: si la cédula no está verificada, esa
  * es la línea que manda, porque sin ella no se publica.
@@ -108,71 +108,24 @@ export async function cuenta(perfilId: string): Promise<Cuenta> {
   });
 }
 
-export type GrupoDeAjustes = {
-  titulo: string;
-  filas: { etiqueta: string; valor?: string; ruta?: string; peligro?: boolean }[];
-};
-
 /**
- * TRES GRUPOS: viaje, dinero y cuenta. En ese orden.
+ * **`ajustes()` Y LA PANTALLA `8a` SE BORRARON EL 01-09-2026.**
  *
- * **El grupo «Avisos» se fue el 27-08-2026**, por pedido del dueño. Sus dos
- * filas no eran ajustes de nada: «Mis avisos» abría la bandeja —que está a un
- * toque en la campana del inicio— y «Rutas guardadas» son viajes, así que
- * ahora vive en Mis viajes, con los demás. Un ajuste es algo que se cambia;
- * un atajo a otra pantalla, no.
+ * Pedido del dueño —«delete ajustes, those should be in menu; delete la
+ * rueda»— y, al abrir la pantalla para mudar sus filas al perfil, resultó
+ * que **no tenía ni una fila propia**:
  *
- * Y con él, «Cómo aportas»: la misma pantalla que ya abre «Cómo se aporta»
- * desde Tu cuenta. Dos rótulos distintos para `/(pasajero)/metodos` es la
- * clase de duplicado que termina divergiendo.
+ * · «Mi carro» y «Verificación» → dos de las cuatro filas del perfil.
+ * · «Mis datos» → la cabecera del perfil, que se pulsa entera.
+ * · «Cómo se aporta» → dentro de «Aportes y pagos».
+ * · «Cómo te cuidamos» → la fila «Seguridad».
+ * · «Cómo se hacen las cosas» → ahora la lista «Ayuda» del perfil.
+ * · «Cerrar sesión» → abajo del todo en el perfil, su único sitio.
+ *
+ * Era un segundo menú que sólo llevaba a puertas ya visibles. El día que
+ * exista algo que de verdad se AJUSTE —avisos, idioma, unidades— vuelve a
+ * hacer falta una pantalla; hasta entonces, no.
  */
-export async function ajustes(perfilId: string): Promise<GrupoDeAjustes[]> {
-  const cedula = await estadoDeCedula(perfilId);
-  const licencia = estadoDeLicencia(await licenciaDe(perfilId));
-  const perfil = fuente.perfiles.find((p) => p.id === perfilId);
-
-  return demora([
-    {
-      /* **«MIS VIAJES» SE FUE** (31-08-2026). Está en la barra de abajo, en
-         esta misma pantalla, y estaba además en el perfil: tres caminos al
-         mismo sitio. Ajustes es donde se CAMBIA algo, no un atajo más. */
-      titulo: 'Viaje',
-      filas: [
-        { etiqueta: 'Mi carro', valor: fuente.vehiculos.find((v) => v.owner_id === perfilId)?.model ?? 'Ninguno', ruta: '/(conductor)/carro' },
-      ],
-    },
-    {
-      titulo: 'Cuenta',
-      filas: [
-        { etiqueta: 'Mis datos', valor: 'Nombre, ciudad, teléfono', ruta: '/(cuenta)/editar' },
-        {
-          etiqueta: 'Verificación',
-          valor: cedula.puedePublicar && (licencia === 'al-dia' || licencia === 'por-vencer')
-            ? 'Cédula y licencia'
-            : cedula.puedePublicar
-              ? 'Falta la licencia'
-              : cedula.etiqueta,
-          ruta: '/(conductor)/cedula',
-        },
-        { etiqueta: 'Cómo se aporta', valor: NOMBRE_DEL_CANAL[perfil?.preferred_pay_channel ?? 'yappy_app'], ruta: '/(pasajero)/metodos' },
-      ],
-    },
-    {
-      /* **LA AYUDA VIVE AQUÍ** (31-08-2026). Estaba también en el perfil, y
-         el perfil se podó a cuatro filas de lo que es tuyo. Quien busca ayuda
-         mira en Ajustes: es donde la pone todo el mundo. */
-      titulo: 'Ayuda',
-      filas: [
-        { etiqueta: 'Cómo se hacen las cosas', ruta: '/(ayuda)' },
-        { etiqueta: 'Cómo te cuidamos', ruta: '/(ayuda)/seguridad' },
-      ],
-    },
-    {
-      titulo: '',
-      filas: [{ etiqueta: 'Cerrar sesión', peligro: true }],
-    },
-  ]);
-}
 
 /** Los kilómetros compartidos: los de cada corredor por cada viaje hecho. */
 function kilometrosDe(perfilId: string): number {

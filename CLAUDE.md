@@ -166,20 +166,26 @@ la consommation qui fait foi**, la colonne `rate_per_km_cents` est à retirer.
 Voir `supabase/CONSUMO.md` — l'argument, les cinq catégories, la liste des
 modèles et ce qui reste à migrer.)*
 
-**L'apport s'arrondit au dollar, et cet arrondi coûte cher au conducteur.**
-Depuis le 30-08-2026 il s'arrondit **vers le bas** : c'est la seule direction
-où celui qui conduit ne met jamais moins qu'un passager (avant, un
-Panamá → Las Tablas donnait 7 $ par passager et 4,86 $ pour lui). Mais sur un
-Panamá → Chitré à 29,39 $ le partage juste vaut 5,88 $ et devient 5 $ : les
-quatre passagers mettent 20 au lieu de 23,51, et le conducteur récupère
-3,51 $ de moins **à cause de l'arrondi, pas de la règle**.
+**~~L'apport s'arrondit au dollar~~ — TRANCHÉ LE 01-09-2026 : il ne s'arrondit
+plus du tout.** Le propriétaire, la capture devant lui : *« why we redondean
+like this? all pay exact the same brother »*. Sur un Panamá → Chitré de 29,19 $
+partagé à trois, le partage juste vaut 9,73 ; l'arrondi au dollar inférieur
+le descendait à 9 et **le conducteur mettait 11,19 contre 9 pour chacun de ses
+passagers**. La correction du 30-08 — arrondir vers le bas au lieu du haut —
+avait retourné l'inégalité sans la supprimer.
 
-Arrondir **au quart de dollar** — 5,75 $ — garderait la garantie et
-diviserait la perte par quatre ; le quarter est la pièce la plus courante du
-pays, donc ça reste payable en liquide. Ça touche en revanche la décision du
-Sistema v6 « l'apport ne montre pas de centimes », qui vaut pour tout l'app.
-**À trancher par le propriétaire** : une ligne de `dominio/aporte.ts`
-(`aDolarAbajo`) et le format de `ui/dinero.tsx`.
+`aporteCalculado` divise maintenant **au centime** (`alCentavoAbajo`) : tout le
+monde met le même chiffre, et ce qui ne se divise pas — un à quatre centimes —
+reste chez celui qui conduit. La garantie du 30-08 tient toujours (il ne met
+jamais moins qu'un passager), et un second invariant la resserre : *la
+différence est de centimes, jamais de dollars* (`aporte.test.ts`).
+
+Ce que ça coûte : la décision du Sistema v6 « l'apport ne montre pas de
+centimes ». On l'assume — aucune règle de style ne vaut deux dollars d'écart
+visible entre quatre personnes du même carro. Les conséquences en interface :
+la règle de `5c` et le compteur des tronçons travaillent en **centimes par pas
+de 25** (le quarter est la pièce la plus courante du pays, donc on descend par
+chiffres payables en liquide), et leur maximum est ta part exacte.
 
 ## Divergences assumées entre le design et la production
 
@@ -917,3 +923,58 @@ Reste ouvert, et c'est une bonne idée du propriétaire : **le profil devrait
 s'adapter au rôle**. « Mi carro » ne dit rien à quelqu'un qui ne fait que
 réserver des places. Aujourd'hui la ligne est toujours là, avec « Añadir mi
 carro » quand il n'y en a pas.
+
+### « All pay exact the same », et Ajustes qui n'avait rien à régler — 01-09-2026
+
+Quatre demandes dans un message, trois écrans touchés.
+
+**1 · L'engrenage d'Ajustes est parti, et Ajustes avec lui.** *« On top right
+delete ajustes those should be in menu. Delete de rueda. Be smart for this
+menu. »* En ouvrant l'écran pour déménager ses lignes dans le profil, il est
+apparu qu'**aucune ne lui appartenait** : « Mi carro » et « Verificación » sont
+deux des quatre lignes du profil, « Mis datos » est sa cabecera, « Cómo se
+aporta » vit dans « Aportes y pagos », « Cómo te cuidamos » est la ligne
+Seguridad. Restaient « Cómo se hacen las cosas » et « Cerrar sesión ».
+
+`(cuenta)/ajustes.tsx` est supprimé, `ajustes()` aussi. Le profil porte
+maintenant **deux listes courtes** — *Mi cuenta* (Verificación · Mi carro ·
+Aportes y pagos · Seguridad) et *Ayuda* (Cómo funciona Partimos) — puis le
+partage, puis la déconnexion tout en bas. `(ayuda)/reembolso` allait chercher
+le moyen de paiement en fouillant les groupes d'Ajustes ; il demande
+maintenant `cuenta()`, où la donnée vit.
+
+Au passage : « Seguridad · Contactos de confianza · SOS » promettait des
+contacts de confiance qui n'existent pas. La ligne dit ce qu'il y a derrière —
+*« Cómo te cuidamos y el 911 »*.
+
+**2 · Le partage au centime.** Voir plus haut, « L'apport s'arrondit au
+dollar » : tranché, il ne s'arrondit plus. `alCentavoAbajo` remplace
+`aDolarAbajo`, la règle de `5c` et le compteur des tronçons passent en
+centimes par pas de 25, et les textes qui disaient *« el aporte se redondea al
+dólar de abajo, y la diferencia la pones tú »* disent maintenant l'inverse,
+qui est devenu vrai : *« Todos ponen lo mismo »*. Sur l'écran de relecture,
+les deux chiffres côte à côte sont désormais B/6,18 et B/6,22.
+
+**3 · Le panneau du conducteur, reconstruit.** *« This viajes publicados page
+is lacking a lot of design. We need to understand the best information
+clearly. »* Il dessinait **trois cartes différentes pour la même chose** —
+feuille blanche pour aujourd'hui, carte pour les suivants, la même carte pour
+les partis — et aucune ne répondait entièrement à la question qui amène un
+conducteur ici. Il y a maintenant **une seule carte**, cinq renglones toujours
+au même endroit : *cuándo · dónde · quién va · cuánto · qué hago ahora*.
+
+Ce qui manquait et qui y est :
+
+- **Les places se voient** — des sièges dessinés, encre pour l'occupé, gris
+  pour le libre. C'était une ligne de texte de 13 px, et c'est le chiffre
+  qu'on regarde en premier.
+- **L'argent sur toutes les cartes.** La grande, celle du trajet qui part dans
+  deux heures, ne montrait l'apport **nulle part**.
+- **Les demandes de place montent en tête de page**, comptées sur tous les
+  trajets et avec ce qui reste vraiment à la première (`expiraLaPrimera`) : le
+  libellé disait « expiran en 4 h » en dur, c'est-à-dire la durée de la
+  fenêtre et pas ce qu'il en reste.
+- **Un résumé d'une ligne** sous le titre, **les trajets partis éteints**, et
+  **un vide qui se touche** (le bouton Publicar au lieu d'une phrase grise).
+- Les heures ne sont plus écrites deux fois : `20:56 → 00:26 · 3 h 30` en
+  tête, et le rail garde les lieux.

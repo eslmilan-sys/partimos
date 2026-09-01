@@ -57,6 +57,7 @@ versionné.
 | `publicar-hojas.mjs` | le sélecteur d'heure ouvert, et les sièges qu'on retire |
 | `publicar-auditar.mjs` | `auditar.mjs`, mais aux huit étapes de l'assistant |
 | `repaso-tiro.mjs` | l'écran de relecture, avec un commentaire écrit |
+| `panel-tiro.mjs` | le panneau du conducteur et le profil, fenêtre par fenêtre |
 
 **Pourquoi trois de plus pour un seul écran.** `auditar.mjs` charge une route
 et mesure ce qu'il voit ; les étapes 2 à 8 de `publicar` n'existent qu'après

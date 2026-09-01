@@ -61,7 +61,7 @@ import { type Opcion, HojaDeEleccion } from '@/ui/HojaDeEleccion';
 import { ElegirDia, diaEnChip } from '@/ui/ElegirDia';
 import { ElegirHora, franjaDelDia } from '@/ui/ElegirHora';
 import { Boton, Epigrafe, Interruptor, Pastilla, Stepper } from '@/ui/controles';
-import { cifraRedonda, formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
+import { cifraRedonda, dineroEnVoz, formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, hora, mas } from '@/ui/fechas';
 import { Atras, Avanza, Carro, Cerrar, Escudo, Mas } from '@/ui/iconos';
 import { familia, color, espacio, radio, texto, zonaDeToque } from '@/ui/tokens';
@@ -1009,17 +1009,22 @@ export default function Publicar() {
               baja, que es lo que el producto promete en todas partes:
               «puedes pedir menos, nunca más». */}
           <View style={estilos.regula}>
+            {/* **LA REGLA VA EN CENTAVOS, DE CUARTO EN CUARTO** (01-09-2026).
+                Iba en dólares enteros, y desde que el aporte es el reparto
+                EXACTO —29,19 entre cuatro son 7,29— el tope de la regla ya no
+                es un número redondo: un deslizador de dólares no podía ni
+                pararse en la cifra sugerida. Con paso de 25 centavos se baja
+                por cifras cómodas para el efectivo, y el extremo derecho es tu
+                parte exacta. */}
             <Regula
-              valor={Math.round(aporte / 100)}
+              valor={aporte}
               /* El suelo cede ante el techo: en una ruta corta con el carro
-                 lleno el reparto puede dar 2, y un mínimo de 3 por encima del
-                 máximo dejaría el deslizador al revés. */
-              min={Math.min(
-                Math.round(APORTE_MINIMO_CENTAVOS / 100),
-                Math.round(calculado / 100),
-              )}
-              max={Math.round(calculado / 100)}
-              alCambiar={(v) => setAporteElegido(v * 100)}
+                 lleno el reparto puede dar 2,30, y un mínimo de 3 por encima
+                 del máximo dejaría el deslizador al revés. */
+              min={Math.min(APORTE_MINIMO_CENTAVOS, calculado)}
+              max={calculado}
+              paso={25}
+              alCambiar={setAporteElegido}
               rotuloIzquierda={`Mínimo ${formatearDineroRedondo(Math.min(APORTE_MINIMO_CENTAVOS, calculado))}`}
               /* «Máximo», no «tu parte»: lo que el conductor pone es OTRA
                  cifra —con un solo puesto, B/21,86 contra un tope de B/11— y
@@ -1027,7 +1032,7 @@ export default function Publicar() {
                  por otro justo al lado del que sí es suyo. */
               rotuloDerecha={`Máximo ${formatearDineroRedondo(calculado)}`}
               etiquetaAccesible="Aporte por puesto"
-              comoSeDice={(v) => `${v} balboas por puesto`}
+              comoSeDice={(v) => `${dineroEnVoz(v)} por puesto`}
             />
           </View>
 
@@ -1051,10 +1056,21 @@ export default function Publicar() {
               de 16,43 a 11 no hay un redondeo, hay un tope. El dueño lo
               preguntó con la pantalla delante: «¿por qué si son 30 $ pagan
               11?». Cada caso dice su propia razón. */}
+          {/* **TRES CASOS, TRES FRASES, Y CADA UNA ES VERDAD LA SUYA.**
+              La de en medio —el reparto limpio— antes decía «el aporte se
+              redondea al dólar de abajo, y la diferencia la pones tú», y era
+              una diferencia de 2,19 $ entre gente del mismo carro. Desde que
+              el reparto va al centavo (`dominio/aporte`), lo que sobra son
+              tres centavos y la frase que toca es la más corta de las tres:
+              todos ponen lo mismo. */}
           <Text style={estilos.cuenta}>
             {topeMuerde
               ? `Cada pasajero pone ${formatearDineroRedondo(aporte)} y tú el resto, ${formatearDinero(cuenta.deTuBolsilloCentavos)}.`
-              : `Cada pasajero pone ${formatearDineroRedondo(aporte)}. Tú pones ${formatearDinero(cuenta.deTuBolsilloCentavos)}: el aporte se redondea al dólar de abajo, y la diferencia la pones tú.`}
+              : aporte < calculado
+                ? `Pides menos que tu parte: cada pasajero pone ${formatearDinero(aporte)} y tú ${formatearDinero(cuenta.deTuBolsilloCentavos)}.`
+                : cuenta.deTuBolsilloCentavos === aporte
+                  ? `Todos ponen lo mismo: ${formatearDinero(aporte)} cada uno, tú incluido.`
+                  : `Cada uno pone ${formatearDinero(aporte)}, tú incluido. A ti te tocan ${formatearDinero(cuenta.deTuBolsilloCentavos)}: los centavos que no se dividen entre ${puestos + 1}.`}
           </Text>
 
           {/* **POR QUÉ EL APORTE NO SUBE AL QUITAR PUESTOS.** El reparto entre
@@ -1105,18 +1121,29 @@ export default function Publicar() {
             <>
               {tramos.map((t) => (
                 <View key={`${t.desde}-${t.hasta}`} style={estilos.filaPuestos}>
-                  <Text style={estilos.textoPuestos} numberOfLines={1}>
-                    {`Desde ${nombreDeParada(t.desde)}`}
-                    <Text style={estilos.carroApagado}>{` · ${Math.round(t.km)} km`}</Text>
-                  </Text>
+                  {/* LOS KILÓMETROS BAJAN A SU PROPIA LÍNEA. Iban detrás del
+                      nombre, y con la cifra escrita entera al lado —«B/3,54»
+                      en vez de un dígito— al rótulo le quedaban 130 px:
+                      «Desde Coronado · 1…». */}
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={estilos.textoPuestos} numberOfLines={1}>
+                      {`Desde ${nombreDeParada(t.desde)}`}
+                    </Text>
+                    <Text style={estilos.kmDelTramo}>{`${Math.round(t.km)} km`}</Text>
+                  </View>
+                  {/* EN CENTAVOS, de cuarto en cuarto, como la regla del
+                      aporte entero: el reparto de un tramo también sale al
+                      centavo —B/4,86— y un contador de dólares enseñaba 5
+                      mientras se publicaba otra cifra. */}
                   <Stepper
-                    valor={Math.round((aportesDeTramo[t.desde] ?? t.aporteCentavos) / 100)}
-                    alCambiar={(v) =>
-                      setAportesDeTramo((m) => ({ ...m, [t.desde]: v * 100 }))
-                    }
-                    min={1}
-                    max={Math.round(t.topeCentavos / 100)}
-                    etiquetaAccesible={`Aporte desde ${nombreDeParada(t.desde)}, en dólares`}
+                    valor={aportesDeTramo[t.desde] ?? t.aporteCentavos}
+                    alCambiar={(v) => setAportesDeTramo((m) => ({ ...m, [t.desde]: v }))}
+                    min={Math.min(100, t.aporteCentavos)}
+                    max={t.aporteCentavos}
+                    paso={25}
+                    comoSeVe={formatearDineroRedondo}
+                    compacto
+                    etiquetaAccesible={`Aporte desde ${nombreDeParada(t.desde)}`}
                   />
                 </View>
               ))}
@@ -1630,6 +1657,7 @@ const estilos = StyleSheet.create({
     borderTopColor: color.bordeSutil,
   },
   textoPuestos: { flex: 1, ...texto.fila, color: color.ink900 },
+  kmDelTramo: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
   cuenta: { fontSize: 12.5, lineHeight: 18.125, color: color.ink700, marginTop: 10, fontFamily: familia },
   /** Azul: informa, no reclama. El rojo tiene sus cuatro sentidos exactos. */
   notaTope: {

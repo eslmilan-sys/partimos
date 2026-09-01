@@ -38,11 +38,11 @@ test('el tope de la ruta a Chitré es 10 $', () => {
   assert.equal(topeDeRuta(costoDelViaje(CHITRE)), 1000);
 });
 
-test('el aporte por defecto con 3 puestos es 7 $', () => {
+test('el aporte por defecto con 3 puestos es 7,29 $', () => {
   const costo = costoDelViaje(CHITRE);
-  // 29,19 entre cuatro ocupantes son 7,29: al dólar de ABAJO, 7. Los 29
-  // centavos que no se dividen los pone quien maneja. Ver `aDolarAbajo`.
-  assert.equal(aporteCalculado(costo, 3, topeDeRuta(costo)), 700);
+  // 29,19 entre los cuatro que van son 7,2975: al centavo de ABAJO, 7,29.
+  // Los tres centavos que no se dividen los pone quien maneja.
+  assert.equal(aporteCalculado(costo, 3, topeDeRuta(costo)), 729);
 });
 
 test('el aporte baja al añadir puestos y nunca pasa del tope', () => {
@@ -50,8 +50,33 @@ test('el aporte baja al añadir puestos y nunca pasa del tope', () => {
   const tope = topeDeRuta(costo);
   assert.deepEqual(
     [1, 2, 3, 4].map((p) => aporteCalculado(costo, p, tope)),
-    [1000, 900, 700, 500],
+    [1000, 973, 729, 583],
   );
+});
+
+/**
+ * LA PREGUNTA DEL DUEÑO, 01-09-2026: «why we redondean like this? all pay
+ * exact the same brother».
+ *
+ * El invariante de abajo —«el conductor nunca pone menos»— sólo pedía una
+ * desigualdad, y el redondeo al dólar la cumplía dejando al conductor 2,19 $
+ * por encima de cada pasajero. Éste pide lo otro: que la diferencia sea de
+ * centavos y no de dólares. **Nunca más de un centavo por puesto**, que es
+ * exactamente lo que sobra al dividir.
+ */
+test('todos ponen lo mismo: la diferencia es de centavos, no de dólares', () => {
+  for (let costo = 500; costo <= 9000; costo += 37) {
+    const tope = topeDeRuta(costo);
+    for (let puestos = 1; puestos <= 4; puestos++) {
+      const aporte = aporteCalculado(costo, puestos, tope);
+      if (elTopeMuerde(costo, puestos, tope)) continue; // ahí manda el tope, no el reparto
+      const suyo = costo - loQueRecuperas(aporte, puestos);
+      assert.ok(
+        suyo - aporte <= puestos,
+        `con ${costo} y ${puestos} puestos: pasajero ${aporte}, conductor ${suyo}`,
+      );
+    }
+  }
 });
 
 /**
@@ -97,16 +122,17 @@ test('el suelo de 3 $ no sube el reparto: subirlo haría ganar dinero', () => {
   assert.equal(coronado, 1150);
   // El reparto entre cinco da 2,30. A 3 $ el conductor recuperaría 12 de 11,50.
   const aporte = aporteCalculado(coronado, 4, topeDeRuta(coronado));
-  assert.equal(aporte, 200);
+  assert.equal(aporte, 230);
   assert.ok(loQueRecuperas(aporte, 4) < coronado);
 });
 
-test('con el carro lleno el conductor recupera 21 $ de 29,19 $ y pone 8,19 $', () => {
+test('con el carro lleno el conductor recupera 21,87 $ de 29,19 $ y pone 7,32 $', () => {
   const costo = costoDelViaje(CHITRE);
-  const recupera = loQueRecuperas(700, 3);
-  assert.equal(recupera, 2100);
-  // R1 en una línea: ni lleno recupera lo que gastó — y pone más que ellos.
-  assert.equal(loQuePonesDeTuBolsillo(costo, recupera), 819);
+  const recupera = loQueRecuperas(729, 3);
+  assert.equal(recupera, 2187);
+  // R1 en una línea: ni lleno recupera lo que gastó. Y pone tres centavos más
+  // que cada pasajero — los que no se dividen entre cuatro.
+  assert.equal(loQuePonesDeTuBolsillo(costo, recupera), 732);
 });
 
 test('la pastilla dice de dónde sale la cifra', () => {

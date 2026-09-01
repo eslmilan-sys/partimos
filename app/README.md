@@ -123,7 +123,7 @@ Las 58 pantallas del traspaso, hechas:
 | `15b` | Ayuda | `/(ayuda)` |
 | `15d` | Reportar | `/(ayuda)/reportar` |
 | `15a` | Rutas guardadas | `/(pasajero)/rutas` |
-| `8a` | Ajustes | `/(cuenta)/ajustes` |
+| ~~`8a`~~ | ~~Ajustes~~ | borrada el 01-09-2026: no tenía ni una fila que no abriera ya el perfil |
 | `16b` | Cómo se paga | `/(ayuda)/pagos` |
 | `16c` | Comprobante | `/(pasajero)/comprobante` |
 | `16d` | Permiso de avisos | `/(avisos)/permiso` |

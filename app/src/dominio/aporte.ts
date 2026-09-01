@@ -5,7 +5,8 @@
  * en ui/Dinero.tsx y en ningún otro sitio.
  *
  * Viaje de referencia — Albrook → Chitré, 250 km, peaje 3,00 $, sedán:
- *   costo 29,19 $ · tope 10 $ · aporte por defecto con 3 puestos 8 $.
+ *   costo 29,19 $ · tope 10 $ · aporte por defecto con 3 puestos 7,29 $
+ *   (29,19 entre los cuatro que van, el conductor incluido).
  * (El traspaso de diseño decía 20,60 / 7 / 6: eran las cifras con la
  * gasolina a 0,80 $/L, que nunca fue el precio panameño. Corregido el
  * 24-08-2026 con la decisión de `supabase/CONSUMO.md`.)
@@ -73,26 +74,37 @@ export const OCUPACION_DE_REFERENCIA = 3;
 const aDolarArriba = (centavos: number): number => Math.ceil(centavos / 100) * 100;
 
 /**
- * Redondeo al dólar hacia ABAJO — el del aporte por puesto.
+ * EL REPARTO, AL CENTAVO DE ABAJO — el del aporte por puesto.
  *
- * **Por qué abajo, y por qué importa** (30-08-2026, pregunta del dueño con
- * la captura delante: «si todos ponen 7, ¿por qué yo pago 4,86?»).
+ * **Historia de dos preguntas del dueño, la segunda mató a la primera.**
  *
- * El reparto de un Panamá → Las Tablas de 32,86 $ entre cinco ocupantes da
- * 6,57 $. Redondeando hacia arriba, cada pasajero pone 7 y al conductor le
- * queda 32,86 − 28 = 4,86: **menos que cualquiera de los que lleva**. Y no
- * era el caso raro sino la regla — con `ceil`, lo que le queda al conductor
- * es siempre `costo − puestos × redondeo`, que por construcción cae por
- * debajo del reparto justo. Hasta el viaje de referencia de este archivo lo
- * tenía: 5,19 el conductor contra 6,00 cada pasajero.
+ * *30-08-2026, «si todos ponen 7, ¿por qué yo pago 4,86?»* — el reparto de
+ * un Panamá → Las Tablas de 32,86 $ entre cinco daba 6,57, y redondeando al
+ * dólar de ARRIBA cada pasajero ponía 7 y al conductor le quedaban 4,86:
+ * menos que cualquiera de los que llevaba. Se cambió a redondear al dólar de
+ * ABAJO, que da la vuelta a la desigualdad.
  *
- * Hacia abajo, la aritmética se da la vuelta y se queda dada la vuelta:
- * `costo − puestos × ⌊costo/(puestos+1)⌋ ≥ ⌊costo/(puestos+1)⌋` para todo
- * número de puestos. **Los centavos que no se dividen los pone quien
- * maneja**, que es la única versión de «el conductor cuenta como uno más»
- * que se sostiene mirando la pantalla.
+ * *01-09-2026, «why we redondean like this? all pay exact the same brother»*
+ * — pero la desigualdad seguía ahí, sólo que del otro lado y a veces más
+ * grande: 29,19 entre tres daba 9,73, el redondeo al dólar de abajo lo
+ * bajaba a 9, y el conductor ponía 11,19 contra los 9 de cada pasajero.
+ * **Dos dólares y pico de diferencia entre gente que va en el mismo carro,
+ * por un redondeo que no defendía nada.**
+ *
+ * El redondeo al dólar existía por una regla de estilo del v6 —«el aporte no
+ * enseña centavos»— y ninguna regla de estilo vale una desigualdad visible
+ * entre las cuatro personas de un carro. Al centavo, el reparto es exacto:
+ * `⌊costo/(ocupantes)⌋` para todos, y a quien maneja le quedan los ceros a
+ * tres o cuatro centavos como mucho. **Todos ponen lo mismo, y cuando no cabe
+ * exacto, los centavos sueltos los pone quien maneja** — que es la única
+ * versión de «el conductor cuenta como uno más» que aguanta mirando la
+ * pantalla.
+ *
+ * La desigualdad que arregló el cambio de agosto se conserva, porque es la
+ * misma cuenta con otra unidad:
+ * `costo − puestos × ⌊costo/(puestos+1)⌋ ≥ ⌊costo/(puestos+1)⌋`.
  */
-const aDolarAbajo = (centavos: number): number => Math.floor(centavos / 100) * 100;
+const alCentavoAbajo = (centavos: number): number => Math.floor(centavos);
 
 /** Centavos por kilómetro que gasta un carro: litros a los 100 km × precio del litro. */
 export function tasaPorKm(
@@ -135,7 +147,8 @@ export function topeDeRuta(costoDeReferenciaCentavos: number): number {
 
 /**
  * EL APORTE POR PUESTO: el costo entre los ocupantes —el conductor cuenta como
- * uno más que paga— al dólar de abajo, y nunca por encima del tope de la ruta.
+ * uno más que paga— al centavo de abajo, y nunca por encima del tope de la
+ * ruta. Ver `alCentavoAbajo`: **todos ponen lo mismo**.
  *
  * **Es a la vez lo que proponemos y lo máximo que se puede pedir.** Antes eran
  * dos cifras: esta, y un techo aparte que era el tope de la ruta. El tope se
@@ -162,7 +175,7 @@ export function aporteCalculado(
   puestos: number,
   topeCentavos: number,
 ): number {
-  const justo = aDolarAbajo(costoCentavos / (puestos + 1));
+  const justo = alCentavoAbajo(costoCentavos / (puestos + 1));
   return Math.min(topeCentavos, justo);
 }
 
@@ -219,7 +232,7 @@ export function elTopeMuerde(
   puestos: number,
   topeCentavos: number,
 ): boolean {
-  return aDolarAbajo(costoCentavos / (puestos + 1)) > topeCentavos;
+  return alCentavoAbajo(costoCentavos / (puestos + 1)) > topeCentavos;
 }
 
 /** Lo que el conductor recupera si se llena el carro. */

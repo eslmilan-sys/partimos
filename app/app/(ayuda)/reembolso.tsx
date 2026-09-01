@@ -20,7 +20,7 @@ import { useVolver } from '@/ui/salidas';
 import Svg, { Path, Rect } from 'react-native-svg';
 
 import type { MotivoDeReembolso } from '@/dominio/reembolsos';
-import { ajustes } from '@/servicios/ajustes';
+import { cuenta } from '@/servicios/ajustes';
 import { comprobante, viajeDeAyuda, type ViajeDeAyuda } from '@/servicios/ayuda';
 import {
   MOTIVOS,
@@ -79,13 +79,12 @@ export default function Reembolso() {
     viajeDeAyuda(reservaId).then(setViaje);
     comprobante(reservaId).then((c) => setReferencia(c.referencia));
     previsualizarTodos(reservaId).then(setPrevias);
-    // Dónde cae el dinero es el método de pago de la cuenta: la fila que lleva a
-    // cambiarlo es la misma que enseña cuál es.
+    // Dónde cae el dinero es el método de pago de la cuenta. Antes se sacaba
+    // rebuscando la fila de Ajustes que llevaba a `/(pasajero)/metodos`; ahora
+    // se pide el dato donde vive, que es lo que había que hacer desde el
+    // principio (la pantalla de Ajustes ya no existe).
     if (!yo) return;
-    ajustes(yo).then((grupos) => {
-      const fila = grupos.flatMap((g) => g.filas).find((f) => f.ruta === '/(pasajero)/metodos');
-      setADonde(fila?.valor ?? '');
-    });
+    cuenta(yo).then((c) => setADonde(c.metodo));
   }, [yo, reservaId]);
 
   const previa = previas.find((p) => p.motivo === motivo);

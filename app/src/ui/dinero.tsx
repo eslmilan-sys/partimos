@@ -37,6 +37,20 @@ export function cifraRedonda(centavos: number): string {
   return `${Math.floor(abs / 100)},${String(abs % 100).padStart(2, '0')}`;
 }
 
+/**
+ * La cifra DICHA, para un lector de pantalla.
+ *
+ * «B/7,29» leído en voz alta sale «be barra siete coma veintinueve». Desde que
+ * el aporte es el reparto exacto y lleva centavos (`dominio/aporte`), el
+ * deslizador de `5c` necesita decirlo como se dice hablando.
+ */
+export function dineroEnVoz(centavos: number): string {
+  const balboas = Math.floor(Math.abs(centavos) / 100);
+  const resto = Math.abs(centavos) % 100;
+  const enteros = `${balboas} ${balboas === 1 ? 'balboa' : 'balboas'}`;
+  return resto === 0 ? enteros : `${enteros} con ${resto} centavos`;
+}
+
 /** Cifras tabulares, para que las columnas cuadren sin voz técnica. */
 export const tabular = { fontVariant: ['tabular-nums' as const] };
 

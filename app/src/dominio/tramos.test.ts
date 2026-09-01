@@ -39,10 +39,10 @@ test('partir el viaje NO lo encarece: la parada no es un peaje disfrazado', () =
     todos.find((t) => t.desde === 2 && t.hasta === 3)!,
   ];
   const suma = encadenado.reduce((n, t) => n + t.aporteCentavos, 0);
-  /* Sólo puede pasarse por el redondeo al dólar de cada trozo, que es
-     como mucho un dólar por tramo. Más que eso sería cobrar por parar. */
+  /* Desde que el reparto va al centavo (01-09-2026) el margen es de un
+     centavo por trozo, no de un dólar. Más que eso sería cobrar por parar. */
   assert.ok(
-    suma <= entero.aporteCentavos + 100 * encadenado.length,
+    suma <= entero.aporteCentavos + encadenado.length,
     `partirlo cuesta ${suma} contra ${entero.aporteCentavos} de una sola vez`,
   );
 });

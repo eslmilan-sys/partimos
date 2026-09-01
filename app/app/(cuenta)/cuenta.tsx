@@ -35,9 +35,15 @@
  *   otro ve— y los dos filetes verticales las separan sin cajas.
  * · **«Mi cuenta» rotula la lista.** Antes las filas empezaban sin decir de
  *   qué eran, pegadas a una tarjeta de dinero.
- * · **Ajustes sube al engranaje** de arriba a la derecha. Era la primera
- *   fila de la lista por pedido del 26-08 —«Ajustes should be on top»— y
- *   arriba del todo es más arriba todavía.
+ * · **Ajustes se disolvió** (01-09-2026, pedido del dueño: «delete ajustes,
+ *   those should be in menu; delete la rueda»). Se fue el engranaje, y con
+ *   él la pantalla: al abrirla se veía que **no tenía ni una fila propia**.
+ *   «Mi carro» y «Verificación» son dos de las cuatro de aquí; «Cómo se
+ *   aporta» vive dentro de «Aportes y pagos»; «Mis datos» es esta misma
+ *   cabecera; «Cómo te cuidamos» es la fila de Seguridad. Sólo quedaba
+ *   «Cómo se hacen las cosas», que ahora es la segunda lista, y «Cerrar
+ *   sesión», que vuelve abajo del todo. Un menú que sólo lleva a las
+ *   puertas que ya están a la vista es una puerta de más.
  * · **La cabecera entera se pulsa y abre «Editar perfil»** (`6b`). Tocar tu
  *   propia foto para cambiarla es el gesto que todo el mundo tiene
  *   aprendido; una fila «Editar perfil» aparte habría sido una fila más en
@@ -62,7 +68,7 @@
  * 3. **El botón de escanear (arriba, junto al engranaje) no existe.** No hay
  *    nada que escanear en este producto. Un control muerto es el peor
  *    defecto de este repositorio —`REVISION.md` lo pone el primero de la
- *    lista—, así que se dibuja sólo el engranaje.
+ *    lista—, así que arriba a la derecha no se dibuja nada.
  *
  */
 
@@ -89,18 +95,15 @@ import {
   Ayuda,
   Billete,
   Carro,
-  Cartera,
   Cedula,
-  Engranaje,
   Escudo,
   Estrella,
   Pin,
   Regalo,
-  Ruta,
   Salir,
   Visto,
 } from '@/ui/iconos';
-import { TRACK_MICRO, color, espacio, familia, interlinea, radio, sombra } from '@/ui/tokens';
+import { TRACK_MICRO, color, espacio, familia, interlinea, radio } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, el conductor del traspaso. */
 const DEL_RECORRIDO = '11111111-1111-4111-8111-111111111111';
@@ -156,17 +159,22 @@ export default function TuCuenta() {
    * entrar, un hueco no.
    */
   /**
-   * CUATRO FILAS, NI UNA MÁS. Ver la cabecera del archivo: las tres que se
-   * fueron llevaban a sitios que la barra de abajo o Ajustes ya abren, o
-   * partían el dinero en dos puertas.
+   * DOS LISTAS CORTAS, Y CADA UNA CONTESTA UNA PREGUNTA DISTINTA.
+   *
+   * «Mi cuenta» son las cuatro cosas TUYAS que sólo se administran desde
+   * aquí. «Ayuda» es lo único que traía la pantalla de Ajustes y no estaba
+   * ya en esta lista. Separarlas con su rótulo cuesta una línea y ahorra
+   * leer cinco filas para encontrar la que no va con las otras.
    */
-  const filas: {
+  type Fila = {
     etiqueta: string;
     debajo: string;
     pastilla?: string;
     icono: React.ReactNode;
     alPulsar: () => void;
-  }[] = [
+  };
+
+  const mias: Fila[] = [
     {
       etiqueta: 'Verificación',
       debajo: verificadoDeltodo
@@ -197,10 +205,23 @@ export default function TuCuenta() {
       alPulsar: () => router.push('/(conductor)/aportes'),
     },
     {
+      /* «Contactos de confianza» no existe en este producto y la fila lo
+         prometía. Lo que hay detrás es la pantalla de cómo te cuidamos, con
+         el botón de llamar al 911 arriba del todo: eso es lo que dice. */
       etiqueta: 'Seguridad',
-      debajo: 'Contactos de confianza · SOS',
+      debajo: 'Cómo te cuidamos y el 911',
       icono: <Escudo tamano={20} tinta={color.ink500} />,
       alPulsar: () => router.push('/(ayuda)/seguridad'),
+    },
+  ];
+
+  /* Lo único de la difunta pantalla de Ajustes que no estaba ya arriba. */
+  const ayuda: Fila[] = [
+    {
+      etiqueta: 'Cómo funciona Partimos',
+      debajo: 'Aportes, cancelaciones y reembolsos',
+      icono: <Ayuda tamano={20} tinta={color.ink500} />,
+      alPulsar: () => router.push('/(ayuda)'),
     },
   ];
 
@@ -217,18 +238,8 @@ export default function TuCuenta() {
         <CampoRojo altura={250} motivo="mapa" />
 
         <View style={estilos.cabecera}>
-          {/* El engranaje, solo. Ver la nota 3 de la cabecera del archivo:
-              el botón de escanear de la maqueta no tiene nada que escanear. */}
-          <View style={estilos.filaAcciones}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ajustes"
-              onPress={() => router.push('/(cuenta)/ajustes')}
-              style={({ pressed }) => [estilos.botonRedondo, pressed && estilos.pulsada]}
-            >
-              <Engranaje />
-            </Pressable>
-          </View>
+          {/* ARRIBA A LA DERECHA NO VA NADA. Estaba el engranaje de Ajustes,
+              y Ajustes ya no existe: ver la cabecera del archivo. */}
 
           {/* LA CABECERA ENTERA ABRE «EDITAR PERFIL» (`6b`). Tocar tu propia
               foto para cambiarla es el gesto que todo el mundo tiene
@@ -325,47 +336,10 @@ export default function TuCuenta() {
           </Pressable>
 
           <Text style={estilos.rotuloSeccion}>Mi cuenta</Text>
+          <Lista filas={mias} completa={verificadoDeltodo} />
 
-          <View style={estilos.lista}>
-            {filas.map((f, i) => (
-              <Pressable
-                key={f.etiqueta}
-                accessibilityRole="button"
-                accessibilityLabel={`${f.etiqueta}, ${f.pastilla ?? f.debajo}`}
-                onPress={f.alPulsar}
-                style={({ pressed }) => [
-                  estilos.fila,
-                  i < filas.length - 1 && estilos.filaConLinea,
-                  pressed && estilos.pulsada,
-                ]}
-              >
-                <View style={estilos.cuadroIcono}>{f.icono}</View>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={estilos.filaEtiqueta} numberOfLines={1}>
-                    {f.etiqueta}
-                  </Text>
-                  <Text style={estilos.filaDebajo} numberOfLines={1}>
-                    {f.debajo}
-                  </Text>
-                </View>
-                {f.pastilla ? (
-                  <View
-                    style={[estilos.pastillaFila, !verificadoDeltodo && estilos.pastillaTibia]}
-                  >
-                    <Text
-                      style={[
-                        estilos.pastillaFilaTexto,
-                        !verificadoDeltodo && estilos.pastillaTibiaTexto,
-                      ]}
-                    >
-                      {f.pastilla}
-                    </Text>
-                  </View>
-                ) : null}
-                <Avanza />
-              </Pressable>
-            ))}
-          </View>
+          <Text style={estilos.rotuloSeccion}>Ayuda</Text>
+          <Lista filas={ayuda} completa={verificadoDeltodo} />
 
           {/* **INVITAR, NO «GANAR», Y EN VOZ BAJA.** Ver la nota 2 de la
               cabecera: no hay programa de referidos que pagar, así que no se
@@ -396,14 +370,80 @@ export default function TuCuenta() {
             <Avanza />
           </Pressable>
 
-          {/* **CERRAR SESIÓN SE FUE A AJUSTES**, donde ya estaba. Estaba en
-              las dos pantallas, y la de Ajustes se abre desde el engranaje de
-              esta misma cabecera: dos botones de salir a dos toques de
-              distancia son uno de más. */}
+          {/* **CERRAR SESIÓN VUELVE AQUÍ**, que es donde se busca y donde
+              ahora es el único sitio: la pantalla de Ajustes se disolvió.
+              Abajo del todo, en tinta y sin caja — salirse no es una de las
+              cosas que se vienen a hacer a esta pantalla. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Cerrar sesión"
+            onPress={() => salir().then(() => router.replace('/(cuenta)/apertura'))}
+            style={({ pressed }) => [estilos.cerrar, pressed && estilos.pulsada]}
+          >
+            <Salir tamano={17} tinta={color.ink600} />
+            <Text style={estilos.cerrarTexto}>Cerrar sesión</Text>
+          </Pressable>
         </View>
       </ScrollView>
 
       <Pestanas valor="Perfil" yo={yo} />
+    </View>
+  );
+}
+
+/**
+ * UNA LISTA DE FILAS, dibujada igual las dos veces.
+ *
+ * `completa` es el estado de la verificación y sólo lo mira la pastilla:
+ * pendiente va en arena y no en rojo, porque no es un error sino algo por
+ * hacer.
+ */
+function Lista({
+  filas,
+  completa,
+}: {
+  filas: {
+    etiqueta: string;
+    debajo: string;
+    pastilla?: string;
+    icono: React.ReactNode;
+    alPulsar: () => void;
+  }[];
+  completa: boolean;
+}) {
+  return (
+    <View style={estilos.lista}>
+      {filas.map((f, i) => (
+        <Pressable
+          key={f.etiqueta}
+          accessibilityRole="button"
+          accessibilityLabel={`${f.etiqueta}, ${f.pastilla ?? f.debajo}`}
+          onPress={f.alPulsar}
+          style={({ pressed }) => [
+            estilos.fila,
+            i < filas.length - 1 && estilos.filaConLinea,
+            pressed && estilos.pulsada,
+          ]}
+        >
+          <View style={estilos.cuadroIcono}>{f.icono}</View>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text style={estilos.filaEtiqueta} numberOfLines={1}>
+              {f.etiqueta}
+            </Text>
+            <Text style={estilos.filaDebajo} numberOfLines={1}>
+              {f.debajo}
+            </Text>
+          </View>
+          {f.pastilla ? (
+            <View style={[estilos.pastillaFila, !completa && estilos.pastillaTibia]}>
+              <Text style={[estilos.pastillaFilaTexto, !completa && estilos.pastillaTibiaTexto]}>
+                {f.pastilla}
+              </Text>
+            </View>
+          ) : null}
+          <Avanza />
+        </Pressable>
+      ))}
     </View>
   );
 }
@@ -420,17 +460,9 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 4 },
-  filaAcciones: { flexDirection: 'row', justifyContent: 'flex-end' },
-  botonRedondo: {
-    width: 44,
-    height: 44,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...sombra.s,
-  },
+  /* Sin fila de acciones arriba: el engranaje se fue con la pantalla de
+     Ajustes, así que la cabecera empieza directamente en la persona. */
+  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 22 },
 
   filaPersona: {
     flexDirection: 'row',

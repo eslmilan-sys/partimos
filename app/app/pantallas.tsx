@@ -78,7 +78,8 @@ const TABLEROS: { nombre: string; pantallas: Pantalla[] }[] = [
       { id: '15b', titulo: 'Ayuda', ruta: '/(ayuda)' },
       { id: '15d', titulo: 'Reportar', ruta: '/(ayuda)/reportar' },
       { id: '15a', titulo: 'Rutas guardadas', ruta: '/(pasajero)/rutas' },
-      { id: '8a', titulo: 'Ajustes', ruta: '/(cuenta)/ajustes' },
+      /* `8a` Ajustes se borró el 01-09-2026: no tenía ni una fila que no
+         abriera ya el perfil. Ver `servicios/ajustes.ts`. */
       { id: '16b', titulo: 'Cómo se paga', ruta: '/(ayuda)/pagos' },
       { id: '16c', titulo: 'Comprobante', ruta: '/(pasajero)/comprobante' },
       { id: '16d', titulo: 'Permiso de avisos', ruta: '/(avisos)/permiso' },

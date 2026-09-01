@@ -28,6 +28,21 @@ type StepperProps = {
    * de menos (29-08-2026).
    */
   prefijo?: string;
+  /**
+   * CUÁNTO SE MUEVE CADA TOQUE. Uno, salvo cuando el contador cuenta CENTAVOS
+   * —el aporte de un tramo— y entonces son 25: desde que el reparto va al
+   * centavo exacto (`dominio/aporte`), un contador de dólares enteros no podía
+   * ni enseñar la cifra que iba a publicarse.
+   */
+  paso?: number;
+  /** Cómo se escribe el valor. Sin esto, el número pelado. */
+  comoSeVe?: (v: number) => string;
+  /**
+   * La cifra en pequeño. La grande es de 25 px, pensada para un número de una
+   * cifra («3 puestos»); con una cantidad escrita entera —«B/2,87»— ocupa 85
+   * px y se come el rótulo de al lado en un teléfono de 390.
+   */
+  compacto?: boolean;
   etiquetaAccesible: string;
 };
 
@@ -37,14 +52,21 @@ export function Stepper({
   min = 0,
   max = 9,
   prefijo,
+  paso = 1,
+  comoSeVe,
+  compacto = false,
   etiquetaAccesible,
 }: StepperProps) {
-  const boton = (paso: number, apagado: boolean, glifo: string, nombre: string) => (
+  /* Con paso de 25 el máximo casi nunca es múltiplo del paso —el reparto da
+     729—, así que se acota DESPUÉS de redondear: el extremo se alcanza. */
+  const acotar = (v: number) => Math.min(max, Math.max(min, Math.round(v / paso) * paso));
+
+  const boton = (cuanto: number, apagado: boolean, glifo: string, nombre: string) => (
     <Pressable
       disabled={apagado}
       accessibilityRole="button"
       accessibilityLabel={nombre}
-      onPress={() => alCambiar(Math.min(max, Math.max(min, valor + paso)))}
+      onPress={() => alCambiar(acotar(valor + cuanto))}
       style={({ pressed }) => [
         estilos.stepperBoton,
         pressed && !apagado && { backgroundColor: color.sand200 },
@@ -61,14 +83,14 @@ export function Stepper({
       accessibilityLabel={etiquetaAccesible}
       accessibilityValue={{ min, max, now: valor }}
     >
-      {boton(-1, valor <= min, '−', 'Uno menos')}
-      <Text style={estilos.stepperValor}>
+      {boton(-paso, valor <= min, '−', 'Bajar')}
+      <Text style={[estilos.stepperValor, compacto && estilos.stepperValorCompacto]}>
         {/* El símbolo va más pequeño y en tinta suave: la cifra es lo que se
             mueve, el símbolo sólo dice de qué. */}
         {prefijo ? <Text style={estilos.stepperSufijo}>{prefijo}</Text> : null}
-        {valor}
+        {comoSeVe ? comoSeVe(valor) : valor}
       </Text>
-      {boton(1, valor >= max, '+', 'Uno más')}
+      {boton(paso, valor >= max, '+', 'Subir')}
     </View>
   );
 }
@@ -456,6 +478,7 @@ const estilos = StyleSheet.create({
     letterSpacing: -0.5,
     color: color.ink900,
     fontVariant: ['tabular-nums'], fontFamily: familia },
+  stepperValorCompacto: { minWidth: 62, fontSize: 17, lineHeight: 22, letterSpacing: -0.3 },
 
   interruptorBloque: { width: '100%' },
   /** Título y pista, centrados entre sí; el título cede, la pista jamás. */
