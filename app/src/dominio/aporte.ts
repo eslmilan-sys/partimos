@@ -180,6 +180,35 @@ export function aporteCalculado(
 }
 
 /**
+ * EL RANGO RECOMENDADO — la banda verde de `5c`.
+ *
+ * Pedido del dueño el 01-09-2026 con BlaBlaCar al lado: allí la pantalla del
+ * precio enseña «Precio recomendado: 23 € – 25 €» y debajo «tendrás pasajeros
+ * enseguida». Aquí sólo había un número y dos rótulos —«Mínimo B/3», «Máximo
+ * B/16,36»—, y un máximo no es una recomendación: no dice dónde conviene
+ * quedarse, sólo dónde está la pared.
+ *
+ * **El techo del rango es el tope, y no se puede subir.** El dueño pidió que
+ * se pudiera pedir «un 10 % más» que lo calculado. No se puede, y no es una
+ * decisión de diseño: R1 plafona el aporte en `costo / (ocupantes + 1)` y esa
+ * división ES el techo. Un 10 % por encima con el carro lleno acerca lo
+ * recuperado al costo entero, que es justo la frontera que separa compartir
+ * gastos de cobrar un pasaje. (El 10 % que sí existe ya está dentro: el
+ * `MARGEN_DESVIO_PCT` que engorda el costo antes de repartirlo.)
+ *
+ * Lo que sí se puede es lo que hace BlaBlaCar: **decir dónde está la banda
+ * buena**. Aquí es del 90 % del reparto hasta el reparto — por debajo se
+ * regala plata sin necesidad, por encima no se puede. Diez por ciento de
+ * margen, hacia el lado que la ley permite.
+ */
+export function rangoRecomendado(calculadoCentavos: number): { desde: number; hasta: number } {
+  return {
+    desde: Math.max(0, Math.round(calculadoCentavos * 0.9)),
+    hasta: calculadoCentavos,
+  };
+}
+
+/**
  * DE DÓNDE SALE LA CIFRA, dicho como se dice hablando.
  *
  * Eran «calculado», «lo pusiste tú» y «tope de la ruta» (30-08-2026, pedido

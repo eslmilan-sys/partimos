@@ -1117,3 +1117,37 @@ offert ; le montant se dit **une fois dessous, avec sa multiplication** —
 *« 4 puestos × B/12,02 · recuperas B/48,08 »* —, qui est exactement la question
 qu'on se pose en touchant les sièges. Proportions de voiture (176 × 262),
 sièges plus petits, roues et rétroviseurs à l'échelle.
+
+### La banda recomendada, los tramos en una hoja, y una frase que mentía — 01-09-2026
+
+**« Why is chauffeur paying more? It's equal! »** — capture à l'appui :
+`Cada pasajero B/16 · Tú B/17,10` sur un trajet de B/49,10 à trois, sous la
+phrase *« todos ponen lo mismo »*. Reproduit au centime : le plafond ne mordait
+pas, **le conducteur avait descendu le curseur de 36 centimes** (B/16,36 →
+B/16), et l'écran de relecture ne le disait pas. `publicar` a trois phrases —
+le plafond mord / tu demandes moins que ta part / le partage propre — et
+`repaso` n'en avait que deux. La troisième y est, avec l'écart chiffré et la
+sortie : *« Súbelo al máximo si quieres que todos pongan lo mismo »*.
+
+**« Je mets un prix (Partimos donne une fourchette) mais on peut mettre 10 %
+de plus. »** Les 10 % vers le HAUT ne sont pas possibles, et ce n'est pas un
+choix de design : R1 plafonne l'aporte à `coût / (occupants + 1)` et cette
+division **est** le plafond ; au-dessus, voiture pleine, on s'approche du coût
+entier, c'est-à-dire de la frontière entre partager des frais et vendre un
+billet. (Le 10 % qui existe est déjà dedans : `MARGEN_DESVIO_PCT`, qui grossit
+le coût avant de le partager.)
+
+Ce qui manquait, et que BlaBlaCar montre bien, c'est **la fourchette** : là-bas
+« Precio recomendado : 23 € – 25 € · tendrás pasajeros enseguida ». Ici il n'y
+avait qu'un maximum, et un maximum ne recommande rien — il dit où est le mur.
+`rangoRecomendado` va donc de 90 % du partage jusqu'au partage : dix pour cent
+de marge, du côté que la loi permet. La bande est peinte en vert sur le
+curseur, avec sa pastille et *« A este aporte se llena el carro »*.
+
+**Les prix des villes de passage passent d'une étape à une ligne.** C'était
+`¿Y quien sube en el camino?`, une page entière de l'assistant avec un
+compteur par arrêt — alors que ces montants sortent déjà calculés de leurs
+kilomètres et que l'écran ne sert qu'à les baisser. BlaBlaCar en fait une ligne
+sous le prix (« Precios para las ciudades de paso › ») qui ouvre une feuille :
+c'est fait, l'assistant passe de 9 étapes à 8, et la ligne est là où l'on
+regarde déjà l'argent.

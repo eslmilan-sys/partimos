@@ -151,7 +151,18 @@ export default function Repaso() {
     );
   if (!datos) return <Cargando />;
 
-  const aporte = aporteElegido ?? aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos);
+  /**
+   * **LA TERCERA RAZÓN POR LA QUE LAS DOS CIFRAS NO SALEN IGUALES.**
+   *
+   * `publicar` tiene tres frases —el tope muerde, pediste menos que tu parte,
+   * o el reparto limpio— y esta pantalla sólo tenía dos. Así que quien bajaba
+   * el deslizador 36 centavos leía aquí «todos ponen lo mismo» sobre un
+   * B/16 contra un B/17,10 (visto por el dueño el 01-09-2026: «why is
+   * chauffeur paying more? it's equal!»). No era el tope: era su propia
+   * rebaja, y la pantalla no la decía.
+   */
+  const calculado = aporteCalculado(datos.costoCentavos, puestos, datos.topeCentavos);
+  const aporte = aporteElegido ?? calculado;
   const cuenta = repartoDelCosto(datos.costoCentavos, aporte, puestos);
   /* ¿La cifra sale del reparto o del tope de la ruta? Las dos razones por las
      que el conductor pone más que ellos son distintas, y decir la que no es
@@ -329,7 +340,9 @@ export default function Repaso() {
             <Text style={estilos.porQue}>
               {topeMuerde
                 ? `Entre ${puestos + 1} saldría a ${formatearDinero(Math.round(cuenta.costoCentavos / (puestos + 1)))} cada uno, pero el tope de esta ruta es ${formatearDinero(datos.topeCentavos)} por puesto: nadie paga de más por ser el único que va contigo. El resto lo pones tú, y nadie gana dinero con esto.`
-                : `El costo se parte entre los ${puestos + 1} que van y todos ponen lo mismo, tú incluido. Por eso el carro lleno nunca cubre el viaje entero: tu parte siempre se queda dentro.`}
+                : aporte < calculado
+                  ? `Bajaste el aporte de ${formatearDinero(calculado)} a ${formatearDinero(aporte)}, así que pones ${formatearDinero(cuenta.deTuBolsilloCentavos - aporte)} más que cada pasajero. Súbelo al máximo si quieres que todos pongan lo mismo.`
+                  : `El costo se parte entre los ${puestos + 1} que van y todos ponen lo mismo, tú incluido. Por eso el carro lleno nunca cubre el viaje entero: tu parte siempre se queda dentro.`}
             </Text>
           </View>
 

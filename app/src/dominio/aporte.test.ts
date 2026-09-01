@@ -9,6 +9,7 @@ import {
   loQueRecuperas,
   elTopeMuerde,
   origenDelAporte,
+  rangoRecomendado,
   tasaPorKm,
   topeDeRuta,
 } from './aporte.ts';
@@ -211,5 +212,24 @@ test('si falla el otro, vuelve todo con tarifa incluida', () => {
     });
     assert.equal(r.montoCentavos, 630, motivo);
     assert.equal(r.retenidoCentavos, 0, motivo);
+  }
+});
+
+/**
+ * LA BANDA RECOMENDADA (01-09-2026). El dueño pidió poder pedir un 10 % MÁS
+ * que lo calculado, con BlaBlaCar delante. Por arriba no se puede —el reparto
+ * ES el tope de R1— así que el margen va hacia abajo: la banda buena termina
+ * exactamente en el reparto y empieza un 10 % antes.
+ */
+test('el rango recomendado nunca pasa del reparto: por arriba está R1', () => {
+  const costo = costoDelViaje(CHITRE);
+  const tope = topeDeRuta(costo);
+  for (let puestos = 1; puestos <= 4; puestos++) {
+    const calculado = aporteCalculado(costo, puestos, tope);
+    const { desde, hasta } = rangoRecomendado(calculado);
+    assert.equal(hasta, calculado, 'el techo de la banda es el aporte calculado');
+    assert.ok(desde < hasta && desde >= calculado * 0.89);
+    // Y ni en el extremo alto de la banda se recupera el viaje entero.
+    assert.ok(loQueRecuperas(hasta, puestos) < costo);
   }
 });

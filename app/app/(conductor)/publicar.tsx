@@ -8,7 +8,16 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -18,6 +27,7 @@ import {
   APORTE_MINIMO_CENTAVOS,
   CONSUMO_L_100KM,
   aporteCalculado,
+  rangoRecomendado,
   costoDelViaje,
   elTopeMuerde,
   origenDelAporte,
@@ -245,7 +255,6 @@ const PASOS = [
   'hora',
   'carro',
   'aporte',
-  'tramos',
   'condiciones',
   'comentario',
 ] as const;
@@ -276,7 +285,6 @@ const COMO_SE_LLAMA_EL_PASO: Record<Paso, string> = {
   hora: '¿A qué hora sales?',
   carro: '¿Con qué carro y cuántos puestos?',
   aporte: '¿Cuánto aporta cada quien?',
-  tramos: '¿Y quien sube en el camino?',
   condiciones: 'Las condiciones del viaje',
   comentario: '¿Algo que decirles?',
 };
@@ -296,7 +304,9 @@ const QUE_DECIDE_EL_PASO: Record<Paso, string> = {
   hora: 'La hora a la que recoges en el punto de salida.',
   carro: 'El carro que verán, y los puestos que de verdad ofreces.',
   aporte: 'Tu gasolina y tus peajes, repartidos entre los que van.',
-  tramos: 'Menos camino, menos aporte: cada tramo lleva su tope.',
+  /* «tramos» ya no es un paso: los aportes de las ciudades de paso viven en
+     una hoja que se abre desde el paso del aporte (01-09-2026). Su frase
+     —«menos camino, menos aporte»— sigue dentro de la hoja. */
   condiciones: 'Lo que se puede y lo que no, dicho antes de que pidan.',
   comentario: 'Lo último: tus palabras, tal cual, en la ficha del viaje.',
 };
@@ -402,6 +412,8 @@ export default function Publicar() {
   const [carroId, setCarroId] = useState<string | null>(null);
   const [misCarros, setMisCarros] = useState<Vehicle[]>([]);
   const [eligiendoCarro, setEligiendoCarro] = useState(false);
+  /** La hoja de los tramos: era un paso del asistente, ahora es una fila. */
+  const [viendoTramos, setViendoTramos] = useState(false);
   const [aporteElegido, setAporteElegido] = useState<number | null>(null);
   /** Lo que el conductor deja puesto en cada tramo, por índice de parada. */
   const [aportesDeTramo, setAportesDeTramo] = useState<Record<number, number>>({});
@@ -530,6 +542,8 @@ export default function Publicar() {
     [datos, puestos],
   );
   const aporte = aporteElegido ?? calculado;
+  /** La banda verde del deslizador y su pastilla. Ver `rangoRecomendado`. */
+  const banda = rangoRecomendado(calculado);
   const cuenta = datos ? repartoDelCosto(datos.costoCentavos, aporte, puestos) : null;
   /** ¿La cifra que se enseña es el tope y no el reparto? La pantalla lo dice. */
   const topeMuerde = !!datos && elTopeMuerde(datos.costoCentavos, puestos, datos.topeCentavos);
@@ -701,11 +715,11 @@ export default function Publicar() {
             >
               <Atras />
             </Pressable>
-            <Text style={estilos.epigrafeCampo}>{`Paso 1 de ${PASOS.length - 1}`}</Text>
+            <Text style={estilos.epigrafeCampo}>{`Paso 1 de ${PASOS.length}`}</Text>
           </View>
 
           <View style={estilos.avance}>
-            {PASOS.filter((x) => x !== 'tramos').map((clave, i) => (
+            {PASOS.map((clave, i) => (
               <View key={clave} style={[estilos.segmento, i === 0 && estilos.segmentoHecho]} />
             ))}
           </View>
@@ -785,10 +799,19 @@ export default function Publicar() {
   // Cada parada cuesta unos minutos; la llegada se mueve con ellas.
   const llegada = hora(mas(salida, datos.duracionMin + paradas * MINUTOS_POR_PARADA));
 
-  /* El paso de los tramos sólo existe si hay paradas: preguntar «¿y quien
-     sube en el camino?» en un viaje directo es una pantalla que no decide
-     nada. Los pasos se cuentan sobre los que de verdad se van a ver. */
-  const losPasos = PASOS.filter((x) => x !== 'tramos' || paradas > 0);
+  /**
+   * **LOS TRAMOS DEJAN DE SER UN PASO** (01-09-2026, con BlaBlaCar delante).
+   *
+   * Eran una pantalla entera del asistente —«¿Y quien sube en el camino?»—
+   * con un contador por parada. BlaBlaCar lo resuelve con **una fila** debajo
+   * del precio, «Precios para las ciudades de paso ›», que abre una hoja: es
+   * un ajuste fino de una decisión que ya está tomada, no una decisión más.
+   * Y sobre todo, los aportes de tramo ya salen calculados de sus kilómetros;
+   * la pantalla existía para poder bajarlos, que es lo que casi nadie hace.
+   *
+   * Un paso menos, y el que queda está donde se está mirando el dinero.
+   */
+  const losPasos = PASOS;
   const indiceDelPaso = Math.max(0, losPasos.indexOf(paso));
   const esElUltimo = indiceDelPaso === losPasos.length - 1;
 
@@ -1217,6 +1240,7 @@ export default function Publicar() {
                  del máximo dejaría el deslizador al revés. */
               min={Math.min(APORTE_MINIMO_CENTAVOS, calculado)}
               max={calculado}
+              banda={banda}
               paso={25}
               alCambiar={setAporteElegido}
               rotuloIzquierda={`Mínimo ${formatearDineroRedondo(Math.min(APORTE_MINIMO_CENTAVOS, calculado))}`}
@@ -1228,6 +1252,28 @@ export default function Publicar() {
               etiquetaAccesible="Aporte por puesto"
               comoSeDice={(v) => `${dineroEnVoz(v)} por puesto`}
             />
+          </View>
+
+          {/* **LA BANDA RECOMENDADA, COMO EN BLABLACAR** (01-09-2026). Allí
+              la pantalla del precio dice «Precio recomendado: 23 € – 25 €» y
+              debajo «tendrás pasajeros enseguida». Aquí había un máximo, y un
+              máximo no recomienda nada: dice dónde está la pared.
+
+              El techo de la banda ES el reparto, y no se puede subir: R1
+              plafona el aporte en `costo / (ocupantes + 1)`. Así que el
+              margen del 10 % va hacia abajo, que es el lado que la ley
+              permite. Ver `rangoRecomendado`. */}
+          <View style={estilos.filaBanda}>
+            <View style={estilos.pastillaBanda}>
+              <Text style={[estilos.pastillaBandaTexto, tabular]}>
+                {`Recomendado ${formatearDineroRedondo(banda.desde)} – ${formatearDineroRedondo(banda.hasta)}`}
+              </Text>
+            </View>
+            <Text style={estilos.pieBanda}>
+              {aporte >= banda.desde
+                ? 'A este aporte se llena el carro.'
+                : 'Puedes pedir menos, pero recuperas menos.'}
+            </Text>
           </View>
 
 
@@ -1277,6 +1323,34 @@ export default function Publicar() {
 
               Sin esta línea el número se quedaba quieto sin decir por qué, y
               parecía que el stepper estuviera roto (visto por el dueño). */}
+          {/* **LOS PRECIOS DE LAS CIUDADES DE PASO: UNA FILA, NO UN PASO.**
+              Es la estructura de BlaBlaCar —«Precios para las ciudades de
+              paso ›» debajo del precio— y es lo que esto es: un ajuste fino de
+              una decisión ya tomada. Sólo existe si hay paradas. */}
+          {tramos.length > 0 ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Ver los aportes de las ${tramos.length} ciudades de paso`}
+              onPress={() => setViendoTramos(true)}
+              style={({ pressed }) => [
+                estilos.filaTramos,
+                pressed && { backgroundColor: color.lavadoChip },
+              ]}
+            >
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.filaTramosTitulo}>Quien sube en el camino</Text>
+                {/* Sólo la cuenta. Con una cifra detrás —«desde B/0,12», el
+                    tramo más corto de un Panamá → David— parecía un error; y
+                    con la explicación detrás, se cortaba. Lo que hay dentro
+                    se cuenta dentro. */}
+                <Text style={estilos.filaTramosPie} numberOfLines={1}>
+                  {tramos.length === 1 ? '1 ciudad de paso' : `${tramos.length} ciudades de paso`}
+                </Text>
+              </View>
+              <Avanza />
+            </Pressable>
+          ) : null}
+
           {topeMuerde ? (
             <View style={estilos.notaTope}>
               <Escudo tamano={17} tinta={color.azul500} />
@@ -1290,63 +1364,6 @@ export default function Publicar() {
               </Text>
             </View>
           ) : null}
-        </View>
-        ) : null}
-
-        {/* **LO QUE APORTA QUIEN SUBE EN EL CAMINO** (0045).
-
-            BlaBlaCar deja poner a mano el precio de cada ciudad de paso, a
-            lo que el conductor quiera. Aquí no puede ser: **cada tramo lleva
-            su propio tope**, con la misma fórmula sobre SUS kilómetros y con
-            el mismo `+1`. Sin eso, partir un viaje en trozos sería la puerta
-            de atrás para cobrar de más — cuatro tramos al precio del viaje
-            entero son cuatro veces el costo. El conductor puede bajarlo; no
-            subirlo por encima de lo que ese tramo cuesta. */}
-        {paso === 'tramos' ? (
-        <View style={estilos.tarjetaAporte}>
-          <Brillo />
-          <Epigrafe>Quien sube en el camino</Epigrafe>
-          {tramos.length === 0 ? (
-            <Text style={estilos.cuenta}>
-              Este viaje va directo, sin paradas: todos aportan lo mismo. Si añades una parada,
-              aquí aparece lo que aporta quien suba ahí.
-            </Text>
-          ) : (
-            <>
-              {tramos.map((t) => (
-                <View key={`${t.desde}-${t.hasta}`} style={estilos.filaPuestos}>
-                  {/* LOS KILÓMETROS BAJAN A SU PROPIA LÍNEA. Iban detrás del
-                      nombre, y con la cifra escrita entera al lado —«B/3,54»
-                      en vez de un dígito— al rótulo le quedaban 130 px:
-                      «Desde Coronado · 1…». */}
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={estilos.textoPuestos} numberOfLines={1}>
-                      {`Desde ${nombreDeParada(t.desde)}`}
-                    </Text>
-                    <Text style={estilos.kmDelTramo}>{`${Math.round(t.km)} km`}</Text>
-                  </View>
-                  {/* EN CENTAVOS, de cuarto en cuarto, como la regla del
-                      aporte entero: el reparto de un tramo también sale al
-                      centavo —B/4,86— y un contador de dólares enseñaba 5
-                      mientras se publicaba otra cifra. */}
-                  <Stepper
-                    valor={aportesDeTramo[t.desde] ?? t.aporteCentavos}
-                    alCambiar={(v) => setAportesDeTramo((m) => ({ ...m, [t.desde]: v }))}
-                    min={Math.min(100, t.aporteCentavos)}
-                    max={t.aporteCentavos}
-                    paso={25}
-                    comoSeVe={formatearDineroRedondo}
-                    compacto
-                    etiquetaAccesible={`Aporte desde ${nombreDeParada(t.desde)}`}
-                  />
-                </View>
-              ))}
-              <Text style={estilos.cuenta}>
-                Menos camino, menos aporte. Cada tramo tiene su propio tope, calculado con sus
-                kilómetros: nadie paga el viaje entero por medio camino.
-              </Text>
-            </>
-          )}
         </View>
         ) : null}
 
@@ -1513,6 +1530,97 @@ export default function Publicar() {
       </View>
 
       {buscador}
+
+
+      {/* **LOS PRECIOS DE LAS CIUDADES DE PASO, EN UNA HOJA** (01-09-2026,
+          con BlaBlaCar delante: allí es la fila «Precios para las ciudades de
+          paso ›» debajo del precio). Era un paso entero del asistente, y no
+          decide nada nuevo: los aportes de tramo ya salen calculados de sus
+          kilómetros y esto sólo sirve para bajarlos.
+
+          **Cada tramo lleva su propio tope**, con la misma fórmula sobre SUS
+          kilómetros y con el mismo `+1`. Sin eso, partir un viaje en trozos
+          sería la puerta de atrás para cobrar de más — cuatro tramos al precio
+          del viaje entero son cuatro veces el costo. Se puede bajar; nunca
+          subir por encima de lo que ese tramo cuesta. */}
+      <Modal
+        visible={viendoTramos}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setViendoTramos(false)}
+      >
+        <Pressable
+          accessibilityLabel="Cerrar"
+          onPress={() => setViendoTramos(false)}
+          style={estilos.veloHoja}
+        />
+        <View style={estilos.alFondo} pointerEvents="box-none">
+          <View style={estilos.hojaTramos}>
+            <View style={estilos.asaHoja} pointerEvents="none" />
+            <View style={estilos.cabeceraHoja}>
+              <Text style={estilos.tituloHoja}>Quien sube en el camino</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Cerrar"
+                onPress={() => setViendoTramos(false)}
+                style={estilos.cerrarHoja}
+              >
+                <Cerrar tamano={16} tinta={color.ink700} />
+              </Pressable>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420 }}>
+            {tramos.length === 0 ? (
+              <Text style={estilos.cuenta}>
+                Este viaje va directo, sin paradas: todos aportan lo mismo. Si añades una parada,
+                aquí aparece lo que aporta quien suba ahí.
+              </Text>
+            ) : (
+              <>
+                {tramos.map((t) => (
+                  <View key={`${t.desde}-${t.hasta}`} style={estilos.filaPuestos}>
+                    {/* LOS KILÓMETROS BAJAN A SU PROPIA LÍNEA. Iban detrás del
+                        nombre, y con la cifra escrita entera al lado —«B/3,54»
+                        en vez de un dígito— al rótulo le quedaban 130 px:
+                        «Desde Coronado · 1…». */}
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={estilos.textoPuestos} numberOfLines={1}>
+                        {`Desde ${nombreDeParada(t.desde)}`}
+                      </Text>
+                      <Text style={estilos.kmDelTramo}>{`${Math.round(t.km)} km`}</Text>
+                    </View>
+                    {/* EN CENTAVOS, de cuarto en cuarto, como la regla del
+                        aporte entero: el reparto de un tramo también sale al
+                        centavo —B/4,86— y un contador de dólares enseñaba 5
+                        mientras se publicaba otra cifra. */}
+                    <Stepper
+                      valor={aportesDeTramo[t.desde] ?? t.aporteCentavos}
+                      alCambiar={(v) => setAportesDeTramo((m) => ({ ...m, [t.desde]: v }))}
+                      min={Math.min(100, t.aporteCentavos)}
+                      max={t.aporteCentavos}
+                      paso={25}
+                      comoSeVe={formatearDineroRedondo}
+                      compacto
+                      etiquetaAccesible={`Aporte desde ${nombreDeParada(t.desde)}`}
+                    />
+                  </View>
+                ))}
+                <Text style={estilos.cuenta}>
+                  Menos camino, menos aporte. Cada tramo tiene su propio tope, calculado con sus
+                  kilómetros: nadie paga el viaje entero por medio camino.
+                </Text>
+              </>
+            )}
+            </ScrollView>
+
+            <View style={{ marginTop: 16 }}>
+              <Boton tono="azul" ancho alPulsar={() => setViendoTramos(false)}>
+                Listo
+              </Boton>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <HojaDeEleccion
         abierta={eligiendoCarro}
@@ -1976,5 +2084,91 @@ const estilos = StyleSheet.create({
   notaLibre: { fontSize: 12, lineHeight: 17, fontWeight: '400', color: color.ink600, marginTop: 10, fontFamily: familia },
   pieLibre: { paddingHorizontal: espacio.gutter, paddingTop: 16, gap: 12 },
 
+  filaBanda: { marginTop: 10, alignItems: 'center', gap: 5 },
+  /** Verde de «hecho»: es la zona en la que el viaje se llena. */
+  pastillaBanda: {
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.hechoFondo,
+  },
+  pastillaBandaTexto: {
+    fontSize: 12.5,
+    lineHeight: 17,
+    fontWeight: '600',
+    color: color.hechoTinta,
+    fontFamily: familia,
+  },
+  pieBanda: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
+
+  filaTramos: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    backgroundColor: color.blanco,
+  },
+  filaTramosTitulo: {
+    fontSize: 14.5,
+    lineHeight: 20,
+    fontWeight: '600',
+    letterSpacing: -0.24,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  filaTramosPie: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
+
+  /* ── La hoja de los precios de las ciudades de paso ─────────────── */
+  veloHoja: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'rgba(26,20,32,.34)',
+  },
+  /** `zIndex`: en la web lo posicionado se pinta encima de lo que no lo está. */
+  alFondo: { flex: 1, justifyContent: 'flex-end', zIndex: 1 },
+  hojaTramos: {
+    backgroundColor: color.blanco,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: espacio.gutter,
+    paddingTop: 10,
+    paddingBottom: 26,
+    width: '100%',
+    maxWidth: espacio.marco,
+    alignSelf: 'center',
+  },
+  asaHoja: {
+    width: 38,
+    height: 4,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.bordePorDefecto,
+    alignSelf: 'center',
+  },
+  cabeceraHoja: { flexDirection: 'row', alignItems: 'center', marginTop: 14, marginBottom: 4 },
+  tituloHoja: {
+    flex: 1,
+    fontSize: 17,
+    lineHeight: 24,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+    color: color.ink900,
+    fontFamily: familia,
+  },
+  cerrarHoja: {
+    width: 34,
+    height: 34,
+    borderRadius: radio.icono,
+    backgroundColor: color.lavado,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   notaPie: { textAlign: 'center', fontSize: 12.5, lineHeight: 18.125, color: color.ink600, marginTop: 10, fontFamily: familia },
 });

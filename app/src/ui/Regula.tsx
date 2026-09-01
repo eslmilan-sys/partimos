@@ -47,6 +47,12 @@ type Props = {
   alCambiar: (v: number) => void;
   /** Lo sugerido: una marca en la barra, sin rótulo grande. */
   marca?: number;
+  /**
+   * LA BANDA RECOMENDADA, pintada sobre el carril (01-09-2026, con BlaBlaCar
+   * delante: «precio recomendado 23 € – 25 €»). Un máximo dice dónde está la
+   * pared; la banda dice dónde conviene quedarse. Ver `rangoRecomendado`.
+   */
+  banda?: { desde: number; hasta: number };
   /** Lo que se lee bajo cada extremo. */
   rotuloIzquierda?: string;
   rotuloDerecha?: string;
@@ -62,6 +68,7 @@ export function Regula({
   paso = 1,
   alCambiar,
   marca,
+  banda,
   rotuloIzquierda,
   rotuloDerecha,
   etiquetaAccesible,
@@ -134,6 +141,24 @@ export function Regula({
         >
           <View style={estilos.pintura} pointerEvents="none">
             <View style={estilos.barra} />
+
+            {/* La banda buena va DEBAJO del recorrido hecho: es el fondo
+                sobre el que se mueve el pulgar, no una segunda barra que
+                compita con él. */}
+            {banda ? (
+              <View
+                style={[
+                  estilos.banda,
+                  {
+                    left: PULGAR + (carril * Math.max(0, banda.desde - min)) / recorrido,
+                    width:
+                      (carril * Math.min(recorrido, banda.hasta - Math.max(min, banda.desde))) /
+                      recorrido,
+                  },
+                ]}
+              />
+            ) : null}
+
             <View style={[estilos.barraHecha, { width: PULGAR + carril * fraccion }]} />
 
             {/* La marca de lo sugerido. Va DEBAJO del pulgar a propósito: es
@@ -215,6 +240,13 @@ const estilos = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: color.ink900,
+  },
+  /** Verde de «hecho»: es la zona en la que el viaje se llena. */
+  banda: {
+    position: 'absolute',
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: color.hechoFondo,
   },
   marca: {
     position: 'absolute',
