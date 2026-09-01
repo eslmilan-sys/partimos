@@ -27,6 +27,7 @@ import {
   cuantasPiezas,
   decideElMaletero,
 } from '@/dominio/equipaje';
+import { desvioDeRecogida, enKilometros } from '@/dominio/desvio';
 import type { Lugar } from '@/dominio/lugar';
 import { type ReservaPreparada, pedirPuesto, prepararReserva } from '@/servicios/reservas';
 import { useMiId } from '@/servicios/sesion';
@@ -36,10 +37,10 @@ import { NoEsta } from '@/ui/NoEsta';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Boton, Epigrafe, Interruptor, Pastilla, Stepper } from '@/ui/controles';
 import { BuscadorDeLugar } from '@/ui/BuscadorDeLugar';
-import { formatearDineroRedondo, tabular } from '@/ui/dinero';
+import { formatearDinero, formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaCorto, hora } from '@/ui/fechas';
 import { Atras, Lupa, Maleta } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio, pulsado } from '@/ui/tokens';
+import { TRACK_MICRO, familia, color, espacio, radio, pulsado, zonaDeToque } from '@/ui/tokens';
 
 const VIAJE_DEL_RECORRIDO = '55555555-5555-4555-8555-555555555555';
 /** Sin sesión que preguntar —solo en simulado—. En producción la pide `1c`. */
@@ -70,7 +71,15 @@ export default function Reservar() {
   /* «Todavía no lo sé» y «no está» no son lo mismo: lo segundo dura para
      siempre, y en blanco no hay ni por dónde salir. */
   const [noEsta, setNoEsta] = useState(false);
-  const [direccion, setDireccion] = useState('Vía Argentina, Riba Smith');
+  /**
+   * **EL PUNTO PROPIO ARRANCA VACÍO** (01-09-2026, pedido del dueño: «de base
+   * je dois aller au point d'où il part; puis en bas, option»). Estaba escrito
+   * a mano —«Vía Argentina, Riba Smith»— así que todo el mundo abría esta
+   * pantalla con una dirección puesta que no era la suya, en el renglón que
+   * otra persona lee para saber dónde plantarse a las cinco de la mañana. Lo
+   * normal es ir a donde sale el carro; pedir otro sitio es una opción.
+   */
+  const [direccion, setDireccion] = useState('');
   /** Una pregunta, no dos contadores: ¿llevas maleta? La mochila va
       contigo siempre y no se cuenta (pedido el 25-08). */
   /* El pasajero DICE lo que lleva; el conductor decide cuando le llegue la
@@ -95,6 +104,27 @@ export default function Reservar() {
 
   if (noEsta) return <NoEsta />;
   if (!datos) return <Cargando />;
+
+  /**
+   * LO QUE CUESTA IR A BUSCARTE. Nulo mientras no hayas pedido otro punto —
+   * que es el caso normal— y nulo también si no sabemos dónde cae uno de los
+   * dos: entonces la pantalla no promete ningún número. Ver `dominio/desvio`.
+   */
+  const desvio =
+    puntoElegido?.lat != null &&
+    puntoElegido?.lng != null &&
+    datos.origen.lat != null &&
+    datos.origen.lng != null &&
+    datos.destinoPunto &&
+    datos.distanciaKm > 0
+      ? desvioDeRecogida(
+          { lat: datos.origen.lat, lng: datos.origen.lng },
+          { lat: puntoElegido.lat, lng: puntoElegido.lng },
+          datos.destinoPunto,
+          datos.distanciaKm,
+          datos.consumoL100km,
+        )
+      : null;
 
   // Si el conductor no lleva maletas, no hay maleta que contar.
 
@@ -138,46 +168,98 @@ export default function Reservar() {
         <View style={estilos.hoja}>
           <Epigrafe>Dónde te recogen</Epigrafe>
 
+          {/* **POR DEFECTO, DONDE SALE EL CARRO.** El raíl dibujaba siempre
+              dos puntos —el suyo y «Tu punto · +4 min»— aunque nadie hubiera
+              pedido ningún desvío, y los cuatro minutos eran una constante del
+              código. Sin punto propio hay UN sitio, y es el suyo. */}
           <View style={estilos.recorrido}>
-            <View style={estilos.lineaRecorrido} />
+            {desvio ? <View style={estilos.lineaRecorrido} /> : null}
 
-            <View style={estilos.parada}>
+            <View style={[estilos.parada, !desvio && { paddingBottom: 0 }]}>
               <View style={estilos.puntoLleno} />
-              <Text style={estilos.paradaNombre}>{datos.origen.etiqueta}</Text>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={estilos.paradaNombre}>{datos.origen.etiqueta}</Text>
+                {!desvio ? (
+                  <Text style={estilos.paradaPie}>
+                    {`Es de donde sale ${datos.conductor}. Llegas ahí y listo.`}
+                  </Text>
+                ) : null}
+              </View>
               <Text style={estilos.paradaHora}>{hora(datos.origen.hora)}</Text>
             </View>
 
-            <View style={[estilos.parada, { paddingBottom: 0 }]}>
-              <View style={estilos.puntoTuyo} />
-              <Text style={[estilos.paradaNombre, { color: color.azul700 }]}>Tu punto</Text>
-              <Text style={estilos.paradaHora}>{`+${datos.minutosDeDesvio} min`}</Text>
-            </View>
+            {desvio ? (
+              <View style={[estilos.parada, { paddingBottom: 0 }]}>
+                <View style={estilos.puntoTuyo} />
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={[estilos.paradaNombre, { color: color.azul700 }]} numberOfLines={1}>
+                    {direccion}
+                  </Text>
+                  <Text style={estilos.paradaPie}>
+                    {`${datos.conductor} lo aprueba junto con el puesto.`}
+                  </Text>
+                </View>
+                <Text style={estilos.paradaHora}>{`+${desvio.minutos} min`}</Text>
+              </View>
+            ) : null}
           </View>
 
-          {/* El campo ABRE EL BUSCADOR — el mismo motor de publicar, con el
-              catálogo entero («ph metric» encuentra el PH). Antes era un
-              campo suelto: se tecleaba y nada se proponía (visto en el
-              teléfono, 25-08).
-
-              Y desde el 26-08 lo tecleado YA NO VALE por sí solo: el punto
-              se elige de la lista o no se elige. Aquí es donde más importa —
-              esta línea es la que otra persona lee para saber dónde
-              plantarse a las cinco de la mañana. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Elegir tu punto de recogida"
-            onPress={() => setBuscandoPunto(true)}
-            style={({ pressed }) => [estilos.campoPunto, pressed && { backgroundColor: color.lavadoChip }]}
-          >
-            <Lupa tamano={16} tinta={color.ink400} grueso={2} />
-            <Text
-              style={[estilos.campoPuntoTexto, !direccion && { color: color.ink400 }]}
-              numberOfLines={1}
+          {/* LA OPCIÓN, ABAJO Y EN VOZ BAJA. Con un punto puesto se convierte
+              en la cuenta de lo que ese punto cuesta, más la salida para
+              quitarlo. */}
+          {desvio ? (
+            <View style={estilos.cajaDesvio}>
+              <Text style={[estilos.desvioCuenta, tabular]}>
+                {/* **KILÓMETROS, NO UN RECARGO.** `PRODUCT.md` es explícito:
+                    un servicio de recogida tarifado es transporte comercial.
+                    Aquí el viaje se ALARGA, y la gasolina de lo que se alarga
+                    la pone quien pidió el desvío — misma fórmula, ni un
+                    centavo más. Ver `dominio/desvio`. */}
+                {`Tu punto alarga el viaje ${enKilometros(desvio.km)}. La gasolina de esos kilómetros la pones tú: ${formatearDinero(desvio.costoCentavos)}.`}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Quitar mi punto y salir desde donde sale el carro"
+                onPress={() => {
+                  setPuntoElegido(null);
+                  setDireccion('');
+                }}
+                style={[{ alignSelf: 'flex-start', paddingVertical: 6 }, zonaDeToque]}
+              >
+                <Text style={estilos.quitarPunto}>Mejor voy a su punto</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Pedir que me recoja en otro punto"
+              onPress={() => setBuscandoPunto(true)}
+              style={({ pressed }) => [
+                estilos.campoPunto,
+                pressed && { backgroundColor: color.lavadoChip },
+              ]}
             >
-              {direccion || 'Busca tu punto de recogida'}
+              <Lupa tamano={16} tinta={color.ink400} grueso={2} />
+              <Text style={estilos.campoPuntoTexto} numberOfLines={1}>
+                Pedir otro punto de recogida
+              </Text>
+            </Pressable>
+          )}
+
+          {/* Cuando el desvío se pasa del garde-fou, se dice aquí y no se
+              deja pedir: quince minutos de vuelta ya no es llevar a alguien
+              de camino. */}
+          {puntoElegido && desvio && !desvio.cabe ? (
+            <Text style={estilos.desvioLargo}>
+              {`Ese punto le añade ${desvio.minutos} minutos a ${datos.conductor}: demasiado para un viaje compartido. Elige otro más cerca de su ruta.`}
             </Text>
-          </Pressable>
-          <Text style={estilos.ayudaPunto}>{`${datos.conductor} lo aprueba junto con el puesto.`}</Text>
+          ) : null}
+
+          {puntoElegido && !desvio ? (
+            <Text style={estilos.ayudaPunto}>
+              {`No podemos medir cuánto se desvía. ${datos.conductor} lo aprueba junto con el puesto.`}
+            </Text>
+          ) : null}
         </View>
 
         {/* **CUÁNTOS PUESTOS**, con el mismo ± que el equipaje y que
@@ -266,9 +348,13 @@ export default function Reservar() {
             «plaza»: es un puesto, como en todas las demás pantallas. */}
         {/* El TOTAL, y debajo de dónde sale. Con dos puestos el pie decía
             «B/6 por puesto» y quien pedía dos veía el precio de uno. */}
+        {/* **EL DESVÍO ENTRA EN EL TOTAL**, y una sola vez: los kilómetros
+            de ir a buscarte no dependen de cuántos puestos pidas. Es la misma
+            fórmula de siempre sobre una distancia mayor — no un recargo por
+            un servicio. Ver `dominio/desvio`. */}
         <View style={estilos.filaPrecio}>
           <Text style={[estilos.precio, tabular]}>
-            {formatearDineroRedondo(datos.aporteCentavos * puestos)}
+            {formatearDineroRedondo(datos.aporteCentavos * puestos + (desvio?.costoCentavos ?? 0))}
           </Text>
           <Pastilla estilo={{ marginBottom: 6 }}>
             {puestos === 1
@@ -276,10 +362,17 @@ export default function Reservar() {
               : `${puestos} × ${formatearDineroRedondo(datos.aporteCentavos)}`}
           </Pastilla>
         </View>
+        {desvio && desvio.cabe ? (
+          <Text style={[estilos.notaPie, { marginTop: -2, marginBottom: 8 }]}>
+            {`${formatearDineroRedondo(datos.aporteCentavos * puestos)} del viaje + ${formatearDinero(desvio.costoCentavos)} de los ${enKilometros(desvio.km)} que se desvía.`}
+          </Text>
+        ) : null}
 
         <Boton
          
-          desactivado={pidiendo}
+          /* Un desvío que no cabe no se pide: el botón se apaga y la caja de
+             arriba dice por qué. */
+          desactivado={pidiendo || (!!desvio && !desvio.cabe)}
           alPulsar={async () => {
             if (!yo) {
               router.push({ pathname: '/(cuenta)/puerta', params: { viaje: viajeId } });
@@ -289,7 +382,12 @@ export default function Reservar() {
             try {
               const puesto = await pedirPuesto(
                 viajeId,
-                { direccionPropia: direccion },
+                /* Sin punto propio no se propone ninguno: `proposed_point`
+                   queda nulo y quien maneja recoge donde dijo que sale. Antes
+                   se mandaba siempre la dirección que el código traía escrita
+                   a mano, así que TODAS las reservas nacían pidiendo un
+                   desvío que nadie había pedido. */
+                direccion ? { direccionPropia: direccion } : { paradaId: '' },
                 equipaje,
                 { pasajeroId: yo, puestos },
               );
@@ -419,6 +517,43 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   paradaHora: { fontSize: 13.5, lineHeight: 18.85, color: color.ink600, fontFamily: familia, ...tabular },
+  /** El renglón de debajo de cada punto: qué es, o quién lo aprueba. */
+  paradaPie: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: color.ink600,
+    fontFamily: familia,
+    marginTop: 2,
+  },
+  /** La cuenta del desvío: azul, informa; el rojo tiene sus cuatro sentidos. */
+  cajaDesvio: {
+    marginTop: 12,
+    padding: 13,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.azul200,
+    backgroundColor: color.azul50,
+  },
+  desvioCuenta: {
+    fontSize: 12.5,
+    lineHeight: 18.125,
+    color: color.ink700,
+    fontFamily: familia,
+  },
+  quitarPunto: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: color.azul700,
+    fontFamily: familia,
+  },
+  desvioLargo: {
+    marginTop: 10,
+    fontSize: 12.5,
+    lineHeight: 18.125,
+    color: color.rojo700,
+    fontFamily: familia,
+  },
 
   /** Una fila por clase, separadas por un pelo: es una lista, no tarjetas. */
   clases: { marginTop: 8 },

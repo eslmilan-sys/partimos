@@ -1055,3 +1055,65 @@ avant :**
   ligne qui dit pourquoi. On continue de les offrir — les retirer emportait le
   carrefour de Divisa, qui avance de 103 % —, mais on n'invente plus l'heure.
   `trip_stops.scheduled_at` accepte NULL depuis la 0001, donc rien à migrer.
+
+### Quatre écrans repris avec les captures du téléphone — 01-09-2026 (soir)
+
+**1 · Le point de prise en charge devient une OPTION, et le défaut est le
+point du conducteur.** *« De base je dois aller au point d'où il part. Puis en
+bas, option. Avec calcul en fonction de la distance depuis le point de
+départ. »* L'écran `7a` ouvrait avec un champ de recherche **déjà rempli** —
+« Vía Argentina, Riba Smith », écrit en dur dans le code — et un rail qui
+affichait toujours « Tu punto · +4 min », ces quatre minutes étant elles aussi
+une constante. Deux données inventées sur l'écran où l'on convient de l'endroit
+où quelqu'un attendra à cinq heures du matin ; et toutes les réservations
+naissaient donc en demandant un détour que personne n'avait demandé
+(`proposed_point` était toujours rempli).
+
+Maintenant : un seul point, le sien, avec *« Es de donde sale Andrés. Llegas
+ahí y listo »*. Dessous, en voix basse, **« Pedir otro punto de recogida »**.
+Quand on en choisit un, `dominio/desvio.ts` calcule ce qu'il coûte —
+`cuantoAlarga(salida, ton point, destination)` × les kilomètres du trajet — et
+l'écran dit *« Tu punto alarga el viaje 7,0 km. La gasolina de esos kilómetros
+la pones tú : B/0,71 »*, avec le total recalculé et une sortie pour l'enlever.
+Au-delà de **+15 % de kilométrage** (`PRODUCT.md`) le bouton s'éteint et
+l'écran explique pourquoi.
+
+C'est la règle du détour appliquée à la lettre : jamais un supplément pour un
+service de ramassage — le trajet **s'allonge**, donc il coûte plus d'essence,
+et cette essence est portée par qui a demandé le détour, avec la même formule
+et pas un centime de plus. (Premier jet : compter l'aller-retour au point, sans
+regarder où l'on va — un point à trois kilomètres sortait à seize minutes de
+détour et se faisait refuser, alors que c'est la prise en charge la plus
+banale qui soit.)
+
+**2 · « Mis viajes » ne montrait rien.** *« I published travels… but when I
+click mis viajes from menu bottom it doesn't show anything. »* Vrai : l'écran
+n'affichait que ce qui vient, et avec tous les trajets passés il répondait
+« todavía no tienes viajes por delante » et rien d'autre. La note en tête du
+fichier défendait ça — « l'historique vit dans le profil » — mais ça laisse un
+onglet racine qui ne montre RIEN de ce qu'on a. Il y a maintenant **« Ya
+pasaron »**, en lignes compactes et atténuées, des deux côtés du volant ; et un
+trajet qu'on a conduit y ouvre **le panneau**, la même porte que « Administrar
+viaje », pour qu'il n'y ait plus deux écrans avec la même liste.
+
+**3 · L'heure : une molette, plus une grille.** *« Attached calendar and button
+is not well designed. Act like a pro of ui apps and design. I like it simple
+yet like Apple. »* C'était vingt-quatre cases plus quatre pastilles — vingt-huit
+contrôles pour répondre à une question de deux chiffres, et ça se lisait comme
+un calendrier cassé (d'où le mot). Choisir une heure, ce n'est pas trancher
+entre vingt-quatre options : c'est déplacer un nombre sur une droite. Deux
+molettes qui tournent au doigt, la bande de sélection immobile au centre, les
+lignes qui s'éteignent vers les bords, et **les minutes de cinq en cinq** (en
+grille il fallait des quarts ; sur une molette ça ne coûte rien). `snapToInterval`
+devient `scroll-snap` en RN-Web, donc le repos tombe toujours sur une ligne
+exacte.
+
+**4 · La voiture, un tiers plus petite.** *« Design of the car is too big and
+really not good looking. »* Elle faisait 220 × 326 à 260 px de large — la
+moitié de l'écran pour un dessin qui accompagne — et surtout elle portait le
+montant **écrit quatre fois**, le même à chaque siège, en 19 px : c'est ça qui
+l'obligeait à être énorme. Le remplissage sombre suffit à dire qu'un siège est
+offert ; le montant se dit **une fois dessous, avec sa multiplication** —
+*« 4 puestos × B/12,02 · recuperas B/48,08 »* —, qui est exactement la question
+qu'on se pose en touchant les sièges. Proportions de voiture (176 × 262),
+sièges plus petits, roues et rétroviseurs à l'échelle.

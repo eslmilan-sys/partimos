@@ -28,8 +28,19 @@ export type ReservaPreparada = {
   conductor: string;
   destino: string;
   salida: string;
-  /** La primera parada de la ruta, de donde arranca el carro. */
-  origen: { etiqueta: string; hora: string };
+  /**
+   * La primera parada de la ruta, de donde arranca el carro — **y dónde
+   * está**. Las coordenadas son lo que deja medir el desvío de un punto de
+   * recogida (01-09-2026); nulas cuando el viaje no las trae, y entonces la
+   * pantalla no promete ningún número.
+   */
+  origen: { etiqueta: string; hora: string; lat: number | null; lng: number | null };
+  /** A dónde va, en coordenadas: un desvío se juzga contra el destino. */
+  destinoPunto: { lat: number; lng: number } | null;
+  /** Los kilómetros del viaje: el alargue es un porcentaje de esto. */
+  distanciaKm: number;
+  /** Lo que gasta el carro: sin esto no se puede poner precio a un desvío. */
+  consumoL100km: number;
   /** El aporte de UN puesto. El total lo hace la pantalla: unidad × puestos. */
   aporteCentavos: number;
   /**
@@ -39,8 +50,7 @@ export type ReservaPreparada = {
    * libre, y el error saldría al final — después de elegir punto y equipaje.
    */
   puestosLibres: number;
-  /** Lo que el punto del pasajero le añade al conductor. */
-  minutosDeDesvio: number;
+
 };
 
 export async function prepararReserva(viajeId: string): Promise<ReservaPreparada> {
@@ -51,6 +61,10 @@ export async function prepararReserva(viajeId: string): Promise<ReservaPreparada
   const origen = fuente.paradas
     .filter((p) => p.trip_id === viajeId)
     .sort((a, b) => a.sequence - b.sequence)[0];
+  /* De dónde sale, en coordenadas. La parada guarda una etiqueta, no un
+     punto; la ciudad del viaje sí lo tiene. */
+  const ciudadDeSalida = fuente.ciudades.find((c) => c.id === viaje.origin_city_id);
+  const ciudadDeLlegada = fuente.ciudades.find((c) => c.id === viaje.destination_city_id);
 
   return demora({
     viajeId,
@@ -60,7 +74,17 @@ export async function prepararReserva(viajeId: string): Promise<ReservaPreparada
     origen: {
       etiqueta: origen?.custom_label ?? viaje.origin_label ?? '',
       hora: origen?.scheduled_at ?? viaje.departure_at,
+      lat: ciudadDeSalida?.lat ?? null,
+      lng: ciudadDeSalida?.lng ?? null,
     },
+    destinoPunto:
+      ciudadDeLlegada?.lat != null && ciudadDeLlegada?.lng != null
+        ? { lat: ciudadDeLlegada.lat, lng: ciudadDeLlegada.lng }
+        : null,
+    distanciaKm: viaje.snap_distance_km ?? 0,
+    consumoL100km:
+      fuente.vehiculos.find((v) => v.owner_id === viaje.driver_id && v.is_active)
+        ?.consumption_l_100km ?? 7.5,
     aporteCentavos: viaje.price_cents,
     puestosLibres: Math.max(
       0,
@@ -71,9 +95,10 @@ export async function prepararReserva(viajeId: string): Promise<ReservaPreparada
           )
           .reduce((t, r) => t + r.seats, 0),
     ),
-    // Sin mapas de verdad el desvío es una estimación fija; ver «lo que es
-    // ingeniería» en el traspaso.
-    minutosDeDesvio: 4,
+    /* **YA NO HAY UN «+4 min» ESCRITO A MANO.** Era una constante que la
+       pantalla enseñaba como si fuera una medida, en un viaje donde nadie
+       había pedido todavía ningún desvío. Lo que cuesta ir a buscar a alguien
+       se calcula ahora con su punto, cuando lo pone, en `dominio/desvio`. */
   });
 }
 
@@ -140,7 +165,9 @@ export async function pedirPuesto(
     unit_price_cents: viaje.price_cents,
     service_fee_cents: tarifa,
     total_cents: total,
-    trip_stop_id: 'paradaId' in punto ? punto.paradaId : null,
+    /* Vacío es «donde sale el carro», no una parada con id en blanco: sobre
+       Supabase una cadena vacía en una columna uuid revienta la inserción. */
+    trip_stop_id: 'paradaId' in punto && punto.paradaId ? punto.paradaId : null,
     proposed_point: 'direccionPropia' in punto ? punto.direccionPropia : null,
     proposal_accepted: null,
     status: 'pending',

@@ -104,7 +104,9 @@ type Fila =
 const ESTADO: Record<string, { texto: string; fondo: string; tinta: string }> = {
   confirmed: { texto: 'Confirmado', fondo: color.hechoFondo, tinta: color.hechoTinta },
   pending: { texto: 'Pendiente', fondo: color.esperaFondo, tinta: color.esperaTinta },
-  completed: { texto: 'Terminado', fondo: color.sand200, tinta: color.ink500 },
+  /* `ink600` y no `ink500`: a 10,5 px sobre `sand200` el gris claro daba
+     4,39:1, justo por debajo del 4,5 que pide la WCAG al texto pequeño. */
+  completed: { texto: 'Terminado', fondo: color.sand200, tinta: color.ink600 },
 };
 
 export default function MisViajesPantalla() {
@@ -148,6 +150,29 @@ export default function MisViajesPantalla() {
   ].sort((a, b) => a.cuando.localeCompare(b.cuando));
 
   const vacio = !proximo && loQueViene.length === 0;
+
+  /**
+   * **LO QUE YA PASÓ, TAMBIÉN AQUÍ** (01-09-2026, visto por el dueño con el
+   * teléfono en la mano: *«when I click mis viajes from menu bottom it doesn't
+   * show anything»*).
+   *
+   * Y era verdad: tenía dos viajes publicados, los veía buscando y los veía
+   * desde «Administrar viaje», pero esta pantalla —la que abre la barra de
+   * abajo, la que se llama «Mis viajes»— le contestaba «todavía no tienes
+   * viajes por delante» y nada más. La cabecera de este archivo lo defendía
+   * así: «el historial vive en el perfil». Con la cuenta vacía por delante,
+   * eso deja una pestaña raíz que no enseña NADA de lo que tienes, y manda a
+   * buscarlo a dos sitios distintos.
+   *
+   * Ahora salen debajo, apagados y en filas compactas: no compiten con lo que
+   * viene —que sigue siendo lo primero— pero la pantalla deja de mentir.
+   */
+  const loQuePaso: Fila[] = [
+    ...(datos.pasados ?? []).map((p): Fila => ({ clase: 'pasajero', cuando: p.cuando, puesto: p })),
+    ...(manejando?.pasados ?? []).map(
+      (v): Fila => ({ clase: 'conduzco', cuando: v.cuando, viaje: v }),
+    ),
+  ].sort((a, b) => b.cuando.localeCompare(a.cuando));
 
   return (
     <View style={estilos.pantalla}>
@@ -242,7 +267,54 @@ export default function MisViajesPantalla() {
             botón «Buscar un viaje» — media pantalla para decir «no hay nada»,
             y con un botón que la barra de abajo ya tiene a un dedo. Una línea
             basta: dice lo que pasa sin ocupar el sitio de lo que vendrá. */}
-        {vacio ? <Text style={estilos.nadaTodavia}>Todavía no tienes viajes por delante.</Text> : null}
+        {vacio ? (
+          <Text style={estilos.nadaTodavia}>
+            {loQuePaso.length > 0
+              ? 'No tienes viajes por delante. Abajo están los que ya hiciste.'
+              : 'Todavía no tienes viajes. Busca uno, o publica el que ya ibas a hacer.'}
+          </Text>
+        ) : null}
+
+        {/* YA PASARON. En filas compactas y bajo su rótulo: están para
+            consultarlos, no para hacer nada con ellos. */}
+        {loQuePaso.length > 0 ? (
+          <View style={estilos.pasados}>
+            <View style={estilos.filaSeccion}>
+              <Epigrafe>Ya pasaron</Epigrafe>
+              <Text style={estilos.cuantos}>
+                {loQuePaso.length === 1 ? '1 viaje' : `${loQuePaso.length} viajes`}
+              </Text>
+            </View>
+
+            <View style={{ gap: 8, opacity: 0.72 }}>
+              {loQuePaso.slice(0, 6).map((f) =>
+                f.clase === 'pasajero' ? (
+                  <FilaCompacta
+                    key={f.puesto.reservaId}
+                    puesto={f.puesto}
+                    alPulsar={() =>
+                      router.push({
+                        pathname: '/(pasajero)/viaje',
+                        params: { viaje: f.puesto.viajeId },
+                      })
+                    }
+                  />
+                ) : (
+                  /* Un viaje que manejaste abre el PANEL, no la ficha
+                     pública: desde ahí se teclean los códigos que falten y se
+                     vuelve a publicar. Es la misma puerta que «Administrar
+                     viaje», y así deja de haber dos sitios con la misma
+                     lista. */
+                  <FilaConduzco
+                    key={f.viaje.id}
+                    viaje={f.viaje}
+                    alPulsar={() => router.push('/(conductor)/panel')}
+                  />
+                ),
+              )}
+            </View>
+          </View>
+        ) : null}
 
         <View style={estilos.puertas}>
           {proximo ? (
@@ -505,7 +577,10 @@ function FilaCompacta({ puesto, alPulsar }: { puesto: PuestoMio; alPulsar: () =>
             selector de arriba, dicho donde importa — en el viaje — en vez de
             obligar a elegir antes de ver nada (28-08-2026). */}
         <Text style={estilos.sitioMini} numberOfLines={1}>
-          {['Voy de pasajero', puesto.conductor, formatearDineroRedondo(puesto.aporteCentavos)]
+          {/* «Pasajero», no «Voy de pasajero»: con el nombre del conductor y
+              el aporte detrás, la línea se cortaba en el ancho de la fila y
+              lo que se perdía era el dinero, que es lo que se venía a ver. */}
+          {['Pasajero', puesto.conductor, formatearDineroRedondo(puesto.aporteCentavos)]
             .filter(Boolean)
             .join(' · ')}
         </Text>
@@ -590,6 +665,7 @@ function FilaConduzco({ viaje, alPulsar }: { viaje: ViajePublicado; alPulsar: ()
 
 const estilos = StyleSheet.create({
   /** El vacío, en una línea. Sin tarjeta, sin icono y sin botón. */
+  pasados: { marginTop: 22 },
   nadaTodavia: {
     fontSize: 14,
     lineHeight: 20,

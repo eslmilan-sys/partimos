@@ -44,22 +44,28 @@ import { color, familia, interlinea } from './tokens';
  * y su área táctil—, así que la geometría vive aquí una sola vez y las dos
  * capas la leen. Si se separaran, el toque caería al lado del asiento.
  */
-const ANCHO = 220;
+const ANCHO = 176;
 /** El alto con UN banco. Con dos, el carro se alarga lo que mide el segundo. */
-const ALTO_DE_UN_BANCO = 326;
+const ALTO_DE_UN_BANCO = 262;
 
 type Sitio = { x: number; y: number; ancho: number; alto: number };
 
-const VOLANTE: Sitio = { x: 26, y: 96, ancho: 76, alto: 76 };
-const COPILOTO: Sitio = { x: 118, y: 96, ancho: 76, alto: 76 };
+/* Las medidas del 01-09-2026, después de verlo en el teléfono: «design of the
+   car is too big and really not good looking». Era 220 × 326 a 260 px de
+   ancho — media pantalla para un dibujo que acompaña, y con la cifra escrita
+   CUATRO VECES dentro de los asientos, la misma cada vez. Ahora el carro es
+   un tercio más pequeño, tiene proporción de carro (largo = 1,5 × ancho) y la
+   cifra se dice una sola vez debajo, con su multiplicación. */
+const VOLANTE: Sitio = { x: 24, y: 80, ancho: 54, alto: 56 };
+const COPILOTO: Sitio = { x: 98, y: 80, ancho: 54, alto: 56 };
 
-/** Un sitio del banco: 54 de ancho, 68 de alto, y 5 de aire entre dos. */
-const BANCO_ANCHO = 54;
-const BANCO_ALTO = 68;
-const BANCO_AIRE = 5;
+/** Un sitio del banco, y el aire entre dos. */
+const BANCO_ANCHO = 38;
+const BANCO_ALTO = 50;
+const BANCO_AIRE = 6;
 /** Dónde empieza el primer banco, y cuánto baja el segundo. */
-const BANCO_Y = 190;
-const SALTO_DE_BANCO = BANCO_ALTO + 12;
+const BANCO_Y = 154;
+const SALTO_DE_BANCO = BANCO_ALTO + 10;
 
 /**
  * EL PLANO DEL CARRO, calculado a partir de cuántos asientos tiene detrás.
@@ -69,8 +75,7 @@ const SALTO_DE_BANCO = BANCO_ALTO + 12;
  * se quedara fijo, la segunda fila caería sobre la luneta.
  *
  * Cada banco se centra solo, así que uno de dos asientos no queda pegado a la
- * izquierda. Con tres, la cuenta devuelve exactamente las posiciones de
- * siempre — `x = 24 + i × 59`.
+ * izquierda.
  */
 function planoDelCarro(traseros: number) {
   const filas: number[] = [];
@@ -155,32 +160,25 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
               que esto se mira desde arriba y no de frente. La trasera va
               medida desde ABAJO, para que siga bajo el eje cuando el carro se
               alarga con un segundo banco. */}
-          {[74, ALTO - 94].map((y) => (
+          {[62, ALTO - 82].map((y) => (
             <G key={y}>
-              <Rect x={0} y={y} width={15} height={38} rx={6} fill={color.ink300} />
-              <Rect
-                x={ANCHO - 15}
-                y={y}
-                width={15}
-                height={38}
-                rx={6}
-                fill={color.ink300}
-              />
+              <Rect x={0} y={y} width={11} height={30} rx={5} fill={color.ink200} />
+              <Rect x={ANCHO - 11} y={y} width={11} height={30} rx={5} fill={color.ink200} />
             </G>
           ))}
 
           {/* Los retrovisores. Un detalle, pero el que hace que la silueta se
               lea como un carro y no como una bandeja de asientos. */}
-          <Rect x={8} y={104} width={12} height={20} rx={5} fill={color.ink200} />
-          <Rect x={ANCHO - 20} y={104} width={12} height={20} rx={5} fill={color.ink200} />
+          <Rect x={5} y={86} width={9} height={16} rx={4} fill={color.ink200} />
+          <Rect x={ANCHO - 14} y={86} width={9} height={16} rx={4} fill={color.ink200} />
 
           {/* La carrocería. */}
           <Rect
-            x={14}
-            y={6}
-            width={ANCHO - 28}
-            height={ALTO - 12}
-            rx={44}
+            x={11}
+            y={5}
+            width={ANCHO - 22}
+            height={ALTO - 10}
+            rx={38}
             /* La carrocería va en arena y no en blanco: la tarjeta que la
                contiene ES blanca, y un borde de un píxel era todo lo que
                separaba el carro del papel. */
@@ -193,9 +191,9 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
               los dos, que es exactamente donde van los asientos. La luneta va
               POR DEBAJO del banco —de ahí que el banco suba a 190—: dibujada
               encima de los asientos no se veía. */}
-          <Path d="M 32 88 C 48 46 172 46 188 88 Z" fill={color.ink200} />
+          <Path d="M 26 72 C 40 38 136 38 150 72 Z" fill={color.ink200} />
           <Path
-            d={`M 34 ${ALTO - 54} C 50 ${ALTO - 20} 170 ${ALTO - 20} 186 ${ALTO - 54} Z`}
+            d={`M 27 ${ALTO - 44} C 41 ${ALTO - 14} 135 ${ALTO - 14} 149 ${ALTO - 44} Z`}
             fill={color.ink200}
           />
 
@@ -214,7 +212,7 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
               sólo el aro y la barra horizontal —como estaba— el dibujo se leía
               como una señal de prohibido el paso, justo encima del asiento
               que no se puede ofrecer. El radio de abajo lo deshace. */}
-          <Volante cx={VOLANTE.x + VOLANTE.ancho / 2} cy={VOLANTE.y + 30} />
+          <Volante cx={VOLANTE.x + VOLANTE.ancho / 2} cy={VOLANTE.y + 22} />
         </Svg>
 
         {/* La capa de los toques. Va encima y no dentro del SVG para que cada
@@ -225,7 +223,7 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
         <View
           style={[
             estilos.tuSitio,
-            { top: `${((VOLANTE.y + 50) / ALTO) * 100}%` },
+            { top: `${((VOLANTE.y + 37) / ALTO) * 100}%` },
           ]}
           pointerEvents="none"
         >
@@ -244,7 +242,7 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
             onPress={() => alCambiar({ ...reparto, adelante: reparto.adelante > 0 ? 0 : 1 })}
             style={[estilos.sitio, enCiento(COPILOTO, ALTO)]}
           >
-            <EtiquetaDelAsiento ofrecido={reparto.adelante > 0} cifra={cifra} />
+            <EtiquetaDelAsiento ofrecido={reparto.adelante > 0} />
           </Pressable>
         ) : null}
 
@@ -263,7 +261,7 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
               onPress={() => tocarElBanco(i)}
               style={[estilos.sitio, enCiento(s, ALTO)]}
             >
-              <EtiquetaDelAsiento ofrecido={ofrecido} cifra={cifra} pequeno />
+              <EtiquetaDelAsiento ofrecido={ofrecido} />
             </Pressable>
           );
         })}
@@ -272,11 +270,22 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
       {/* LO QUE EL DIBUJO NO PUEDE DECIR SOLO: el total. Un asiento dice
           cuánto aporta quien se sienta ahí; esta línea dice cuánto vuelve al
           bolsillo del que maneja, que es la otra pregunta. */}
-      <Text style={estilos.cuenta}>
-        {ofrecidos === 0
-          ? 'Toca un asiento para ofrecerlo. Sin puestos no hay viaje que publicar.'
-          : `${ofrecidos === 1 ? '1 puesto' : `${ofrecidos} puestos`} · recuperas ${formatearDineroRedondo(aporteCentavos * ofrecidos)} entre todos.`}
-      </Text>
+      {/* LA CUENTA, DICHA UNA VEZ Y CON SU MULTIPLICACIÓN. Antes la cifra
+          por puesto estaba escrita dentro de cada asiento y el total aquí;
+          ahora la línea hace la operación entera —«3 × B/9,82 = B/29,46»—,
+          que es la pregunta que el conductor está haciendo al tocar. */}
+      {ofrecidos === 0 ? (
+        <Text style={estilos.cuenta}>
+          Toca un asiento para ofrecerlo. Sin puestos no hay viaje que publicar.
+        </Text>
+      ) : (
+        <Text style={[estilos.cuenta, tabular]}>
+          <Text style={estilos.cuentaFuerte}>
+            {`${ofrecidos} ${ofrecidos === 1 ? 'puesto' : 'puestos'} × ${cifra}`}
+          </Text>
+          {`  ·  recuperas ${formatearDineroRedondo(aporteCentavos * ofrecidos)}`}
+        </Text>
+      )}
       {/* Lo que el reparto promete, debajo y en voz más baja: es consecuencia
           de dónde tocó, no otra decisión que tomar. */}
       {nota ? <Text style={estilos.nota}>{nota}</Text> : null}
@@ -288,17 +297,17 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
 
 /** El aro, el cubo y los tres radios de un volante visto desde arriba. */
 function Volante({ cx, cy }: { cx: number; cy: number }) {
-  const R = 16;
+  const R = 13;
   return (
     <G>
-      <Circle cx={cx} cy={cy} r={R} fill="none" stroke={color.ink500} strokeWidth={3} />
+      <Circle cx={cx} cy={cy} r={R} fill="none" stroke={color.ink500} strokeWidth={2.4} />
       <Path
         d={`M ${cx - R} ${cy} H ${cx + R} M ${cx} ${cy} V ${cy + R}`}
         stroke={color.ink500}
-        strokeWidth={3}
+        strokeWidth={2.4}
         strokeLinecap="round"
       />
-      <Circle cx={cx} cy={cy} r={4.5} fill={color.ink500} />
+      <Circle cx={cx} cy={cy} r={3.6} fill={color.ink500} />
     </G>
   );
 }
@@ -315,7 +324,7 @@ function Asiento({ sitio, estado }: { sitio: Sitio; estado: Estado }) {
         y={sitio.y}
         width={sitio.ancho}
         height={sitio.alto}
-        rx={16}
+        rx={13}
         fill={relleno}
         stroke={estado === 'libre' ? color.ink200 : 'none'}
         strokeWidth={2}
@@ -326,11 +335,11 @@ function Asiento({ sitio, estado }: { sitio: Sitio; estado: Estado }) {
       {/* La banda del respaldo. En el ofrecido va clara sobre oscuro; en el
           libre, apenas un tono sobre el blanco. */}
       <Rect
-        x={sitio.x + 8}
-        y={sitio.y + 7}
-        width={sitio.ancho - 16}
-        height={10}
-        rx={5}
+        x={sitio.x + 7}
+        y={sitio.y + 6}
+        width={sitio.ancho - 14}
+        height={8}
+        rx={4}
         fill={estado === 'ofrecido' ? 'rgba(255,255,255,.22)' : color.ink200}
         opacity={estado === 'volante' ? 0 : 1}
       />
@@ -338,52 +347,39 @@ function Asiento({ sitio, estado }: { sitio: Sitio; estado: Estado }) {
   );
 }
 
-/** Lo que va escrito dentro del asiento: la cifra, o el signo de añadirlo. */
-function EtiquetaDelAsiento({
-  ofrecido,
-  cifra,
-  pequeno = false,
-}: {
-  ofrecido: boolean;
-  cifra: string;
-  pequeno?: boolean;
-}) {
-  if (!ofrecido) return <Text style={estilos.masTexto}>+</Text>;
-  return (
-    <Text style={[pequeno ? estilos.cifraChica : estilos.cifraAsiento, tabular]} numberOfLines={1}>
-      {cifra}
-    </Text>
-  );
+/**
+ * LO QUE VA DENTRO DEL ASIENTO — y ya no es la cifra.
+ *
+ * Iba, y era la MISMA cifra escrita cuatro veces: «B/9,82» en los cuatro
+ * asientos de un carro donde todos aportan lo mismo. Cuatro repeticiones de
+ * un dato que no varía, en 19 px, dentro de un dibujo que por eso tenía que
+ * ser enorme (01-09-2026: «design of the car is too big and really not good
+ * looking»). El relleno oscuro ya dice que el asiento está ofrecido; la cifra
+ * se dice una vez debajo, multiplicada, que es donde de verdad contesta la
+ * pregunta «¿cuánto recupero si pongo tres?».
+ *
+ * El asiento libre sí lleva algo: el «+» es la invitación a tocarlo, y sin él
+ * un hueco punteado no se lee como un control.
+ */
+function EtiquetaDelAsiento({ ofrecido }: { ofrecido: boolean }) {
+  if (ofrecido) return null;
+  return <Text style={estilos.masTexto}>+</Text>;
 }
 
 const estilos = StyleSheet.create({
   marco: { alignItems: 'center' },
   /* El `aspectRatio` lo pone quien dibuja: depende de cuántos bancos hay. */
-  lienzo: { width: '100%', maxWidth: 260 },
+  /* 190 y no 260: el dibujo acompaña la decisión, no es la decisión. Ver la
+     nota de las medidas arriba. */
+  lienzo: { width: '100%', maxWidth: 190 },
 
   sitio: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
-  cifraAsiento: {
-    fontSize: 19,
-    lineHeight: 25,
-    fontWeight: '700',
-    letterSpacing: -0.4,
-    color: '#fff',
-    fontFamily: familia,
-  },
-  cifraChica: {
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: '700',
-    letterSpacing: -0.3,
-    color: '#fff',
-    fontFamily: familia,
-  },
   /* `ink500` y no `ink400`: el «+» es texto, y `ink400` da 2,3:1 sobre el
      blanco del asiento libre — por debajo del 3:1 que la WCAG pide incluso
      al texto grande. */
   masTexto: {
-    fontSize: 24,
-    lineHeight: 28,
+    fontSize: 20,
+    lineHeight: 24,
     fontWeight: '400',
     color: color.ink500,
     fontFamily: familia,
@@ -397,15 +393,16 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
   },
   tuTexto: {
-    fontSize: 13.5,
-    lineHeight: 19,
+    fontSize: 12,
+    lineHeight: 17,
     fontWeight: '600',
     color: color.ink600,
     fontFamily: familia,
   },
 
+  cuentaFuerte: { fontWeight: '700', color: color.ink900 },
   cuenta: {
-    marginTop: 6,
+    marginTop: 10,
     textAlign: 'center',
     fontSize: 13,
     lineHeight: interlinea(13),
