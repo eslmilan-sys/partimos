@@ -89,6 +89,19 @@ export function estaEnElCamino(a: Punto, x: Punto, b: Punto): boolean {
  *
  * Cada una vuelve con la fracción del trayecto a la que cae, que es lo que
  * deja poner una hora de paso sin inventarla.
+ *
+ * **La fracción NO se recorta a 1** (01-09-2026). Se recortaba, y entonces
+ * todo lo que cae al final o pasado el destino salía con la MISMA fracción —
+ * y por tanto con la misma hora de paso. Con dos paradas por viaje casi no se
+ * veía; desde que se pueden poner todas, un Panamá → Chitré enseñaba cuatro
+ * ciudades seguidas a las 02:40 clavadas, que es una hora inventada cuatro
+ * veces.
+ *
+ * Por encima de 1 la línea recta ya no sabe ordenar —lo dice la nota de
+ * arriba: Divisa avanza un 103 % y Las Tablas, que está 35 km PASADO Chitré,
+ * un 104 %—, así que **quien consuma esto no debe escribir una hora para
+ * ellas**. Se siguen ofreciendo, porque quitarlas se llevaba por delante el
+ * cruce de Divisa; lo que no se hace es fingir que sabemos cuándo se pasa.
  */
 export function paradasEnElCamino<T extends Punto>(
   a: Punto,
@@ -100,6 +113,6 @@ export function paradasEnElCamino<T extends Punto>(
 
   return candidatas
     .filter((c) => estaEnElCamino(a, c, b))
-    .map((c) => ({ ...c, fraccion: Math.min(1, distanciaKm(a, c) / directo) }))
+    .map((c) => ({ ...c, fraccion: distanciaKm(a, c) / directo }))
     .sort((uno, otro) => uno.fraccion - otro.fraccion);
 }

@@ -434,8 +434,19 @@ function aporteDeReferencia(c: Corridor): number {
 
 export type ParadaOfrecida = {
   nombre: string;
-  /** Minutos desde la salida. La hora se calcula al vuelo con la hora de salida. */
-  minutos: number;
+  /**
+   * Minutos desde la salida, o **null cuando no lo sabemos**.
+   *
+   * La fracción del camino sale de una línea recta, y por encima del 100 % la
+   * línea recta deja de ordenar: en un Panamá → Chitré, Divisa avanza un
+   * 103 % y Las Tablas —35 km PASADO Chitré— un 104 % (ver
+   * `dominio/enElCamino`). Antes se recortaba la fracción a 1 y las cuatro
+   * salían con la misma hora clavada; con dos paradas por viaje casi no se
+   * veía, y desde que se pueden poner todas era una hora inventada cuatro
+   * veces seguidas. Se siguen ofreciendo —quitarlas se lleva el cruce de
+   * Divisa— pero sin hora: no la sabemos.
+   */
+  minutos: number | null;
 };
 
 /** Todo lo que `5c` necesita saber antes de que el conductor toque nada. */
@@ -701,7 +712,7 @@ export async function prepararPublicacion(
       slugsDeLosExtremos,
     ).map((p) => ({
       nombre: p.etiqueta,
-      minutos: Math.round(p.fraccion * duracionMin),
+      minutos: p.fraccion < 1 ? Math.round(p.fraccion * duracionMin) : null,
     })),
   });
 }
@@ -717,7 +728,7 @@ export type BorradorDePublicacion = {
   salida: string;
   /** Los ÍNDICES de las paradas ofrecidas que van incluidas — «[0, 2]» dice
       cuáles, no cuántas: se puede parar en la segunda sin parar en la
-      primera (25-08-2026). Máximo dos entran al viaje. */
+      primera (25-08-2026). Entran todas las que el conductor deje puestas. */
   paradas: number[];
   puestos: number;
   /** null = usar el calculado. */
@@ -833,12 +844,17 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
    * tenía primera parada que proponerle al pasajero.
    *
    * La primera y la última son las ciudades del corredor; las de en medio,
-   * las que el conductor dejó puestas, en su orden. Máximo cuatro puntos de
-   * recogida por viaje, que es la regla del producto.
+   * las que el conductor dejó puestas, en su orden.
+   *
+   * **Sin tope** (01-09-2026). Había un `.slice(0, 2)` aquí, callado: aunque
+   * la pantalla dejara elegir más, sólo dos llegaban a la base. El tope se
+   * apoyaba en «máximo cuatro puntos de recogida», que `PRODUCT.md` ha
+   * reescrito: una ciudad del camino no es un desvío, y quien maneja declara
+   * todas las que atraviesa. Lo que sigue acotado son los puntos que propone
+   * un pasajero, que ésos sí sacan el carro de la ruta.
    */
   const intermedias = [...borrador.paradas]
     .sort((a, b) => a - b)
-    .slice(0, 2)
     .map((i) => preparada.paradasOfrecidas[i])
     .filter(Boolean);
   const salidaMs = new Date(borrador.salida).getTime();
@@ -875,7 +891,10 @@ export async function publicarViaje(borrador: BorradorDePublicacion): Promise<Vi
     custom_label: p.etiqueta,
     sequence: i,
     kind: p.tipo,
-    scheduled_at: enPunto(p.minutos),
+    /* Sin minutos no hay hora que guardar, y la columna admite null: una
+       parada del tramo final se publica sin hora de paso en vez de con una
+       inventada. Ver `ParadaOfrecida.minutos`. */
+    scheduled_at: p.minutos == null ? null : enPunto(p.minutos),
     created_at: ahora,
   }));
 

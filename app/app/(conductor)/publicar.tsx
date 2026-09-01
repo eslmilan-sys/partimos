@@ -22,7 +22,6 @@ import {
   elTopeMuerde,
   origenDelAporte,
 } from '@/dominio/aporte';
-import { MAXIMO_PARADAS_INTERMEDIAS, MAXIMO_PUNTOS_DE_RECOGIDA } from '@/dominio/paradas';
 import {
   type Reparto,
   comodidadDeAtras,
@@ -341,21 +340,36 @@ export default function Publicar() {
    * se podía añadir «la siguiente»: quien quería parar en Penonomé pero NO
    * en La Chorrera no tenía cómo decirlo (pedido el 25-08).
    *
-   * El techo son TRES (01-09-2026, pedido del dueño: «should be able to
-   * select more paradas, not just 2»). Eran dos por un `MAX_INTERMEDIAS = 2`
-   * escrito aquí sin razón al lado; el número que manda vive ahora en
-   * `dominio/paradas`, con la regla de `PRODUCT.md` que lo fija: nunca más de
-   * cuatro puntos de recogida por viaje, y el origen es uno de los cuatro.
+   * **SIN TECHO** (01-09-2026, corregido por el dueño: «it's the paradas one
+   * driver can do through his whole travel — he can do all»). Había un
+   * `MAX_INTERMEDIAS` —dos, luego tres— apoyado en la línea de `PRODUCT.md`
+   * que decía «máximo 4 puntos de recogida por viaje». Esa línea mezclaba dos
+   * cosas distintas, y el dueño separó la que valía:
+   *
+   * · **Una ciudad del camino no es un desvío.** Bajar a Chitré pasando por
+   *   Penonomé y por Divisa es la carretera, no una vuelta: parar cinco
+   *   minutos no añade un kilómetro. Poner un tope ahí era prohibirle a
+   *   alguien declarar el viaje que va a hacer igual, y empujar las subidas
+   *   del camino al chat — fuera del precio y fuera del inventario por tramo.
+   * · **El riesgo está en ir a buscar a la gente**, y eso ya está acotado por
+   *   otro sitio: un punto que se sale de la ruta cae bajo los topes de
+   *   desvío (+15 % de kilómetros, +15 minutos), y lo paga quien lo pidió.
+   *
+   * El guardarraíl de verdad es GEOMÉTRICO y no numérico: `enElCamino` sólo
+   * ofrece ciudades que están en el camino, con sus dos medidas y sus
+   * pruebas. Lo que sigue topado son los puntos que PROPONE UN PASAJERO
+   * (`proposed_point`), que ésos sí son desvíos.
    */
   const [elegidas, setElegidas] = useState<number[]>([]);
   /**
    * SI SE VE EL CAMINO ENTERO O SÓLO SU PRINCIPIO.
    *
-   * Panamá → Las Tablas atraviesa DIECISÉIS ciudades del catálogo, y de ellas
-   * caben tres. Enseñar las dieciséis de golpe es empujar el resto de la
-   * pantalla —el recorrido, la llegada, el botón— fuera de la vista para
-   * elegir tres. Se abren las primeras del camino, que son las que un viaje
-   * desde Panamá recoge de verdad, y las demás quedan a un toque, contadas.
+   * Panamá → Las Tablas atraviesa DIECISÉIS ciudades del catálogo. Ahora
+   * caben todas —ver `elegidas`—, pero enseñar las dieciséis de golpe sigue
+   * empujando el resto de la pantalla —el recorrido, la llegada, el botón—
+   * fuera de la vista. Se abren las primeras del camino, que son las que un
+   * viaje desde Panamá recoge de verdad, y las demás quedan a un toque,
+   * contadas. Es un pliegue, no un tope: «Añadir todas» las pone todas.
    */
   const [verTodasLasParadas, setVerTodasLasParadas] = useState(false);
   /* `puestos` YA NO ES ESTADO: se deriva del reparto adelante/atrás (0045).
@@ -734,8 +748,7 @@ export default function Publicar() {
 
   const origen = origenDelAporte(aporteElegido, aporte, datos.topeCentavos);
   const salida = new Date(datos.salida);
-  const MAX_INTERMEDIAS = MAXIMO_PARADAS_INTERMEDIAS;
-  const enOrden = [...elegidas].sort((a, b) => a - b).slice(0, MAX_INTERMEDIAS);
+  const enOrden = [...elegidas].sort((a, b) => a - b);
   const paradas = enOrden.length;
   const paradasVisibles = enOrden
     .map((i) => ({ indice: i, ...datos.paradasOfrecidas[i] }))
@@ -743,7 +756,6 @@ export default function Publicar() {
   const porElegir = datos.paradasOfrecidas
     .map((p, i) => ({ indice: i, ...p }))
     .filter((p) => !enOrden.includes(p.indice));
-  const hayHueco = paradas < MAX_INTERMEDIAS;
   /** Cuántas se abren sin pedirlo. Ver `verTodasLasParadas`. */
   const A_LA_VISTA = 6;
   const seVen = verTodasLasParadas ? porElegir : porElegir.slice(0, A_LA_VISTA);
@@ -766,7 +778,11 @@ export default function Publicar() {
      kilómetros de cada tramo. La última es el destino: el camino entero. */
   const fracciones = [
     0,
-    ...paradasVisibles.map((p) => Math.min(0.99, p.minutos / Math.max(1, datos.duracionMin))),
+    /* Sin minutos, la parada cae en el tramo final: 0,99 del camino. El
+       tramo que sale de ahí es casi el viaje entero, que es la verdad. */
+    ...paradasVisibles.map((p) =>
+      p.minutos == null ? 0.99 : Math.min(0.99, p.minutos / Math.max(1, datos.duracionMin)),
+    ),
     1,
   ];
   const tramos = desdeCadaParada(
@@ -974,14 +990,15 @@ export default function Publicar() {
 
           {paso === 'paradas' ? (
           <>
-          {/* El límite se ve SIEMPRE —«0 de 2»—, no sólo al chocar con él.
-              Y «Añadir todas» aparece cuando de verdad caben todas: antes
-              pedía que la ruta ofreciera como mucho dos paradas, así que con
-              tres o cuatro candidatas no salía nunca. */}
+          {/* LA CUENTA, NO EL CUPO. Decía «0 de 2» porque había un tope; sin
+              tope, un «de N» sólo inventaría uno nuevo. Dice cuántas llevas,
+              que es lo que hay que saber. */}
           <View style={estilos.filaParadasTitulo}>
             <Epigrafe>Dónde paras en el camino</Epigrafe>
-            <Text style={estilos.cuentaParadas}>{`${paradas} de ${MAX_INTERMEDIAS}`}</Text>
-            {porElegir.length > 1 && porElegir.length <= MAX_INTERMEDIAS - paradas ? (
+            <Text style={estilos.cuentaParadas}>
+              {paradas === 0 ? 'Ninguna' : paradas === 1 ? '1 parada' : `${paradas} paradas`}
+            </Text>
+            {porElegir.length > 1 ? (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Añadir todas las paradas"
@@ -1006,7 +1023,9 @@ export default function Publicar() {
               <View key={p.nombre} style={estilos.parada}>
                 <View style={estilos.puntoIntermedio} />
                 <Text style={estilos.paradaIntermedia}>{p.nombre}</Text>
-                <Text style={estilos.paradaHora}>{hora(mas(salida, p.minutos))}</Text>
+                <Text style={estilos.paradaHora}>
+                  {p.minutos == null ? '' : hora(mas(salida, p.minutos))}
+                </Text>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`Quitar ${p.nombre}`}
@@ -1027,12 +1046,23 @@ export default function Publicar() {
             </View>
           </View>
 
-          {/* PASTILLAS, no filas. La ruta ofrece hasta doce ciudades y sólo
-              caben tres: doce renglones a lo ancho obligaban a desplazar la
-              pantalla entera para ver el camino. En pastillas, EN EL ORDEN
-              EN QUE SE PASAN, el conductor lee su ruta de un vistazo y toca
-              la que quiere. Con el cupo lleno no desaparecen —esconderlas
-              dejaba la pantalla sin explicación—: se apagan. */}
+          {/* POR QUÉ ALGUNAS VAN SIN HORA. Se ve al poner las últimas del
+              camino, y sin esta línea parece que falte un dato. La razón
+              está en `dominio/enElCamino`: a esas alturas la línea recta ya
+              no distingue el cruce de antes del pueblo de después. */}
+          {paradasVisibles.some((p) => p.minutos == null) ? (
+            <Text style={estilos.notaParadas}>
+              {`Las últimas van sin hora: están tan cerca de ${datos.destino} que no podemos decir a qué hora pasas por ellas.`}
+            </Text>
+          ) : null}
+
+          {/* PASTILLAS, no filas. La ruta ofrece hasta dieciséis ciudades:
+              dieciséis renglones a lo ancho obligaban a desplazar la pantalla
+              entera para ver el camino. En pastillas, EN EL ORDEN EN QUE SE
+              PASAN, el conductor lee su ruta de un vistazo y toca la que
+              quiere.
+
+              Ya no se apagan nunca: no hay cupo que llenar (01-09-2026). */}
           {porElegir.length > 0 ? (
             <>
               <View style={estilos.pastillas}>
@@ -1040,20 +1070,20 @@ export default function Publicar() {
                   <Pressable
                     key={p.indice}
                     accessibilityRole="button"
-                    accessibilityLabel={`Añadir ${p.nombre}, pasas sobre las ${hora(mas(salida, p.minutos))}`}
-                    disabled={!hayHueco}
-                    onPress={() =>
-                      setElegidas((xs) => (xs.length < MAX_INTERMEDIAS ? [...xs, p.indice] : xs))
+                    accessibilityLabel={
+                      p.minutos == null
+                        ? `Añadir ${p.nombre}, en el tramo final`
+                        : `Añadir ${p.nombre}, pasas sobre las ${hora(mas(salida, p.minutos))}`
                     }
+                    onPress={() => setElegidas((xs) => [...xs, p.indice])}
                     style={({ pressed }) => [
                       estilos.pastilla,
-                      !hayHueco && estilos.pastillaLlena,
                       pressed && estilos.eleccionPulsada,
                     ]}
                   >
-                    <Mas tamano={13} tinta={hayHueco ? color.azul700 : color.ink300} />
+                    <Mas tamano={13} tinta={color.azul700} />
                     <Text
-                      style={[estilos.pastillaTexto, !hayHueco && estilos.pastillaTextoLleno]}
+                      style={estilos.pastillaTexto}
                       numberOfLines={1}
                     >
                       {p.nombre}
@@ -1064,9 +1094,9 @@ export default function Publicar() {
                         cae a las siete o a las diez; con ella la lista se lee
                         como lo que es, el camino en orden. */}
                     <Text
-                      style={[estilos.pastillaHora, !hayHueco && estilos.pastillaTextoLleno]}
+                      style={estilos.pastillaHora}
                     >
-                      {hora(mas(salida, p.minutos))}
+                      {p.minutos == null ? '' : hora(mas(salida, p.minutos))}
                     </Text>
                   </Pressable>
                 ))}
@@ -1089,22 +1119,25 @@ export default function Publicar() {
                 </Pressable>
               ) : null}
 
+              {/* LO QUE DE VERDAD CUESTA UNA PARADA, ahora que no hay tope:
+                  no un cupo, sino minutos de llegada. Se dice aquí, y arriba
+                  el recorrido ya enseña la hora nueva de cada renglón. */}
               <Text style={estilos.notaParadas}>
-                {hayHueco
-                  ? 'En el orden en que las pasas. El punto exacto lo acuerdas con cada pasajero.'
-                  : `Ya llevas ${MAX_INTERMEDIAS} paradas, el máximo: contando de dónde sales son ${MAXIMO_PUNTOS_DE_RECOGIDA} sitios donde alguien puede subirse. Quita una para cambiarla.`}
+                {`En el orden en que las pasas, y todas las que quieras: son ciudades por las que ya vas a pasar. Cada una suma unos ${MINUTOS_POR_PARADA} minutos a la llegada. El punto exacto lo acuerdas con cada pasajero.`}
               </Text>
             </>
           ) : (
-            /* SIN CANDIDATAS. Dice POR QUÉ no hay ninguna, no sólo que no las
-               hay: el catálogo de ciudades es corto y en un tramo corto —o en
-               una ruta que no atraviesa ninguna— es normal que salga vacío.
-               La frase de antes, «esta ruta no pasa por ninguna otra ciudad de
-               la lista», se enseñaba también cuando el defecto era nuestro:
-               las rutas libres nunca consultaban la regla y TODAS decían eso. */
+            /* NADA QUE AÑADIR — y son DOS casos, no uno.
+               «No conocemos ninguna ciudad» se enseñaba también cuando el
+               conductor las había puesto TODAS, que es lo contrario: se hizo
+               visible al quitar el tope de paradas (01-09-2026), porque hasta
+               entonces vaciar la lista era imposible. Además, la explicación
+               del catálogo corto sigue haciendo falta donde de verdad toca:
+               en un tramo corto o en una ruta que no atraviesa nada. */
             <Text style={estilos.notaParadas}>
-              No conocemos ninguna ciudad entre {datos.origen} y {datos.destino}. Publica directo:
-              quien quiera subirse en el camino te lo pedirá por el chat.
+              {paradas > 0
+                ? 'Ya están todas las ciudades que conocemos de este camino. Quita alguna si no quieres parar ahí.'
+                : `No conocemos ninguna ciudad entre ${datos.origen} y ${datos.destino}. Publica directo: quien quiera subirse en el camino te lo pedirá por el chat.`}
             </Text>
           )}
           </>
@@ -1654,7 +1687,6 @@ const estilos = StyleSheet.create({
     borderColor: color.bordePorDefecto,
     backgroundColor: color.blanco,
   },
-  pastillaLlena: { opacity: 0.5 },
   pastillaTexto: {
     fontSize: 13.5,
     lineHeight: 18,
@@ -1663,7 +1695,6 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  pastillaTextoLleno: { color: color.ink400 },
   /** La hora dentro de la pastilla: cifras tabulares y un peso menos que el
    *  nombre — se lee, pero el nombre sigue mandando. */
   pastillaHora: {

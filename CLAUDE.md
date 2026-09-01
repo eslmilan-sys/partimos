@@ -1026,12 +1026,32 @@ Une conséquence sur les mots : `comodidadDeAtras` se tait au-delà de trois à
 l'arrière. « Máx. 2 personas atrás » parle d'une banquette ; sur deux rangées
 la phrase serait fausse.
 
-**4 · Trois arrêts au lieu de deux.** `const MAX_INTERMEDIAS = 2` était écrit
-dans l'écran, sans raison à côté. Le nombre vit maintenant dans
-`dominio/paradas.ts` avec la règle qui le fixe : **jamais plus de quatre
-points de prise en charge par trajet** (`PRODUCT.md`), et **l'origine est
-l'un des quatre** — d'où trois arrêts intermédiaires, pas quatre. La
-destination ne compte pas : personne n'y monte. Le texte qui expliquait le
-plafond disait « avec le départ et l'arrivée, ça fait quatre points de prise
-en charge », ce qui était faux dans les deux moitiés ; il est réécrit et
-calculé à partir des constantes.
+**4 · Tous les arrêts de la route, sans plafond.** Premier jet : passer
+`MAX_INTERMEDIAS` de 2 à 3, en s'appuyant sur la ligne « maximum 4 points de
+prise en charge » de `PRODUCT.md`. Le propriétaire a corrigé la règle
+elle-même : *« it's the paradas one driver can do through his whole travel —
+he can do all. Not limited to three. Rewrite product. »* Il a raison, et la
+ligne confondait deux choses : **une ville sur la route n'est pas un
+détour**. Descendre à Chitré en passant par Penonomé, c'est la route ; s'y
+arrêter cinq minutes n'ajoute pas un kilomètre. Le risque juridique est dans
+le *ramassage* — un point qui sort de la route —, et il est déjà borné
+ailleurs (+15 % de km, +15 min, écart porté par le passager qui l'a demandé).
+Le vrai garde-fou est **géométrique, pas numérique** : `enElCamino.ts`
+n'offre que ce qui est sur le chemin. `PRODUCT.md` est réécrit, le plafond
+retiré partout, et `dominio/paradas.ts` — créé une heure plus tôt — supprimé.
+
+**Deux défauts que la levée du plafond a rendus visibles, et qui étaient là
+avant :**
+
+- `publicarViaje` avait un `.slice(0, 2)` silencieux, et `repaso` un autre :
+  l'écran pouvait laisser choisir plus d'arrêts, seuls deux atteignaient la
+  base et l'écran de relecture en montrait deux.
+- **Quatre villes affichées à la même heure.** `paradasEnElCamino` bornait la
+  fraction du trajet à 1, donc tout ce qui tombe à la fin — ou après la
+  destination — sortait avec la même fraction, donc la même heure de passage :
+  sur un Panamá → Chitré, Guararé, Los Santos, Las Tablas et Parita toutes à
+  02:40. La fraction n'est plus bornée, et `ParadaOfrecida.minutos` vaut
+  **null** au-delà de 100 % : ces arrêts s'affichent **sans heure**, avec une
+  ligne qui dit pourquoi. On continue de les offrir — les retirer emportait le
+  carrefour de Divisa, qui avance de 103 % —, mais on n'invente plus l'heure.
+  `trip_stops.scheduled_at` accepte NULL depuis la 0001, donc rien à migrer.

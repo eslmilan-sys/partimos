@@ -105,10 +105,32 @@ Autres contraintes confirmées :
   donc le coût, donc le plafond calculé par la même formule. L'écart est porté
   par le passager qui l'a demandé, et s'exprime en kilomètres, jamais en
   dollars.
-- Maximum 4 points de prise en charge par trajet. **L'origine en est un** :
-  cela fait donc trois arrêts intermédiaires au plus. La destination ne compte
-  pas — personne n'y monte. Codé une seule fois dans `dominio/paradas.ts`
-  (`MAXIMO_PUNTOS_DE_RECOGIDA`), avec son test.
+- **Le conducteur déclare autant d'arrêts que sa route en traverse.** Corrigé
+  le 01-09-2026 par le propriétaire : *« it's the paradas one driver can do
+  through his whole travel — he can do all »*. Cette ligne disait « maximum 4
+  points de prise en charge par trajet », et elle confondait deux choses qui
+  n'ont pas le même statut :
+
+  - **Une ville sur la route n'est pas un détour.** Descendre à Chitré en
+    passant par Penonomé et Divisa, c'est la route ; s'arrêter cinq minutes
+    pour prendre quelqu'un n'ajoute pas un kilomètre. Plafonner ça, c'était
+    interdire de déclarer la route qu'on fait de toute façon — et pousser à
+    régler les montées en chemin par le chat, hors du prix et hors de
+    l'inventaire par tronçon.
+  - **Le risque est dans le RAMASSAGE, pas dans le nombre.** Ce que le produit
+    ne fait pas, c'est aller chercher les gens : un point qui sort de la route
+    reste borné par les garde-fous de détour (+15 % de kilométrage, +15
+    minutes), et l'écart est porté par le passager qui l'a demandé. C'est là
+    que la limite doit vivre, et elle y vit déjà.
+
+  Le vrai garde-fou est donc **géométrique, pas numérique** : `enElCamino.ts`
+  n'offre que les villes qui sont sur le chemin (allongement ≤ 35 %, cap de
+  sortie ≤ 45° du cap de la destination), et il a ses tests. Ce qui reste
+  plafonné, ce sont les **points proposés par un passager** (`proposed_point`),
+  qui eux sont des détours : au maximum 4 par trajet.
+- Chaque arrêt déplace l'heure d'arrivée, et l'écran l'affiche. Au-delà de 10
+  minutes de décalage, les passagers déjà réservés sont prévenus et peuvent
+  annuler sans frais.
 - Les annulations sont asymétriques : aucune pénalité financière au conducteur
   (ce serait une relation commerciale avec la plateforme) ; la sanction est
   réputationnelle.

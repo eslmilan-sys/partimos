@@ -114,11 +114,14 @@ export default function Repaso() {
   const [quePaso, setQuePaso] = useState<string | null>(null);
 
   /* Los índices de las paradas elegidas — «0,2» — no una cuenta. */
+  /* Todas las que vengan: el `.slice(0, 2)` que había aquí recortaba el
+     repaso a dos paradas mientras la pantalla anterior dejaba poner las que
+     quisiera, así que el resumen que se lee antes de publicar enseñaba menos
+     camino del que se iba a publicar (01-09-2026). */
   const indicesParadas = (p.paradas ?? '')
     .split(',')
     .map(Number)
-    .filter((n) => Number.isInteger(n) && n >= 0)
-    .slice(0, 2);
+    .filter((n) => Number.isInteger(n) && n >= 0);
   const paradas = indicesParadas.length;
   const puestos = Number(p.puestos ?? 3);
   const aporteElegido = p.aporte ? Number(p.aporte) : null;
@@ -186,7 +189,9 @@ export default function Repaso() {
     ...enMedio.map((x) => ({
       que: 'Parada',
       nombre: x.nombre,
-      cuando: hora(mas(salida, x.minutos)),
+      /* Vacío cuando no sabemos a qué hora se pasa por ahí — una parada del
+         tramo final. Ver `ParadaOfrecida.minutos`. */
+      cuando: x.minutos == null ? '' : hora(mas(salida, x.minutos)),
       tipo: 'media' as const,
     })),
     { que: 'Llegada', nombre: datos.destino, cuando: hora(llegada), tipo: 'llegada' as const },

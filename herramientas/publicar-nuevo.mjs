@@ -40,7 +40,7 @@ await seguir().click();
 await p.waitForTimeout(1300);
 await tiro(p, 'n2-paradas');
 for (const nombre of [/^Añadir /]) {
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 8; i++) {
     const chip = p.getByRole('button', { name: nombre }).first();
     if (await chip.count()) { await chip.click(); await p.waitForTimeout(600); }
   }

@@ -85,6 +85,22 @@ test('cada parada dice a qué fracción del trayecto cae, creciendo', () => {
   assert.ok(segunda.fraccion <= 1);
 });
 
+/**
+ * LA FRACCIÓN PUEDE PASARSE DE 1, y tiene que poder.
+ *
+ * Se recortaba a 1, así que todo lo que cae al final del camino —o pasado el
+ * destino— salía con la misma fracción y con la misma hora de paso: cuatro
+ * ciudades seguidas a las 02:40 en un Panamá → Chitré. Quien pinta la hora
+ * necesita poder distinguir «al 80 % del camino» de «no sé dónde cae».
+ */
+test('una ciudad pasada el destino avanza más del 100 %, y se nota', () => {
+  const [lasTablas] = paradasEnElCamino(PANAMA, CHITRE, [
+    { nombre: 'Las Tablas', lat: 7.7667, lng: -80.2833 },
+  ]);
+  assert.ok(lasTablas, 'sigue ofreciéndose: quitarla se lleva el cruce de Divisa');
+  assert.ok(lasTablas.fraccion > 1, `avanza ${lasTablas.fraccion}`);
+});
+
 test('el mismo sitio no alarga nada, y dos puntos iguales no dan ruta', () => {
   assert.equal(cuantoAlarga(PANAMA, PANAMA, CHITRE), 0);
   assert.equal(paradasEnElCamino(PANAMA, PANAMA, [{ ...CHITRE }]).length, 0);
