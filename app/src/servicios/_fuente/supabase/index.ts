@@ -434,6 +434,21 @@ export async function actualizarPerfil(id: string, cambios: Partial<Profile>): P
   return perfiles[i] ?? ({ id, ...cambios } as Profile);
 }
 
+/**
+ * EDITAR UN VIAJE POR FIN ESCRIBE EN LA BASE (02-09-2026). `guardarEdicion`
+ * mutaba `fuente.viajes[i]` a pelo: en simulado daba igual —todo es
+ * memoria—, pero contra Supabase el conductor «guardaba» sus puestos y al
+ * recargar la app el viaje volvía como estaba. La política de 0023 (el
+ * conductor escribe su fila) ya lo amparaba; faltaba llamarla.
+ */
+export async function actualizarViaje(id: string, cambios: Partial<ViajeFila>): Promise<ViajeFila> {
+  const { data, error } = await tabla('trips').update(cambios).eq('id', id).select().single();
+  if (error) throw new Error(`trips: ${error.message}`);
+  const i = viajes.findIndex((v) => v.id === id);
+  if (i >= 0) viajes[i] = data as ViajeFila;
+  return data as ViajeFila;
+}
+
 export async function actualizarReserva(id: string, cambios: Partial<ReservaFila>): Promise<ReservaFila> {
   const { data, error } = await tabla('bookings').update(cambios).eq('id', id).select().single();
   if (error) throw new Error(`bookings: ${error.message}`);

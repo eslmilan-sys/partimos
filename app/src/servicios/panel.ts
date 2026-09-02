@@ -11,6 +11,12 @@
  * ya pagó no es editar: es cancelarle el viaje a otro sin decírselo.
  */
 
+import {
+  CONSUMO_L_100KM,
+  type CategoriaVehiculo,
+  costoDelViaje,
+  topeDeRuta,
+} from '@/dominio/aporte';
 import { soloPunto } from '@/dominio/comoSeLlama';
 import type { Lugar } from '@/dominio/lugar';
 import type { ViajeFila } from '@/tipos';
@@ -395,6 +401,27 @@ export type Edicion = {
   campos: CampoEditable[];
   /** Avisar de un cambio no es opcional cuando alguien tiene puesto. */
   seAvisa: boolean;
+
+  /* ── Lo que la pantalla edita de verdad (02-09-2026): antes sólo los
+     puestos y el interruptor llegaban tipados, y la hora y el aporte ni se
+     dibujaban cuando estaban abiertos — la pantalla enseñaba una tarjeta
+     VACÍA. Ver la nota de `14d`. ── */
+  /** El aporte por puesto que el viaje pide hoy. */
+  aporteCentavos: number;
+  /** Lo que cuesta el camino con el carro del conductor: la base del techo. */
+  costoCentavos: number;
+  /** El tope de la ruta (referencia estándar), que sólo puede bajar. */
+  topeCentavos: number;
+  /** Cuántos puestos caben en su carro, sin el del volante. */
+  puestosMax: number;
+  /** Cuántos están ocupados: el suelo del contador de puestos. */
+  ocupados: number;
+  /**
+   * «Solo mujeres» SÓLO SE OFRECE A UNA MUJER (02-09-2026, pedido del
+   * dueño: «woman only is just for woman»). Un hombre encendiéndolo se
+   * excluiría de su propio carro; el interruptor ni se le enseña.
+   */
+  conductoraEsMujer: boolean;
 };
 
 export async function prepararEdicion(viajeId: string): Promise<Edicion> {
@@ -408,6 +435,24 @@ export async function prepararEdicion(viajeId: string): Promise<Edicion> {
     .filter((p) => p.trip_id === viajeId)
     .sort((a, b) => a.sequence - b.sequence)
     .map((p) => (p.custom_label ?? '').split(' · ')[0]);
+
+  /* El techo del aporte se calcula con LOS DATOS DE ESTE VIAJE — la
+     distancia y el peaje que la publicación dejó escritos en su fila — y
+     el carro del conductor. Es la misma cuenta de `5c`, así que editar no
+     puede ofrecer un número que publicar habría prohibido. */
+  const carro = fuente.vehiculos.find((v) => v.owner_id === viaje.driver_id && v.is_active);
+  const categoria = (carro?.category_code ?? 'standard') as CategoriaVehiculo;
+  const distanciaKm = Number(viaje.snap_distance_km ?? 0);
+  const peajeCentavos = Number(viaje.snap_toll_cents ?? 0);
+  const costoCentavos = costoDelViaje({
+    distanciaKm,
+    peajeCentavos,
+    consumoL100km: CONSUMO_L_100KM[categoria],
+  });
+  const topeCentavos = topeDeRuta(
+    costoDelViaje({ distanciaKm, peajeCentavos, consumoL100km: CONSUMO_L_100KM.standard }),
+  );
+  const conductora = fuente.perfiles.find((p) => p.id === viaje.driver_id);
 
   return demora({
     viajeId,
@@ -438,6 +483,13 @@ export async function prepararEdicion(viajeId: string): Promise<Edicion> {
       },
     ],
     seAvisa: hayPagados,
+
+    aporteCentavos: Number(viaje.price_cents ?? 0),
+    costoCentavos,
+    topeCentavos,
+    puestosMax: Math.min(7, (carro?.seats_total ?? 8) - 1),
+    ocupados: pagados.length,
+    conductoraEsMujer: conductora?.gender === 'mujer',
   });
 }
 
@@ -446,25 +498,41 @@ export async function prepararEdicion(viajeId: string): Promise<Edicion> {
    ocurrir, porque el viaje ya no declara nada. El conductor decide sobre
    cada solicitud, una por una, viendo lo que esa persona lleva. */
 
+/**
+ * Guardar los cambios de `14d` — **contra la fuente, no contra la copia**.
+ * Esto mutaba `fuente.viajes[i]` a pelo: en simulado daba igual, contra la
+ * base el conductor «guardaba» y al recargar el viaje volvía como estaba
+ * (02-09-2026). Ahora pasa por `actualizarViaje`, que escribe la fila.
+ *
+ * La hora llega como «HH:MM» de Panamá y se aplica como CORRIMIENTO sobre
+ * la salida que había: mover la salida mueve también la llegada estimada,
+ * porque el camino dura lo mismo salga a las siete o a las nueve.
+ */
 export async function guardarEdicion(
   viajeId: string,
-  cambios: { puestos?: number; mujeres?: boolean },
+  cambios: { puestos?: number; mujeres?: boolean; aporteCentavos?: number; hora?: string },
 ): Promise<ViajeFila> {
-  const i = fuente.viajes.findIndex((v) => v.id === viajeId);
-  if (i < 0) throw new Error(`No existe el viaje ${viajeId}`);
+  const viaje = fuente.viajes.find((v) => v.id === viajeId);
+  if (!viaje) throw new Error(`No existe el viaje ${viajeId}`);
 
-  fuente.viajes[i] = {
-    ...fuente.viajes[i],
-    seats_offered: cambios.puestos ?? fuente.viajes[i].seats_offered,
-    gender_preference:
-      cambios.mujeres === undefined
-        ? fuente.viajes[i].gender_preference
-        : cambios.mujeres
-          ? 'women_only'
-          : 'any',
-    updated_at: new Date().toISOString(),
-  };
-  return demora(fuente.viajes[i]);
+  const fila: Partial<ViajeFila> = {};
+  if (cambios.puestos !== undefined) fila.seats_offered = cambios.puestos;
+  if (cambios.mujeres !== undefined) fila.gender_preference = cambios.mujeres ? 'women_only' : 'any';
+  if (cambios.aporteCentavos !== undefined) fila.price_cents = cambios.aporteCentavos;
+
+  if (cambios.hora !== undefined && cambios.hora !== hhmm(viaje.departure_at)) {
+    const [vh, vm] = hhmm(viaje.departure_at).split(':').map(Number);
+    const [nh, nm] = cambios.hora.split(':').map(Number);
+    const corrimientoMs = ((nh - vh) * 60 + (nm - vm)) * 60_000;
+    fila.departure_at = new Date(new Date(viaje.departure_at).getTime() + corrimientoMs).toISOString();
+    if (viaje.arrival_estimate_at) {
+      fila.arrival_estimate_at = new Date(
+        new Date(viaje.arrival_estimate_at).getTime() + corrimientoMs,
+      ).toISOString();
+    }
+  }
+
+  return demora(await fuente.actualizarViaje(viajeId, fila));
 }
 
 function hhmm(cuando: string): string {

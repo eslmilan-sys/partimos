@@ -86,6 +86,10 @@ export default function Inicio() {
   const [rutas, setRutas] = useState<RutaPopular[]>([]);
   const [salen, setSalen] = useState<SalidaCercana[]>([]);
   const [desde, setDesde] = useState<Lugar>(DESDE_POR_DEFECTO);
+  /** Si el origen lo puso una mano — la suya o su ciudad registrada — o es
+      sólo el valor de fábrica. De fábrica, el campo se enseña como
+      pregunta en tinta de marcador, no como una capital que nadie eligió. */
+  const [desdeElegido, setDesdeElegido] = useState(false);
   const [hacia, setHacia] = useState<Lugar | null>(null);
   const [buscando, setBuscando] = useState<'desde' | 'hacia' | null>(null);
   const [cuando, setCuando] = useState(() => diaEnPanama(new Date()));
@@ -140,6 +144,7 @@ export default function Inicio() {
   useEffect(() => {
     if (!ciudad) return;
     setDesde(comoLugarDeCiudad(ciudad));
+    setDesdeElegido(true);
     salidasDesde(ciudad.slug).then(setDesdeCasa);
   }, [ciudad]);
 
@@ -259,8 +264,14 @@ export default function Inicio() {
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={estilos.cejaCampo}>Salgo de</Text>
-                <Text style={estilos.valorCampo} numberOfLines={1}>
-                  {desde.nombre}
+                {/* Sin ciudad registrada ni elegida, el campo PREGUNTA — en
+                    la tinta de marcador, como «¿A dónde vas?» — en vez de
+                    afirmar una capital que nadie eligió (02-09-2026). */}
+                <Text
+                  style={[estilos.valorCampo, !desdeElegido && { color: color.ink500 }]}
+                  numberOfLines={1}
+                >
+                  {desdeElegido ? desde.nombre : '¿De qué ciudad sales?'}
                 </Text>
               </View>
             </Pressable>
@@ -302,6 +313,7 @@ export default function Inicio() {
                 if (!hacia) return;
                 const antes = desde;
                 setDesde(hacia);
+                setDesdeElegido(true);
                 setHacia(antes);
               }}
               style={({ pressed }) => [
@@ -463,33 +475,12 @@ export default function Inicio() {
           </View>
         ) : null}
 
-        {/* **¿DE DÓNDE SALES?** (27-08-2026, pedido del dueño.)
-
-            La app daba por hecho que todo el mundo sale de la capital: quien
-            vive en Chitré tenía que corregir el campo «Salgo de» cada vez que
-            abría. Se pregunta aquí y no en el registro por dos razones: quien
-            entra con Google o Facebook no pasa por los tres pasos y se
-            quedaría sin ciudad para siempre, y aquí la respuesta se paga sola
-            — debajo aparece lo que sale desde ahí. */}
-        {yo && ciudad === null ? (
-          <View style={estilos.seccion}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Decir de qué ciudad salgo normalmente"
-              onPress={() => setEligiendoCiudad(true)}
-              style={({ pressed }) => [estilos.preguntaCiudad, pressed && pulsado.tarjeta]}
-            >
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={estilos.preguntaCiudadTitulo}>¿De qué ciudad sales?</Text>
-                <Text style={estilos.preguntaCiudadTexto}>
-                  Te enseñamos lo que ya está publicado desde ahí, y el buscador arranca en tu
-                  ciudad en vez de en Panamá.
-                </Text>
-              </View>
-              <Avanza />
-            </Pressable>
-          </View>
-        ) : null}
+        {/* **LA TARJETA «¿DE QUÉ CIUDAD SALES?» SE FUE** (02-09-2026, pedido
+            del dueño: «shall not be showing — shall be the city I put when
+            register»). La pregunta vive ahora DENTRO del campo «Salgo de»:
+            con ciudad registrada el campo arranca en ella, y sin ciudad el
+            campo mismo la pregunta, en tinta de marcador. Media pantalla de
+            tarjeta para una pregunta que el formulario ya sabía hacer. */}
 
         {/* Lo que sale desde su ciudad en los próximos días. Sin punto en
             vivo: eso es de la sección de arriba, que mira la próxima hora, y
@@ -592,8 +583,10 @@ export default function Inicio() {
         titulo={buscando === 'desde' ? 'Desde dónde sales' : 'A dónde vas'}
         sugerencias={sugerencias}
         alElegir={(d) => {
-          if (buscando === 'desde') setDesde(d);
-          else setHacia(d);
+          if (buscando === 'desde') {
+            setDesde(d);
+            setDesdeElegido(true);
+          } else setHacia(d);
           setBuscando(null);
         }}
         alCerrar={() => setBuscando(null)}

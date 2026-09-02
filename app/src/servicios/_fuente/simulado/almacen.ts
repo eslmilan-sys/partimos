@@ -635,6 +635,14 @@ export async function actualizarReserva(
   return reservas[i];
 }
 
+/** Editar un viaje escribe su fila — la pareja simulada de `trips.update`. */
+export async function actualizarViaje(id: string, cambios: Partial<ViajeFila>): Promise<ViajeFila> {
+  const i = viajes.findIndex((v) => v.id === id);
+  if (i < 0) throw new Error(`No existe el viaje ${id}`);
+  viajes[i] = { ...viajes[i], ...cambios, updated_at: new Date().toISOString() };
+  return viajes[i];
+}
+
 /* ══════════════════════════════════════════════════════════════════════
    EL HISTORIAL DE DANIELA — dos viajes que ya pasaron.
 

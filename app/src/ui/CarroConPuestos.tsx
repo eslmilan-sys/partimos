@@ -33,7 +33,7 @@ import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 
 import { ASIENTOS_POR_BANCO, MAXIMO_ATRAS, MAXIMO_BANCOS, type Reparto } from '@/dominio/puestos';
 
-import { formatearDineroRedondo, tabular } from './dinero';
+import { cifraRedonda, formatearDineroRedondo, tabular } from './dinero';
 import { color, familia, interlinea } from './tokens';
 
 /* ---------------------------------------------------------------- El plano */
@@ -137,6 +137,9 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
 
   const ofrecidos = reparto.adelante + reparto.atras;
   const cifra = formatearDineroRedondo(aporteCentavos);
+  /* La versión que cabe dentro de un asiento de 38: sin el «B/», que la
+     línea de abajo ya dice de quién es la moneda. */
+  const cifraChica = cifraRedonda(aporteCentavos);
 
   /**
    * El banco se llena de izquierda a derecha, y tocar un asiento dice
@@ -242,7 +245,7 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
             onPress={() => alCambiar({ ...reparto, adelante: reparto.adelante > 0 ? 0 : 1 })}
             style={[estilos.sitio, enCiento(COPILOTO, ALTO)]}
           >
-            <EtiquetaDelAsiento ofrecido={reparto.adelante > 0} />
+            <EtiquetaDelAsiento ofrecido={reparto.adelante > 0} cifra={cifraChica} />
           </Pressable>
         ) : null}
 
@@ -261,7 +264,7 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
               onPress={() => tocarElBanco(i)}
               style={[estilos.sitio, enCiento(s, ALTO)]}
             >
-              <EtiquetaDelAsiento ofrecido={ofrecido} />
+              <EtiquetaDelAsiento ofrecido={ofrecido} cifra={cifraChica} />
             </Pressable>
           );
         })}
@@ -279,11 +282,13 @@ export function CarroConPuestos({ maximos, reparto, alCambiar, aporteCentavos, n
           Toca un asiento para ofrecerlo. Sin puestos no hay viaje que publicar.
         </Text>
       ) : (
+        /* Con la cifra ya escrita en cada asiento, la línea de abajo dice
+           sólo lo que el dibujo no puede: el total que vuelve. */
         <Text style={[estilos.cuenta, tabular]}>
+          {`${ofrecidos} ${ofrecidos === 1 ? 'puesto' : 'puestos'} a ${cifra} · `}
           <Text style={estilos.cuentaFuerte}>
-            {`${ofrecidos} ${ofrecidos === 1 ? 'puesto' : 'puestos'} × ${cifra}`}
+            {`recuperas ${formatearDineroRedondo(aporteCentavos * ofrecidos)}`}
           </Text>
-          {`  ·  recuperas ${formatearDineroRedondo(aporteCentavos * ofrecidos)}`}
         </Text>
       )}
       {/* Lo que el reparto promete, debajo y en voz más baja: es consecuencia
@@ -348,21 +353,26 @@ function Asiento({ sitio, estado }: { sitio: Sitio; estado: Estado }) {
 }
 
 /**
- * LO QUE VA DENTRO DEL ASIENTO — y ya no es la cifra.
+ * LO QUE VA DENTRO DEL ASIENTO: la cifra en el ofrecido, el «+» en el libre.
  *
- * Iba, y era la MISMA cifra escrita cuatro veces: «B/9,82» en los cuatro
- * asientos de un carro donde todos aportan lo mismo. Cuatro repeticiones de
- * un dato que no varía, en 19 px, dentro de un dibujo que por eso tenía que
- * ser enorme (01-09-2026: «design of the car is too big and really not good
- * looking»). El relleno oscuro ya dice que el asiento está ofrecido; la cifra
- * se dice una vez debajo, multiplicada, que es donde de verdad contesta la
- * pregunta «¿cuánto recupero si pongo tres?».
+ * La cifra se quitó el 01-09 porque el carro era enorme y la repetía en
+ * 19 px; el 02-09 el dueño la pidió de vuelta — «I liked the price on the
+ * seats» — y ahora cabe: el carro ya mide 190 y la cifra va en 10,5,
+ * blanca sobre la tinta del asiento ofrecido. Tocar un asiento y ver
+ * aparecer su aporte DENTRO es la respuesta más corta a «¿qué estoy
+ * ofreciendo?». El total sigue debajo, dicho una vez.
  *
- * El asiento libre sí lleva algo: el «+» es la invitación a tocarlo, y sin él
- * un hueco punteado no se lee como un control.
+ * El «+» del libre se queda: sin él, un hueco punteado no se lee como un
+ * control.
  */
-function EtiquetaDelAsiento({ ofrecido }: { ofrecido: boolean }) {
-  if (ofrecido) return null;
+function EtiquetaDelAsiento({ ofrecido, cifra }: { ofrecido: boolean; cifra: string }) {
+  if (ofrecido) {
+    return (
+      <Text style={[estilos.cifraAsiento, tabular]} numberOfLines={1}>
+        {cifra}
+      </Text>
+    );
+  }
   return <Text style={estilos.masTexto}>+</Text>;
 }
 
@@ -382,6 +392,14 @@ const estilos = StyleSheet.create({
     lineHeight: 24,
     fontWeight: '400',
     color: color.ink500,
+    fontFamily: familia,
+  },
+  /** La cifra dentro del asiento ofrecido: blanca sobre la tinta. */
+  cifraAsiento: {
+    fontSize: 10.5,
+    lineHeight: 14,
+    fontWeight: '700',
+    color: '#fff',
     fontFamily: familia,
   },
 
