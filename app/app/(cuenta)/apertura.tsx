@@ -231,37 +231,39 @@ export default function Apertura() {
         </Pressable>
       </View>
 
+      {/* **LAS BARRAS VAN ARRIBA** (02-09-2026, pedido del dueño: «not well
+          placed»). Estaban en el pie, flotando a media foto justo encima
+          del chip — ni cabecera ni contenido. Toda historia las pone bajo
+          la fila de arriba: es donde el ojo sabe buscar «en cuál voy», y
+          desde ahí no compiten con el titular. */}
+      <View style={estilos.barras}>
+        {LAMINAS.map((l, i) => (
+          <View key={l.clave} style={estilos.barra}>
+            {i < enCual ? (
+              <View style={[estilos.barraLlena, { width: '100%' }]} />
+            ) : i === enCual ? (
+              <Animated.View
+                style={[
+                  estilos.barraLlena,
+                  {
+                    width: progreso.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0%', '100%'],
+                    }),
+                  },
+                ]}
+              />
+            ) : null}
+          </View>
+        ))}
+      </View>
+
       {/* El pie fijo: las barras de historia, el texto de la lámina en
           curso, y LAS MISMAS TRES PUERTAS EN LAS TRES LÁMINAS — crear
           cuenta, entrar, o mirar sin cuenta. Antes sólo la última lámina
           las tenía enteras: quien se convencía en la primera tenía que
           tragarse dos más para encontrar el botón (02-09-2026). */}
       <View style={estilos.pie}>
-        {/* Las barras, como una historia: las pasadas llenas, la de en
-            curso corriendo sus seis segundos, las que faltan vacías. Dicen
-            a la vez dónde vas Y que esto avanza solo. */}
-        <View style={estilos.barras}>
-          {LAMINAS.map((l, i) => (
-            <View key={l.clave} style={estilos.barra}>
-              {i < enCual ? (
-                <View style={[estilos.barraLlena, { width: '100%' }]} />
-              ) : i === enCual ? (
-                <Animated.View
-                  style={[
-                    estilos.barraLlena,
-                    {
-                      width: progreso.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0%', '100%'],
-                      }),
-                    },
-                  ]}
-                />
-              ) : null}
-            </View>
-          ))}
-        </View>
-
         <Animated.View
           style={{
             opacity: suspiro,
@@ -370,7 +372,12 @@ const estilos = StyleSheet.create({
   },
 
   /** Las barras de historia: pasadas llenas, la de en curso corriendo. */
-  barras: { flexDirection: 'row', gap: 5, marginBottom: 16 },
+  barras: {
+    flexDirection: 'row',
+    gap: 5,
+    marginTop: 12,
+    paddingHorizontal: espacio.gutter,
+  },
   barra: {
     flex: 1,
     height: 3,

@@ -30,9 +30,14 @@
  *   el nombre con la pastilla verde al lado, y debajo dos líneas: desde
  *   cuándo estás y de dónde eres. Es el orden en que te mira quien va a
  *   subirse a tu carro.
- * · **Las tres cifras van en una tarjeta de tinta**, no sueltas sobre la
- *   arena. Sobre oscuro pesan lo que son —lo único de esta pantalla que el
- *   otro ve— y los dos filetes verticales las separan sin cajas.
+ * · **Las tres cifras van en una tarjeta blanca y no se pulsan** (02-09-2026,
+ *   auditoría de diseño). Eran una tarjeta de tinta con «Pendiente · Cédula
+ *   y licencia» de tercera columna: un ESTADO disfrazado de estadística. La
+ *   tinta pasa a la única tarjeta que pide algo —**la verificación**—, que
+ *   dice qué falta, qué está hecho y trae el botón que antes no existía. Y
+ *   verificado del todo, desaparece: no hay nada que hacer.
+ * · **Editar perfil es un botón**, no un texto rojo suelto: la píldora
+ *   blanca con borde de las acciones secundarias de la casa.
  * · **«Mi cuenta» rotula la lista.** Antes las filas empezaban sin decir de
  *   qué eran, pegadas a una tarjeta de dinero.
  * · **Ajustes se disolvió** (01-09-2026, pedido del dueño: «delete ajustes,
@@ -44,10 +49,9 @@
  *   «Cómo se hacen las cosas», que ahora es la segunda lista, y «Cerrar
  *   sesión», que vuelve abajo del todo. Un menú que sólo lleva a las
  *   puertas que ya están a la vista es una puerta de más.
- * · **La cabecera entera se pulsa y abre «Editar perfil»** (`6b`). Tocar tu
- *   propia foto para cambiarla es el gesto que todo el mundo tiene
- *   aprendido; una fila «Editar perfil» aparte habría sido una fila más en
- *   la lista que acabamos de podar.
+ * · **La foto se pulsa y abre «Editar perfil»** (`6b`): tocar tu propia
+ *   foto para cambiarla es el gesto que todo el mundo tiene aprendido. El
+ *   botón de debajo lo dice con la palabra, para quien no lo adivina.
  * · **«Verificado» significa cédula Y licencia.** Con la cédula sola se
  *   viaja de pasajero; para llevar a alguien hace falta la licencia, y decir
  *   «verificado» sin ella promete lo que no se comprobó.
@@ -86,7 +90,6 @@ import { salir } from '@/servicios/cuenta';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
-import { CampoRojo } from '@/ui/CampoRojo';
 import { NoEsta } from '@/ui/NoEsta';
 import { Pestanas } from '@/ui/Pestanas';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
@@ -99,7 +102,6 @@ import {
   Compartir,
   Escudo,
   Estrella,
-  Pin,
   Salir,
   Visto,
 } from '@/ui/iconos';
@@ -138,6 +140,10 @@ export default function TuCuenta() {
    */
   const verificadoDeltodo = datos.verificado && datos.licenciaAlDia;
 
+  /* TRES CIFRAS, y las tres son cifras (02-09-2026, auditoría: la tercera
+     columna decía «Pendiente · Cédula y licencia» — un ESTADO disfrazado de
+     estadística, y el único motivo por el que la tarjeta se pulsaba. La
+     verificación tiene ahora su propia tarjeta, con su acción). */
   const loQueVen = [
     { valor: String(datos.viajes), etiqueta: datos.viajes === 1 ? 'Viaje' : 'Viajes' },
     {
@@ -145,11 +151,7 @@ export default function TuCuenta() {
       etiqueta: datos.calificacion == null ? 'Sin nota' : 'Calificación',
       estrella: datos.calificacion != null,
     },
-    {
-      /* «Verificado» son las DOS. Ver la cabecera del archivo. */
-      valor: verificadoDeltodo ? 'Verificado' : 'Pendiente',
-      etiqueta: 'Cédula y licencia',
-    },
+    { valor: conMiles(datos.kilometros), etiqueta: 'km juntos' },
   ];
 
   /**
@@ -177,11 +179,13 @@ export default function TuCuenta() {
   const mias: Fila[] = [
     {
       etiqueta: 'Verificación',
+      /* Corto, que a 390 px «Cédula lista · falta la lice…» se cortaba con
+         puntos suspensivos justo en la palabra que importaba. */
       debajo: verificadoDeltodo
-        ? 'Cédula y licencia verificadas'
+        ? 'Cédula y licencia listas'
         : datos.verificado
-          ? 'Cédula lista · falta la licencia'
-          : 'Falta tu cédula',
+          ? 'Falta la licencia'
+          : 'Falta la cédula',
       pastilla: verificadoDeltodo ? 'Completada' : 'Pendiente',
       /* La cédula y no un escudo: el escudo es de Seguridad, dos filas más
          abajo, y dos escudos en la misma lista no distinguen nada. */
@@ -238,105 +242,125 @@ export default function TuCuenta() {
           como una app y no como una cabecera clavada. Solo la barra de estado
           —y la de pestañas— quedan fijas. */}
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        <CampoRojo altura={250} motivo="mapa" />
-
+        {/* **EL ARMAZÓN V6, COMO LAS OTRAS TRES RAÍCES** (02-09-2026,
+            rediseño pedido por el dueño). Buscar, Viajes y Chats ya hablan
+            en fondo claro; Perfil era la única pestaña con campo rojo. */}
         <View style={estilos.cabecera}>
-          {/* ARRIBA A LA DERECHA NO VA NADA. Estaba el engranaje de Ajustes,
-              y Ajustes ya no existe: ver la cabecera del archivo. */}
-
-          {/* LA CABECERA ENTERA ABRE «EDITAR PERFIL» (`6b`). Tocar tu propia
-              foto para cambiarla es el gesto que todo el mundo tiene
-              aprendido, y una fila «Editar perfil» aparte sería una fila más
-              en la lista que acabamos de podar a cuatro. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Editar mi perfil"
-            onPress={() => router.push('/(cuenta)/editar')}
-            style={({ pressed }) => [estilos.filaPersona, pressed && estilos.pulsada]}
-          >
-            <View style={estilos.avatar}>
+          <View style={estilos.filaPersona}>
+            {/* Tocar la foto abre editar: el gesto que todo el mundo trae
+                aprendido. Y abajo un botón que lo dice con la palabra. */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cambiar mi foto"
+              onPress={() => router.push('/(cuenta)/editar')}
+              style={estilos.avatar}
+            >
               <Text style={estilos.avatarTexto}>{datos.iniciales}</Text>
-              {/* La insignia sobre la foto, como la lleva cualquier perfil
-                  que se ha verificado: se ve antes de leer el nombre. */}
               {datos.verificado ? (
                 <View style={estilos.insignia}>
                   <Visto tamano={11} tinta="#fff" />
                 </View>
               ) : null}
-            </View>
+            </Pressable>
 
             <View style={{ flex: 1, minWidth: 0 }}>
-              <View style={estilos.filaNombre}>
-                <Text style={estilos.nombre} numberOfLines={1}>
-                  {`${datos.nombre} ${datos.apellido}`.trim()}
-                </Text>
-                {datos.verificado ? (
-                  <View style={estilos.pastillaVerde}>
-                    <Escudo tamano={13} tinta={color.hechoTinta} />
-                    <Text style={estilos.pastillaVerdeTexto}>Verificado</Text>
-                  </View>
-                ) : null}
-              </View>
-
-              {/* Los kilómetros van junto al nombre y no en una columna: son
-                  lo que has recorrido acompañado, la única cifra de esta
-                  pantalla que se puede presumir. Con cero se callan. */}
-              <Text style={estilos.desde}>
-                {`Miembro desde ${datos.desde}`}
-                {datos.kilometros > 0 ? ` · ${conMiles(datos.kilometros)} km juntos` : ''}
+              <Text style={estilos.nombre} numberOfLines={1}>
+                {`${datos.nombre} ${datos.apellido}`.trim()}
               </Text>
-
-              {datos.ciudad ? (
-                <View style={estilos.filaCiudad}>
-                  <Pin tamano={13} tinta={color.ink500} />
-                  <Text style={estilos.ciudad} numberOfLines={1}>
-                    {datos.ciudad}
+              {/* Desde cuándo y de dónde: los kilómetros bajan a la tarjeta
+                  de cifras, que es donde se comparan. */}
+              <Text style={estilos.desde} numberOfLines={1}>
+                {[`Miembro desde ${datos.desde}`, datos.ciudad].filter(Boolean).join(' · ')}
+              </Text>
+              {/* La pastilla dice EXACTAMENTE qué está verificado: «Cédula
+                  verificada» no promete la licencia que falta. */}
+              {datos.verificado ? (
+                <View style={estilos.pastillaVerde}>
+                  <Escudo tamano={13} tinta={color.hechoTinta} />
+                  <Text style={estilos.pastillaVerdeTexto}>
+                    {verificadoDeltodo ? 'Cédula y licencia verificadas' : 'Cédula verificada'}
                   </Text>
                 </View>
               ) : null}
-
-              {/* La invitación a tocar, pequeña y explícita: sin ella la
-                  cabecera es pulsable y no lo parece. */}
-              <View style={estilos.editar}>
-                <Text style={estilos.editarTexto}>Editar perfil</Text>
-                <Avanza tamano={13} />
-              </View>
             </View>
+          </View>
+
+          {/* Un botón de verdad, no un texto rojo suelto: la única acción de
+              la cabecera, con la forma de las acciones secundarias de la
+              casa (auditoría: afordancia). */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Editar mi perfil"
+            onPress={() => router.push('/(cuenta)/editar')}
+            style={({ pressed }) => [estilos.editar, pressed && estilos.pulsada]}
+          >
+            <Text style={estilos.editarTexto}>Editar perfil</Text>
+            <Avanza tamano={14} tinta={color.ink700} />
           </Pressable>
         </View>
 
         <View style={estilos.contenido}>
-          {/* LA TARJETA DE TINTA. Se pulsa entera y abre la verificación, que
-              es la columna donde está el chevrón. El 27-08 se decidió que la
-              tarjeta del dinero NO se pulsara —«se toca sin querer al
-              desplazar»—; aquella abría una cosa distinta de la que enseñaba,
-              y ésta abre justo lo que dice su tercera columna. */}
-          <Pressable
-            accessibilityRole="button"
+          {/* LAS CIFRAS, en blanco y sin pulsar: una estadística no es una
+              puerta (27-08: «se toca sin querer al desplazar»). Son lo que
+              el otro ve antes de subirse. */}
+          <View
             accessibilityLabel={`${datos.viajes} viajes, ${
               datos.calificacion == null ? 'sin nota' : `nota ${enTexto(datos.calificacion)}`
-            }, cédula ${datos.verificado ? 'verificada' : 'pendiente'}. Ver la verificación`}
-            onPress={() => router.push('/(conductor)/cedula')}
-            style={({ pressed }) => [estilos.tarjetaTinta, pressed && { opacity: 0.92 }]}
+            }, ${conMiles(datos.kilometros)} kilómetros juntos`}
+            style={estilos.tarjetaCifras}
           >
             {loQueVen.map((v, i) => (
-              <View key={v.etiqueta} style={estilos.columnaTinta}>
+              <View key={v.etiqueta} style={estilos.columnaCifra}>
                 {i > 0 ? <View style={estilos.filete} /> : null}
                 <View style={estilos.columnaDentro}>
-                  <View style={estilos.filaValorTinta}>
-                    {v.estrella ? <Estrella tamano={13} tinta="#fff" /> : null}
-                    <Text style={[estilos.valorTinta, tabular]} numberOfLines={1}>
+                  <View style={estilos.filaValor}>
+                    {v.estrella ? <Estrella tamano={14} /> : null}
+                    <Text style={[estilos.valorCifra, tabular]} numberOfLines={1}>
                       {v.valor}
                     </Text>
                   </View>
-                  <Text style={estilos.etiquetaTinta} numberOfLines={1}>
+                  <Text style={estilos.etiquetaCifra} numberOfLines={1}>
                     {v.etiqueta}
                   </Text>
                 </View>
               </View>
             ))}
-            <Avanza tamano={17} tinta="rgba(255,255,255,.55)" />
-          </Pressable>
+          </View>
+
+          {/* **LA VERIFICACIÓN ES UNA ACCIÓN, NO UN ESTADO** (02-09-2026,
+              auditoría — principio 1 y 11): sin licencia no se publica, y la
+              pantalla lo decía dos veces («Pendiente», «Pendiente») sin
+              ofrecer nunca el botón. Esta tarjeta sólo existe mientras
+              falte algo, en tinta —lo único oscuro de la pantalla— porque es
+              lo único que hay que hacer. Verificado del todo, desaparece. */}
+          {verificadoDeltodo ? null : (
+            <View style={estilos.tarjetaVerifica}>
+              <Text style={estilos.verificaEpigrafe}>Para llevar a alguien</Text>
+              <Text style={estilos.verificaTitulo}>
+                {datos.verificado ? 'Falta tu licencia de conducir' : 'Verifica tu cédula'}
+              </Text>
+              <View style={estilos.pasos}>
+                <PasoDeVerificacion hecho={datos.verificado} texto="Cédula" />
+                <PasoDeVerificacion hecho={datos.licenciaAlDia} texto="Licencia de conducir" />
+              </View>
+              <Text style={estilos.verificaTexto}>
+                {datos.verificado
+                  ? 'Con la cédula viajas de pasajero. Para publicar un viaje hace falta la licencia, verificada por el mismo proveedor.'
+                  : 'Toma un minuto y vale para siempre: es lo que ven los demás antes de subirse.'}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={datos.verificado ? 'Verificar la licencia' : 'Verificar la cédula'}
+                onPress={() => router.push('/(conductor)/cedula')}
+                style={({ pressed }) => [estilos.botonVerifica, pressed && { opacity: 0.9 }]}
+              >
+                <Text style={estilos.botonVerificaTexto}>
+                  {datos.verificado ? 'Verificar la licencia' : 'Verificar la cédula'}
+                </Text>
+                <Avanza tamano={16} tinta={color.ink900} />
+              </Pressable>
+            </View>
+          )}
 
           <Text style={estilos.rotuloSeccion}>Mi cuenta</Text>
           <Lista filas={mias} completa={verificadoDeltodo} />
@@ -393,6 +417,18 @@ export default function TuCuenta() {
       </ScrollView>
 
       <Pestanas valor="Perfil" yo={yo} />
+    </View>
+  );
+}
+
+/** Un paso de la verificación: hecho (verde con visto) o por hacer (aro). */
+function PasoDeVerificacion({ hecho, texto }: { hecho: boolean; texto: string }) {
+  return (
+    <View style={estilos.paso} accessibilityLabel={`${texto}: ${hecho ? 'lista' : 'pendiente'}`}>
+      <View style={[estilos.pasoAro, hecho && estilos.pasoHecho]}>
+        {hecho ? <Visto tamano={10} tinta="#fff" /> : null}
+      </View>
+      <Text style={[estilos.pasoTexto, hecho && estilos.pasoTextoHecho]}>{texto}</Text>
     </View>
   );
 }
@@ -468,22 +504,19 @@ const estilos = StyleSheet.create({
 
   /* Sin fila de acciones arriba: el engranaje se fue con la pantalla de
      Ajustes, así que la cabecera empieza directamente en la persona. */
-  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 22 },
+  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 18 },
 
+  /* Ya no se pulsa entera: la foto abre editar y el botón de abajo lo dice
+     con la palabra. Sin márgenes negativos — la fila alinea con el resto. */
   filaPersona: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
-    marginTop: 10,
-    marginHorizontal: -8,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    borderRadius: radio.hoja,
   },
   avatar: {
-    width: 82,
-    height: 82,
-    borderRadius: 41,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     /* `azul100` es casi el mismo tono que la arena de la página: el círculo
        de la foto desaparecía. `ink200` lo separa sin oscurecerlo. */
     backgroundColor: color.ink200,
@@ -491,8 +524,8 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarTexto: {
-    fontSize: 27,
-    lineHeight: 34,
+    fontSize: 25,
+    lineHeight: 32,
     fontWeight: '700',
     letterSpacing: -0.6,
     color: color.ink900,
@@ -500,8 +533,8 @@ const estilos = StyleSheet.create({
   },
   insignia: {
     position: 'absolute',
-    right: 0,
-    bottom: 2,
+    right: -1,
+    bottom: 0,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -512,9 +545,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  filaNombre: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   nombre: {
-    flexShrink: 1,
     fontSize: 24,
     lineHeight: 30,
     fontWeight: '700',
@@ -522,13 +553,16 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
+  desde: { fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia, marginTop: 3 },
   /* Verde de «hecho», el del sistema (`hechoFondo`/`hechoTinta`): la app ya
      lo usa para un estado cumplido, y un segundo verde para lo mismo son dos
      verdes que acaban divergiendo. */
   pastillaVerde: {
+    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 5,
+    marginTop: 8,
     paddingHorizontal: 9,
     paddingVertical: 4,
     borderRadius: radio.pastilla,
@@ -541,49 +575,136 @@ const estilos = StyleSheet.create({
     color: color.hechoTinta,
     fontFamily: familia,
   },
-  desde: { fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia, marginTop: 4 },
-  filaCiudad: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
-  editar: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 7 },
+  /* La forma de las acciones secundarias de la casa (el «Cerrar sesión» de
+     abajo, los «Editar» de resultados): píldora blanca con borde, 40 de
+     alto. Un texto rojo suelto no decía que se pulsaba. */
+  editar: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 16,
+    height: 40,
+    paddingLeft: 16,
+    paddingRight: 12,
+    borderRadius: radio.control,
+    backgroundColor: color.blanco,
+    borderWidth: 1,
+    borderColor: color.bordePorDefecto,
+  },
   editarTexto: {
-    fontSize: 13,
+    fontSize: 13.5,
     lineHeight: 18,
     fontWeight: '600',
-    color: color.rojo700,
+    letterSpacing: 13.5 * TRACK_MICRO,
+    color: color.ink800,
     fontFamily: familia,
   },
-  ciudad: { fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia },
 
   contenido: { paddingHorizontal: espacio.gutter, paddingTop: 20, paddingBottom: 110 },
 
-  /** Las tres cifras sobre tinta: lo único de esta pantalla que ve el otro. */
-  tarjetaTinta: {
+  /** Las tres cifras en blanco: una estadística no es una puerta, y la
+      tinta queda para lo único que hay que HACER (la verificación). */
+  tarjetaCifras: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: color.ink900,
+    backgroundColor: color.blanco,
     borderRadius: radio.hoja,
-    paddingVertical: 18,
-    paddingLeft: 6,
-    paddingRight: 14,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    paddingVertical: 16,
+    paddingHorizontal: 6,
   },
-  columnaTinta: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center' },
-  /** Un pelo de blanco, no una caja: separa sin dibujar tres recuadros. */
-  filete: { width: 1, height: 38, backgroundColor: 'rgba(255,255,255,.16)' },
+  columnaCifra: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center' },
+  /** Un pelo de tinta, no una caja: separa sin dibujar tres recuadros. */
+  filete: { width: 1, height: 34, backgroundColor: color.bordePorDefecto },
   columnaDentro: { flex: 1, minWidth: 0, alignItems: 'center', paddingHorizontal: 4 },
-  filaValorTinta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  valorTinta: {
-    fontSize: 20,
-    lineHeight: 26,
+  filaValor: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  valorCifra: {
+    fontSize: 21,
+    lineHeight: 27,
     fontWeight: '700',
     letterSpacing: -0.6,
-    color: '#fff',
+    color: color.ink900,
     fontFamily: familia,
   },
-  etiquetaTinta: {
+  etiquetaCifra: {
     fontSize: 12.5,
     lineHeight: 17,
-    color: 'rgba(255,255,255,.72)',
+    color: color.ink600,
     fontFamily: familia,
     marginTop: 2,
+  },
+
+  /** La única tarjeta oscura: lo único que hay que hacer. Desaparece hecha. */
+  tarjetaVerifica: {
+    marginTop: 14,
+    padding: 18,
+    borderRadius: radio.hoja,
+    backgroundColor: color.ink900,
+  },
+  verificaEpigrafe: {
+    fontSize: 11.5,
+    lineHeight: 15,
+    fontWeight: '600',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,.66)',
+    fontFamily: familia,
+  },
+  verificaTitulo: {
+    fontSize: 20,
+    lineHeight: 25,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+    color: '#fff',
+    fontFamily: familia,
+    marginTop: 5,
+  },
+  pasos: { flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 14 },
+  paso: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  pasoAro: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pasoHecho: { backgroundColor: color.verde500, borderColor: color.verde500 },
+  pasoTexto: {
+    fontSize: 13.5,
+    lineHeight: 18,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,.72)',
+    fontFamily: familia,
+  },
+  pasoTextoHecho: { color: '#fff', fontWeight: '600' },
+  verificaTexto: {
+    fontSize: 13.5,
+    lineHeight: 19,
+    color: 'rgba(255,255,255,.82)',
+    fontFamily: familia,
+    marginTop: 12,
+  },
+  botonVerifica: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 16,
+    height: 48,
+    borderRadius: radio.control,
+    backgroundColor: color.blanco,
+  },
+  botonVerificaTexto: {
+    fontSize: 15,
+    lineHeight: interlinea(15),
+    fontWeight: '600',
+    letterSpacing: 15 * TRACK_MICRO,
+    color: color.ink900,
+    fontFamily: familia,
   },
 
   rotuloSeccion: {
@@ -630,7 +751,6 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   filaDebajo: { fontSize: 12.5, lineHeight: 18, color: color.ink600, fontFamily: familia },
-  filaValor: { fontSize: 13.5, lineHeight: 19, color: color.ink600, fontFamily: familia },
 
   pastillaFila: {
     paddingHorizontal: 10,
