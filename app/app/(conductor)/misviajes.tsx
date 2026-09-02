@@ -4,6 +4,17 @@
  * **La estructura que pidió el cliente**, traída a nuestro lenguaje: una ficha
  * grande para el viaje que viene y filas compactas para los demás.
  *
+ * **Los dos lados, de entrada** (02-09-2026, pedido del dueño: «on devrait
+ * pouvoir voir les [viajes] que moi je fais, donc c'est moi le chauffeur,
+ * aussi [ceux où] c'est moi le client — le voir d'entrée»). Tres cosas lo
+ * hacen: la bajada dice el bilan («Conduces 2 · vas de pasajero en 1»); la
+ * ficha grande es LO PRÓXIMO del lado que sea —el boleto si vas sentado, la
+ * tarjeta del panel con sus acciones dentro si conduces—; y cada fila lleva
+ * su cuadro de rol: arena con asiento = tu puesto, tinta con carro = lo
+ * conduces tú. Antes el rol era una palabra de 12 px dentro de una línea
+ * gris, y un viaje tuyo saliendo en dos horas era una fila compacta con
+ * todo lo suyo a dos toques.
+ *
  * **Sin selectores** (28-08-2026, pedido del dueño). Había dos, uno encima
  * del otro: «Voy de pasajero / Conduzco» y «Próximos / Historial». Cuatro
  * casillas, dos toques para llegar a cualquiera — y con tres o cuatro viajes
@@ -57,10 +68,11 @@ import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
 import { CampoRojo } from '@/ui/CampoRojo';
 import { Pestanas } from '@/ui/Pestanas';
+import { Galon, TarjetaDePublicado, loQueQueda } from '@/ui/TarjetaDePublicado';
 import { Avatar, Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaAbrev, diaSemana, hora, mesAbrev, numeroDeDia } from '@/ui/fechas';
-import { Avanza, Carro, Chat, Compartir, Estrella, Visto } from '@/ui/iconos';
+import { Asiento, Avanza, Carro, Chat, Compartir, Estrella, Visto } from '@/ui/iconos';
 import {
   TRACK_MICRO,
   color,
@@ -134,22 +146,33 @@ export default function MisViajesPantalla() {
 
   if (!datos) return <Cargando altura={186} tarjetas={3} />;
 
-  /* La ficha grande sigue siendo la del próximo PUESTO: lleva el código de
-     subir y el chat, que son cosas de pasajero. Quien maneja no tiene código
-     que enseñar — tiene gente a la que responder, y eso está más abajo. */
-  const proximo = datos.hoy ?? datos.proximos[0] ?? null;
-
-  /** Lo que viene, de los dos lados, en orden. */
+  /**
+   * **LA FICHA GRANDE ES LO PRÓXIMO, DEL LADO QUE SEA** (02-09-2026, pedido
+   * del dueño: «on devrait pouvoir voir les [viajes] que moi je fais, donc
+   * c'est moi le chauffeur, aussi [ceux où] c'est moi le client — le voir
+   * d'entrée»).
+   *
+   * Antes la ficha grande sólo existía para el próximo PUESTO: un conductor
+   * con un viaje saliendo en dos horas abría «Mis viajes» y su viaje era una
+   * fila compacta, con las solicitudes y los códigos a dos toques. Ahora la
+   * pantalla contesta la pregunta de verdad —¿qué es lo próximo en mi vida?—
+   * y lo dibuja en grande sea un puesto (el boleto con su talón) o un viaje
+   * que conduces (la misma tarjeta del panel, con sus acciones dentro).
+   */
   const loQueViene: Fila[] = [
-    ...datos.proximos
-      .filter((p) => p.reservaId !== proximo?.reservaId)
-      .map((p): Fila => ({ clase: 'pasajero', cuando: p.cuando, puesto: p })),
+    ...datos.proximos.map((p): Fila => ({ clase: 'pasajero', cuando: p.cuando, puesto: p })),
     ...(manejando?.proximos ?? []).map(
       (v): Fila => ({ clase: 'conduzco', cuando: v.cuando, viaje: v }),
     ),
   ].sort((a, b) => a.cuando.localeCompare(b.cuando));
 
-  const vacio = !proximo && loQueViene.length === 0;
+  const [primero, ...despues] = loQueViene;
+
+  /* El resumen de un vistazo, para la bajada: cuántos de cada lado vienen. */
+  const conduzco = manejando?.proximos.length ?? 0;
+  const dePasajero = datos.proximos.length;
+
+  const vacio = !primero;
 
   /**
    * **LO QUE YA PASÓ, TAMBIÉN AQUÍ** (01-09-2026, visto por el dueño con el
@@ -192,7 +215,20 @@ export default function MisViajesPantalla() {
         <View style={estilos.filaSuperior}>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={estilos.titular}>Mis viajes</Text>
-            <Text style={estilos.bajada}>Consulta y administra tus próximos viajes.</Text>
+            {/* **LA BAJADA DICE EL BILAN, no una consigna.** «Consulta y
+                administra tus próximos viajes» era una instrucción vacía;
+                esto es lo que contestarías si alguien te preguntara qué
+                tienes por delante — y dice DE ENTRADA que aquí viven los
+                dos lados del carro (02-09-2026, pedido del dueño). */}
+            <Text style={estilos.bajada}>
+              {conduzco > 0 && dePasajero > 0
+                ? `Conduces ${conduzco} · vas de pasajero en ${dePasajero}`
+                : conduzco > 0
+                  ? `Conduces ${conduzco === 1 ? '1 viaje' : `${conduzco} viajes`}`
+                  : dePasajero > 0
+                    ? `Vas de pasajero en ${dePasajero === 1 ? '1 viaje' : `${dePasajero} viajes`}`
+                    : 'Tus viajes, de los dos lados del carro.'}
+            </Text>
           </View>
 
           {/* **LA CAMPANA NO VA AQUÍ.** Estaba en Inicio Y en esta pantalla:
@@ -211,38 +247,98 @@ export default function MisViajesPantalla() {
       </View>
 
       <View style={estilos.cuerpo}>
-        {proximo ? (
+        {/* LO PRÓXIMO, EN GRANDE Y DEL LADO QUE SEA. Si es un puesto, el
+            boleto de siempre; si es un viaje que conduces, la tarjeta del
+            panel — la misma pieza, con solicitudes, códigos y compartir
+            DENTRO, sin pasar por «tocar la fila → administrar → volver». */}
+        {primero?.clase === 'pasajero' ? (
           <>
             <Epigrafe>Tu próximo puesto</Epigrafe>
             <FichaGrande
-              puesto={proximo}
+              puesto={primero.puesto}
               alChat={() =>
-                router.push({ pathname: '/(pasajero)/chat', params: { reserva: proximo.reservaId } })
+                router.push({
+                  pathname: '/(pasajero)/chat',
+                  params: { reserva: primero.puesto.reservaId },
+                })
               }
               alDetalle={() =>
-                router.push({ pathname: '/(pasajero)/viaje', params: { viaje: proximo.viajeId } })
+                router.push({
+                  pathname: '/(pasajero)/viaje',
+                  params: { viaje: primero.puesto.viajeId },
+                })
               }
               alCodigo={() =>
                 router.push({
                   pathname: '/(pasajero)/codigo',
-                  params: { reserva: proximo.reservaId },
+                  params: { reserva: primero.puesto.reservaId },
                 })
               }
             />
           </>
+        ) : primero ? (
+          <>
+            <Epigrafe>Tu próximo viaje · lo conduces tú</Epigrafe>
+
+            {/* Lo único con reloj corriendo, encima de la tarjeta: la misma
+                banda roja del panel, contando sólo este viaje. */}
+            {primero.viaje.solicitudes > 0 ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${primero.viaje.solicitudes} solicitudes de puesto sin responder`}
+                onPress={() =>
+                  router.push({
+                    pathname: '/(conductor)/solicitudes',
+                    params: { viaje: primero.viaje.id },
+                  })
+                }
+                style={({ pressed }) => [estilos.aviso, pressed && { opacity: 0.9 }]}
+              >
+                <View style={estilos.contador}>
+                  <Text style={estilos.contadorTexto}>{primero.viaje.solicitudes}</Text>
+                </View>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={estilos.avisoTitulo}>
+                    {primero.viaje.solicitudes === 1 ? 'Te piden un puesto' : 'Te piden puesto'}
+                  </Text>
+                  <Text style={estilos.avisoPie}>
+                    {`En este viaje · ${loQueQueda(primero.viaje.expiraLaPrimera ?? undefined)}`}
+                  </Text>
+                </View>
+                <Galon tinta={color.rojo700} />
+              </Pressable>
+            ) : null}
+
+            <TarjetaDePublicado viaje={primero.viaje} tono="siguiente" />
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Administrar este viaje"
+              onPress={() =>
+                router.push({
+                  pathname: '/(conductor)/administrar',
+                  params: { viaje: primero.viaje.id },
+                })
+              }
+              style={({ pressed }) => [estilos.puertaChica, pressed && pulsado.celda]}
+            >
+              <Text style={estilos.puertaChicaTexto}>Administrar este viaje</Text>
+              <Avanza tamano={15} />
+            </Pressable>
+          </>
         ) : null}
 
-        {loQueViene.length > 0 ? (
+        {despues.length > 0 ? (
           <>
             <View style={estilos.filaSeccion}>
-              <Epigrafe>{proximo ? 'Después de ése' : 'Lo que viene'}</Epigrafe>
+              <Epigrafe>{primero ? 'Después de ése' : 'Lo que viene'}</Epigrafe>
               <Text style={estilos.cuantos}>
-                {loQueViene.length === 1 ? '1 viaje' : `${loQueViene.length} viajes`}
+                {despues.length === 1 ? '1 viaje' : `${despues.length} viajes`}
               </Text>
             </View>
 
             <View style={{ gap: 8 }}>
-              {loQueViene.map((f) =>
+              {despues.map((f) =>
                 f.clase === 'pasajero' ? (
                   <FilaCompacta
                     key={f.puesto.reservaId}
@@ -582,6 +678,15 @@ function FilaCompacta({ puesto, alPulsar }: { puesto: PuestoMio; alPulsar: () =>
       onPress={alPulsar}
       style={({ pressed }) => [estilos.fila, pressed && { backgroundColor: color.sand100 }]}
     >
+      {/* **EL ROL SE VE ANTES DE LEER** (02-09-2026, pedido del dueño: «on
+          devrait pouvoir le voir d'entrée»). Un asiento sobre arena: aquí
+          vas sentado. El cuadro oscuro con el carro es el otro lado. Icono Y
+          palabra —la línea de abajo sigue diciendo «Pasajero»— porque un
+          color solo no es un dato. */}
+      <View style={estilos.cuadroRol}>
+        <Asiento tamano={19} tinta={color.ink600} />
+      </View>
+
       <View style={{ flex: 1, minWidth: 0 }}>
         <View style={estilos.hitoMini}>
           <View style={estilos.carrilMini}>
@@ -642,6 +747,13 @@ function FilaConduzco({ viaje, alPulsar }: { viaje: ViajePublicado; alPulsar: ()
       onPress={alPulsar}
       style={({ pressed }) => [estilos.fila, pressed && { backgroundColor: color.sand100 }]}
     >
+      {/* El cuadro oscuro con el carro: ESTE lo conduces tú. Se distingue
+          del asiento sobre arena sin leer nada — y la línea de abajo lo
+          sigue diciendo con la palabra «Conduzco». */}
+      <View style={[estilos.cuadroRol, estilos.cuadroRolConduzco]}>
+        <Carro tamano={19} tinta="#fff" />
+      </View>
+
       <View style={{ flex: 1, minWidth: 0 }}>
         <View style={estilos.hitoMini}>
           <View style={estilos.carrilMini}>
@@ -956,7 +1068,61 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
+  /* ── la banda de solicitudes del viaje grande, idéntica a la del panel ── */
+  aviso: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: color.rojo100,
+    borderRadius: radio.l,
+    paddingVertical: 13,
+    paddingHorizontal: 15,
+  },
+  contador: {
+    width: 34,
+    height: 34,
+    borderRadius: radio.cuadrado,
+    backgroundColor: color.rojo500,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contadorTexto: {
+    fontSize: 15.5,
+    lineHeight: 20,
+    fontWeight: '700',
+    color: '#fff',
+    fontFamily: familia,
+    ...tabular,
+  },
+  avisoTitulo: {
+    fontSize: 14,
+    lineHeight: 21,
+    fontWeight: '600',
+    letterSpacing: -0.2175,
+    color: color.rojo700,
+    fontFamily: familia,
+  },
+  avisoPie: {
+    fontSize: 12.5,
+    lineHeight: 18.125,
+    color: color.ink600,
+    fontFamily: familia,
+  },
+
   /* ── las filas compactas ── */
+  /** El cuadro de rol: arena con asiento = vas sentado; tinta con carro =
+      conduces tú. La forma y el contraste se leen antes que cualquier
+      palabra, y la palabra sigue ahí para quien la necesita. */
+  cuadroRol: {
+    width: 36,
+    height: 36,
+    borderRadius: radio.ficha,
+    backgroundColor: color.sand200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cuadroRolConduzco: { backgroundColor: color.ink900 },
+
   fila: {
     flexDirection: 'row',
     alignItems: 'center',
