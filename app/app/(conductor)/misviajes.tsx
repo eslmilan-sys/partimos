@@ -59,7 +59,7 @@ import { Cargando } from '@/ui/Cargando';
 import { Pestanas } from '@/ui/Pestanas';
 import { Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
-import { duracionEntre, diaSemana, hora, mesAbrev, numeroDeDia } from '@/ui/fechas';
+import { diaAbrev, diaSemana, duracionEntre, hora, mesAbrev, numeroDeDia } from '@/ui/fechas';
 import { Asiento, Avanza, Billete, Calendario, Escudo, Filtros } from '@/ui/iconos';
 import { TRACK_MICRO, color, espacio, familia, pulsado, radio } from '@/ui/tokens';
 
@@ -317,7 +317,9 @@ function Casilla({
 function BloqueFecha({ cuando, chico = false }: { cuando: string; chico?: boolean }) {
   return (
     <View style={[estilos.bloqueFecha, chico && estilos.bloqueFechaChico]}>
-      <Text style={estilos.fechaSemana}>{diaSemana(cuando)}</Text>
+      {/* «VIE», no «VIERNES»: a 11 px un miércoles entero desborda el
+          bloque, y el dibujo lo abrevia también. */}
+      <Text style={estilos.fechaSemana}>{diaAbrev(cuando)}</Text>
       <Text style={[estilos.fechaNumero, chico && estilos.fechaNumeroChico, tabular]}>
         {numeroDeDia(cuando)}
       </Text>
@@ -348,15 +350,27 @@ function Rail({ origen, destino }: { origen: string; destino: string }) {
 }
 
 /** Las dos cifras bajo el filete: puestos reservados y aporte por puesto. */
-function Cifras({ puestos, aporteCentavos }: { puestos: number; aporteCentavos: number }) {
+function Cifras({
+  puestos,
+  de,
+  aporteCentavos,
+}: {
+  puestos: number;
+  /** De cuántos ofrecidos. Sin él, un «0» suelto no cuenta nada: «0 de 3»
+      dice el estado del carro; «0» a secas parece un error. */
+  de?: number;
+  aporteCentavos: number;
+}) {
   return (
     <View style={estilos.filaCifras}>
       <View style={estilos.cifra}>
         <Asiento tamano={22} tinta={color.ink700} />
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={[estilos.cifraNumero, tabular]}>{puestos}</Text>
+          <Text style={[estilos.cifraNumero, tabular]}>
+            {de != null ? `${puestos} de ${de}` : puestos}
+          </Text>
           <Text style={estilos.cifraPie}>
-            {puestos === 1 ? 'puesto reservado' : 'puestos reservados'}
+            {puestos === 1 && de == null ? 'puesto reservado' : 'puestos reservados'}
           </Text>
         </View>
       </View>
@@ -374,14 +388,41 @@ function Cifras({ puestos, aporteCentavos }: { puestos: number; aporteCentavos: 
   );
 }
 
-/** Las horas del dibujo: «23:00 → 05:30» y lo que dura, al lado. */
+/** El día del calendario en Panamá, para saber si la llegada cruza la noche. */
+const diaEnPanama = new Intl.DateTimeFormat('en-CA', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: 'America/Panama',
+});
+
+/**
+ * Las horas del dibujo: «23:00 → 05:30» en grande, y DEBAJO lo que dura.
+ *
+ * La duración iba pegada al lado del número grande y se leía como un
+ * pegote — «05:30 6 h 30» (visto por el dueño el 02-09-2026: «the total
+ * duration is next to big number, it's weird»). Los datos secundarios van
+ * en su renglón, no colgados del primario. Y una salida a las 23:00 que
+ * llega a las 05:30 llega OTRO DÍA: el invariante de la casa manda decirlo
+ * siempre, así que el renglón chico también dice «llegas el sábado».
+ */
 function Horas({ sale, llega }: { sale: string; llega: string }) {
   const dura = duracionEntre(sale, llega);
+  const otroDia = diaEnPanama.format(new Date(sale)) !== diaEnPanama.format(new Date(llega));
+  const pie = [dura ? `${dura} de viaje` : '', otroDia ? `llegas el ${diaSemana(llega).toLowerCase()}` : '']
+    .filter(Boolean)
+    .join(' · ');
   return (
-    <Text style={[estilos.horas, tabular]} numberOfLines={1}>
-      {`${hora(sale)} → ${hora(llega)}`}
-      {dura ? <Text style={estilos.duracion}>{`  ${dura}`}</Text> : null}
-    </Text>
+    <View>
+      <Text style={[estilos.horas, tabular]} numberOfLines={1}>
+        {`${hora(sale)} → ${hora(llega)}`}
+      </Text>
+      {pie ? (
+        <Text style={estilos.duracion} numberOfLines={1}>
+          {pie}
+        </Text>
+      ) : null}
+    </View>
   );
 }
 
@@ -416,7 +457,11 @@ function TarjetaConduzco({ viaje, router }: { viaje: ViajePublicado; router: Rou
       <Rail origen={viaje.origen.split(' · ')[0]} destino={viaje.destino.split(' · ')[0]} />
 
       <View style={estilos.filete} />
-      <Cifras puestos={viaje.puestosVendidos} aporteCentavos={viaje.aporteCentavos} />
+      <Cifras
+        puestos={viaje.puestosVendidos}
+        de={viaje.puestosOfrecidos}
+        aporteCentavos={viaje.aporteCentavos}
+      />
 
       <Pressable
         accessibilityRole="button"
@@ -776,7 +821,15 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  duracion: { fontSize: 13.5, lineHeight: 19, fontWeight: '500', color: color.ink500 },
+  /** Su propio renglón, bajo las horas: contexto, no la hora. */
+  duracion: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    color: color.ink500,
+    fontFamily: familia,
+    marginTop: 2,
+  },
 
   /* ── el raíl ── */
   rail: { marginTop: 15 },
@@ -790,15 +843,16 @@ const estilos = StyleSheet.create({
     borderColor: color.ink300,
     backgroundColor: color.blanco,
   },
-  /** El hilo discontinuo del dibujo, entre los dos puntos. */
+  /** El hilo entre los dos puntos. Sólido, como el de la tarjeta del panel:
+      el borde discontinuo de 0 px de ancho se dibujaba como un tiro suelto
+      bajo el punto rojo (visto en el teléfono el 02-09-2026). */
   hilo: {
-    width: 0,
+    width: 2,
     height: 16,
     marginLeft: 4,
     marginVertical: 2,
-    borderLeftWidth: 1.5,
-    borderColor: color.ink300,
-    borderStyle: 'dashed',
+    borderRadius: 1,
+    backgroundColor: color.ink200,
   },
   lugar: {
     flex: 1,
