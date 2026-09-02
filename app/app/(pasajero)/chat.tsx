@@ -18,7 +18,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useVolver } from '@/ui/salidas';
 
@@ -63,6 +63,8 @@ export default function Chat() {
   const reservaId = viaje ? null : (reserva ?? DEL_RECORRIDO);
   const [hilo, setHilo] = useState<HiloDelViaje | null>(null);
   const [texto, setTexto] = useState('');
+  /** El envío que no pasó, escrito junto al campo hasta reintentar. */
+  const [falloEnvio, setFalloEnvio] = useState<string | null>(null);
   const lista = useRef<ScrollView>(null);
 
   const recargar = useCallback(async () => {
@@ -84,13 +86,38 @@ export default function Chat() {
     recargar();
   }, [recargar]);
 
+  /**
+   * **EL HILO SE REFRESCA SOLO MIENTRAS SE MIRA** (02-09-2026, critique).
+   * Sólo se recargaba al entrar y al mandar: en la acera, con el carro
+   * llegando, el «estoy a 5 min» del conductor no aparecía hasta salir y
+   * volver a entrar — el momento más tenso del producto era el único sin
+   * flujo. Cada 12 s se vuelve a pedir el hilo mientras la pantalla tiene
+   * el foco; `recargar` ya marca leído y ordena, así que no hay saltos.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      const reloj = setInterval(() => {
+        recargar();
+      }, 12_000);
+      return () => clearInterval(reloj);
+    }, [recargar]),
+  );
+
   if (!hilo) return <Cargando />;
 
   const mandar = async () => {
     if (!texto.trim()) return;
     if (!yo) return;
-    if (viaje && conId) await enviarPregunta(viaje, conId, yo, texto);
-    else if (reservaId) await enviarMensaje(reservaId, yo, texto);
+    /* El texto NO se borra hasta que el envío pasó: si la red lo tumba, lo
+       escrito sigue en el campo y el fallo se dice (02-09-2026, critique). */
+    try {
+      if (viaje && conId) await enviarPregunta(viaje, conId, yo, texto);
+      else if (reservaId) await enviarMensaje(reservaId, yo, texto);
+    } catch {
+      setFalloEnvio('No se pudo enviar. Revisa la señal y prueba otra vez.');
+      return;
+    }
+    setFalloEnvio(null);
     setTexto('');
     await recargar();
     lista.current?.scrollToEnd({ animated: true });
@@ -247,6 +274,14 @@ export default function Chat() {
             ))}
           </View>
         </ScrollView>
+
+        {/* El envío que no pasó, dicho JUNTO al campo y hasta reintentar:
+            un aviso que se va solo deja el chat mudo (02-09-2026). */}
+        {falloEnvio ? (
+          <View style={estilos.falloEnvio}>
+            <Text style={estilos.falloEnvioTexto}>{falloEnvio}</Text>
+          </View>
+        ) : null}
 
         <View style={estilos.barraEscribir}>
           {/* SIN «+» (01-09-2026, pedido del dueño). Abría el punto de
@@ -481,6 +516,21 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
     outlineStyle: 'none',
   } as never,
+  falloEnvio: {
+    marginHorizontal: espacio.gutter,
+    marginBottom: 8,
+    backgroundColor: color.rojo100,
+    borderRadius: radio.m,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  falloEnvioTexto: {
+    fontSize: 13,
+    lineHeight: 18.85,
+    fontWeight: '500',
+    color: color.rojo700,
+    fontFamily: familia,
+  },
   /** Apagado sigue OPACO — lo que se apaga es el dibujo, no la superficie. */
   enviarApagado: { backgroundColor: color.inerteFondo },
   /** Enviar ES la acción: va en rojo, con la sombra del acento. */

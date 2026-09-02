@@ -173,12 +173,8 @@ export default function Inicio() {
     });
   };
 
-  /** El rango de precios de las salidas próximas: «B/9 – B/18». */
-  const precios = salen.map((v) => v.aporteCentavos);
-  const rango =
-    precios.length > 1
-      ? `B/${cifraRedonda(Math.min(...precios))} – B/${cifraRedonda(Math.max(...precios))}`
-      : null;
+  /* El «rango de precios» que se calculaba aquí no se dibujaba en ninguna
+     parte: código muerto retirado el 02-09-2026 (critique). */
 
   /** Las iniciales del retrato de la cabecera. */
   const iniciales = (nombre ?? 'Tú')

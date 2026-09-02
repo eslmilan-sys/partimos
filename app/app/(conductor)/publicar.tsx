@@ -454,9 +454,13 @@ export default function Publicar() {
   /**
    * PUBLICAR DE NUEVO. `?deViaje=<id>` llega del panel — «Para repetir» — y
    * rellena el formulario con aquel viaje: la ruta a nivel de ciudad, la
-   * hora a la que saliste y los puestos que ofreciste. La fecha nace en hoy
-   * y el punto exacto se vuelve a elegir: es lo único que cambia de una
-   * semana a otra. Dos toques en vez del formulario entero.
+   * hora a la que saliste y los puestos que ofreciste.
+   *
+   * **Y ATERRIZA EN LA FECHA** (02-09-2026, critique): rellenar los campos
+   * y arrancar igual en el paso 1 obligaba al conductor semanal a ocho
+   * «Continuar» para cambiar sólo el día — la fecha ES lo único que cambia
+   * de un viernes al otro. Los pasos anteriores siguen ahí, un «atrás» los
+   * abre si algo más cambió.
    */
   const { deViaje } = useLocalSearchParams<{ deViaje?: string }>();
   useEffect(() => {
@@ -467,6 +471,7 @@ export default function Publicar() {
       setHacia(t.destino);
       setHoraSalida(t.hora);
       setReparto(repartoDeUnTotal(t.puestos));
+      setPaso('dia');
     });
   }, [deViaje]);
 

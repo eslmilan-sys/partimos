@@ -301,8 +301,13 @@ export default function DetalleDelViaje() {
                 const ultima = i === paradas.length - 1;
                 return (
                   <View key={p.id} style={[estilos.parada, ultima && { paddingBottom: 0 }]}>
+                    {/* LA GRAMÁTICA DEL RAÍL, una sola en toda la app
+                        (02-09-2026, critique): aro hueco = de dónde sales,
+                        ROJO lleno = a dónde llegas — como el pin de la
+                        búsqueda y la flecha de resultados. Aquí estaba al
+                        revés y cada tarjeta lo decía a su manera. */}
                     <View
-                      style={i === 0 ? estilos.puntoLleno : ultima ? estilos.puntoFinal : estilos.puntoMedio}
+                      style={i === 0 ? estilos.puntoSalida : ultima ? estilos.puntoLlegada : estilos.puntoMedio}
                     />
                     <View style={{ flex: 1, minWidth: 0 }}>
                       {/* «Salida» y «Llegada» con nombre: dos filas con un punto
@@ -310,7 +315,7 @@ export default function DetalleDelViaje() {
                       <Text
                         style={[
                           estilos.paradaQue,
-                          i === 0 && { color: color.rojo600 },
+                          ultima && { color: color.rojo600 },
                         ]}
                       >
                         {i === 0 ? 'Salida' : ultima ? 'Llegada' : 'Parada'}
@@ -608,14 +613,20 @@ export default function DetalleDelViaje() {
                a `llegada`, así que nada más pedir puesto la app decía
                «llegaste» y enseñaba el código del final del viaje, sin
                haberse montado en el carro todavía. Mientras no haya subido,
-               lo que hace falta es el código de abordaje. */
+               lo que hace falta es el código de abordaje.
+               **Y UN `pending` NO TIENE CÓDIGO QUE VER** (02-09-2026,
+               critique): ofrecer «Ver mi código» antes de que el conductor
+               diga que sí fabrica una certeza que no existe. Esperando, la
+               puerta útil es el chat con quien decide. */
             onPress={() =>
               router.push(
-                miReserva.status === 'completed'
-                  ? { pathname: '/(pasajero)/comprobante', params: { reserva: miReserva.id } }
-                  : miReserva.boarded_at
-                    ? { pathname: '/(pasajero)/llegada', params: { reserva: miReserva.id } }
-                    : { pathname: '/(pasajero)/codigo', params: { reserva: miReserva.id } },
+                miReserva.status === 'pending'
+                  ? { pathname: '/(pasajero)/chat', params: { reserva: miReserva.id } }
+                  : miReserva.status === 'completed'
+                    ? { pathname: '/(pasajero)/comprobante', params: { reserva: miReserva.id } }
+                    : miReserva.boarded_at
+                      ? { pathname: '/(pasajero)/llegada', params: { reserva: miReserva.id } }
+                      : { pathname: '/(pasajero)/codigo', params: { reserva: miReserva.id } },
               )
             }
             style={({ pressed }) => [
@@ -631,11 +642,13 @@ export default function DetalleDelViaje() {
                 El estado sigue dicho, arriba y en su sitio; aquí va la puerta
                 a la que este botón lleva de verdad. */}
             <Text style={estilos.ctaTexto} numberOfLines={1}>
-              {miReserva.status === 'completed'
-                ? 'Ver el comprobante'
-                : miReserva.boarded_at
-                  ? 'Ya vas a bordo'
-                  : 'Ver mi código de subir'}
+              {miReserva.status === 'pending'
+                ? `Esperando a ${deNombre}`
+                : miReserva.status === 'completed'
+                  ? 'Ver el comprobante'
+                  : miReserva.boarded_at
+                    ? 'Ya vas a bordo'
+                    : 'Ver mi código de subir'}
             </Text>
             <Avanza tamano={19} tinta="#fff" />
           </Pressable>
@@ -836,11 +849,14 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   aprox: { fontSize: 11.5, color: color.ink600 },
-  puntoLleno: {
+  /** El aro de la salida: hueco — de ahí sales, ahí no hay nada que marcar. */
+  puntoSalida: {
     width: 10,
     height: 10,
     borderRadius: radio.pastilla,
-    backgroundColor: color.rojo500,
+    backgroundColor: color.blanco,
+    borderWidth: 2,
+    borderColor: color.ink300,
     marginTop: 6,
   },
   puntoMedio: {
@@ -852,13 +868,12 @@ const estilos = StyleSheet.create({
     borderColor: color.azul500,
     marginTop: 6,
   },
-  puntoFinal: {
+  /** El rojo marca la llegada — el único sentido de marcador que el rojo tiene. */
+  puntoLlegada: {
     width: 10,
     height: 10,
     borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
-    borderWidth: 2,
-    borderColor: color.ink200,
+    backgroundColor: color.rojo500,
     marginTop: 6,
   },
   paradaNombre: {

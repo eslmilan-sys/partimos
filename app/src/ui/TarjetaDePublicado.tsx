@@ -119,18 +119,20 @@ export function TarjetaDePublicado({ viaje, tono }: { viaje: ViajePublicado; ton
       </View>
 
       {/* 2 · DÓNDE. El raíl escribe la dirección dos veces —el orden de las
-          filas y el punto lleno arriba— como manda el invariante 1. Sin horas:
-          las dos están arriba, en la línea que las dice juntas. */}
+          filas y la gramática de los puntos— como manda el invariante 1.
+          **Una sola gramática en toda la app** (02-09-2026, critique): aro
+          hueco = sales, ROJO lleno = llegas — la del pin de la búsqueda y la
+          flecha de resultados. Aquí estaba al revés. */}
       <View style={estilos.recorrido}>
         <View style={estilos.filaRuta}>
-          <View style={[estilos.puntoLleno, pasado && { backgroundColor: color.ink400 }]} />
+          <View style={estilos.aroOrigen} />
           <Text style={[estilos.parada, pasado && estilos.apagadoFuerte]} numberOfLines={1}>
             {viaje.origen}
           </Text>
         </View>
         <View style={estilos.hilo} />
         <View style={estilos.filaRuta}>
-          <View style={estilos.puntoVacio} />
+          <View style={[estilos.puntoDestino, pasado && { backgroundColor: color.ink400 }]} />
           <Text style={[estilos.parada, pasado && estilos.apagadoFuerte]} numberOfLines={1}>
             {viaje.destino}
           </Text>
@@ -387,15 +389,16 @@ const estilos = StyleSheet.create({
     borderRadius: 1,
     backgroundColor: color.ink200,
   },
-  puntoLleno: { width: 9, height: 9, borderRadius: 999, backgroundColor: color.rojo500 },
-  puntoVacio: {
+  /** Aro hueco = sales; rojo lleno = llegas. La única gramática del raíl. */
+  aroOrigen: {
     width: 9,
     height: 9,
     borderRadius: 999,
     backgroundColor: color.blanco,
     borderWidth: 2,
-    borderColor: color.ink200,
+    borderColor: color.ink300,
   },
+  puntoDestino: { width: 9, height: 9, borderRadius: 999, backgroundColor: color.rojo500 },
   parada: {
     flex: 1,
     fontSize: 15,

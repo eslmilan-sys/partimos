@@ -200,9 +200,15 @@ export default function Apertura() {
         style={estilos.veloArriba}
         pointerEvents="none"
       />
+      {/* **EL VELO ASIENTA ANTES Y MÁS HONDO** (02-09-2026, bolder/typeset,
+          visto en el teléfono sobre la foto de la calzada): el titular caía
+          sobre el turquesa brillante del mar con el velo apenas empezando, y
+          la primera línea —blanca al 72 %— se ahogaba. La tinta llega antes
+          (34 %) y aprieta más (85 % bajo el titular): el texto pisa suelo
+          oscuro SIEMPRE, salga la foto que salga. */}
       <LinearGradient
-        colors={['rgba(10,39,49,0)', 'rgba(10,39,49,.28)', 'rgba(10,39,49,.72)', 'rgba(10,39,49,.97)']}
-        locations={[0, 0.3, 0.62, 1]}
+        colors={['rgba(10,39,49,0)', 'rgba(10,39,49,.38)', 'rgba(10,39,49,.85)', 'rgba(10,39,49,.98)']}
+        locations={[0, 0.34, 0.6, 1]}
         style={estilos.veloAbajo}
         pointerEvents="none"
       />
@@ -315,7 +321,7 @@ const estilos = StyleSheet.create({
   },
 
   veloArriba: { position: 'absolute', top: 0, left: 0, right: 0, height: 130 },
-  veloAbajo: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 430 },
+  veloAbajo: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 470 },
 
   filaMarca: {
     paddingTop: 10,
@@ -380,9 +386,10 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 11,
     paddingVertical: 5,
     borderRadius: 999,
-    backgroundColor: 'rgba(10,39,49,.38)',
+    /* Más tinta detrás: el chip cae justo en la costura clara de la foto. */
+    backgroundColor: 'rgba(10,39,49,.5)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,.24)',
+    borderColor: 'rgba(255,255,255,.26)',
     marginBottom: 10,
   },
   ceja: {
@@ -396,23 +403,32 @@ const estilos = StyleSheet.create({
   },
   /** El título en dos tintas sobre foto: la primera línea velada, la
       segunda en blanco pleno. Más grande que sobre carta: aquí respira. */
+  /**
+   * EL DISPLAY A PLENA FUERZA (02-09-2026, bolder + typeset). El paseo es
+   * la superficie Persuade del producto: el titular sube a 34 y la primera
+   * línea deja el 72 % —que moría sobre el agua clara— por un 88 % que
+   * sigue cediendo el pleno blanco a la línea fuerte. Texto claro sobre
+   * oscuro se compensa en los tres ejes: un pelo más de interlínea, un pelo
+   * más de tracking en la copia, y el velo más hondo puesto arriba.
+   */
   titulo: {
-    fontSize: 31,
-    lineHeight: 36,
+    fontSize: 34,
+    lineHeight: 39,
     fontWeight: '700',
-    letterSpacing: -0.93,
-    color: 'rgba(255,255,255,.72)',
+    letterSpacing: -1.02,
+    color: 'rgba(255,255,255,.88)',
     fontFamily: familia,
-    textShadowColor: 'rgba(10,39,49,.4)',
-    textShadowRadius: 12,
+    textShadowColor: 'rgba(10,39,49,.45)',
+    textShadowRadius: 14,
   },
   tituloFuerte: { color: color.blanco },
   copia: {
-    marginTop: 9,
-    fontSize: 14.5,
-    lineHeight: 21,
-    color: 'rgba(255,255,255,.85)',
-    maxWidth: 320,
+    marginTop: 10,
+    fontSize: 15,
+    lineHeight: 22.5,
+    letterSpacing: 0.1,
+    color: 'rgba(255,255,255,.92)',
+    maxWidth: 300,
     fontFamily: familia,
     textShadowColor: 'rgba(10,39,49,.4)',
     textShadowRadius: 8,

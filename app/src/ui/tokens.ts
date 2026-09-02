@@ -108,6 +108,13 @@ export const color = {
    * cuenta); `rojo700` es el acento de TEXTO sobre blanco (enlaces, «Llega»,
    * pestañas activas); `rojo800` es el acento dentro de un chip teñido
    * (pocos cupos, «Mejor opción»). `rojo600` es el pressed del CTA.
+   *
+   * **LA GRAMÁTICA DEL RAÍL ES UNA** (02-09-2026, critique impeccable): en
+   * todo raíl de ruta, el ORIGEN es un aro hueco gris y el DESTINO un punto
+   * ROJO lleno — como el pin de la búsqueda y la flecha de resultados. Tres
+   * pantallas llegaron a decirlo de tres maneras; un punto rojo que a veces
+   * es «sales» y a veces «llegas» es cero convención. Si dibujas un raíl
+   * nuevo, es esta.
    */
   rojo500: '#E1213B',
   rojo600: '#A6122A',

@@ -328,19 +328,20 @@ function BloqueFecha({ cuando, chico = false }: { cuando: string; chico?: boolea
   );
 }
 
-/** El raíl del dibujo: punto rojo, hilo discontinuo, aro hueco. */
+/** El raíl, con LA gramática de la app (02-09-2026, critique): aro hueco =
+    sales, ROJO lleno = llegas — la misma del pin de la búsqueda. */
 function Rail({ origen, destino }: { origen: string; destino: string }) {
   return (
     <View style={estilos.rail}>
       <View style={estilos.filaRail}>
-        <View style={estilos.puntoLleno} />
+        <View style={estilos.aroOrigen} />
         <Text style={estilos.lugar} numberOfLines={1}>
           {origen}
         </Text>
       </View>
       <View style={estilos.hilo} />
       <View style={estilos.filaRail}>
-        <View style={estilos.puntoHueco} />
+        <View style={estilos.puntoDestino} />
         <Text style={estilos.lugar} numberOfLines={1}>
           {destino}
         </Text>
@@ -577,13 +578,13 @@ function FilaHistorial({ fila, alPulsar }: { fila: Fila; alPulsar: () => void })
 
       <View style={{ flex: 1, minWidth: 0 }}>
         <View style={estilos.filaRailMini}>
-          <View style={estilos.puntoLlenoMini} />
+          <View style={estilos.aroOrigenMini} />
           <Text style={estilos.lugarMini} numberOfLines={1}>
             {origen}
           </Text>
         </View>
         <View style={estilos.filaRailMini}>
-          <View style={estilos.puntoHuecoMini} />
+          <View style={estilos.puntoDestinoMini} />
           <Text style={estilos.lugarMini} numberOfLines={1}>
             {destino}
           </Text>
@@ -834,8 +835,8 @@ const estilos = StyleSheet.create({
   /* ── el raíl ── */
   rail: { marginTop: 15 },
   filaRail: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  puntoLleno: { width: 10, height: 10, borderRadius: 5, backgroundColor: color.rojo500 },
-  puntoHueco: {
+  /** Aro hueco = sales; rojo lleno = llegas. La única gramática del raíl. */
+  aroOrigen: {
     width: 10,
     height: 10,
     borderRadius: 5,
@@ -843,6 +844,7 @@ const estilos = StyleSheet.create({
     borderColor: color.ink300,
     backgroundColor: color.blanco,
   },
+  puntoDestino: { width: 10, height: 10, borderRadius: 5, backgroundColor: color.rojo500 },
   /** El hilo entre los dos puntos. Sólido, como el de la tarjeta del panel:
       el borde discontinuo de 0 px de ancho se dibujaba como un tiro suelto
       bajo el punto rojo (visto en el teléfono el 02-09-2026). */
@@ -989,15 +991,15 @@ const estilos = StyleSheet.create({
     borderColor: color.bordeSutil,
   },
   filaRailMini: { flexDirection: 'row', alignItems: 'center', gap: 9, minHeight: 21 },
-  puntoLlenoMini: { width: 8, height: 8, borderRadius: 4, backgroundColor: color.ink900 },
-  puntoHuecoMini: {
+  aroOrigenMini: {
     width: 8,
     height: 8,
     borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: color.rojo500,
+    borderColor: color.ink400,
     backgroundColor: color.blanco,
   },
+  puntoDestinoMini: { width: 8, height: 8, borderRadius: 4, backgroundColor: color.rojo500 },
   lugarMini: {
     flex: 1,
     fontSize: 14,

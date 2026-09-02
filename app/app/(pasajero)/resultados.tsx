@@ -818,7 +818,10 @@ export default function Resultados() {
           </View>
 
           <View style={{ marginTop: 18 }}>
-            <Boton alPulsar={() => setEditando(false)}>Buscar</Boton>
+            {/* «Ver resultados», no «Buscar»: la búsqueda ya corrió al tocar
+                cada campo — este botón sólo cierra la hoja y enseña lo que
+                ya está (02-09-2026, clarify: el verbo dice lo que pasa). */}
+            <Boton alPulsar={() => setEditando(false)}>Ver resultados</Boton>
           </View>
         </View>
       </Modal>

@@ -63,6 +63,12 @@ export default function Editar() {
   const [aporte, setAporte] = useState(0);
   const [hora, setHora] = useState('06:00');
   const [eligiendoHora, setEligiendoHora] = useState(false);
+  /* EL FALLO SE QUEDA EN PANTALLA (02-09-2026, critique): guardar sin
+     try/catch era el único botón del flujo conductor sin filet — en 4G, un
+     rechazo dejaba la pantalla muda y el conductor creía haber guardado.
+     El patrón es el de `carro.tsx`, que ya lo hacía bien. */
+  const [guardando, setGuardando] = useState(false);
+  const [falloGuardar, setFalloGuardar] = useState<string | null>(null);
 
   useEffect(() => {
     prepararEdicion(viajeId).then((e) => {
@@ -263,19 +269,38 @@ export default function Editar() {
       />
 
       <View style={estilos.pie}>
+        {falloGuardar ? (
+          <View style={estilos.fallo}>
+            <Text style={estilos.falloTexto}>{falloGuardar}</Text>
+          </View>
+        ) : null}
         <Boton
+          desactivado={guardando}
           alPulsar={async () => {
-            await guardarEdicion(viajeId, {
-              puestos,
-              mujeres: datos.conductoraEsMujer ? mujeres : undefined,
-              aporteCentavos: cerrado ? undefined : aporteVigente,
-              hora: cerrado ? undefined : hora,
-            });
-            volver();
+            setGuardando(true);
+            setFalloGuardar(null);
+            try {
+              await guardarEdicion(viajeId, {
+                puestos,
+                mujeres: datos.conductoraEsMujer ? mujeres : undefined,
+                aporteCentavos: cerrado ? undefined : aporteVigente,
+                hora: cerrado ? undefined : hora,
+              });
+              volver();
+            } catch (e) {
+              const porque =
+                e instanceof Error ? e.message : 'No se pudo guardar. Prueba otra vez.';
+              setFalloGuardar(porque);
+            } finally {
+              setGuardando(false);
+            }
           }}
         >
-          Guardar
+          {guardando ? 'Guardando…' : falloGuardar ? 'Intentar otra vez' : 'Guardar'}
         </Boton>
+        {falloGuardar ? (
+          <Text style={estilos.notaFallo}>Nada se perdió: lo que pusiste sigue aquí.</Text>
+        ) : null}
         <Pressable
           accessibilityRole="button"
           onPress={() => router.push('/(ayuda)/cancelar')}
@@ -485,6 +510,28 @@ const estilos = StyleSheet.create({
     lineHeight: interlinea(13.5),
     fontWeight: '600',
     color: color.rojo700,
+    fontFamily: familia,
+  },
+
+  /** El motivo del fallo, escrito y quieto hasta que se reintente. */
+  fallo: {
+    backgroundColor: color.rojo100,
+    borderRadius: radio.m,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+  falloTexto: {
+    fontSize: 13.5,
+    lineHeight: 19,
+    fontWeight: '500',
+    color: color.rojo700,
+    fontFamily: familia,
+  },
+  notaFallo: {
+    textAlign: 'center',
+    fontSize: 12.5,
+    lineHeight: interlinea(12.5),
+    color: color.ink600,
     fontFamily: familia,
   },
 });
