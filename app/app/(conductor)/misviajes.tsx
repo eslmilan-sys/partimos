@@ -255,11 +255,19 @@ export default function MisViajesPantalla() {
                     }
                   />
                 ) : (
+                  /* Un viaje que TÚ llevas abre su administración, no su
+                     anuncio: el conductor que toca su viaje viene a responder
+                     solicitudes y teclear códigos, no a leer cómo se vende su
+                     puesto (02-09-2026, pedido del dueño). El anuncio sigue a
+                     una puerta de distancia, dentro de administrar. */
                   <FilaConduzco
                     key={f.viaje.id}
                     viaje={f.viaje}
                     alPulsar={() =>
-                      router.push({ pathname: '/(pasajero)/viaje', params: { viaje: f.viaje.id } })
+                      router.push({
+                        pathname: '/(conductor)/administrar',
+                        params: { viaje: f.viaje.id },
+                      })
                     }
                   />
                 ),
@@ -306,15 +314,20 @@ export default function MisViajesPantalla() {
                     }
                   />
                 ) : (
-                  /* Un viaje que manejaste abre el PANEL, no la ficha
-                     pública: desde ahí se teclean los códigos que falten y se
-                     vuelve a publicar. Es la misma puerta que «Administrar
-                     viaje», y así deja de haber dos sitios con la misma
-                     lista. */
+                  /* Un viaje que manejaste abre SU administración, la misma
+                     puerta que los de arriba: desde ahí se teclean los
+                     códigos que falten. Antes abría el panel entero y había
+                     que volver a encontrar el viaje en la lista
+                     (02-09-2026). */
                   <FilaConduzco
                     key={f.viaje.id}
                     viaje={f.viaje}
-                    alPulsar={() => router.push('/(conductor)/panel')}
+                    alPulsar={() =>
+                      router.push({
+                        pathname: '/(conductor)/administrar',
+                        params: { viaje: f.viaje.id },
+                      })
+                    }
                   />
                 ),
               )}

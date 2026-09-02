@@ -61,6 +61,7 @@ const TABLEROS: { nombre: string; pantallas: Pantalla[] }[] = [
       { id: '5d', titulo: 'El tope', ruta: '/(conductor)/tope' },
       { id: '7c', titulo: 'Puestos y maletas', ruta: '/(conductor)/puestos' },
       { id: '10a', titulo: 'Panel del conductor', ruta: '/(conductor)/panel' },
+      { id: '10c', titulo: 'Administrar el viaje', ruta: '/(conductor)/administrar' },
       { id: '5b', titulo: 'Mis viajes', ruta: '/(conductor)/misviajes' },
       { id: '14d', titulo: 'Editar el viaje', ruta: '/(conductor)/editar' },
       { id: '11a', titulo: 'Solicitudes de puesto', ruta: '/(conductor)/solicitudes' },

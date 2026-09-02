@@ -327,7 +327,9 @@ export function avisosDeLosHechos(perfilId: string, hechos: Hechos): AvisoDeriva
       title: tituloDeSalida(salida, hechos.ahora, 'manejas'),
       body: `${confirmadas === 1 ? '1 persona va' : `${confirmadas} personas van`} contigo · ${cuandoDelViaje(v)}`,
       action_label: 'Ver mi viaje',
-      action_route: `/(conductor)/panel?viaje=${v.id}`,
+      // A administrar ESE viaje: `panel` ignoraba el parámetro y abría la
+      // lista entera, así que el aviso prometía un viaje y enseñaba todos.
+      action_route: `/(conductor)/administrar?viaje=${v.id}`,
       booking_id: null,
       trip_id: v.id,
       read_at: null,

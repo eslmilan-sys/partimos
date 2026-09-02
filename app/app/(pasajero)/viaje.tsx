@@ -584,7 +584,14 @@ export default function DetalleDelViaje() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Administrar mi viaje"
-            onPress={() => router.push('/(conductor)/panel')}
+            /* A administrar ESTE viaje, no al panel entero: llevaba a la
+               lista de todos los publicados, por arriba, y quien venía de
+               mirar su viaje tenía que volver a encontrarlo — «otra
+               interfaz», dijo el dueño (02-09-2026). El botón hace ahora
+               lo que dice. */
+            onPress={() =>
+              router.push({ pathname: '/(conductor)/administrar', params: { viaje: viaje.id } })
+            }
             style={({ pressed }) => [
               estilos.cta,
               { backgroundColor: pressed ? color.ink800 : color.ink900 },
