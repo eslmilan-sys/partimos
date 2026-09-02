@@ -678,6 +678,16 @@ export default function DetalleDelViaje() {
           </Pressable>
         )}
         </View>
+
+        {/* **CÓMO SE PAGA, DICHO ANTES DE PEDIR** (02-09-2026, decidido por
+            el dueño tras el critique: era la única pregunta del camino sin
+            respuesta escrita). Los tres canales existen de verdad —
+            `dominio/tarifas` — y se eligen justo después de pedir. */}
+        {esMio || miReserva ? null : (
+          <Text style={estilos.notaPago}>
+            El aporte se paga como tú elijas: Yappy, tarjeta o efectivo en la mano.
+          </Text>
+        )}
       </View>
     </View>
   );
@@ -692,6 +702,15 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
   contenido: { paddingBottom: 190 },
+  /** Cómo se paga, en voz baja bajo la barra: contexto, no advertencia. */
+  notaPago: {
+    marginTop: 9,
+    textAlign: 'center',
+    fontSize: 12,
+    lineHeight: 17,
+    color: color.ink500,
+    fontFamily: familia,
+  },
 
   chrome: {
     paddingHorizontal: espacio.gutter,

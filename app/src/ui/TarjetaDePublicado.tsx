@@ -261,7 +261,10 @@ function Codigos({ viaje }: { viaje: ViajePublicado }) {
         <Text style={estilos.codigosPie}>
           {subiendo
             ? `Teclea el código que te enseña · ${faltan.toLowerCase()} ${cuantos} de ${viaje.aBordo}`
-            : `Su aporte sale hacia ti al teclear el código de llegada · ${quedan.toLowerCase()} ${cuantos}`}
+            : /* «Queda registrado», no «sale hacia ti» (02-09-2026, decidido
+                 por el dueño): la plataforma no mueve plata — R2 — y la
+                 frase vieja describía un giro que no existe. */
+              `Su aporte queda registrado al teclear el código de llegada · ${quedan.toLowerCase()} ${cuantos}`}
         </Text>
       </View>
       <Galon tinta={color.azul700} />

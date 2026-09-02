@@ -404,7 +404,12 @@ export default function Reservar() {
         >
           Pedir puesto
         </Boton>
-        <Text style={estilos.notaPie}>{`No se cobra hasta que ${datos.conductor} acepte.`}</Text>
+        {/* La segunda frase contesta la pregunta que faltaba en todo el
+            camino (02-09-2026): CÓMO se paga. El canal se elige de verdad
+            en el paso siguiente (`7b` aportar). */}
+        <Text style={estilos.notaPie}>
+          {`No se cobra hasta que ${datos.conductor} acepte. Pagas como elijas en el siguiente paso: Yappy, tarjeta o efectivo.`}
+        </Text>
       </View>
     </View>
   );

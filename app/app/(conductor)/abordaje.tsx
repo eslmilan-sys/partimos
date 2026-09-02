@@ -140,7 +140,7 @@ export default function Abordaje() {
             <Text style={estilos.todosDentro}>
               {esperando
                 ? 'Ya están todos dentro. Al llegar, cada quien confirma desde su teléfono; si no lo hace, el viaje se da por bueno solo a las 24 h.'
-                : 'El viaje está cerrado. Cada aporte ya salió hacia ti.'}
+                : 'El viaje está cerrado. Cada aporte ya quedó registrado.'}
             </Text>
           ) : (
           <>
@@ -261,7 +261,9 @@ export default function Abordaje() {
         ) : (
           <Text style={estilos.noShow}>
             {esperando
-              ? 'Al confirmar cada quien, su aporte sale hacia ti.'
+              ? /* «Queda registrado» (02-09-2026): la plataforma no mueve
+                   plata; la frase vieja describía un giro inexistente. */
+                'Al confirmar cada quien, su aporte queda registrado.'
               : 'Ya no queda nada por hacer aquí.'}
           </Text>
         )}

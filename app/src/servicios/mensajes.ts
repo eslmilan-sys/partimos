@@ -207,6 +207,17 @@ export async function enviarPregunta(
 }
 
 /**
+ * EL CHAT ESCUCHA MIENTRAS SE MIRA (02-09-2026). Contra la base de verdad
+ * es Supabase Realtime sobre `messages` — a cada quien le llegan sólo sus
+ * hilos, la RLS decide —; en simulado, un colgador vacío. `alCambiar` se
+ * dispara con cada mensaje nuevo o leído: la pantalla vuelve a pedir su
+ * hilo y lo pinta. Devuelve el modo de dejar de escuchar.
+ */
+export function escucharMensajes(alCambiar: () => void): () => void {
+  return fuente.suscribirseAMensajes(alCambiar);
+}
+
+/**
  * ABRIR UN HILO LO MARCA LEÍDO.
  *
  * Sólo los que te escribieron: marcar como leído el tuyo no querría decir

@@ -364,6 +364,44 @@ export async function actualizarVehiculo(id: string, cambios: Partial<Vehicle>):
  * identificador NO se manda: lo pone la base. Mandarlo desde el cliente es
  * como choca la secuencia en cuanto escriben dos personas.
  */
+/**
+ * EL CHAT, EN VIVO (02-09-2026, decidido por el dueño tras el critique).
+ *
+ * `messages` está en la publicación `supabase_realtime` desde 0021, y las
+ * políticas RLS ya deciden qué filas ve cada quien — Realtime las respeta,
+ * así que a cada cliente sólo le llegan los mensajes de SUS hilos. Lo que
+ * faltaba era escuchar: la copia en memoria sólo crecía con lo que uno
+ * mismo mandaba, y el «llego en 5 min» del otro no aparecía nunca sin
+ * recargar la app entera.
+ *
+ * La suscripción escribe la fila recién llegada en la copia en memoria
+ * —de la que leen `hiloDelViaje` y las cuentas de no-leídos— y avisa a
+ * quien escucha para que se redibuje. Devuelve el modo de colgar.
+ */
+export function suscribirseAMensajes(alCambiar: () => void): () => void {
+  const canal = supabase
+    .channel(`mensajes-en-vivo-${Date.now()}`)
+    .on<Message>(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'messages' },
+      (aviso) => {
+        const fila = aviso.new as Message;
+        if (!fila || fila.id == null) return;
+        if (aviso.eventType === 'INSERT') {
+          if (!mensajes.some((m) => m.id === fila.id)) mensajes.push(fila);
+        } else if (aviso.eventType === 'UPDATE') {
+          const i = mensajes.findIndex((m) => m.id === fila.id);
+          if (i >= 0) mensajes[i] = fila;
+        }
+        alCambiar();
+      },
+    )
+    .subscribe();
+  return () => {
+    supabase.removeChannel(canal);
+  };
+}
+
 export async function guardarMensaje(m: Message): Promise<Message> {
   const { id: _sinUsar, ...sinId } = m;
   const { data, error } = await tabla('messages').insert(sinId).select().single();

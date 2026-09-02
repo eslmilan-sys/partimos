@@ -28,6 +28,7 @@ import {
   type HiloDelViaje,
   enviarMensaje,
   enviarPregunta,
+  escucharMensajes,
   hiloDeViaje,
   hiloDelViaje,
   marcarHiloLeido,
@@ -87,19 +88,25 @@ export default function Chat() {
   }, [recargar]);
 
   /**
-   * **EL HILO SE REFRESCA SOLO MIENTRAS SE MIRA** (02-09-2026, critique).
+   * **EL HILO LLEGA SOLO, EN VIVO** (02-09-2026, decidido por el dueño).
    * Sólo se recargaba al entrar y al mandar: en la acera, con el carro
-   * llegando, el «estoy a 5 min» del conductor no aparecía hasta salir y
-   * volver a entrar — el momento más tenso del producto era el único sin
-   * flujo. Cada 12 s se vuelve a pedir el hilo mientras la pantalla tiene
-   * el foco; `recargar` ya marca leído y ordena, así que no hay saltos.
+   * llegando, el «estoy a 5 min» del conductor no aparecía nunca — el
+   * momento más tenso del producto era el único sin flujo. Ahora el hilo
+   * escucha Realtime mientras la pantalla tiene el foco, y un reloj de
+   * 30 s cubre el hueco si el socket se cae en un túnel de 4G.
    */
   useFocusEffect(
     useCallback(() => {
+      const parar = escucharMensajes(() => {
+        recargar();
+      });
       const reloj = setInterval(() => {
         recargar();
-      }, 12_000);
-      return () => clearInterval(reloj);
+      }, 30_000);
+      return () => {
+        parar();
+        clearInterval(reloj);
+      };
     }, [recargar]),
   );
 

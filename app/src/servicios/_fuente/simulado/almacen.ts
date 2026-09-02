@@ -635,6 +635,15 @@ export async function actualizarReserva(
   return reservas[i];
 }
 
+/**
+ * En simulado no hay otro teléfono escribiendo: la suscripción en vivo no
+ * tiene nada que escuchar y se queda en un colgador vacío. El contrato es
+ * el mismo que el del adaptador de Supabase, que sí escucha.
+ */
+export function suscribirseAMensajes(_alCambiar: () => void): () => void {
+  return () => {};
+}
+
 /** Editar un viaje escribe su fila — la pareja simulada de `trips.update`. */
 export async function actualizarViaje(id: string, cambios: Partial<ViajeFila>): Promise<ViajeFila> {
   const i = viajes.findIndex((v) => v.id === id);
