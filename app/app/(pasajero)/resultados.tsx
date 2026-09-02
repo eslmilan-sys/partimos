@@ -286,26 +286,27 @@ export default function Resultados() {
         >
           <Atras tamano={23} tinta={color.ink900} />
         </Pressable>
-        {/* EL LÁPIZ EDITA AQUÍ. Llamaba a `volver()`: se pulsaba «editar la
-            búsqueda» y la app se iba al inicio — a una pantalla distinta, con
-            los campos vacíos, perdiendo la búsqueda que se quería retocar.
-            Ahora abre una hoja sobre los resultados y al buscar se quedan en
-            su sitio. Pedido por el dueño el 26-08-2026. */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Editar la búsqueda"
-          onPress={() => setEditando(true)}
-          style={({ pressed }) => [estilos.celdaIcono, pressed && pulsado.celda]}
-        >
-          <Lapiz />
-        </Pressable>
       </View>
 
-      {/* La cabecera de ruta: DESDE → HASTA, y la línea de meta que se lee
-          de la propia búsqueda — no puede contradecirla. */}
-      <View style={estilos.cabecera}>
+      {/* **LA BÚSQUEDA ES LA TARJETA** (02-09-2026, pedido del dueño: «il
+          faut que ça s'édite directement sur la page — le crayon à droite,
+          ce n'est pas bon en termes d'UX»). El lápiz de la esquina era un
+          botón aparte para editar LO QUE SE ESTÁ MIRANDO: la ruta, el día y
+          los pasajeros viven ahora en una tarjeta blanca que se toca en
+          cualquier punto —con «Editar» escrito, para no adivinarlo— y abre
+          la misma hoja de siempre. El resumen de la búsqueda ES el control
+          que la cambia. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Editar la búsqueda: de ${nombreDeCiudad(origen)} a ${etiquetaDestino}, ${cuandoTexto(dia)}, ${ruta.pasajeros} ${ruta.pasajeros === 1 ? 'pasajero' : 'pasajeros'}`}
+        onPress={() => setEditando(true)}
+        style={({ pressed }) => [
+          estilos.tarjetaBusqueda,
+          pressed && { backgroundColor: color.sand50 },
+        ]}
+      >
         <View style={estilos.parRuta}>
-          <CurvaDeRuta />
+          <RectaDeRuta />
           <View style={estilos.columnaRuta}>
             <View>
               <Text style={estilos.cejaRuta}>Desde</Text>
@@ -319,23 +320,28 @@ export default function Resultados() {
                 {etiquetaDestino}
               </Text>
             </View>
+
+            {/* **«SIN VIAJES» NO SE DICE DOS VECES.** Esta línea lo
+                escribía, y más abajo el vacío lo repite en grande y con su
+                razón. Se queda con lo que sí aporta: qué día y para cuánta
+                gente — que es exactamente lo que este toque edita. */}
+            <Text style={[estilos.meta, tabular]}>
+              {`${cuandoTexto(dia)} · ${ruta.pasajeros} ${ruta.pasajeros === 1 ? 'pasajero' : 'pasajeros'}${
+                cargando
+                  ? ' · buscando…'
+                  : viajes.length === 0
+                    ? ''
+                    : ` · ${viajes.length} ${viajes.length === 1 ? 'viaje' : 'viajes'}`
+              }`}
+            </Text>
+          </View>
+
+          <View style={estilos.editar}>
+            <Text style={estilos.editarTexto}>Editar</Text>
+            <Avanza tamano={14} tinta={color.azul700} />
           </View>
         </View>
-
-        {/* **«SIN VIAJES» NO SE DICE DOS VECES.** Esta línea lo escribía, y
-            treinta píxeles más abajo el vacío lo repite en grande y con su
-            razón. Cuando no hay nada, la línea se queda con lo que sí aporta:
-            qué día y para cuánta gente se está buscando. */}
-        <Text style={[estilos.meta, tabular]}>
-          {`${cuandoTexto(dia)} · ${ruta.pasajeros} ${ruta.pasajeros === 1 ? 'pasajero' : 'pasajeros'}${
-            cargando
-              ? ' · buscando…'
-              : viajes.length === 0
-                ? ''
-                : ` · ${viajes.length} ${viajes.length === 1 ? 'viaje' : 'viajes'}`
-          }`}
-        </Text>
-      </View>
+      </Pressable>
 
       {/* La barra: Filtros en tinta con su cuenta, el orden, el día.
           **No sale cuando no hay NADA que filtrar ni que ordenar** — salvo si
@@ -863,18 +869,8 @@ export default function Resultados() {
 /* ------------------------------------------------------- Piezas de dibujo */
 
 /** El lápiz de editar la búsqueda, 21 en trazo 1.9. */
-function Lapiz() {
-  return (
-    <Svg width={21} height={21} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M4 19.4 5.6 14 16.4 3.2l4.4 4.4L10 18.4 4 19.4Z"
-        stroke={color.inkIconoFuerte}
-        strokeWidth={1.9}
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
+/* El lápiz de la esquina se fue el 02-09-2026: editar es tocar la tarjeta
+   de la búsqueda, no un botón aparte que había que descubrir. */
 
 
 /**
@@ -900,28 +896,21 @@ function tamanoDeRuta(destino: string): { fontSize: number; lineHeight: number }
  * dessin (invariant 1 du v6). L'anneau creux et la pointe pleine sont les
  * mêmes qu'ailleurs dans l'app.
  */
-function CurvaDeRuta() {
+/**
+ * EL RAÍL DE LA BÚSQUEDA, RECTO (02-09-2026, visto por el dueño: «ta flèche
+ * n'est pas bien faite»). La curva que se abría hacia la derecha nunca se
+ * dibujó bien — la punta quedaba despegada del trazo y se leía como una
+ * mancha roja suelta. Un raíl vertical no tiene ese problema: el aro del
+ * origen, el trazo, y la punta roja EN EL EJE del trazo, mirando hacia
+ * abajo — la misma gramática de todas las tarjetas (aro = sales, rojo =
+ * llegas), sin geometría que pueda salir torcida.
+ */
+function RectaDeRuta() {
   return (
-    <Svg width={26} height={64} viewBox="0 0 26 64" fill="none" style={estilos.curva}>
-      {/* L'anneau du départ : creux, comme sur chaque carte. */}
-      <Circle cx={6} cy={7} r={3.4} stroke={color.inkIcono} strokeWidth={1.9} fill="none" />
-      {/* Le trait descend droit, puis s'ouvre vers la destination. La courbe
-          se termine SOUS la pointe (15,4 ; 52,2) : le triangle la recouvre,
-          il n'y a donc plus de blanc entre les deux. */}
-      <Path
-        d="M6 12.6V38c0 9 2.6 13.2 9.4 14.2"
-        stroke={color.ink300}
-        strokeWidth={2}
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* La pointe rouge : le rouge dit la destination, et rien d'autre.
-          Elle est ALIGNÉE SUR LA TANGENTE de la courbe (8,4° — calculé, pas
-          estimé) et reprend les proportions de `PuntaDeFlecha` : 6,4 de long
-          pour 7,2 de base. Avant, c'était un triangle dessiné à part, posé à
-          côté de la fin du trait et pointant dans une autre direction — il se
-          lisait comme un éclat rouge détaché, pas comme une flèche. */}
-      <Path d="M16.7 48.7 22.5 53.2 15.7 55.9Z" fill={color.rojo500} />
+    <Svg width={14} height={66} viewBox="0 0 14 66" fill="none" style={estilos.curva}>
+      <Circle cx={7} cy={7} r={3.4} stroke={color.inkIcono} strokeWidth={1.9} fill="none" />
+      <Path d="M7 13.6V48" stroke={color.ink300} strokeWidth={2} strokeLinecap="round" />
+      <Path d="M2.9 50h8.2L7 57.4Z" fill={color.rojo500} />
     </Svg>
   );
 }
@@ -1146,7 +1135,37 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  cabecera: { paddingTop: 8, paddingHorizontal: espacio.gutter, gap: 6 },
+  /**
+   * LA TARJETA BLANCA DE LA BÚSQUEDA: el resumen que se toca para editarlo.
+   * Fondo blanco sobre el campo, borde y sombra de hoja — se lee como una
+   * pieza tocable, no como un titular suelto (02-09-2026).
+   */
+  tarjetaBusqueda: {
+    marginTop: 8,
+    marginHorizontal: espacio.gutter,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: color.blanco,
+    borderRadius: radio.l,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+    ...sombra.hoja,
+  },
+  /** El toque de la derecha, dicho con la palabra: nadie adivina un lápiz. */
+  editar: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingLeft: 8,
+  },
+  editarTexto: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: color.azul700,
+    fontFamily: familia,
+  },
   /** Le couple vertical : la courbe à gauche, les deux noms à droite. */
   parRuta: { flexDirection: 'row', gap: 12 },
   curva: { marginTop: 4, flexShrink: 0 },
@@ -1183,7 +1202,14 @@ const estilos = StyleSheet.create({
     color: color.ink900,
     fontFamily: familia,
   },
-  meta: { fontSize: 12, lineHeight: 16, fontWeight: '400', color: color.ink500, fontFamily: familia },
+  meta: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '400',
+    color: color.ink500,
+    fontFamily: familia,
+    marginTop: 2,
+  },
 
   barraChips: {
     paddingTop: 16,

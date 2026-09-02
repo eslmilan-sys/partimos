@@ -47,6 +47,14 @@ export async function guardarVehiculo(carro: Vehicle): Promise<Vehicle> {
   return carro;
 }
 
+/** El carro se corrige, no se duplica — la pareja del insert de arriba. */
+export async function actualizarVehiculo(id: string, cambios: Partial<Vehicle>): Promise<Vehicle> {
+  const i = vehiculos.findIndex((v) => v.id === id);
+  if (i < 0) throw new Error(`No existe el carro ${id}`);
+  vehiculos[i] = { ...vehiculos[i], ...cambios };
+  return vehiculos[i];
+}
+
 export async function guardarResena(resena: Review): Promise<Review> {
   resenas.push(resena);
   return resena;

@@ -343,6 +343,23 @@ export async function guardarRuta(r: RutinaFila): Promise<RutinaFila> {
 export const guardarVehiculo = (v: Vehicle) => insertar('vehicles', v, vehiculos);
 
 /**
+ * EL CARRO SE CORRIGE, NO SE DUPLICA. `guardarCarro` sólo sabía insertar,
+ * así que cada «Guardar el carro» estrenaba una fila: el dueño llegó a tener
+ * OCHO carros activos, todos el mismo Elantra (visto en la base el
+ * 02-09-2026). La política `vehicles_owner_all` deja al dueño escribir la
+ * suya; con esto la pantalla actualiza la que ya existe.
+ */
+export async function actualizarVehiculo(id: string, cambios: Partial<Vehicle>): Promise<Vehicle> {
+  const { data, error } = await tabla('vehicles').update(cambios).eq('id', id).select().single();
+  if (error) throw new Error(`vehicles: ${error.message}`);
+  const guardado = data as Vehicle;
+  const i = vehiculos.findIndex((v) => v.id === id);
+  if (i >= 0) vehiculos[i] = guardado;
+  else vehiculos.push(guardado);
+  return guardado;
+}
+
+/**
  * `messages.id` es un `bigserial` con valor por defecto, asi que el
  * identificador NO se manda: lo pone la base. Mandarlo desde el cliente es
  * como choca la secuencia en cuanto escriben dos personas.

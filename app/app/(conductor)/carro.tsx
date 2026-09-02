@@ -45,13 +45,17 @@ import { useDecir } from '@/ui/Nota';
 import { useVolver } from '@/ui/salidas';
 import Svg, { Circle, Path } from 'react-native-svg';
 
+import type { Vehicle } from '@/tipos';
+
 import {
   type BorradorDeCarro,
   borradorInicial,
   cambiarMarca,
   cambiarModelo,
+  carroActivoDe,
   catalogo,
   categoriaDe,
+  comoBorrador,
   guardarCarro,
   puestosDe,
   resumen,
@@ -81,6 +85,22 @@ export default function RegistrarCarro() {
   const volver = useVolver('/(conductor)/panel');
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [borrador, setBorrador] = useState<BorradorDeCarro>(borradorInicial);
+  /**
+   * EL CARRO QUE YA EXISTE SE CARGA Y SE CORRIGE (02-09-2026, visto por el
+   * dueño: quería marcar el enchufe USB y la pantalla le exigía registrar
+   * el carro entero otra vez, foto incluida — y cada guardado estrenaba
+   * una fila más en la base). Con él cargado, la foto de siempre ya está
+   * puesta y guardar escribe ENCIMA, no al lado.
+   */
+  const [existente, setExistente] = useState<Vehicle | null>(null);
+  useEffect(() => {
+    if (!yo) return;
+    carroActivoDe(yo).then((v) => {
+      if (!v) return;
+      setExistente(v);
+      setBorrador(comoBorrador(v));
+    });
+  }, [yo]);
   /** Lo que Didit dice de tu licencia (28-08-2026). */
   const [licencia, setLicencia] = useState<Licencia>({ vence: null });
   const [licenciaEnRevision, setLicenciaEnRevision] = useState(false);
@@ -126,8 +146,11 @@ export default function RegistrarCarro() {
     if (!borrador.modelo) return 'Falta el modelo.';
     if (!borrador.anio) return 'Falta el año.';
     if (!borrador.color) return 'Falta el color.';
-    if (!borrador.placa.trim()) return 'Falta la placa.';
-    if (borrador.placa.trim().length < 5) return 'Esa placa se ve corta. Escríbela completa.';
+    /* Con un carro ya guardado, la placa vacía significa «la de siempre»:
+       la base solo tiene sus tres últimos y no hay entera que precargar. */
+    if (!existente && !borrador.placa.trim()) return 'Falta la placa.';
+    if (borrador.placa.trim() && borrador.placa.trim().length < 5)
+      return 'Esa placa se ve corta. Escríbela completa.';
     if (!borrador.foto) return 'Falta la foto del carro por detrás.';
     return null;
   };
@@ -146,7 +169,11 @@ export default function RegistrarCarro() {
     }
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
+    /* JPEG/PNG/WebP y NO `image/*`: con la lista concreta, el iPhone
+       convierte sus HEIC a JPEG al elegirlos; con `image/*` entregaba el
+       HEIC crudo, el navegador no lo decodificaba, y la foto «no agarraba»
+       sin decir por qué (visto por el dueño el 02-09-2026). */
+    input.accept = 'image/jpeg,image/png,image/webp';
     input.style.display = 'none';
     document.body.appendChild(input);
     const soltar = () => {
@@ -160,9 +187,15 @@ export default function RegistrarCarro() {
         const { datos, vista } = await reducir(archivo);
         laFoto.current = datos;
         setFaltaLaFoto(false);
+        setFallo(null);
         setBorrador((b) => ({ ...b, foto: vista }));
       } catch {
-        decir('No se pudo leer esa imagen. Prueba con otra.');
+        /* El motivo SE QUEDA escrito, como el de guardar: un aviso que se
+           va solo deja la zona vacía y parece que no pasó nada. */
+        const porque =
+          'No se pudo leer esa foto. Prueba elegirla de la galería, o toma una nueva con la cámara.';
+        setFallo(porque);
+        decir(porque);
       }
     };
     input.oncancel = soltar;
@@ -184,7 +217,7 @@ export default function RegistrarCarro() {
     try {
       let foto = borrador.foto as string;
       if (laFoto.current) foto = await subirFotoDelCarro(yo, laFoto.current, foto);
-      await guardarCarro(yo, { ...borrador, foto });
+      await guardarCarro(yo, { ...borrador, foto }, existente ?? undefined);
 
       volver();
     } catch (e) {
@@ -329,7 +362,9 @@ export default function RegistrarCarro() {
               style={estilos.entradaPlaca}
             />
             <Text style={estilos.notaCampo}>
-              Guardamos solo sus tres últimos.
+              {existente?.plate_last3
+                ? `Guardada: ••• ${existente.plate_last3}. Escríbela de nuevo solo si cambió.`
+                : 'Guardamos solo sus tres últimos.'}
             </Text>
           </View>
 
@@ -544,19 +579,46 @@ export default function RegistrarCarro() {
  * JPEG al 82 %. Una placa se lee igual y pesa veinte veces menos.
  */
 async function reducir(archivo: File): Promise<{ datos: Blob; vista: string }> {
-  const mapa = await createImageBitmap(archivo);
-  const escala = Math.min(1, 1280 / Math.max(mapa.width, mapa.height));
+  const mapa = await decodificar(archivo);
+  const anchoReal = mapa instanceof HTMLImageElement ? mapa.naturalWidth : mapa.width;
+  const altoReal = mapa instanceof HTMLImageElement ? mapa.naturalHeight : mapa.height;
+  const escala = Math.min(1, 1280 / Math.max(anchoReal, altoReal));
   const lienzo = document.createElement('canvas');
-  lienzo.width = Math.round(mapa.width * escala);
-  lienzo.height = Math.round(mapa.height * escala);
+  lienzo.width = Math.round(anchoReal * escala);
+  lienzo.height = Math.round(altoReal * escala);
   const pincel = lienzo.getContext('2d');
   if (!pincel) throw new Error('sin lienzo');
   pincel.drawImage(mapa, 0, 0, lienzo.width, lienzo.height);
-  mapa.close();
+  if (!(mapa instanceof HTMLImageElement)) mapa.close();
   const datos = await new Promise<Blob>((listo, fallo) =>
     lienzo.toBlob((b) => (b ? listo(b) : fallo(new Error('sin blob'))), 'image/jpeg', 0.82),
   );
   return { datos, vista: lienzo.toDataURL('image/jpeg', 0.72) };
+}
+
+/**
+ * `createImageBitmap` primero, y si el navegador no puede con ese formato,
+ * el camino viejo de `<img>` — que en Safari decodifica más de lo que el
+ * bitmap admite. Sólo si los dos fallan la foto de verdad no se puede leer.
+ */
+async function decodificar(archivo: File): Promise<ImageBitmap | HTMLImageElement> {
+  try {
+    return await createImageBitmap(archivo);
+  } catch {
+    // sigue por el <img>
+  }
+  const url = URL.createObjectURL(archivo);
+  try {
+    const imagen = new window.Image();
+    await new Promise<void>((listo, fallo) => {
+      imagen.onload = () => listo();
+      imagen.onerror = () => fallo(new Error('sin imagen'));
+      imagen.src = url;
+    });
+    return imagen;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
 
 function FilaQueElige({

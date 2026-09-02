@@ -69,6 +69,44 @@ export function puestosDe(modelo: string): number {
   return fuente.PUESTOS_POR_MODELO[modelo] ?? fuente.PUESTOS_POR_DEFECTO;
 }
 
+/**
+ * EL CARRO QUE YA TIENES, COMO BORRADOR (02-09-2026).
+ *
+ * La pantalla arrancaba SIEMPRE de cero: quien ya tenía su Elantra guardado
+ * la abría para marcar el enchufe USB, se encontraba un formulario vacío que
+ * le exigía la foto otra vez, y al no poder dársela el guardado «no
+ * funcionaba» (visto por el dueño con el teléfono en la mano). El carro que
+ * existe se carga, se corrige lo que cambió, y se guarda ENCIMA.
+ *
+ * La placa vuelve vacía a propósito: la base solo guarda sus tres últimos,
+ * así que no hay entera que precargar. Si no se escribe, se conserva la que
+ * había.
+ */
+export function comoBorrador(v: Vehicle): BorradorDeCarro {
+  const color =
+    fuente.COLORES.find((c) => c.nombre.toLowerCase() === (v.color ?? '').toLowerCase())?.nombre ??
+    fuente.COLORES[0].nombre;
+  return {
+    marca: v.make ?? '',
+    modelo: v.model ?? '',
+    anio: v.year ? String(v.year) : '',
+    color,
+    placa: '',
+    puestos: Math.max(1, (v.seats_total ?? 5) - 1),
+    aire: !!v.has_ac,
+    usb: !!v.has_usb,
+    foto: v.photo_path ?? null,
+  };
+}
+
+/** El carro activo más reciente del dueño — el que la pantalla corrige. */
+export async function carroActivoDe(duenoId: string): Promise<Vehicle | null> {
+  const mios = fuente.vehiculos
+    .filter((v) => v.owner_id === duenoId && v.is_active)
+    .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''));
+  return demora(mios[0] ?? null);
+}
+
 export function borradorInicial(): BorradorDeCarro {
   const marca = fuente.MARCAS[1]; // Hyundai, el del recorrido del diseño
   const modelo = fuente.MODELOS[marca][0];
@@ -180,8 +218,35 @@ export function sePuedeGuardar(b: BorradorDeCarro): boolean {
   return Boolean(b.marca && b.modelo && b.anio && b.color && b.placa && b.foto);
 }
 
-export async function guardarCarro(duenoId: string, b: BorradorDeCarro): Promise<Vehicle> {
+export async function guardarCarro(
+  duenoId: string,
+  b: BorradorDeCarro,
+  /** El carro que ya existe: se corrige esa fila en vez de estrenar otra.
+      Sin él, cada «Guardar» insertaba un carro nuevo — el dueño llegó a
+      tener ocho Elantras activos (visto en la base el 02-09-2026). */
+  existente?: Vehicle,
+): Promise<Vehicle> {
   if (!b.foto) throw new Error('Falta la foto del carro por detrás');
+
+  if (existente) {
+    const cambios: Partial<Vehicle> = {
+      category_code: fuente.categoriaDe(b.modelo),
+      make: b.marca,
+      model: b.modelo,
+      color: b.color.toLowerCase(),
+      year: Number(b.anio),
+      seats_total: b.puestos + 1,
+      is_active: true,
+      photo_path: b.foto,
+      has_ac: b.aire,
+      has_usb: b.usb,
+    };
+    // La placa sólo si se volvió a escribir: vacía significa «la de siempre».
+    if (b.placa.trim()) cambios.plate_last3 = b.placa.replace('-', '').slice(-3);
+    const guardado = await fuente.actualizarVehiculo(existente.id, cambios);
+    if (b.placa.trim()) fuente.placasCompletas[guardado.id] = b.placa;
+    return demora(guardado);
+  }
 
   const carro: Vehicle = {
     id: nuevoId(),

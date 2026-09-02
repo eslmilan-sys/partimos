@@ -17,7 +17,7 @@ export { ciudades, corredores, paradasDeLaRuta, ciudadesPedidas, pedirCiudad } f
 
 export {
   categorias, perfiles, vehiculos, reputacion, resenas, placasCompletas,
-  actualizarPerfil, guardarVehiculo, guardarResena,
+  actualizarPerfil, guardarVehiculo, actualizarVehiculo, guardarResena,
 } from './personas';
 
 export {
