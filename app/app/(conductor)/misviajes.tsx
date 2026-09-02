@@ -329,20 +329,23 @@ function BloqueFecha({ cuando, chico = false }: { cuando: string; chico?: boolea
 }
 
 /** El raíl, con LA gramática de la app (02-09-2026, critique): aro hueco =
-    sales, ROJO lleno = llegas — la misma del pin de la búsqueda. */
+    sales, ROJO lleno = llegas — la misma del pin de la búsqueda.
+    **Y la jerarquía de resultados** (misma fecha, polish): el origen es el
+    contexto — se sabe de dónde sales —; el destino es el sujeto, y es lo
+    que el ojo busca al abrir la tarjeta. Iguales, había que leer los dos. */
 function Rail({ origen, destino }: { origen: string; destino: string }) {
   return (
     <View style={estilos.rail}>
       <View style={estilos.filaRail}>
         <View style={estilos.aroOrigen} />
-        <Text style={estilos.lugar} numberOfLines={1}>
+        <Text style={estilos.lugarOrigen} numberOfLines={1}>
           {origen}
         </Text>
       </View>
       <View style={estilos.hilo} />
       <View style={estilos.filaRail}>
         <View style={estilos.puntoDestino} />
-        <Text style={estilos.lugar} numberOfLines={1}>
+        <Text style={estilos.lugarDestino} numberOfLines={1}>
           {destino}
         </Text>
       </View>
@@ -833,7 +836,9 @@ const estilos = StyleSheet.create({
   },
 
   /* ── el raíl ── */
-  rail: { marginTop: 15 },
+  /* 14, no 15: el ritmo interno de la tarjeta va en pasos de la escala —
+     14 dentro de un grupo, 16 entre grupos — y éste era el único suelto. */
+  rail: { marginTop: 14 },
   filaRail: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   /** Aro hueco = sales; rojo lleno = llegas. La única gramática del raíl. */
   aroOrigen: {
@@ -856,12 +861,23 @@ const estilos = StyleSheet.create({
     borderRadius: 1,
     backgroundColor: color.ink200,
   },
-  lugar: {
+  /** El origen, en voz de contexto: se sabe de dónde sales. */
+  lugarOrigen: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: '500',
+    letterSpacing: -0.3,
+    color: color.ink600,
+    fontFamily: familia,
+  },
+  /** El destino, en voz de sujeto: es lo que se viene a ver. */
+  lugarDestino: {
+    flex: 1,
+    fontSize: 17,
     lineHeight: 23,
-    fontWeight: '600',
-    letterSpacing: -0.32,
+    fontWeight: '700',
+    letterSpacing: -0.43,
     color: color.ink900,
     fontFamily: familia,
   },

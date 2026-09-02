@@ -314,7 +314,7 @@ export default function Inicio() {
               }}
               style={({ pressed }) => [
                 estilos.invertir,
-                pressed && { transform: [{ translateY: -20 }, { scale: 0.94 }] },
+                pressed && { transform: [{ translateY: -22 }, { scale: 0.94 }] },
               ]}
             >
               {/* Apagado, el botón sigue OPACO: bajarle la opacidad entera
@@ -372,8 +372,11 @@ export default function Inicio() {
             enlace— así que sólo se descubría tocándolo por accidente. Es una
             afirmación con su razón (invariante 7), y una afirmación se lee.
             Ayuda vive en Perfil, en el chat y en la ficha del viaje. */}
+        {/* Un punto más de voz (02-09-2026, bolder): es el argumento nº 1
+            del producto y estaba dicho en 11 sobre gris flojo. Sigue siendo
+            una línea de confianza, no un titular — sube un punto, no grita. */}
         <View style={estilos.confianza}>
-          <Escudo tamano={13} tinta={color.inkIcono} />
+          <Escudo tamano={14} tinta={color.inkIconoFuerte} />
           <Text style={estilos.confianzaTexto}>Conductores con cédula verificada</Text>
         </View>
       </View>
@@ -445,7 +448,11 @@ export default function Inicio() {
               <View style={estilos.cabeceraIzquierda}>
                 {/* El punto en vivo: uno de los cuatro sentidos del rojo. */}
                 <View style={estilos.puntoVivo} />
-                <Text style={estilos.tituloSeccion}>Próximas salidas desde Panamá</Text>
+                {/* «Salen en la próxima hora», no otro «desde Panamá»: la
+                    sección de arriba ya lo dice, y lo que ESTA promete — el
+                    punto en vivo lo subraya — es el reloj, no el lugar
+                    (02-09-2026, clarify: cada título su promesa). */}
+                <Text style={estilos.tituloSeccion}>Salen en la próxima hora</Text>
               </View>
               <Pressable
                 accessibilityRole="button"
@@ -726,34 +733,8 @@ const estilos = StyleSheet.create({
     marginRight: 4,
     fontFamily: familia,
   },
-  /** La pregunta de la ciudad: de trazo discontinuo, como todo lo que falta. */
-  preguntaCiudad: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: color.bordePorDefecto,
-    borderRadius: radio.l,
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-  },
-  preguntaCiudadTitulo: {
-    fontSize: 16,
-    lineHeight: 22,
-    fontWeight: '600',
-    letterSpacing: -0.26,
-    color: color.ink900,
-    fontFamily: familia,
-  },
-  preguntaCiudadTexto: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: color.ink500,
-    marginTop: 4,
-    fontFamily: familia,
-  },
+  /* Los estilos de la tarjeta «¿De qué ciudad sales?» se fueron con ella
+     (02-09-2026): la pregunta vive dentro del campo «Salgo de». */
 
   pantalla: {
     flex: 1,
@@ -905,13 +886,16 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   divisorCampo: { height: 1, backgroundColor: color.divisor, marginLeft: 42, marginRight: 14 },
+  /** 44, no 40: el plancher táctil de la casa (`espacio.tap`) vale también
+      para el botón montado en el borde — era la única celda por debajo
+      (02-09-2026, critique: Casey lo toca andando, con una mano). */
   invertir: {
     position: 'absolute',
     right: 0,
     top: '50%',
-    transform: [{ translateY: -20 }],
-    width: 40,
-    height: 40,
+    transform: [{ translateY: -22 }],
+    width: 44,
+    height: 44,
     borderRadius: radio.icono,
     backgroundColor: color.blanco,
     borderWidth: 1,
@@ -973,10 +957,10 @@ const estilos = StyleSheet.create({
     minHeight: 25,
   },
   confianzaTexto: {
-    fontSize: 11,
-    lineHeight: 15,
+    fontSize: 11.5,
+    lineHeight: 16,
     fontWeight: '500',
-    color: color.ink600,
+    color: color.ink700,
     fontFamily: familia,
   },
 
@@ -1000,17 +984,10 @@ const estilos = StyleSheet.create({
     fontSize: 16,
     lineHeight: 21,
     fontWeight: '600',
-    letterSpacing: -0.48,
+    /* −2 %, como los demás 16 de la app: el −3 % que traía apretaba este
+       rol más que a sus hermanos sin que nada lo pidiera (typeset). */
+    letterSpacing: -0.32,
     color: color.ink900,
-    fontFamily: familia,
-  },
-  rotuloSeccion: {
-    fontSize: 11,
-    lineHeight: 15,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    color: color.ink600,
     fontFamily: familia,
   },
   enlaceSeccion: {
@@ -1030,13 +1007,6 @@ const estilos = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 3.5,
     shadowOffset: { width: 0, height: 0 },
-  },
-  rangoPrecios: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '600',
-    color: color.ink900,
-    fontFamily: familia,
   },
 
   tiraFavoritas: { flexDirection: 'row', gap: 12, paddingHorizontal: espacio.gutter, paddingTop: 12 },
