@@ -24,14 +24,12 @@ import { type PuestoMio, misViajes } from '@/servicios/panel';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
-import { CampoRojo } from '@/ui/CampoRojo';
 import { Pestanas } from '@/ui/Pestanas';
 import { Avatar } from '@/ui/controles';
-import { Chip } from '@/ui/piezas';
 import { tabular } from '@/ui/dinero';
 import { diaAbrev, esHoy, hora } from '@/ui/fechas';
 import { Lupa, Marca, Visto } from '@/ui/iconos';
-import { TRACK_MICRO, familia, color, espacio, radio } from '@/ui/tokens';
+import { familia, color, espacio, radio } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
 const YO_DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
@@ -135,8 +133,11 @@ export default function Conversaciones() {
         showsVerticalScrollIndicator={false}
       >
 
-      <CampoRojo altura={hayFiltros ? 214 : 176} motivo="hibisco" />
-
+      {/* **EL MISMO ARMAZÓN QUE MIS VIAJES** (02-09-2026, pedido del dueño:
+          la bandeja necesitaba «un cambio total», y el cambio de verdad era
+          de familia — campo rojo y chips de otra época al lado de la 5b
+          recién puesta al v6. Ahora las tres raíces hablan igual: fondo
+          claro, titular grande, y el selector de dos casillas. */}
       <View style={estilos.cabecera}>
         {/* **SIN BOTÓN ATRÁS Y SIN EPÍGRAFE** (30-08-2026, visto por el
             dueño: «its weird why a back button?»). Dos errores en una fila
@@ -152,6 +153,7 @@ export default function Conversaciones() {
                dato que la pastilla «Sin leer 0» de dos dedos más abajo. Un
                hecho dicho dos veces en la misma pantalla. */}
         <Text style={estilos.titular}>Mensajes</Text>
+        <Text style={estilos.bajada}>Tus conversaciones de viaje, por escrito.</Text>
 
         {/* EL BUSCADOR APARECE CUANDO HAY QUE BUSCAR. Su propio comentario lo
             decía —«a los SEIS hilos ya no te acuerdas de cuál era»— y salía
@@ -180,27 +182,24 @@ export default function Conversaciones() {
             Van en la cabecera y no en el cuerpo: dentro del `ScrollView`, que
             empieza donde acaba la cabecera, la mitad de arriba de cada chip
             caía sobre el rojo y la de abajo sobre la arena. */}
+        {/* El selector de dos casillas, el mismo de Mis viajes: sólo existe
+            cuando separa algo. La cuenta incluye la fila de Partimos — un
+            número que no cuadra con lo que se ve al lado le quita el
+            crédito al que sí es cierto (29-08). */}
         {hayFiltros ? (
-          <View style={estilos.filtros}>
-            {/* La cuenta incluye la fila de Partimos, que es una fila más de
-                la lista aunque no salga de `messages`. «Todos 1» con DOS
-                filas debajo es el mismo defecto que ya se corrigió en la
-                chincheta el 29-08: un número que no cuadra con lo que se ve
-                al lado le quita el crédito al que sí es cierto. */}
-            <Chip
+          <View style={estilos.selector}>
+            <Casilla
               activo={filtro === 'todos'}
+              etiqueta="Todos"
               cuenta={filas.length + 1}
               alPulsar={() => setFiltro('todos')}
-            >
-              Todos
-            </Chip>
-            <Chip
+            />
+            <Casilla
               activo={filtro === 'sinLeer'}
+              etiqueta="Sin leer"
               cuenta={sinLeer}
               alPulsar={() => setFiltro('sinLeer')}
-            >
-              Sin leer
-            </Chip>
+            />
           </View>
         ) : null}
       </View>
@@ -341,6 +340,34 @@ export default function Conversaciones() {
   );
 }
 
+/** Una casilla del selector — la misma pieza de dos estados de Mis viajes. */
+function Casilla({
+  activo,
+  etiqueta,
+  cuenta,
+  alPulsar,
+}: {
+  activo: boolean;
+  etiqueta: string;
+  cuenta: number;
+  alPulsar: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: activo }}
+      accessibilityLabel={`${etiqueta}, ${cuenta}`}
+      onPress={alPulsar}
+      style={[estilos.casilla, activo && estilos.casillaActiva]}
+    >
+      <Text style={[estilos.casillaTexto, activo && estilos.casillaTextoActiva]}>{etiqueta}</Text>
+      <Text style={[estilos.casillaCuenta, activo && estilos.casillaCuentaActiva, tabular]}>
+        {String(cuenta)}
+      </Text>
+    </Pressable>
+  );
+}
+
 /** La hora si es de hoy, el día si no: en una lista nadie quiere la fecha entera. */
 function cuandoCorto(cuandoISO: string): string {
   return esHoy(cuandoISO) ? hora(cuandoISO) : diaAbrev(cuandoISO);
@@ -361,17 +388,22 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
   },
 
-  /* 18 arriba y no 4: sus hermanas cuelgan el título de una fila de epígrafe
-     («CONDUCTOR · ANDRÉS M.») que aquí no dice nada — una bandeja no tiene
-     rol ni dueño que anunciar—, así que el aire lo pone el relleno. */
-  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 18, paddingBottom: 18 },
+  /* La cabecera del armazón v6: titular grande y bajada, como Mis viajes. */
+  cabecera: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 16 },
   titular: {
-    fontSize: 22,
-    lineHeight: 26,
-    letterSpacing: -0.77,
-    fontWeight: '600',
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: '700',
+    letterSpacing: -1.05,
     color: color.ink900,
     fontFamily: familia,
+  },
+  bajada: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: color.ink600,
+    fontFamily: familia,
+    marginTop: 6,
   },
 
   buscador: {
@@ -383,11 +415,8 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: radio.pastilla,
     backgroundColor: color.blanco,
-    shadowColor: '#8F1024',
-    shadowOpacity: 0.16,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
   },
   entrada: {
     flex: 1,
@@ -400,46 +429,44 @@ const estilos = StyleSheet.create({
 
   cuerpo: { paddingHorizontal: espacio.gutter, paddingTop: 20, paddingBottom: 22, gap: 8 },
 
-  filtros: { flexDirection: 'row', gap: 8, marginTop: 14 },
-  filtro: {
+  /* El selector de dos casillas, la pieza de Mis viajes: fila blanca con
+     borde, la activa en tinta. */
+  selector: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 16,
+    padding: 4,
+    backgroundColor: color.blanco,
+    borderRadius: radio.pastilla,
+    borderWidth: 1,
+    borderColor: color.bordeSutil,
+  },
+  casilla: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    height: 40,
-    paddingHorizontal: 15,
+    justifyContent: 'center',
+    gap: 7,
+    height: 44,
     borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderColor: color.bordePorDefecto,
   },
-  filtroActivo: { backgroundColor: color.azul500, borderColor: 'transparent' },
-  filtroTexto: {
-    fontSize: 13.5,
-    lineHeight: 19.5,
+  casillaActiva: { backgroundColor: color.ink900 },
+  casillaTexto: {
+    fontSize: 14.5,
+    lineHeight: 20,
     fontWeight: '600',
     color: color.ink700,
     fontFamily: familia,
   },
-  filtroTextoActivo: { color: '#fff' },
-  cuenta: {
-    minWidth: 20,
-    height: 20,
-    paddingHorizontal: 6,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.sand200,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cuentaActiva: { backgroundColor: 'rgba(255,255,255,.24)' },
-  cuentaTexto: {
-    fontSize: 11.5,
-    lineHeight: 16,
-    fontWeight: '700',
-    color: color.ink700,
+  casillaTextoActiva: { color: '#fff' },
+  casillaCuenta: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    fontWeight: '600',
+    color: color.ink500,
     fontFamily: familia,
-    ...tabular,
   },
-  cuentaTextoActiva: { color: '#fff' },
+  casillaCuentaActiva: { color: 'rgba(255,255,255,.72)' },
 
   fila: {
     flexDirection: 'row',
@@ -543,21 +570,6 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
   vacioTexto: { fontSize: 13.5, lineHeight: 20, color: color.ink500, fontFamily: familia },
-  botonVacio: {
-    height: 46,
-    marginTop: 6,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.rojo500,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  botonVacioTexto: {
-    fontSize: 14,
-    lineHeight: 21,
-    fontWeight: '600',
-    color: '#fff',
-    fontFamily: familia,
-  },
 
   pieTexto: {
     fontSize: 12.5,

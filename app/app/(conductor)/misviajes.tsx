@@ -641,6 +641,12 @@ function Reloj({ tinta }: { tinta: string }) {
 
 /* ----------------------------------------------------------------- estilos */
 
+/* EL REGISTRO DE PESOS ES EL DE LA CASA (02-09-2026, typeset — el dueño
+   sintió «otra fuente» en esta pantalla): la misma Switzer, pero aquí casi
+   todo iba en 700 cuando el resto de la app vive en 500/600 y reserva el
+   700 para los números de fecha y el código del talón. Mismo timbre en
+   todas las pantallas. */
+
 const estilos = StyleSheet.create({
   pantalla: {
     flex: 1,
@@ -820,7 +826,7 @@ const estilos = StyleSheet.create({
   horas: {
     fontSize: 22,
     lineHeight: 28,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: -0.66,
     color: color.ink900,
     fontFamily: familia,
@@ -876,7 +882,7 @@ const estilos = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     lineHeight: 23,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: -0.43,
     color: color.ink900,
     fontFamily: familia,
@@ -891,7 +897,7 @@ const estilos = StyleSheet.create({
   cifraNumero: {
     fontSize: 17,
     lineHeight: 22,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: -0.34,
     color: color.ink900,
     fontFamily: familia,
@@ -911,7 +917,7 @@ const estilos = StyleSheet.create({
   ctaTexto: {
     fontSize: 15.5,
     lineHeight: 21,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: -0.155,
     color: '#fff',
     fontFamily: familia,
@@ -975,7 +981,7 @@ const estilos = StyleSheet.create({
   seguroTitulo: {
     fontSize: 14.5,
     lineHeight: 20,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: -0.22,
     color: color.ink900,
     fontFamily: familia,
@@ -990,7 +996,7 @@ const estilos = StyleSheet.create({
   seguroEnlace: {
     fontSize: 13.5,
     lineHeight: 19,
-    fontWeight: '700',
+    fontWeight: '600',
     color: color.hechoTinta,
     fontFamily: familia,
   },
@@ -1037,7 +1043,7 @@ const estilos = StyleSheet.create({
   horaFila: {
     fontSize: 13.5,
     lineHeight: 19,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: -0.27,
     color: color.ink900,
     fontFamily: familia,
