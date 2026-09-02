@@ -21,6 +21,21 @@ export default function Html({ children }: PropsWithChildren) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
 
+        {/*
+          * SIN BARRA DE DIRECCIONES (02-09-2026, pedido del dueño: «goodbye,
+          * browser»). Con el manifiesto y `display: standalone`, «Añadir a
+          * pantalla de inicio» abre la app a pantalla completa, con su icono
+          * y sin el github.io arriba. Las rutas del manifiesto son relativas
+          * a él, así que valen igual bajo /app/ que bajo /demo/.
+          */}
+        <link rel="manifest" href={`${base}/manifest.webmanifest`} />
+        <meta name="theme-color" content="#F4F7F8" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Partimos" />
+        <link rel="apple-touch-icon" href={`${base}/iconos/icono-180.png`} />
+
         <ScrollViewStyleReset />
         <style dangerouslySetInnerHTML={{ __html: estilos }} />
       </head>

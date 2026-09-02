@@ -46,46 +46,40 @@ export function Atras({ tamano = 23, tinta = color.ink900 }: Props) {
 }
 
 /**
- * EL CARRO. Antes eran dos cajas apiladas con dos puntos debajo: a 19 px se
- * leía como una furgoneta chata, y el usuario lo señaló.
- *
- * Ahora es la silueta de perfil que se reconoce de un vistazo: **una sola
- * línea** hace techo, parabrisas y capó, baja a los dos extremos y se abre en
- * los pasos de rueda; las ruedas son aros centrados sobre esa misma línea, de
- * modo que el arco que entra en la carrocería ES el guardabarros. La cintura
- * separa la cabina del cuerpo — sin ella el techo parece una joroba.
+ * EL CARRO, redibujado (02-09-2026, pedido del dueño: «recreate the icon
+ * svg of the bottom bar»). Silueta de perfil en UNA línea: capó, parabrisas,
+ * techo, luneta y cola, cerrada abajo por los dos extremos del suelo. Las
+ * ruedas CUELGAN bajo la carrocería —antes iban centradas sobre el suelo y
+ * a 23 px el carro parecía flotar sobre dos aros—; los huecos del suelo son
+ * los pasos de rueda. La cintura separa cristal de chapa: sin ella el techo
+ * es una joroba.
  */
 export function Carro({ tamano = 19, tinta = color.ink500, grueso }: Props) {
   const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
-      {/* Techo, parabrisas y costados, de esquina baja a esquina baja. */}
+      {/* La carrocería, de un paso de rueda al otro. */}
       <Path
-        d="M2.7 15.5v-2.4c0-.53.33-1 .83-1.18l2.55-.92 1.9-2.74A2.7 2.7 0 0 1 10.2 7.1h3.6c.88 0 1.7.43 2.22 1.16l1.9 2.74 2.55.92c.5.18.83.65.83 1.18v2.4"
+        d="M4.9 16.6H3.7a1.2 1.2 0 0 1-1.2-1.2v-2.9c0-.66.43-1.24 1.06-1.43l2.54-.77 1.98-3.03A2.7 2.7 0 0 1 10.34 6h3.32c.91 0 1.76.46 2.26 1.23l1.98 3.03 2.54.77c.63.19 1.06.77 1.06 1.43v2.9a1.2 1.2 0 0 1-1.2 1.2h-1.2"
         stroke={tinta}
         strokeWidth={t}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* El suelo, partido: los huecos son los pasos de rueda. */}
-      <Path
-        d="M2.7 15.5h2.3M9.1 15.5h5.8M19 15.5h2.3"
-        stroke={tinta}
-        strokeWidth={t}
-        strokeLinecap="round"
-      />
-      {/* La cintura: donde acaba el cristal y empieza la chapa. */}
-      <Path d="M6.08 10.99h11.84" stroke={tinta} strokeWidth={t} strokeLinecap="round" />
-      <Circle cx={7.05} cy={15.5} r={2.05} stroke={tinta} strokeWidth={t} />
-      <Circle cx={16.95} cy={15.5} r={2.05} stroke={tinta} strokeWidth={t} />
+      {/* El suelo entre las ruedas. */}
+      <Path d="M9.45 16.6h5.1" stroke={tinta} strokeWidth={t} strokeLinecap="round" />
+      {/* La cintura: donde acaba el cristal. */}
+      <Path d="M6.3 10.2h11.4" stroke={tinta} strokeWidth={t} strokeLinecap="round" />
+      <Circle cx={7.2} cy={16.6} r={2.25} stroke={tinta} strokeWidth={t} />
+      <Circle cx={16.8} cy={16.6} r={2.25} stroke={tinta} strokeWidth={t} />
     </Svg>
   );
 }
 
-export function Mas({ tamano = 16, tinta = color.azul700 }: Props) {
+export function Mas({ tamano = 16, tinta = color.azul700, grueso }: Props) {
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
-      <Path d="M12 5v14M5 12h14" stroke={tinta} strokeWidth={trazo(tamano)} strokeLinecap="round" />
+      <Path d="M12 5.5v13M5.5 12h13" stroke={tinta} strokeWidth={grueso ?? trazo(tamano)} strokeLinecap="round" />
     </Svg>
   );
 }
@@ -236,8 +230,10 @@ export function Lupa({ tamano = 21, tinta = color.ink700, grueso, lleno }: Props
   const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
-      <Circle cx={11} cy={11} r={6.4} fill={lleno ? tinta : 'none'} stroke={tinta} strokeWidth={t} />
-      <Path d="m15.9 15.9 4.3 4.3" stroke={tinta} strokeWidth={t} strokeLinecap="round" />
+      {/* La lente arriba a la izquierda y el mango hasta la esquina: ocupa
+          la caja entera, como los otros cuatro. */}
+      <Circle cx={10.5} cy={10.5} r={6.25} fill={lleno ? tinta : 'none'} stroke={tinta} strokeWidth={t} />
+      <Path d="M15.15 15.15 20 20" stroke={tinta} strokeWidth={t} strokeLinecap="round" />
     </Svg>
   );
 }
@@ -272,13 +268,18 @@ export function Boleto({ tamano = 21, tinta = color.ink700, lleno }: PropsPestan
   );
 }
 
-/** El globo de diálogo del v6 — la burbuja redonda con la cola a la izquierda. */
+/**
+ * EL GLOBO DE DIÁLOGO, redibujado: una burbuja SIMÉTRICA —la del v6 estaba
+ * más llena a la derecha que a la izquierda— con la cola abajo a la
+ * izquierda, que es donde la lleva todo el mundo. Sin puntos dentro: a 23 px
+ * son tres motas, y relleno (activo) no habría dónde ponerlos.
+ */
 export function Chat({ tamano = 21, tinta = color.ink700, grueso, lleno }: PropsPestana) {
   const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Path
-        d="M12 4.8c4.2 0 7.6 2.9 7.6 6.5s-3.4 6.5-7.6 6.5c-.9 0-1.7-.1-2.5-.4l-4.1 1.6 1.2-3.4a6.2 6.2 0 0 1-1.8-4.3c0-3.6 3.4-6.5 7.2-6.5Z"
+        d="M12 4.6c4.83 0 8.75 3.08 8.75 6.9s-3.92 6.9-8.75 6.9c-.9 0-1.77-.1-2.6-.3L5 20l1.15-3.55A6.55 6.55 0 0 1 3.25 11.5C3.25 7.68 7.17 4.6 12 4.6Z"
         fill={lleno ? tinta : 'none'}
         stroke={tinta}
         strokeWidth={t}
@@ -341,9 +342,10 @@ export function Persona({ tamano = 21, tinta = color.ink700, grueso, lleno }: Pr
   const t = grueso ?? trazo(tamano);
   return (
     <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
-      <Circle cx={12} cy={8.4} r={3.8} fill={lleno ? tinta : 'none'} stroke={tinta} strokeWidth={t} />
+      <Circle cx={12} cy={8.25} r={3.75} fill={lleno ? tinta : 'none'} stroke={tinta} strokeWidth={t} />
+      {/* Los hombros: un arco abierto, no una cápsula cerrada. */}
       <Path
-        d="M4.8 19.6c1.2-3.7 3.9-5.6 7.2-5.6s6 1.9 7.2 5.6"
+        d="M4.75 20c.75-3.9 3.7-6.1 7.25-6.1s6.5 2.2 7.25 6.1"
         fill="none"
         stroke={tinta}
         strokeWidth={t}

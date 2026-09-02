@@ -156,7 +156,7 @@ export function Pestanas({ valor, yo, insignias }: Props) {
         }}
         fab={{
           etiqueta: 'Publicar un viaje',
-          icono: <Mas tamano={21} tinta="#fff" grueso={2.2} />,
+          icono: <Mas tamano={24} tinta="#fff" grueso={2.2} />,
           activo: valor === 'Publicar',
           alPulsar: () => {
             if (valor === 'Publicar') return;

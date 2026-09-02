@@ -8,8 +8,8 @@
  * rojo con trazo 2.2, rótulo en `#C11730`, peso 500 contra 400 — y las
  * inactivas van en el gris de icono `#6C8A93`.
  *
- * **Publicar es la casilla del centro, levantada.** Un cuadrado de 48 con
- * radio 17, degradado 160° `#123F4D → #0A2731`, subido 20 px sobre el borde,
+ * **Publicar es la casilla del centro, levantada.** Un cuadrado de 54 con
+ * radio 19, degradado 160° `#123F4D → #0A2731`, subido 24 px sobre el borde,
  * con su rótulo debajo como una casilla más. Es la única superficie oscura de
  * la pantalla, y por eso se ve antes que nada.
  *
@@ -179,17 +179,22 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  /** 48 × 48, radio 17, degradado de tinta, subido 20 sobre el borde. */
+  /**
+   * 54 × 54, radio 19, subido 24 sobre el borde (02-09-2026, pedido del
+   * dueño: «larger, clearer, subtle shadow»). Era 48: al lado de las cuatro
+   * casillas se leía como una quinta pestaña oscura y no como EL botón. El
+   * aro claro de 3 lo despega del borde de la barra, que pasa por detrás.
+   */
   cuadrado: {
-    width: 48,
-    height: 48,
-    marginTop: -20,
-    borderRadius: 17,
+    width: 54,
+    height: 54,
+    marginTop: -24,
+    borderRadius: 19,
     // RN no degrada un fondo sin SVG; el paso claro del degradado 160° queda
     // como color base y la profundidad la pone la sombra.
     backgroundColor: color.ink900,
-    borderWidth: 1,
-    borderColor: 'rgba(10,39,49,.12)',
+    borderWidth: 3,
+    borderColor: color.sand100,
     alignItems: 'center',
     justifyContent: 'center',
     ...sombra.publicar,

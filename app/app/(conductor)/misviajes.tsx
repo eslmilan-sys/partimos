@@ -9,7 +9,22 @@
  * · **El selector Próximos / Historial vuelve.** Se quitó el 28-08 («sin
  *   selectores») cuando eran CUATRO casillas en dos filas; el dibujo lo trae
  *   de vuelta como UNA fila de dos, y con el historial creciendo cada semana
- *   la división próximos/pasados vuelve a pagar su sitio.
+ *   la división próximos/pasados vuelve a pagar su sitio. **Y va abajo,
+ *   pegado a la barra** (02-09-2026, ergonomía del pulgar, pedido del
+ *   dueño): arriba del todo obligaba a recolocar la mano para cambiar de
+ *   lista; a la altura del pulgar se cambia con una mano y sin mirar.
+ *   No desliza con el contenido: es un control, no una fila.
+ * · **El rol va en una etiqueta sólida, arriba a la derecha** de la
+ *   tarjeta: «CONDUCES TÚ» en tinta llena, «VAS DE PASAJERO» en contorno.
+ *   Es lo primero que se lee, y la forma (llena / hueca) lo dice sin el
+ *   color. La pastilla de lo que corre —piden puesto, pendiente— queda a su
+ *   izquierda, en la misma fila.
+ * · **Las cifras dicen la fracción** —«0 / 4», no «0 de 4»— y el aporte es
+ *   «por persona»: «por puesto» hacía dudar si era por carro.
+ * · **La acción de la tarjeta va en tinta, a todo el ancho.** Iba en rojo, y
+ *   con dos tarjetas en pantalla el rojo —que aquí es «alguien pide puesto»
+ *   y el punto de llegada— dejaba de significar nada. La tinta es el color
+ *   del botón Publicar: la casa ya la usa para «esto es lo que se pulsa».
  * · **«Próximos viajes»** (el dueño pidió el plural: todos, no sólo el
  *   primero): cada viaje que viene es la tarjeta grande del dibujo — bloque
  *   de fecha, chip de rol, las dos horas con su duración, el raíl, y las dos
@@ -37,7 +52,7 @@
  * contacto pasa por el chat, que queda escrito.
  */
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
@@ -61,7 +76,7 @@ import { Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaAbrev, diaSemana, duracionEntre, hora, mesAbrev, numeroDeDia } from '@/ui/fechas';
 import { Asiento, Avanza, Billete, Calendario, Escudo, Filtros } from '@/ui/iconos';
-import { TRACK_MICRO, color, espacio, familia, pulsado, radio } from '@/ui/tokens';
+import { TRACK_MICRO, color, espacio, familia, pulsado, radio, sombra } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
 const DEL_RECORRIDO = '99999999-9999-4999-8999-999999999999';
@@ -91,6 +106,14 @@ export default function MisViajesPantalla() {
   } | null>(null);
   /** La casilla del selector del dibujo: lo que viene o lo que ya pasó. */
   const [pestana, setPestana] = useState<'proximos' | 'historial'>('proximos');
+  const lista = useRef<ScrollView>(null);
+
+  /* Cambiar de lista vuelve arriba: el selector está abajo, y si se pulsa
+     con el historial a medio desplazar, la otra lista aparecería empezada. */
+  const cambiar = (a: 'proximos' | 'historial') => {
+    setPestana(a);
+    lista.current?.scrollTo({ y: 0, animated: false });
+  };
 
   useEffect(() => {
     if (!yo) return;
@@ -132,6 +155,7 @@ export default function MisViajesPantalla() {
       <BarraDeEstado />
 
       <ScrollView
+        ref={lista}
         style={{ flex: 1 }}
         contentContainerStyle={estilos.contenido}
         showsVerticalScrollIndicator={false}
@@ -156,23 +180,6 @@ export default function MisViajesPantalla() {
           Gestiona los viajes que publicas o en los que participas.
         </Text>
 
-        {/* El selector del dibujo: una fila, dos casillas, la activa en
-            tinta. Vuelve (se fue el 28-08 siendo cuatro casillas) porque con
-            historial creciendo cada semana la división vuelve a pagarse. */}
-        <View style={estilos.selector}>
-          <Casilla
-            activo={pestana === 'proximos'}
-            etiqueta="Próximos"
-            icono={(tinta) => <Calendario tamano={18} tinta={tinta} />}
-            alPulsar={() => setPestana('proximos')}
-          />
-          <Casilla
-            activo={pestana === 'historial'}
-            etiqueta="Historial"
-            icono={(tinta) => <Reloj tinta={tinta} />}
-            alPulsar={() => setPestana('historial')}
-          />
-        </View>
 
         {pestana === 'proximos' ? (
           <>
@@ -238,7 +245,7 @@ export default function MisViajesPantalla() {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Ver todo el historial"
-                    onPress={() => setPestana('historial')}
+                    onPress={() => cambiar('historial')}
                     style={({ pressed }) => [estilos.verTodo, pressed && pulsado.celda]}
                   >
                     <Text style={estilos.verTodoTexto}>
@@ -274,6 +281,27 @@ export default function MisViajesPantalla() {
         )}
       </ScrollView>
 
+      {/* EL SELECTOR, A LA ALTURA DEL PULGAR: una fila, dos casillas, la
+          activa en tinta. Fuera del desplazamiento y justo sobre la barra,
+          donde la mano ya está. Es la única pieza fija de la pantalla
+          además de la barra. */}
+      <View style={estilos.muelle}>
+        <View style={estilos.selector} accessibilityRole="tablist">
+          <Casilla
+            activo={pestana === 'proximos'}
+            etiqueta="Próximos"
+            icono={(tinta) => <Calendario tamano={18} tinta={tinta} />}
+            alPulsar={() => cambiar('proximos')}
+          />
+          <Casilla
+            activo={pestana === 'historial'}
+            etiqueta="Historial"
+            icono={(tinta) => <Reloj tinta={tinta} />}
+            alPulsar={() => cambiar('historial')}
+          />
+        </View>
+      </View>
+
       <Pestanas valor="Mis viajes" yo={yo} />
     </View>
   );
@@ -296,7 +324,7 @@ function Casilla({
 }) {
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole="tab"
       accessibilityState={{ selected: activo }}
       accessibilityLabel={etiqueta}
       onPress={alPulsar}
@@ -370,8 +398,10 @@ function Cifras({
       <View style={estilos.cifra}>
         <Asiento tamano={22} tinta={color.ink700} />
         <View style={{ flex: 1, minWidth: 0 }}>
+          {/* La fracción con barra, «0 / 4» (02-09-2026): se lee de un
+              golpe como «de cuatro, ninguno», que es lo que se viene a ver. */}
           <Text style={[estilos.cifraNumero, tabular]}>
-            {de != null ? `${puestos} de ${de}` : puestos}
+            {de != null ? `${puestos} / ${de}` : puestos}
           </Text>
           <Text style={estilos.cifraPie}>
             {puestos === 1 && de == null ? 'puesto reservado' : 'puestos reservados'}
@@ -385,7 +415,7 @@ function Cifras({
           <Text style={[estilos.cifraNumero, tabular]}>
             {formatearDineroRedondo(aporteCentavos)}
           </Text>
-          <Text style={estilos.cifraPie}>por puesto</Text>
+          <Text style={estilos.cifraPie}>por persona</Text>
         </View>
       </View>
     </View>
@@ -442,10 +472,6 @@ function TarjetaConduzco({ viaje, router }: { viaje: ViajePublicado; router: Rou
         <BloqueFecha cuando={viaje.cuando} />
         <View style={{ flex: 1, minWidth: 0, gap: 7 }}>
           <View style={estilos.filaChip}>
-            <View style={[estilos.chip, { backgroundColor: color.rojo100 }]}>
-              <Volante tinta={color.rojo700} />
-              <Text style={[estilos.chipTexto, { color: color.rojo700 }]}>Conduces tú</Text>
-            </View>
             {viaje.solicitudes > 0 ? (
               <View style={estilos.pastillaPiden}>
                 <Text style={estilos.pastillaPidenTexto}>
@@ -453,6 +479,11 @@ function TarjetaConduzco({ viaje, router }: { viaje: ViajePublicado; router: Rou
                 </Text>
               </View>
             ) : null}
+            {/* El rol, sólido y a la derecha: llena = tú llevas el carro. */}
+            <View style={estilos.rol}>
+              <Volante tinta="#fff" tamano={12} />
+              <Text style={estilos.rolTexto}>Conduces tú</Text>
+            </View>
           </View>
           <Horas sale={viaje.horaSalida} llega={viaje.horaLlegada} />
         </View>
@@ -475,11 +506,11 @@ function TarjetaConduzco({ viaje, router }: { viaje: ViajePublicado; router: Rou
         }
         style={({ pressed }) => [
           estilos.cta,
-          { backgroundColor: pressed ? color.rojo600 : color.rojo500 },
+          { backgroundColor: pressed ? color.ink800 : color.ink900 },
         ]}
       >
+        <Volante tinta="#fff" tamano={17} />
         <Text style={estilos.ctaTexto}>Administrar viaje</Text>
-        <Avanza tamano={17} tinta="#fff" />
       </Pressable>
     </View>
   );
@@ -499,14 +530,16 @@ function TarjetaPasajero({ puesto, router }: { puesto: PuestoMio; router: Router
         <BloqueFecha cuando={puesto.cuando} />
         <View style={{ flex: 1, minWidth: 0, gap: 7 }}>
           <View style={estilos.filaChip}>
-            <View style={[estilos.chip, { backgroundColor: color.azul50 }]}>
-              <Asiento tamano={14} tinta={color.azul700} />
-              <Text style={[estilos.chipTexto, { color: color.azul700 }]}>Vas de pasajero</Text>
-            </View>
             <View style={[estilos.pastillaEstado, { backgroundColor: estado.fondo }]}>
               <Text style={[estilos.pastillaEstadoTexto, { color: estado.tinta }]}>
                 {estado.texto}
               </Text>
+            </View>
+            {/* El rol, en contorno: hueca = vas sentado. La forma lo dice
+                sin el color. */}
+            <View style={[estilos.rol, estilos.rolHueco]}>
+              <Asiento tamano={12} tinta={color.ink900} />
+              <Text style={[estilos.rolTexto, { color: color.ink900 }]}>Vas de pasajero</Text>
             </View>
           </View>
           <Horas sale={puesto.cuando} llega={puesto.llegada} />
@@ -526,7 +559,7 @@ function TarjetaPasajero({ puesto, router }: { puesto: PuestoMio; router: Router
         }
         style={({ pressed }) => [
           estilos.cta,
-          { backgroundColor: pressed ? color.rojo600 : color.rojo500 },
+          { backgroundColor: pressed ? color.ink800 : color.ink900 },
         ]}
       >
         <Text style={estilos.ctaTexto}>Ver mi viaje</Text>
@@ -613,10 +646,10 @@ function FilaHistorial({ fila, alPulsar }: { fila: Fila; alPulsar: () => void })
 
 /* ------------------------------------------------------- iconitos propios */
 
-/** El volante del chip «Conduces tú»: aro, cubo y tres radios. */
-function Volante({ tinta }: { tinta: string }) {
+/** El volante de «Conduces tú»: aro, cubo y tres radios. */
+function Volante({ tinta, tamano = 14 }: { tinta: string; tamano?: number }) {
   return (
-    <Svg viewBox="0 0 24 24" width={14} height={14} fill="none">
+    <Svg viewBox="0 0 24 24" width={tamano} height={tamano} fill="none">
       <Circle cx={12} cy={12} r={9} stroke={tinta} strokeWidth={1.8} />
       <Circle cx={12} cy={12} r={2.4} fill={tinta} />
       <Path
@@ -655,7 +688,9 @@ const estilos = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
   },
-  contenido: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 110 },
+  /* Abajo sólo 24: el selector y la barra ya no flotan sobre el contenido,
+     van en su propia franja debajo del desplazamiento. */
+  contenido: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 24 },
 
   /* ── la cabecera del dibujo: titular grande, botón de filtros, bajada ── */
   filaTitular: { flexDirection: 'row', alignItems: 'center', gap: 12 },
@@ -697,16 +732,24 @@ const estilos = StyleSheet.create({
     marginTop: 6,
   },
 
-  /* ── el selector Próximos / Historial ── */
+  /* ── el selector Próximos / Historial, en el muelle de abajo ── */
+  /** La franja fija sobre la barra: fondo de página, sin borde — la píldora
+      blanca flota sola, y la barra de abajo trae su propio filete. */
+  muelle: {
+    paddingHorizontal: espacio.gutter,
+    paddingTop: 8,
+    paddingBottom: 10,
+    backgroundColor: color.sand100,
+  },
   selector: {
     flexDirection: 'row',
     gap: 6,
-    marginTop: 16,
     padding: 4,
     backgroundColor: color.blanco,
     borderRadius: radio.pastilla,
     borderWidth: 1,
     borderColor: color.bordeSutil,
+    ...sombra.s,
   },
   casilla: {
     flex: 1,
@@ -714,7 +757,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    height: 44,
+    height: 42,
     borderRadius: radio.pastilla,
   },
   casillaActiva: { backgroundColor: color.ink900 },
@@ -734,11 +777,7 @@ const estilos = StyleSheet.create({
     backgroundColor: color.blanco,
     borderRadius: 24,
     padding: 18,
-    shadowColor: '#8F1024',
-    shadowOpacity: 0.09,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 3,
+    ...sombra.busqueda,
   },
   filaAlta: { flexDirection: 'row', gap: 14 },
   bloqueFecha: {
@@ -778,19 +817,34 @@ const estilos = StyleSheet.create({
     fontFamily: familia,
   },
 
-  filaChip: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  chip: {
+  /** Lo que corre a la izquierda, el rol a la derecha. */
+  filaChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: radio.pastilla,
+    justifyContent: 'flex-end',
+    gap: 8,
+    flexWrap: 'wrap',
   },
-  chipTexto: {
-    fontSize: 12.5,
-    lineHeight: 17,
-    fontWeight: '600',
+  /** La etiqueta de rol: sólida en tinta (conduces) o hueca (vas sentado). */
+  rol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radio.pastilla,
+    backgroundColor: color.ink900,
+    borderWidth: 1,
+    borderColor: color.ink900,
+  },
+  rolHueco: { backgroundColor: color.blanco },
+  rolTexto: {
+    fontSize: 10.5,
+    lineHeight: 15,
+    fontWeight: '700',
+    letterSpacing: 10.5 * TRACK_MICRO,
+    textTransform: 'uppercase',
+    color: '#fff',
     fontFamily: familia,
   },
   /** Rojo sólido sólo cuando reclama respuesta: solicitudes esperando. */

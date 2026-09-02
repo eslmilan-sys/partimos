@@ -1,0 +1,5 @@
+<!-- Partimos · barra de pestañas · «perfil». Rejilla 24, trazo 1.75 en reposo (2.2 activo), extremos redondos. Color por currentColor: #6C8A93 en reposo, #E1213B activo. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <circle cx="12" cy="8.25" r="3.75" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M4.75 20c.75-3.9 3.7-6.1 7.25-6.1s6.5 2.2 7.25 6.1" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

@@ -1,0 +1,17 @@
+{
+  "name": "Partimos",
+  "short_name": "Partimos",
+  "description": "Viajes compartidos en Panamá: encuentra quien va en tu misma dirección.",
+  "lang": "es-PA",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F7F8",
+  "theme_color": "#F4F7F8",
+  "icons": [
+    { "src": "./iconos/icono-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./iconos/icono-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "./iconos/icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
