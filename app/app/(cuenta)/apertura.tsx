@@ -105,15 +105,33 @@ export default function Apertura() {
     }
   }, []);
 
-  const ultima = enCual === LAMINAS.length - 1;
-
-  const avanzar = () => {
-    if (ultima) {
-      router.push('/(cuenta)/registro');
-      return;
-    }
-    tira.current?.scrollTo({ x: (enCual + 1) * ancho, animated: true });
-  };
+  /**
+   * **LAS LÁMINAS AVANZAN SOLAS, COMO UNA HISTORIA** (02-09-2026, pedido
+   * del dueño: las tres láminas con las MISMAS salidas que la última, y un
+   * rediseño más fino). Con «Crear cuenta» presente desde la primera, el
+   * botón «Continuar» perdió su sitio — y sin él, el paseo necesita motor:
+   * cada lámina corre seis segundos en su barra de progreso y pasa a la
+   * siguiente; deslizar con el dedo la reinicia. En la última, las barras
+   * quedan llenas y la pantalla espera. Nadie está obligado a mirar el
+   * paseo entero para entrar: las tres puertas están siempre abajo, en el
+   * mismo sitio, sin saltos de altura entre lámina y lámina.
+   */
+  const progreso = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!ancho) return;
+    progreso.setValue(0);
+    const carrera = Animated.timing(progreso, {
+      toValue: 1,
+      duration: 6000,
+      useNativeDriver: false,
+    });
+    carrera.start(({ finished }) => {
+      if (finished && enCual < LAMINAS.length - 1) {
+        tira.current?.scrollTo({ x: (enCual + 1) * ancho, animated: true });
+      }
+    });
+    return () => carrera.stop();
+  }, [enCual, ancho, progreso]);
 
   const lamina = LAMINAS[enCual];
 
@@ -207,12 +225,34 @@ export default function Apertura() {
         </Pressable>
       </View>
 
-      {/* El pie fijo: los puntos, el texto de la lámina en curso, el CTA y
-          las salidas — en blanco, directamente sobre el velo. */}
+      {/* El pie fijo: las barras de historia, el texto de la lámina en
+          curso, y LAS MISMAS TRES PUERTAS EN LAS TRES LÁMINAS — crear
+          cuenta, entrar, o mirar sin cuenta. Antes sólo la última lámina
+          las tenía enteras: quien se convencía en la primera tenía que
+          tragarse dos más para encontrar el botón (02-09-2026). */}
       <View style={estilos.pie}>
-        <View style={estilos.puntos}>
+        {/* Las barras, como una historia: las pasadas llenas, la de en
+            curso corriendo sus seis segundos, las que faltan vacías. Dicen
+            a la vez dónde vas Y que esto avanza solo. */}
+        <View style={estilos.barras}>
           {LAMINAS.map((l, i) => (
-            <View key={l.clave} style={[estilos.punto, i === enCual && estilos.puntoActivo]} />
+            <View key={l.clave} style={estilos.barra}>
+              {i < enCual ? (
+                <View style={[estilos.barraLlena, { width: '100%' }]} />
+              ) : i === enCual ? (
+                <Animated.View
+                  style={[
+                    estilos.barraLlena,
+                    {
+                      width: progreso.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0%', '100%'],
+                      }),
+                    },
+                  ]}
+                />
+              ) : null}
+            </View>
           ))}
         </View>
 
@@ -224,7 +264,11 @@ export default function Apertura() {
             ],
           }}
         >
-          <Text style={estilos.ceja}>{lamina.ceja}</Text>
+          {/* La ceja en pastilla de vidrio: sobre una foto clara, un rótulo
+              suelto se pierde; con su tinta helada detrás se lee siempre. */}
+          <View style={estilos.chipCeja}>
+            <Text style={estilos.ceja}>{lamina.ceja}</Text>
+          </View>
           <Text style={estilos.titulo}>
             {lamina.titulo}
             {'\n'}
@@ -233,39 +277,25 @@ export default function Apertura() {
           <Text style={estilos.copia}>{lamina.copia}</Text>
         </Animated.View>
 
-        <View style={{ marginTop: 18, gap: 10 }}>
-          <Boton alPulsar={avanzar}>{ultima ? 'Crear cuenta' : 'Continuar'}</Boton>
-          {ultima ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ya tengo cuenta"
-              onPress={() => router.push('/(cuenta)/entrar')}
-              style={({ pressed }) => [estilos.secundario, pressed && pulsado.boton]}
-            >
-              <Text style={estilos.secundarioTexto}>Ya tengo cuenta</Text>
-            </Pressable>
-          ) : null}
+        <View style={{ marginTop: 20, gap: 10 }}>
+          <Boton alPulsar={() => router.push('/(cuenta)/registro')}>Crear cuenta</Boton>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ya tengo cuenta"
+            onPress={() => router.push('/(cuenta)/entrar')}
+            style={({ pressed }) => [estilos.secundario, pressed && pulsado.boton]}
+          >
+            <Text style={estilos.secundarioTexto}>Ya tengo cuenta</Text>
+          </Pressable>
         </View>
 
         <View style={estilos.salidas}>
-          {ultima ? null : (
-            <>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => router.push('/(cuenta)/entrar')}
-                style={zonaDeToque}
-              >
-                <Text style={estilos.salida}>Ya tengo cuenta</Text>
-              </Pressable>
-              <Text style={estilos.salidaSeparador}>·</Text>
-            </>
-          )}
           <Pressable
             accessibilityRole="button"
             onPress={() => router.replace('/(pasajero)')}
             style={zonaDeToque}
           >
-            <Text style={estilos.salida}>Mirar los viajes</Text>
+            <Text style={estilos.salida}>Mirar los viajes sin cuenta</Text>
           </Pressable>
         </View>
       </View>
@@ -333,31 +363,44 @@ const estilos = StyleSheet.create({
     paddingBottom: 20,
   },
 
-  puntos: { flexDirection: 'row', gap: 6, marginBottom: 14 },
-  punto: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,.38)' },
-  /** El punto activo es blanco: el rojo se guarda para el único CTA. */
-  puntoActivo: { width: 20, backgroundColor: color.blanco },
+  /** Las barras de historia: pasadas llenas, la de en curso corriendo. */
+  barras: { flexDirection: 'row', gap: 5, marginBottom: 16 },
+  barra: {
+    flex: 1,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,.28)',
+    overflow: 'hidden',
+  },
+  barraLlena: { height: '100%', borderRadius: 2, backgroundColor: color.blanco },
 
-  /** La ceja editorial: pequeña, en versales, con su tracking de rótulo. */
+  /** La ceja, en su pastilla de vidrio helado: legible sobre cualquier foto. */
+  chipCeja: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: 'rgba(10,39,49,.38)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.24)',
+    marginBottom: 10,
+  },
   ceja: {
-    fontSize: 11,
+    fontSize: 10.5,
     lineHeight: 14,
     fontWeight: '600',
-    letterSpacing: 0.7,
+    letterSpacing: 0.84,
     textTransform: 'uppercase',
-    color: 'rgba(255,255,255,.72)',
-    marginBottom: 7,
+    color: 'rgba(255,255,255,.92)',
     fontFamily: familia,
-    textShadowColor: 'rgba(10,39,49,.4)',
-    textShadowRadius: 8,
   },
   /** El título en dos tintas sobre foto: la primera línea velada, la
       segunda en blanco pleno. Más grande que sobre carta: aquí respira. */
   titulo: {
-    fontSize: 29,
-    lineHeight: 34,
+    fontSize: 31,
+    lineHeight: 36,
     fontWeight: '700',
-    letterSpacing: -0.87,
+    letterSpacing: -0.93,
     color: 'rgba(255,255,255,.72)',
     fontFamily: familia,
     textShadowColor: 'rgba(10,39,49,.4)',
@@ -399,7 +442,6 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
   },
   salida: {
     fontSize: 13,
@@ -408,5 +450,4 @@ const estilos = StyleSheet.create({
     color: 'rgba(255,255,255,.92)',
     fontFamily: familia,
   },
-  salidaSeparador: { color: 'rgba(255,255,255,.45)', fontSize: 13 },
 });
