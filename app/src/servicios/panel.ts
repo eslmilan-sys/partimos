@@ -293,6 +293,8 @@ export type PuestoMio = {
   /** `confirmed` cuando el conductor ya dijo que sí; `pending` mientras
    *  espera respuesta. Es lo que decide la pastilla de estado. */
   estado: string;
+  /** Cuántos puestos reservaste en ese carro: la cifra de la tarjeta. */
+  puestos: number;
 };
 
 export type MisViajes = { proximos: PuestoMio[]; pasados: PuestoMio[]; hoy: PuestoMio | null };
@@ -370,6 +372,7 @@ function comoPuesto(r: (typeof fuente.reservas)[number]): PuestoMio | null {
         }
       : null,
     estado: r.status,
+    puestos: r.seats,
   };
 }
 
