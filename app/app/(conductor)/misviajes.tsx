@@ -33,9 +33,18 @@
  * · El chip dice el rol de entrada: «Conduces tú» en rojo pálido con el
  *   volante, «Vas de pasajero» en azul pálido con el asiento. Icono Y
  *   palabra — un color solo no es un dato.
- * · La acción de la tarjeta es la del rol: «Administrar viaje» si conduces
- *   (a `10c`), «Ver mi viaje» si vas sentado. El código de subir conserva su
- *   talón dentro de la tarjeta (pedido del 01-09: «shall be in the card»).
+ * · **Si conduces, la tarjeta trae DOS botones iguales** (03-09-2026, pedido
+ *   del dueño): «Editar» a la izquierda y «Código» a la derecha — teclear
+ *   el código del pasajero que acaba de subir. Son las dos cosas que se
+ *   hacen con el carro en marcha o a punto de salir, y las dos pesan lo
+ *   mismo: el mismo color, la misma altura. La tarjeta entera sigue
+ *   abriendo `10c` (solicitudes, código, todo), y la pastilla «piden
+ *   puesto» también. Si vas sentado, «Ver mi viaje». El código de subir
+ *   conserva su talón dentro de la tarjeta (pedido del 01-09).
+ * · **Sin botón de filtros arriba a la derecha** (03-09-2026, pedido del
+ *   dueño: «delete the filter button, like the home page»). La cabecera es
+ *   el titular y su bajada, como en Buscar. «Rutas guardadas» sigue en su
+ *   pantalla; la puerta de aquí era un embudo que no filtraba esta lista.
  * · La banda verde «Viaja seguro» recuerda la regla de la casa: el chat
  *   dentro de la app es la prueba de lo acordado (`PRODUCT.md`).
  * · «Historial» enseña un adelanto abajo y la pestaña lo trae entero: filas
@@ -44,9 +53,7 @@
  * Lo único del dibujo que no está es el kebab «⋮» de la tarjeta — no había
  * nada que meterle dentro que la tarjeta no diga ya, y un botón sin destino
  * es un bug esperando nombre. En su esquina va lo que sí corre: la pastilla
- * de solicitudes (conduces) o la de estado (vas sentado). El botón de
- * filtros de arriba abre «Rutas guardadas», que es exactamente eso: tus
- * avisos de ruta.
+ * de solicitudes (conduces) o la de estado (vas sentado).
  *
  * **No hay botón de llamar**, y no es un olvido. `PRODUCT.md` decide que el
  * contacto pasa por el chat, que queda escrito.
@@ -67,7 +74,6 @@ import {
   misViajesConduciendo,
 } from '@/servicios/panel';
 import { cerrarLasVencidas } from '@/servicios/abordaje';
-import { cuantasAvisando } from '@/servicios/rutas';
 import { useMiIdOEntrar } from '@/servicios/sesion';
 import { BarraDeEstado } from '@/ui/BarraDeEstado';
 import { Cargando } from '@/ui/Cargando';
@@ -75,7 +81,7 @@ import { Pestanas } from '@/ui/Pestanas';
 import { Epigrafe } from '@/ui/controles';
 import { formatearDineroRedondo, tabular } from '@/ui/dinero';
 import { diaAbrev, diaSemana, duracionEntre, hora, mesAbrev, numeroDeDia } from '@/ui/fechas';
-import { Asiento, Avanza, Billete, Calendario, Escudo, Filtros } from '@/ui/iconos';
+import { Asiento, Avanza, Billete, Calendario, Escudo } from '@/ui/iconos';
 import { TRACK_MICRO, color, espacio, familia, pulsado, radio, sombra } from '@/ui/tokens';
 
 /** Sin sesión que preguntar —solo en simulado—, la pasajera del traspaso. */
@@ -98,8 +104,6 @@ export default function MisViajesPantalla() {
   const router = useRouter();
   const yo = useMiIdOEntrar(DEL_RECORRIDO);
   const [datos, setDatos] = useState<MisViajes | null>(null);
-  /** Cuántas rutas guardadas están avisando, para el punto del botón. */
-  const [avisando, setAvisando] = useState(0);
   const [manejando, setManejando] = useState<{
     proximos: ViajePublicado[];
     pasados: ViajePublicado[];
@@ -124,7 +128,6 @@ export default function MisViajesPantalla() {
       .then(() => misViajes(yo).then(setDatos))
       .catch(() => misViajes(yo).then(setDatos));
     misViajesConduciendo(yo).then(setManejando);
-    cuantasAvisando(yo).then(setAvisando);
   }, [yo]);
 
   if (!datos) return <Cargando altura={186} tarjetas={3} />;
@@ -160,22 +163,8 @@ export default function MisViajesPantalla() {
         contentContainerStyle={estilos.contenido}
         showsVerticalScrollIndicator={false}
       >
-        <View style={estilos.filaTitular}>
-          <Text style={estilos.titular}>Mis viajes</Text>
-          {/* El botón de filtros del dibujo, con un destino de verdad: tus
-              rutas guardadas — los avisos que filtran lo que te interesa. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              avisando > 0 ? `Rutas guardadas, ${avisando} avisando` : 'Rutas guardadas'
-            }
-            onPress={() => router.push('/(pasajero)/rutas')}
-            style={({ pressed }) => [estilos.botonFiltros, pressed && pulsado.celda]}
-          >
-            <Filtros tamano={20} tinta={color.ink800} />
-            {avisando > 0 ? <View style={estilos.puntoAviso} /> : null}
-          </Pressable>
-        </View>
+        {/* Sólo el titular, como en Buscar: sin botón arriba a la derecha. */}
+        <Text style={estilos.titular}>Mis viajes</Text>
         <Text style={estilos.bajada}>
           Gestiona los viajes que publicas o en los que participas.
         </Text>
@@ -466,8 +455,17 @@ function Horas({ sale, llega }: { sale: string; llega: string }) {
  * la esquina lleva lo que corre: la pastilla roja si alguien pide puesto.
  */
 function TarjetaConduzco({ viaje, router }: { viaje: ViajePublicado; router: Router }) {
+  const administrar = () =>
+    router.push({ pathname: '/(conductor)/administrar', params: { viaje: viaje.id } });
   return (
-    <View style={estilos.tarjeta}>
+    /* La tarjeta entera es la puerta a `10c`; los dos botones de abajo son
+       atajos y no burbujean (un Pressable dentro de otro se queda el toque). */
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Viaje del ${diaSemana(viaje.cuando)}, administrar`}
+      onPress={administrar}
+      style={({ pressed }) => [estilos.tarjeta, pressed && { opacity: 0.96 }]}
+    >
       <View style={estilos.filaAlta}>
         <BloqueFecha cuando={viaje.cuando} />
         <View style={{ flex: 1, minWidth: 0, gap: 7 }}>
@@ -498,21 +496,42 @@ function TarjetaConduzco({ viaje, router }: { viaje: ViajePublicado; router: Rou
         aporteCentavos={viaje.aporteCentavos}
       />
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Administrar viaje"
-        onPress={() =>
-          router.push({ pathname: '/(conductor)/administrar', params: { viaje: viaje.id } })
-        }
-        style={({ pressed }) => [
-          estilos.cta,
-          { backgroundColor: pressed ? color.ink800 : color.ink900 },
-        ]}
-      >
-        <Volante tinta="#fff" tamano={17} />
-        <Text style={estilos.ctaTexto}>Administrar viaje</Text>
-      </Pressable>
-    </View>
+      {/* DOS BOTONES IGUALES (03-09-2026): editar el viaje, y teclear el
+          código del pasajero que sube. Mismo color, misma altura — ninguno
+          manda sobre el otro. */}
+      <View style={estilos.filaBotones}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Editar el viaje"
+          onPress={() =>
+            router.push({ pathname: '/(conductor)/editar', params: { viaje: viaje.id } })
+          }
+          style={({ pressed }) => [
+            estilos.cta,
+            estilos.ctaMitad,
+            { backgroundColor: pressed ? color.ink800 : color.ink900 },
+          ]}
+        >
+          <Lapiz tinta="#fff" />
+          <Text style={estilos.ctaTexto}>Editar</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Teclear el código de un pasajero"
+          onPress={() =>
+            router.push({ pathname: '/(conductor)/abordaje', params: { viaje: viaje.id } })
+          }
+          style={({ pressed }) => [
+            estilos.cta,
+            estilos.ctaMitad,
+            { backgroundColor: pressed ? color.ink800 : color.ink900 },
+          ]}
+        >
+          <Teclado tinta="#fff" />
+          <Text style={estilos.ctaTexto}>Código</Text>
+        </Pressable>
+      </View>
+    </Pressable>
   );
 }
 
@@ -662,6 +681,32 @@ function Volante({ tinta, tamano = 14 }: { tinta: string; tamano?: number }) {
   );
 }
 
+/** El lápiz de «Editar»: el trazo inclinado con su punta. */
+function Lapiz({ tinta }: { tinta: string }) {
+  return (
+    <Svg viewBox="0 0 24 24" width={17} height={17} fill="none">
+      <Path
+        d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0 0-3L17 5a2.1 2.1 0 0 0-3 0L4 15.5V20ZM13 6.5l4.5 4.5"
+        stroke={tinta}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/** El teclado de «Código»: la rejilla de nueve teclas. */
+function Teclado({ tinta }: { tinta: string }) {
+  return (
+    <Svg viewBox="0 0 24 24" width={17} height={17} fill="none">
+      {[6, 12, 18].map((x) =>
+        [6, 12, 18].map((y) => <Circle key={`${x}-${y}`} cx={x} cy={y} r={1.9} fill={tinta} />),
+      )}
+    </Svg>
+  );
+}
+
 /** El reloj de la casilla «Historial». */
 function Reloj({ tinta }: { tinta: string }) {
   return (
@@ -692,37 +737,14 @@ const estilos = StyleSheet.create({
      van en su propia franja debajo del desplazamiento. */
   contenido: { paddingHorizontal: espacio.gutter, paddingTop: 14, paddingBottom: 24 },
 
-  /* ── la cabecera del dibujo: titular grande, botón de filtros, bajada ── */
-  filaTitular: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  /* ── la cabecera: titular grande y bajada, como en Buscar ── */
   titular: {
-    flex: 1,
     fontSize: 30,
     lineHeight: 36,
     fontWeight: '700',
     letterSpacing: -1.05,
     color: color.ink900,
     fontFamily: familia,
-  },
-  botonFiltros: {
-    width: 44,
-    height: 44,
-    borderRadius: radio.pastilla,
-    backgroundColor: color.blanco,
-    borderWidth: 1,
-    borderColor: color.bordeSutil,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  puntoAviso: {
-    position: 'absolute',
-    top: 9,
-    right: 9,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: color.rojo500,
-    borderWidth: 1.5,
-    borderColor: color.blanco,
   },
   bajada: {
     fontSize: 14,
@@ -968,6 +990,9 @@ const estilos = StyleSheet.create({
     borderRadius: radio.control,
     marginTop: 16,
   },
+  /** Los dos botones del conductor, a medias y a la misma altura. */
+  filaBotones: { flexDirection: 'row', gap: 10 },
+  ctaMitad: { flex: 1, minWidth: 0 },
   ctaTexto: {
     fontSize: 15.5,
     lineHeight: 21,
